@@ -4,7 +4,7 @@ image: alpine:latest
 stages:
   - deploy_wordpress-cdek
 
-deploy_drupal7:
+deploy_wordpress:
   stage: deploy_wordpress-cdek
   script:
     - rsync -avz -e "ssh -o StrictHostKeyChecking=no" --delete ./ ${DEPLOY_USERNAME}@${DEPLOY_NODE}:${DEPLOY_DEST_DIR}
