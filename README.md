@@ -1,2 +1,2 @@
-# Wordpress_Cdek_Delivery
+# Модуль CDEK для CMS wordpress:latest
 
