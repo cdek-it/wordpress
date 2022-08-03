@@ -1,0 +1,27 @@
+---
+image: alpine:latest
+
+stages:
+  - deploy_wordpress-cdek
+
+deploy_drupal7:
+  stage: deploy_wordpress-cdek
+  script:
+    - rsync -avz -e "ssh -o StrictHostKeyChecking=no" --delete ./ ${DEPLOY_USERNAME}@${DEPLOY_NODE}:${DEPLOY_DEST_DIR}
+  tags:
+    - docker
+  rules:
+    - if: $CI_COMMIT_TITLE =~ /-draft$/
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "master"
+      when: always
+    - when: never
+  before_script:
+    - echo "$CI_COMMIT_REF_SLUG"
+    - test -r ~/.ssh || mkdir -p ~/.ssh
+    - 'command -v ssh-agent >/dev/null || ( apk update && apk add openssh-client )'
+    - 'command -v rsync >/dev/null || ( apk update && apk add rsync )'
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - eval $(ssh-agent -s)
+    - ssh-add ~/.ssh/id_rsa
