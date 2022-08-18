@@ -1,0 +1,15 @@
+{
+    "name": "root/cdek",
+    "autoload": {
+        "psr-4": {
+            "Cdek\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Клементьев  Илья",
+            "email": "ilyaklem65@gmail.com"
+        }
+    ],
+    "require": {}
+}

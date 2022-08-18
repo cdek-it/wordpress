@@ -1,0 +1,32 @@
+#map {
+    width: 600px;
+    height: 400px;
+    position: relative;
+    outline: none;
+}
+
+#map-container {
+    display: none;
+}
+
+.reg-elem {
+    cursor: pointer;
+}
+
+.reg-elem:hover {
+    background: lightblue;
+}
+
+#region-list {
+    max-height: 100px;
+    overflow: auto;
+    width: 400px;
+    background-color: #fff;
+    border-color: #2271b1;
+    box-shadow: 0 0 0 1px #2271b1;
+    outline: 2px solid transparent;
+}
+
+#region-list:empty {
+    display:none;
+}
