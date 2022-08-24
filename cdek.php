@@ -387,6 +387,16 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
         include 'templates/public/map.php';
     }
 
+    add_action('woocommerce_checkout_process', 'is_pvz_code');
+
+    function is_pvz_code() {
+        $pvzCode = $_POST['pvz_code'];
+        $tariff = explode('_', $_POST['shipping_method'][0])[1];
+        if ((int)Tariff::getTariffTypeToByCode($tariff) && empty($pvzCode)) {
+            wc_add_notice( __( 'Не выбран пункт выдачи заказа.' ), 'error' );
+        }
+    }
+
     function cdek_woocommerce_new_order_action($order_id, $order)
     {
         $pvzInfo = $_POST['pvz_info'];
