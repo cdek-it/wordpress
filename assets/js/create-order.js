@@ -1,6 +1,7 @@
 (function ($) {
     $(document).ready(function () {
         $('#create-order-btn').click(function () {
+            console.log('create-order');
             $.ajax({
                 method: "GET",
                 url: "/wp-json/cdek/v1/create-order",
