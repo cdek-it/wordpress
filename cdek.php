@@ -161,6 +161,10 @@ function create_order($data)
     $cdekNumber = $orderInfo->entity->cdek_number;
     $waybill = $orderData->related_entities[0]->uuid;
 
+    if (empty($cdekNumber)) {
+        $cdekNumber = $code;
+    }
+
     $order->update_meta_data('cdek_order_uuid', $cdekNumber);
     $order->update_meta_data('cdek_order_waybill', $waybill);
     $order->save_meta_data();
