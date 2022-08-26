@@ -75,6 +75,12 @@ function cdek_register_route()
         'callback' => 'delete_order',
         'permission_callback' => '__return_true'
     ));
+
+    register_rest_route('cdek/v1', '/get-waybill', array(
+        'methods' => 'GET',
+        'callback' => 'get_waybill',
+        'permission_callback' => '__return_true'
+    ));
 }
 
 function create_order($data)
@@ -140,15 +146,33 @@ function create_order($data)
         'weight' => $weightTotal,
         'items' => $itemsData
     ];
+    $param['print'] = 'waybill';
 
     $orderDataJson = CdekApi()->createOrder($param);
     $orderData = json_decode($orderDataJson);
 
-    $code = $orderData->entity->uuid;
-    $order->update_meta_data('cdek_order_uuid', $code);
-    $order->save_meta_data();
+    if ($orderData->requests[0]->state === 'INVALID') {
+        return json_encode(['state' => 'error', 'message' => 'Ошибка. Заказ не создан. (' . $orderData->requests[0]->errors[0]->message . ')']);
+    }
 
-    return $code;
+    $code = $orderData->entity->uuid;
+    $orderInfoJson = CdekApi()->getOrder($code);
+    $orderInfo = json_decode($orderInfoJson);
+    $cdekNumber = $orderInfo->entity->cdek_number;
+    $waybill = $orderData->related_entities[0]->uuid;
+
+    $order->update_meta_data('cdek_order_uuid', $cdekNumber);
+    $order->update_meta_data('cdek_order_waybill', $waybill);
+    $order->save_meta_data();
+    return json_encode(['state' => 'success', 'code' => $cdekNumber, 'waybill' => '/wp-json/cdek/v1/get-waybill?number=' . $waybill]);
+}
+
+function get_waybill($data)
+{
+    $rawFile = CdekApi()->getWaybill($data->get_param('number'));
+    header("Content-type:application/pdf");
+    echo $rawFile;
+    exit();
 }
 
 function get_region($data)
@@ -248,21 +272,18 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                         'grant_type' => array(
                             'title' => __('Тип аутентификации', 'cdek'),
                             'type' => 'text',
-                            'description' => __('Например "client_credentials"', 'cdek'),
                             'default' => __('client_credentials', 'cdek')
                         ),
 
                         'client_id' => array(
                             'title' => __('Идентификатор клиента', 'cdek'),
                             'type' => 'text',
-                            'description' => __('Для тестового режима "EMscd6r9JnFiQ3bLoyjJY6eM78JrJceI"', 'cdek'),
                             'default' => __('EMscd6r9JnFiQ3bLoyjJY6eM78JrJceI', 'cdek')
                         ),
 
                         'client_secret' => array(
                             'title' => __('Секретный ключ клиента', 'cdek'),
                             'type' => 'text',
-                            'description' => __('Для тестового режима "PjLZkKBHEiLK3YsjtNrt3TGNG0ahs3kG"', 'cdek'),
                             'default' => __('PjLZkKBHEiLK3YsjtNrt3TGNG0ahs3kG', 'cdek')
                         ),
 
@@ -428,8 +449,8 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
     function cdek_admin_order_data_after_shipping_address ($order)
     {
-        wp_enqueue_script('cdek-create-order', plugin_dir_url(__FILE__) . 'assets/js/create-order.js', array('jquery'), '3.x', true);
         $orderUuid = $order->get_meta('cdek_order_uuid');
+        $waybill = $order->get_meta('cdek_order_waybill');
         include 'templates/admin/create-order.php';
     }
 }

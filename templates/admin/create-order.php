@@ -1,6 +1,7 @@
 <?php
 /** @var $order */
 /** @var $orderUuid */
+/** @var $waybill */
 ?>
     <div>
         <div id="cdek-create-order-form" <?php if ($orderUuid) { ?>style="display: none" <?php } ?>
@@ -26,7 +27,10 @@
             <p class="form-field form-field-wide wc-order-status">
                 <label for="package_length">Номер заказа CDEK: </label>
             </p>
-            <p id="cdek-order-number"><?php echo $orderUuid; ?></p>
+            <div>
+                <p id="cdek-order-number"><?php echo $orderUuid; ?></p>
+                <a id="cdek-order-waybill" target="_blank" href="/wp-json/cdek/v1/get-waybill?number=<?php echo $waybill;?>">Получить квитанцию</a>
+            </div>
             <p class="form-field form-field-wide wc-order-status">
                 <button id="delete-order-btn" type="button" class="button refund-items">Отменить</button>
             </p>

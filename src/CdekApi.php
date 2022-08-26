@@ -13,6 +13,7 @@ class CdekApi
     protected const ORDERS = "orders/";
     protected const PVZ = "deliverypoints";
     protected const CALC = "calculator/tariff";
+    protected const WAYBILL = "print/orders/";
 
     protected $settingData;
     protected $httpClient;
@@ -63,6 +64,12 @@ class CdekApi
 
         $result = $this->httpClient->sendCurl($url, 'POST', $this->getToken(), json_encode($param));
         return $result;
+    }
+
+    public function getWaybill($number)
+    {
+        $url = $this->getUrl() . self::WAYBILL . $number;
+        return $this->httpClient->sendCurl($url . '.pdf', 'GET', $this->getToken());
     }
 
     public function deleteOrder($number)

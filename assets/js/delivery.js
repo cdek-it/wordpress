@@ -150,10 +150,16 @@
                     package_width: $('input[name=package_width]').val(),
                     package_height: $('input[name=package_height]').val()
                 },
-                success: function (code) {
-                    $('#cdek-create-order-form').hide();
-                    $('#cdek-order-number').html(code);
-                    $('#cdek-info-order').show();
+                success: function (response) {
+                    let resp = JSON.parse(response);
+                    if (resp.state === 'error') {
+                        window.alert(resp.message);
+                    } else {
+                        $('#cdek-create-order-form').hide();
+                        $('#cdek-order-number').html(resp.code);
+                        $('#cdek-order-waybill').attr('href', resp.waybill);
+                        $('#cdek-info-order').show();
+                    }
                 },
                 error: function (error) {
                     console.log({error: error});
