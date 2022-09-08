@@ -1,7 +1,5 @@
 (function ($) {
-    Drupal.behaviors.cdek = {
-        attach: function (context, settings) {
-
+    $(document).ready(function() {
             let map = null;
             let initmap = false;
             let cluster = null;
@@ -169,6 +167,5 @@
                 $('#pvz-info-container').hide();
                 $('#edit-container').show();
             }
-        }
-    };
+    })
 })(jQuery);

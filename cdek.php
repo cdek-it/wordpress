@@ -308,6 +308,15 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                             'type' => 'multiselect',
                             'options' => Tariff::getTariffList()),
 
+                        'default_weight' => array(
+                            'title' => __('Вес одной единицы товара по умолчанию в кг', 'cdek'),
+                            'description' => "У всех товаров должен быть указан вес, 
+                            если есть товары без указанного <br> веса то для таких товаров будет подставляться значение из этого поля. <br>
+                            Это повлияет на точность расчета доставки. Значение по умолчанию 1 кг.",
+                            'type' => 'text',
+                            'default' => __(1, 'cdek')
+                        ),
+
                         'mode' => array(
                             'title' => __('Место отправки', 'cdek'),
                             'type' => 'select',
@@ -351,19 +360,22 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
 
                 public function calculate_shipping($package = [])
                 {
-                    $totalWeight = 0;
-                    foreach ($package['contents'] as $productGroup) {
-                        $quantity = $productGroup['quantity'];
-                        $weight = $productGroup['data']->get_weight();
-                        $totalWeight += $quantity * (int) $weight;
-                    }
-
                     $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
                     $cdekShippingSettings = $cdekShipping->settings;
                     $tariffList = $cdekShippingSettings['rate'];
                     $tariffType = $cdekShippingSettings['mode'];
                     $city = $package["destination"]['city'];
                     $postcode = $package["destination"]['postcode'];
+
+                    $totalWeight = 0;
+                    foreach ($package['contents'] as $productGroup) {
+                        $quantity = $productGroup['quantity'];
+                        $weight = $productGroup['data']->get_weight();
+                        if ((int)$weight === 0) {
+                            $weight = $cdekShippingSettings['default_weight'];
+                        }
+                        $totalWeight += $quantity * (int) $weight;
+                    }
 
                     $availableTariff = [];
                     foreach ($tariffList as $tariff) {
@@ -372,7 +384,6 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                             $availableTariff[] = $code;
                         }
                     }
-
 
                     if ($city) {
                         foreach ($availableTariff as $tariff) {
