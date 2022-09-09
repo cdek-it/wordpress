@@ -2,6 +2,7 @@
 
 namespace Cdek;
 
+use WP_Error;
 use WP_Http;
 
 class HttpClientWrapper
@@ -19,6 +20,10 @@ class HttpClientWrapper
             ],
         ] );
 
-        return $resp['body'];
+        if (is_array($resp)) {
+            return $resp['body'];
+        } else {
+            return json_encode(['status' => 'error']);
+        }
     }
 }

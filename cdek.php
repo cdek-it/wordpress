@@ -306,7 +306,12 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                         'rate' => array(
                             'title' => __('Тарифы', 'cdek'),
                             'type' => 'multiselect',
-                            'options' => Tariff::getTariffList()),
+                            'options' => Tariff::getTariffList(),
+                            'description' => "Для выбора нескольких тарифов удерживайте клавишу \"CTRL\" и левой кнопкой мыши выберите тарифы.<br>
+                            Если отправка производится со склада, то рекомендуется выбирать тарифы только от склада. <br> Иначе у пользователя будет 
+                            выбор тарифов \"от двери\""
+                        ),
+
 
                         'default_weight' => array(
                             'title' => __('Вес одной единицы товара по умолчанию в кг', 'cdek'),
@@ -317,11 +322,11 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                             'default' => __(1, 'cdek')
                         ),
 
-                        'mode' => array(
-                            'title' => __('Место отправки', 'cdek'),
-                            'type' => 'select',
-                            'options' => ['От двери', 'От склада']
-                        ),
+//                        'mode' => array(
+//                            'title' => __('Место отправки', 'cdek'),
+//                            'type' => 'select',
+//                            'options' => ['От двери', 'От склада']
+//                        ),
 
                         'city' => array(
                             'title' => __('Город отправления', 'cdek'),
@@ -332,19 +337,22 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                         'street' => array(
                             'title' => __('Адрес', 'cdek'),
                             'type' => 'text',
-                            'default' => __('Ленина 21 42', 'cdek')
+                            'default' => __('Ленина 21 42', 'cdek'),
+                            'description' => "Адрес отправления для тарифов \"от двери\""
+                        ),
+
+                        'map' => array(
+                            'type' => 'hidden',
+                            'title' => __('Выбрать ПВЗ на карте', 'cdek'),
                         ),
 
                         'pvz_info' => array(
                             'type' => 'text',
-                            'placeholder' => 'Выбрать пвз на карте'
+                            'readonly' => 'readonly',
+                            'description' => "Адрес отправления для тарифов \"от склада\""
                         ),
 
                         'pvz_code' => array(
-                            'type' => 'hidden',
-                        ),
-
-                        'map' => array(
                             'type' => 'hidden',
                         ),
 
@@ -363,7 +371,7 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                     $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
                     $cdekShippingSettings = $cdekShipping->settings;
                     $tariffList = $cdekShippingSettings['rate'];
-                    $tariffType = $cdekShippingSettings['mode'];
+//                    $tariffType = $cdekShippingSettings['mode'];
                     $city = $package["destination"]['city'];
                     $postcode = $package["destination"]['postcode'];
 
@@ -377,17 +385,21 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                         $totalWeight += $quantity * (int) $weight;
                     }
 
-                    $availableTariff = [];
-                    foreach ($tariffList as $tariff) {
-                        $code = Tariff::getTariffCodeType($tariff, $tariffType);
-                        if (!empty($code)) {
-                            $availableTariff[] = $code;
-                        }
-                    }
+//                    $availableTariff = [];
+//                    foreach ($tariffList as $tariff) {
+//                        $code = Tariff::getTariffCodeType($tariff, $tariffType);
+//                        if (!empty($code)) {
+//                            $availableTariff[] = $code;
+//                        }
+//                    }
 
                     if ($city) {
-                        foreach ($availableTariff as $tariff) {
+                        foreach ($tariffList as $tariff) {
                             $delivery = json_decode(cdekApi()->calculateWP($city, $postcode, $totalWeight, $tariff));
+
+                            if (property_exists($delivery, 'status') && $delivery->status === 'error') {
+                                continue;
+                            }
 
                             if (empty($delivery->errors) && $delivery->delivery_sum !== null){
                                 $rate = array(
