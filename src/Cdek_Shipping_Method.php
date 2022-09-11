@@ -7,16 +7,20 @@ use WC_Shipping_Method;
 
 class CdekShippingMethod extends WC_Shipping_Method
 {
-    public function __construct()
+    public function __construct($instance_id = 0)
     {
         $this->id = 'cdek';
+        $this->instance_id = absint($instance_id);
         $this->method_title = __('Cdek Shipping', 'cdek');
         $this->method_description = __('Custom Shipping Method for Cdek', 'cdek');
-
-        $this->init();
-
+        $this->supports = array(
+            'settings',
+            'shipping-zones',
+            'instance-settings',
+            'instance-settings-modal',
+        );
         $this->enabled = isset($this->settings['enabled']) ? $this->settings['enabled'] : 'yes';
-        $this->title = isset($this->settings['title']) ? $this->settings['title'] : __('Cdek Shipping', 'cdek');
+        $this->init();
     }
 
     function init()

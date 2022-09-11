@@ -246,80 +246,72 @@ add_action('admin_enqueue_scripts', 'cdek_admin_enqueue_script');
 add_action('rest_api_init', 'cdek_register_route');
 
 
-/*
- * Check if WooCommerce is active
- */
-if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
-
-    function cdek_shipping_method()
-    {
-        if (!class_exists('Cdek_Shipping_Method')) {
-            
-        }
-    }
-
-    function cdek_map_display($shippingMethod)
-    {
-        $current = WC()->session->get( 'chosen_shipping_methods')[0];
-        if ($shippingMethod->get_method_id() === 'cdek' &&
-            $shippingMethod->get_meta_data()['type'] === '1' &&
-            $shippingMethod->get_id() === $current &&
-            $_SERVER['REQUEST_URI'] !== '/cart/') {
-            $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
-            $cdekShippingSettings = $cdekShipping->settings;
-            $layerMap = $cdekShippingSettings['tiles'];
-            include 'templates/public/open-map.php';
-        }
-    }
-
-    function cdek_checkout_shipping()
-    {
-        include 'templates/public/map.php';
-    }
-
-    add_action('woocommerce_checkout_process', 'is_pvz_code');
-
-    function is_pvz_code() {
-        $pvzCode = $_POST['pvz_code'];
-        $tariff = explode('_', $_POST['shipping_method'][0])[1];
-        if ((int)Tariff::getTariffTypeToByCode($tariff) && empty($pvzCode)) {
-            wc_add_notice( __( 'Не выбран пункт выдачи заказа.' ), 'error' );
-        }
-    }
-
-    function cdek_woocommerce_new_order_action($order_id, $order)
-    {
-        $pvzInfo = $_POST['pvz_info'];
-        $pvzCode = $_POST['pvz_code'];
-        $tariffId = explode('_', $_POST['shipping_method'][0])[1];
-        $cityCode = $_POST['city_code'];
-
-        $order->set_meta_data(['pvz_info' => $pvzInfo, 'pvz_code' => $pvzCode, 'tariff_id' => $tariffId, 'city_code' => $cityCode]);
-        $order->update_meta_data('pvz_info', $pvzInfo);
-        $order->update_meta_data('pvz_code', $pvzCode);
-        $order->update_meta_data('tariff_id', $tariffId);
-        $order->update_meta_data('city_code', $cityCode);
-        $order->save_meta_data();
-    }
-
-    add_action('woocommerce_shipping_init', 'cdek_shipping_method');
-    add_action('woocommerce_after_shipping_rate', 'cdek_map_display', 10, 2);
-    add_action('woocommerce_checkout_shipping', 'cdek_checkout_shipping');
-    add_filter( 'woocommerce_new_order' , 'cdek_woocommerce_new_order_action', 10, 2);
-    add_filter( 'woocommerce_shipping_methods', 'add_cdek_shipping_method' );
-
-    function add_cdek_shipping_method($methods)
-    {
-        $methods[] = 'Cdek_Shipping_Method';
-        return $methods;
-    }
-
-    add_filter('woocommerce_admin_order_data_after_shipping_address', 'cdek_admin_order_data_after_shipping_address');
-
-    function cdek_admin_order_data_after_shipping_address ($order)
-    {
-        $orderUuid = $order->get_meta('cdek_order_uuid');
-        $waybill = $order->get_meta('cdek_order_waybill');
-        include 'templates/admin/create-order.php';
+function cdek_shipping_method()
+{
+    if (!class_exists('Cdek_Shipping_Method')) {
+        require_once(plugin_dir_path(__FILE__) . 'src/Cdek_Shipping_Method.php');
     }
 }
+
+function cdek_map_display($shippingMethod)
+{
+    $current = WC()->session->get( 'chosen_shipping_methods')[0];
+    if ($shippingMethod->get_method_id() === 'cdek' &&
+        $shippingMethod->get_meta_data()['type'] === '1' &&
+        $shippingMethod->get_id() === $current &&
+        $_SERVER['REQUEST_URI'] !== '/cart/') {
+        $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
+        $cdekShippingSettings = $cdekShipping->settings;
+        $layerMap = $cdekShippingSettings['tiles'];
+        include 'templates/public/open-map.php';
+    }
+}
+
+function cdek_checkout_shipping()
+{
+    include 'templates/public/map.php';
+}
+
+function is_pvz_code() {
+    $pvzCode = $_POST['pvz_code'];
+    $tariff = explode('_', $_POST['shipping_method'][0])[1];
+    if ((int)Tariff::getTariffTypeToByCode($tariff) && empty($pvzCode)) {
+        wc_add_notice( __( 'Не выбран пункт выдачи заказа.' ), 'error' );
+    }
+}
+
+function cdek_woocommerce_new_order_action($order_id, $order)
+{
+    $pvzInfo = $_POST['pvz_info'];
+    $pvzCode = $_POST['pvz_code'];
+    $tariffId = explode('_', $_POST['shipping_method'][0])[1];
+    $cityCode = $_POST['city_code'];
+
+    $order->set_meta_data(['pvz_info' => $pvzInfo, 'pvz_code' => $pvzCode, 'tariff_id' => $tariffId, 'city_code' => $cityCode]);
+    $order->update_meta_data('pvz_info', $pvzInfo);
+    $order->update_meta_data('pvz_code', $pvzCode);
+    $order->update_meta_data('tariff_id', $tariffId);
+    $order->update_meta_data('city_code', $cityCode);
+    $order->save_meta_data();
+}
+
+function add_cdek_shipping_method($methods)
+{
+    $methods['cdek'] = 'CdekShippingMethod';
+    return $methods;
+}
+
+function cdek_admin_order_data_after_shipping_address ($order)
+{
+    $orderUuid = $order->get_meta('cdek_order_uuid');
+    $waybill = $order->get_meta('cdek_order_waybill');
+    include 'templates/admin/create-order.php';
+}
+
+add_filter('woocommerce_admin_order_data_after_shipping_address', 'cdek_admin_order_data_after_shipping_address');
+add_action('woocommerce_shipping_init', 'cdek_shipping_method');
+add_action('woocommerce_after_shipping_rate', 'cdek_map_display', 10, 2);
+add_action('woocommerce_checkout_shipping', 'cdek_checkout_shipping');
+add_filter( 'woocommerce_new_order' , 'cdek_woocommerce_new_order_action', 10, 2);
+add_filter( 'woocommerce_shipping_methods', 'add_cdek_shipping_method' );
+add_action('woocommerce_checkout_process', 'is_pvz_code');
