@@ -52,7 +52,7 @@ class CdekApi
     public function createOrder($param)
     {
         $url = $this->getUrl() . self::ORDERS;
-        $param['developer_key'] = $this->settingData->developerKey;
+//        $param['developer_key'] = $this->settingData->developerKey;
         if ((int) $this->settingData->mode) {
             $param['shipment_point'] = $this->settingData->pvzCode;
         } else {

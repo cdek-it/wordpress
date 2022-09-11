@@ -1,9 +1,9 @@
 (function($) {
     $(document).ready(function() {
-
         let map = null;
         let cluster = null;
         let cityCodePvzReceived = null;
+        $('#woocommerce_cdek_pvz_info').attr('readonly', true);
         modeToggle();
         cityAutocomplete();
         $('#woocommerce_cdek_city').after('<div id="region-list"></div>');
@@ -69,7 +69,7 @@
 
         function initMap() {
             $('#woocommerce_cdek_map').after('<div id="map-container"><div id="map"></div></div>')
-            $('#map-container').show();
+            // $('#map-container').show();
 
             let mapContainer = $('#map');
             if (mapContainer.length) {
@@ -82,7 +82,7 @@
 
                 cluster = L.markerClusterGroup();
                 map.addLayer(cluster);
-
+                
                 if ($('#woocommerce_cdek_tiles').val() === '1') {
                     L.yandex().addTo(map);
                 } else {
@@ -91,20 +91,21 @@
                         attribution: '© OpenStreetMap'
                     }).addTo(map);
                 }
+                getPvz();
             }
         }
 
         function modeToggle() {
             initMap();
-            if ($('#woocommerce_cdek_mode').val() === '1') {
-                $('#woocommerce_cdek_street').hide();
-                $($('label[for=woocommerce_cdek_street]')[0]).text('Карта');
-                $('#woocommerce_cdek_pvz_info').show();
-                getPvz();
-            } else {
-                $('#map-container').hide();
-                $('#woocommerce_cdek_pvz_info').hide();
-            }
+            // if ($('#woocommerce_cdek_mode').val() === '1') {
+            //     $('#woocommerce_cdek_street').hide();
+            //     $($('label[for=woocommerce_cdek_street]')[0]).text('Карта');
+            //     $('#woocommerce_cdek_pvz_info').show();
+            //     getPvz();
+            // } else {
+            //     $('#map-container').hide();
+            //     $('#woocommerce_cdek_pvz_info').hide();
+            // }
 
             $('#woocommerce_cdek_mode').change(function (event) {
                 if ($(event.target).val() === '1') {

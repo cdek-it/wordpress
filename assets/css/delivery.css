@@ -5,9 +5,9 @@
     outline: none;
 }
 
-#map-container {
-    display: none;
-}
+/*#map-container {*/
+/*    display: none;*/
+/*}*/
 
 .reg-elem {
     cursor: pointer;
