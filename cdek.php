@@ -19,12 +19,14 @@ if (!function_exists('add_action')) {
 require 'vendor/autoload.php';
 function cdek_widget_enqueue_script()
 {
+
     wp_enqueue_style('testcssleaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
     wp_enqueue_script('testleaflet', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
     wp_enqueue_style('testcss', plugin_dir_url(__FILE__) . 'assets/css/test.css');
     wp_enqueue_style('cdek-admin-leaflet-cluster-default', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.Default.min.css');
     wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.min.css');
     wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
+    addYandexMap();
 }
 
 function cdek_admin_enqueue_script()
@@ -36,6 +38,18 @@ function cdek_admin_enqueue_script()
     wp_enqueue_style('cdek-admin-leaflet-cluster-default', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.Default.min.css');
     wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.min.css');
     wp_enqueue_style('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/css/delivery.css');
+    addYandexMap();
+}
+
+/**
+ * @return void
+ */
+function addYandexMap(): void
+{
+    $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
+    $cdekShippingSettings = $cdekShipping->settings;
+    wp_enqueue_script('cdek-admin-yandex-api', 'https://api-maps.yandex.ru/2.1/?lang=en_RU&amp;apikey=' . $cdekShippingSettings['apikey']);
+    wp_enqueue_script('cdek-admin-leaflet-yandex', plugin_dir_url(__FILE__) . 'assets/js/lib/Yandex.js');
 }
 
 function cdek_register_route()
@@ -317,6 +331,18 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
                             'default' => __(1, 'cdek')
                         ),
 
+                        'tiles' => array(
+                            'title' => __('Слой карты', 'cdek'),
+                            'type' => 'select',
+                            'options' => ['OpenStreetMap', 'YandexMap']
+                        ),
+
+                        'apikey' => array(
+                            'type' => 'hidden',
+                            'placeholder' => 'Api Key',
+                            'default' => __('', 'cdek')
+                        ),
+
                         'mode' => array(
                             'title' => __('Место отправки', 'cdek'),
                             'type' => 'select',
@@ -414,6 +440,9 @@ if (in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_
             $shippingMethod->get_meta_data()['type'] === '1' &&
             $shippingMethod->get_id() === $current &&
             $_SERVER['REQUEST_URI'] !== '/cart/') {
+            $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
+            $cdekShippingSettings = $cdekShipping->settings;
+            $layerMap = $cdekShippingSettings['tiles'];
             include 'templates/public/open-map.php';
         }
     }

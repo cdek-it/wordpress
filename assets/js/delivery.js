@@ -8,6 +8,23 @@
         cityAutocomplete();
         $('#woocommerce_cdek_city').after('<div id="region-list"></div>');
         regionListProcess();
+        chooseLayerMap();
+
+        function chooseLayerMap() {
+            let tiles = $('#woocommerce_cdek_tiles').val();
+            if (tiles === '1') {
+                $('#woocommerce_cdek_apikey').get(0).type = 'text';
+            }
+
+            $('#woocommerce_cdek_tiles').change(function (event) {
+                if ($(event.currentTarget).val() === '1') {
+                    $('#woocommerce_cdek_apikey').get(0).type = 'text';
+                } else {
+                    $('#woocommerce_cdek_apikey').get(0).type = 'hidden';
+                }
+            })
+        }
+
 
         function cityAutocomplete() {
             $('#woocommerce_cdek_city').on('input', function (event) {
@@ -66,10 +83,14 @@
                 cluster = L.markerClusterGroup();
                 map.addLayer(cluster);
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
+                if ($('#woocommerce_cdek_tiles').val() === '1') {
+                    L.yandex().addTo(map);
+                } else {
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
+                    }).addTo(map);
+                }
             }
         }
 

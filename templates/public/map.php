@@ -44,8 +44,6 @@
                 $('#background').click(function () {
                     $('#map-frame').css('display', 'none');
                 })
-
-                $()
             })
         })(jQuery);
     </script>

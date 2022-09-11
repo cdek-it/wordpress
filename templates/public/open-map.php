@@ -1,4 +1,8 @@
-<?php ?>
+<?php
+/**
+ * @var $layerMap
+ */
+?>
 <div class="open-pvz-btn">Выбрать ПВЗ</div>
 <div>
     <input name="pvz_info" id="pvz-info" type="text">
@@ -43,10 +47,15 @@
                 cluster = L.markerClusterGroup();
                 map.addLayer(cluster);
 
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    maxZoom: 19,
-                    attribution: '© OpenStreetMap'
-                }).addTo(map);
+                console.log(<?php echo $layerMap?>);
+                if (<?php echo $layerMap?> === 1) {
+                    L.yandex().addTo(map);
+                } else {
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
+                    }).addTo(map);
+                }
 
                 displayPvzOnMap();
             })
