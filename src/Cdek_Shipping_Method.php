@@ -1,9 +1,6 @@
 <?php
 
-namespace Cdek;
-
 use Cdek\Model\Tariff;
-use WC_Shipping_Method;
 
 class CdekShippingMethod extends WC_Shipping_Method
 {
@@ -66,10 +63,23 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'default' => __('Клементьев Илья', 'cdek')
             ),
 
-            'seller_phone' => array(
-                'title' => __('Номер телефона', 'cdek'),
+            'shipper_name' => array(
+                'title' => __('Грузоотправитель', 'cdek'),
                 'type' => 'text',
-                'default' => __('+79969633817', 'cdek')
+                'description' => 'Название компании грузоотправителя для международных заказов'
+            ),
+
+            'shipper_address' => array(
+                'title' => __('Адрес грузоотправителя', 'cdek'),
+                'type' => 'text',
+                'description' => 'Адрес компании грузоотправителя для международных заказов'
+            ),
+
+            'seller_address' => array(
+                'title' => __('Адрес истинного продавца', 'cdek'),
+                'type' => 'text',
+                'description' => 'Адрес истинного продавца. Используется при печати инвойсов для отображения адреса настоящего 
+                продавца товара, либо торгового названия. Для международных заказов'
             ),
 
             'rate' => array(

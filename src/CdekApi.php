@@ -3,6 +3,7 @@
 namespace Cdek;
 
 use Cdek\Model\SettingData;
+use Cdek\Model\Tariff;
 
 class CdekApi
 {
@@ -52,8 +53,14 @@ class CdekApi
     public function createOrder($param)
     {
         $url = $this->getUrl() . self::ORDERS;
-//        $param['developer_key'] = $this->settingData->developerKey;
-        if ((int) $this->settingData->mode) {
+        $param['developer_key'] = $this->settingData->developerKey;
+
+        $param['date_invoice'] = date('Y-m-d');
+        $param['shipper_name'] = $this->settingData->shipperName;
+        $param['shipper_address'] = $this->settingData->shipperAddress;
+        $param['seller'] = ['address' => $this->settingData->sellerAddress];
+
+        if (Tariff::getTariffModeByCode($param['tariff_code'])) {
             $param['shipment_point'] = $this->settingData->pvzCode;
         } else {
             $param['from_location'] = [

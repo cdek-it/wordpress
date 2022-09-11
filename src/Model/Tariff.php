@@ -150,6 +150,19 @@ class Tariff
         }
     }
 
+    public static function getTariffModeByCode($code)
+    {
+        foreach (self::TARIFF_DATA as $tariff) {
+            if ($tariff['code'] == $code) {
+                if ($tariff['typeTo'] === self::STORE) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        }
+    }
+
     public static function getTariffNameByCode($code)
     {
         foreach (self::TARIFF_DATA as $tariff) {

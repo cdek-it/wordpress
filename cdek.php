@@ -141,6 +141,7 @@ function create_order($data)
             "cost" => $product->get_price(),
             "amount" => $item->get_quantity(),
             "weight" => (int)$product->get_weight() * 1000,
+            "weight_gross" => ((int)$product->get_weight() * 1000) + 1,
         ];
     }
     $weightTotal = $weightTotal * 1000;
@@ -172,8 +173,11 @@ function create_order($data)
     $code = $orderData->entity->uuid;
     $orderInfoJson = CdekApi()->getOrder($code);
     $orderInfo = json_decode($orderInfoJson);
-    $cdekNumber = $orderInfo->entity->cdek_number;
     $waybill = $orderData->related_entities[0]->uuid;
+    $cdekNumber = null;
+    if (property_exists($orderInfo->entity, 'cdek_number')) {
+        $cdekNumber = $orderInfo->entity->cdek_number;
+    }
 
     if (empty($cdekNumber)) {
         $cdekNumber = $code;
@@ -238,6 +242,9 @@ function getSettingData(): SettingData
     $settingData->setFromAddress($cdekShippingSettings['street']);
     $settingData->setPvzCode($cdekShippingSettings['pvz_code']);
     $settingData->setPvzAddress($cdekShippingSettings['pvz_info']);
+    $settingData->setShipperName((string)$cdekShippingSettings['shipper_name']);
+    $settingData->setShipperAddress((string)$cdekShippingSettings['shipper_address']);
+    $settingData->setSellerAddress((string)$cdekShippingSettings['seller_address']);
     return $settingData;
 }
 

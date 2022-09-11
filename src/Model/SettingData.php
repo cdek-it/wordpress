@@ -16,6 +16,9 @@ class SettingData
     public $pvzCode;
     public $pvzAddress;
     public $developerKey;
+    public $shipperName;
+    public $shipperAddress;
+    public $sellerAddress;
 
 
     /**
@@ -192,5 +195,53 @@ class SettingData
     public function setDeveloperKey($developerKey): void
     {
         $this->developerKey = $developerKey;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getShipperName()
+    {
+        return $this->shipperName;
+    }
+
+    /**
+     * @param mixed $shipperName
+     */
+    public function setShipperName($shipperName): void
+    {
+        $this->shipperName = $shipperName;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getShipperAddress()
+    {
+        return $this->shipperAddress;
+    }
+
+    /**
+     * @param mixed $shipperAddress
+     */
+    public function setShipperAddress($shipperAddress): void
+    {
+        $this->shipperAddress = $shipperAddress;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getSellerAddress()
+    {
+        return $this->sellerAddress;
+    }
+
+    /**
+     * @param mixed $sellerAddress
+     */
+    public function setSellerAddress($sellerAddress): void
+    {
+        $this->sellerAddress = $sellerAddress;
     }
 }
