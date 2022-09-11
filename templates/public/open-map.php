@@ -47,7 +47,6 @@
                 cluster = L.markerClusterGroup();
                 map.addLayer(cluster);
 
-                console.log(<?php echo $layerMap?>);
                 if (<?php echo $layerMap?> === 1) {
                     L.yandex().addTo(map);
                 } else {

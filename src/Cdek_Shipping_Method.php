@@ -91,7 +91,6 @@ class CdekShippingMethod extends WC_Shipping_Method
                             выбор тарифов \"от двери\""
             ),
 
-
             'default_weight' => array(
                 'title' => __('Вес одной единицы товара по умолчанию в кг', 'cdek'),
                 'description' => "У всех товаров должен быть указан вес, 

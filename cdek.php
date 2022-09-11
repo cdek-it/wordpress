@@ -134,13 +134,21 @@ function create_order($data)
     foreach ($items as $item) {
         $product = $item->get_product();
         $weightTotal += (int) $product->get_weight();
+
+        $weight = (int)$product->get_weight();
+        if ($weight === 0) {
+            $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
+            $cdekShippingSettings = $cdekShipping->settings;
+            $weight = (int)$cdekShippingSettings['default_weight'];
+        }
+
         $itemsData[] = [
             "ware_key" => $product->get_id(),
             "payment" => ["value" => 0],
             "name" => $product->get_name(),
             "cost" => $product->get_price(),
             "amount" => $item->get_quantity(),
-            "weight" => (int)$product->get_weight() * 1000,
+            "weight" => $weight * 1000,
             "weight_gross" => ((int)$product->get_weight() * 1000) + 1,
         ];
     }
