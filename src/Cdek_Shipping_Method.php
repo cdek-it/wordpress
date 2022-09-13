@@ -112,6 +112,14 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'default' => __('', 'cdek')
             ),
 
+            'has_packages' => array(
+                'title' => __('Многоместка', 'cdek'),
+                'type' => 'checkbox',
+                'description' => "При включенном режиме 'Многоместка', на детальной странице заказа появится
+                 возможность создать несколько упаковок для одного заказа и распределить товары по созданным упаковкам",
+                'default' => 'no'
+            ),
+
             'city' => array(
                 'title' => __('Город отправления', 'cdek'),
                 'type' => 'text',

@@ -320,6 +320,10 @@ function cdek_admin_order_data_after_shipping_address ($order)
 {
     $orderUuid = $order->get_meta('cdek_order_uuid');
     $waybill = $order->get_meta('cdek_order_waybill');
+    $items = [];
+    foreach ($order->get_items() as $item) {
+        $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
+    }
     include 'templates/admin/create-order.php';
 }
 
