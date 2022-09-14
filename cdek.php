@@ -73,7 +73,7 @@ function cdek_register_route()
     ));
 
     register_rest_route('cdek/v1', '/create-order', array(
-        'methods' => 'GET',
+        'methods' => 'POST',
         'callback' => 'create_order',
         'permission_callback' => '__return_true'
     ));
@@ -97,10 +97,47 @@ function cdek_register_route()
     ));
 }
 
+function get_packages($orderId, $packageData) {
+    $result = [];
+    foreach ($packageData as $package) {
+        $data = get_package_items($package->items);
+        $result[] = [
+            'number' => $orderId . '_' . wp_generate_password(5),
+            'length' => $package->length,
+            'width' => $package->width,
+            'height' => $package->height,
+            'weight' => $data['weight'],
+            'items' => $data['items']
+        ];
+    }
+
+    return $result;
+}
+
+function get_package_items($items) {
+    $itemsData = [];
+    $weightTotal = 0;
+    foreach ($items as $item) {
+        $product = wc_get_product($item[0]);
+        $weightTotal += (int)$product->get_weight() * 1000;
+        $itemsData[] = [
+            "ware_key" => $product->get_id(),
+            "payment" => ["value" => 0],
+            "name" => $product->get_name(),
+            "cost" => $product->get_price(),
+            "amount" => $item[2],
+            "weight" => (int)$product->get_weight() * 1000,
+            "weight_gross" => ((int)$product->get_weight() * 1000) + 1,
+        ];
+    }
+    return ['items' => $itemsData, 'weight' => $weightTotal];
+}
+
 function create_order($data)
 {
     $param = [];
-    $orderId = $data->get_param('package_order_id');
+    $orderId = $data->get_param('order_id');
+    $packageData = json_decode($data->get_param('package_data'));
     $length = $data->get_param('package_length');
     $width = $data->get_param('package_width');
     $height = $data->get_param('package_height');
@@ -128,31 +165,31 @@ function create_order($data)
         ];
     }
 
-    $items = $order->get_items();
-    $itemsData = [];
-    $weightTotal = 0;
-    foreach ($items as $item) {
-        $product = $item->get_product();
-        $weightTotal += (int) $product->get_weight();
-
-        $weight = (int)$product->get_weight();
-        if ($weight === 0) {
-            $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
-            $cdekShippingSettings = $cdekShipping->settings;
-            $weight = (int)$cdekShippingSettings['default_weight'];
-        }
-
-        $itemsData[] = [
-            "ware_key" => $product->get_id(),
-            "payment" => ["value" => 0],
-            "name" => $product->get_name(),
-            "cost" => $product->get_price(),
-            "amount" => $item->get_quantity(),
-            "weight" => $weight * 1000,
-            "weight_gross" => ((int)$product->get_weight() * 1000) + 1,
-        ];
-    }
-    $weightTotal = $weightTotal * 1000;
+//    $items = $order->get_items();
+//    $itemsData = [];
+//    $weightTotal = 0;
+//    foreach ($items as $item) {
+//        $product = $item->get_product();
+//        $weightTotal += (int) $product->get_weight();
+//
+//        $weight = (int)$product->get_weight();
+//        if ($weight === 0) {
+//            $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
+//            $cdekShippingSettings = $cdekShipping->settings;
+//            $weight = (int)$cdekShippingSettings['default_weight'];
+//        }
+//
+//        $itemsData[] = [
+//            "ware_key" => $product->get_id(),
+//            "payment" => ["value" => 0],
+//            "name" => $product->get_name(),
+//            "cost" => $product->get_price(),
+//            "amount" => $item->get_quantity(),
+//            "weight" => $weight * 1000,
+//            "weight_gross" => ((int)$product->get_weight() * 1000) + 1,
+//        ];
+//    }
+//    $weightTotal = $weightTotal * 1000;
 
     $param['recipient'] = [
         'name' => $order->get_shipping_first_name() . ' ' . $order->get_shipping_last_name(),
@@ -161,14 +198,17 @@ function create_order($data)
         ]
     ];
     $param['tariff_code'] = $tariffId;
-    $param['packages'] = [
-        'number' => $orderId,
-        'length' => $length,
-        'width' => $width,
-        'height' => $height,
-        'weight' => $weightTotal,
-        'items' => $itemsData
-    ];
+
+    $param['packages'] = get_packages($orderId, $packageData);
+
+//    $param['packages'] = [
+//        'number' => $orderId,
+//        'length' => $length,
+//        'width' => $width,
+//        'height' => $height,
+//        'weight' => $weightTotal,
+//        'items' => $itemsData
+//    ];
     $param['print'] = 'waybill';
 
     $orderDataJson = CdekApi()->createOrder($param);
@@ -320,6 +360,7 @@ function cdek_admin_order_data_after_shipping_address ($order)
 {
     $orderUuid = $order->get_meta('cdek_order_uuid');
     $waybill = $order->get_meta('cdek_order_waybill');
+    $orderId = $order->get_id();
     $items = [];
     foreach ($order->get_items() as $item) {
         $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
