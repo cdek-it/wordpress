@@ -47,20 +47,17 @@ class CdekShippingMethod extends WC_Shipping_Method
 
             'client_id' => array(
                 'title' => __('Идентификатор клиента', 'official_cdek'),
-                'type' => 'text',
-                'default' => __('EMscd6r9JnFiQ3bLoyjJY6eM78JrJceI', 'official_cdek')
+                'type' => 'text'
             ),
 
             'client_secret' => array(
                 'title' => __('Секретный ключ клиента', 'official_cdek'),
-                'type' => 'text',
-                'default' => __('PjLZkKBHEiLK3YsjtNrt3TGNG0ahs3kG', 'official_cdek')
+                'type' => 'text'
             ),
 
             'seller_name' => array(
                 'title' => __('ФИО', 'official_cdek'),
-                'type' => 'text',
-                'default' => __('Клементьев Илья', 'official_cdek')
+                'type' => 'text'
             ),
 
             'seller_phone' => array(
@@ -114,8 +111,7 @@ class CdekShippingMethod extends WC_Shipping_Method
 
             'apikey' => array(
                 'type' => 'hidden',
-                'placeholder' => 'Api Key',
-                'default' => __('', 'official_cdek')
+                'placeholder' => 'Api Key'
             ),
 
             'has_packages' => array(
@@ -135,7 +131,6 @@ class CdekShippingMethod extends WC_Shipping_Method
             'street' => array(
                 'title' => __('Адрес', 'official_cdek'),
                 'type' => 'text',
-                'default' => __('Ленина 21 42', 'official_cdek'),
                 'description' => "Адрес отправления для тарифов \"от двери\""
             ),
 
