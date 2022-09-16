@@ -6,10 +6,10 @@ class CdekShippingMethod extends WC_Shipping_Method
 {
     public function __construct($instance_id = 0)
     {
-        $this->id = 'cdek';
+        $this->id = 'official_cdek';
         $this->instance_id = absint($instance_id);
-        $this->method_title = __('Cdek Shipping', 'cdek');
-        $this->method_description = __('Custom Shipping Method for Cdek', 'cdek');
+        $this->method_title = __('Cdek Shipping', 'official_cdek');
+        $this->method_description = __('Custom Shipping Method for Cdek', 'official_cdek');
         $this->supports = array(
             'settings',
             'shipping-zones',
@@ -33,57 +33,63 @@ class CdekShippingMethod extends WC_Shipping_Method
         $this->form_fields = array(
 
             'enabled' => array(
-                'title' => __('Enable', 'cdek'),
+                'title' => __('Enable', 'official_cdek'),
                 'type' => 'checkbox',
-                'description' => __('Enable this shipping.', 'cdek'),
+                'description' => __('Enable this shipping.', 'official_cdek'),
                 'default' => 'yes'
             ),
 
             'grant_type' => array(
-                'title' => __('Тип аутентификации', 'cdek'),
+                'title' => __('Тип аутентификации', 'official_cdek'),
                 'type' => 'text',
-                'default' => __('client_credentials', 'cdek')
+                'default' => __('client_credentials', 'official_cdek')
             ),
 
             'client_id' => array(
-                'title' => __('Идентификатор клиента', 'cdek'),
+                'title' => __('Идентификатор клиента', 'official_cdek'),
                 'type' => 'text',
-                'default' => __('EMscd6r9JnFiQ3bLoyjJY6eM78JrJceI', 'cdek')
+                'default' => __('EMscd6r9JnFiQ3bLoyjJY6eM78JrJceI', 'official_cdek')
             ),
 
             'client_secret' => array(
-                'title' => __('Секретный ключ клиента', 'cdek'),
+                'title' => __('Секретный ключ клиента', 'official_cdek'),
                 'type' => 'text',
-                'default' => __('PjLZkKBHEiLK3YsjtNrt3TGNG0ahs3kG', 'cdek')
+                'default' => __('PjLZkKBHEiLK3YsjtNrt3TGNG0ahs3kG', 'official_cdek')
             ),
 
             'seller_name' => array(
-                'title' => __('ФИО', 'cdek'),
+                'title' => __('ФИО', 'official_cdek'),
                 'type' => 'text',
-                'default' => __('Клементьев Илья', 'cdek')
+                'default' => __('Клементьев Илья', 'official_cdek')
+            ),
+
+            'seller_phone' => array(
+                'title' => __('Телефон', 'official_cdek'),
+                'type' => 'text',
+                'description' => 'Должен передаваться в международном формате: код страны (для России +7) и сам номер (10 и более цифр)'
             ),
 
             'shipper_name' => array(
-                'title' => __('Грузоотправитель', 'cdek'),
+                'title' => __('Грузоотправитель', 'official_cdek'),
                 'type' => 'text',
                 'description' => 'Название компании грузоотправителя для международных заказов'
             ),
 
             'shipper_address' => array(
-                'title' => __('Адрес грузоотправителя', 'cdek'),
+                'title' => __('Адрес грузоотправителя', 'official_cdek'),
                 'type' => 'text',
                 'description' => 'Адрес компании грузоотправителя для международных заказов'
             ),
 
             'seller_address' => array(
-                'title' => __('Адрес истинного продавца', 'cdek'),
+                'title' => __('Адрес истинного продавца', 'official_cdek'),
                 'type' => 'text',
                 'description' => 'Адрес истинного продавца. Используется при печати инвойсов для отображения адреса настоящего 
                 продавца товара, либо торгового названия. Для международных заказов'
             ),
 
             'rate' => array(
-                'title' => __('Тарифы', 'cdek'),
+                'title' => __('Тарифы', 'official_cdek'),
                 'type' => 'multiselect',
                 'options' => Tariff::getTariffList(),
                 'description' => "Для выбора нескольких тарифов удерживайте клавишу \"CTRL\" и левой кнопкой мыши выберите тарифы.<br>
@@ -92,16 +98,16 @@ class CdekShippingMethod extends WC_Shipping_Method
             ),
 
             'default_weight' => array(
-                'title' => __('Вес одной единицы товара по умолчанию в кг', 'cdek'),
+                'title' => __('Вес одной единицы товара по умолчанию в кг', 'official_cdek'),
                 'description' => "У всех товаров должен быть указан вес, 
                             если есть товары без указанного <br> веса то для таких товаров будет подставляться значение из этого поля. <br>
                             Это повлияет на точность расчета доставки. Значение по умолчанию 1 кг.",
                 'type' => 'text',
-                'default' => __(1, 'cdek')
+                'default' => __(1, 'official_cdek')
             ),
 
             'tiles' => array(
-                'title' => __('Слой карты', 'cdek'),
+                'title' => __('Слой карты', 'official_cdek'),
                 'type' => 'select',
                 'options' => ['OpenStreetMap', 'YandexMap']
             ),
@@ -109,11 +115,11 @@ class CdekShippingMethod extends WC_Shipping_Method
             'apikey' => array(
                 'type' => 'hidden',
                 'placeholder' => 'Api Key',
-                'default' => __('', 'cdek')
+                'default' => __('', 'official_cdek')
             ),
 
             'has_packages' => array(
-                'title' => __('Многоместка', 'cdek'),
+                'title' => __('Многоместка', 'official_cdek'),
                 'type' => 'checkbox',
                 'description' => "При включенном режиме 'Многоместка', на детальной странице заказа появится
                  возможность создать несколько упаковок для одного заказа и распределить товары по созданным упаковкам",
@@ -121,21 +127,21 @@ class CdekShippingMethod extends WC_Shipping_Method
             ),
 
             'city' => array(
-                'title' => __('Город отправления', 'cdek'),
+                'title' => __('Город отправления', 'official_cdek'),
                 'type' => 'text',
-                'default' => __('Москва', 'cdek')
+                'default' => __('Москва', 'official_cdek')
             ),
 
             'street' => array(
-                'title' => __('Адрес', 'cdek'),
+                'title' => __('Адрес', 'official_cdek'),
                 'type' => 'text',
-                'default' => __('Ленина 21 42', 'cdek'),
+                'default' => __('Ленина 21 42', 'official_cdek'),
                 'description' => "Адрес отправления для тарифов \"от двери\""
             ),
 
             'map' => array(
                 'type' => 'hidden',
-                'title' => __('Выбрать ПВЗ на карте', 'cdek'),
+                'title' => __('Выбрать ПВЗ на карте', 'official_cdek'),
             ),
 
             'pvz_info' => array(
@@ -151,7 +157,7 @@ class CdekShippingMethod extends WC_Shipping_Method
             'city_code_value' => array(
                 'type' => 'text',
                 'css' => 'display: none;',
-                'default' => __('44', 'cdek')
+                'default' => __('44', 'official_cdek')
             ),
 
         );
@@ -160,7 +166,7 @@ class CdekShippingMethod extends WC_Shipping_Method
 
     public function calculate_shipping($package = [])
     {
-        $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
+        $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
         $cdekShippingSettings = $cdekShipping->settings;
         $tariffList = $cdekShippingSettings['rate'];
         $city = $package["destination"]['city'];
@@ -189,9 +195,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                         'id' => $this->id . '_' . $tariff,
                         'label' => 'CDEK: ' . Tariff::getTariffNameByCode($tariff) . ', (' . $delivery->period_min . '-' . $delivery->period_max . ' дней)',
                         'cost' => $delivery->delivery_sum,
-                        'meta_data' => ['type' => Tariff::getTariffTypeToByCode($tariff)],
-                        'className' => 'asdasd',
-                        'class' => 'asdasd',
+                        'meta_data' => ['type' => Tariff::getTariffTypeToByCode($tariff)]
                     );
                     $this->add_rate($rate);
                 }

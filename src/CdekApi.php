@@ -9,7 +9,7 @@ class CdekApi
 {
     protected const URL = "https://api.cdek.ru/v2/";
     protected const URL_TEST = "https://api.cdek.ru/v2/";
-    protected const TOKEN = "/oauth/token";
+    protected const TOKEN = "oauth/token";
     protected const REGION = "location/cities";
     protected const ORDERS = "orders/";
     protected const PVZ = "deliverypoints";

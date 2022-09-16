@@ -20,9 +20,9 @@ require 'vendor/autoload.php';
 function cdek_widget_enqueue_script()
 {
 
-    wp_enqueue_style('testcssleaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
-    wp_enqueue_script('testleaflet', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
-    wp_enqueue_style('testcss', plugin_dir_url(__FILE__) . 'assets/css/test.css');
+    wp_enqueue_style('cdek-css-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
+    wp_enqueue_script('cdek-css-leaflet-min', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
+    wp_enqueue_style('cdek-css', plugin_dir_url(__FILE__) . 'assets/css/cdek-map.css');
     wp_enqueue_style('cdek-admin-leaflet-cluster-default', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.Default.min.css');
     wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.min.css');
     wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
@@ -46,7 +46,7 @@ function cdek_admin_enqueue_script()
  */
 function addYandexMap(): void
 {
-    $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
+    $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
     $cdekShippingSettings = $cdekShipping->settings;
     wp_enqueue_script('cdek-admin-yandex-api', 'https://api-maps.yandex.ru/2.1/?lang=en_RU&amp;apikey=' . $cdekShippingSettings['apikey']);
     wp_enqueue_script('cdek-admin-leaflet-yandex', plugin_dir_url(__FILE__) . 'assets/js/lib/Yandex.js');
@@ -131,7 +131,7 @@ function get_package_items($items) {
         $product = wc_get_product($item[0]);
         $weight = 0;
         if ((int)$product->get_weight() === 0) {
-            $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
+            $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
             $cdekShippingSettings = $cdekShipping->settings;
             $weight = (int)$cdekShippingSettings['default_weight'];
         } else {
@@ -222,7 +222,7 @@ function create_order($data)
  */
 function setPackage($data, $orderId, array $param): array
 {
-    $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
+    $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
     $cdekShippingSettings = $cdekShipping->settings;
     if ($cdekShippingSettings['has_packages'] === 'yes') {
         $packageData = json_decode($data->get_param('package_data'));
@@ -241,7 +241,7 @@ function setPackage($data, $orderId, array $param): array
 
             $weight = (int)$product->get_weight();
             if ($weight === 0) {
-                $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
+                $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
                 $cdekShippingSettings = $cdekShipping->settings;
                 $weight = (int)$cdekShippingSettings['default_weight'];
             }
@@ -309,9 +309,8 @@ function cdekApi(): CdekApi
 function getSettingData(): SettingData
 {
     $settingData = new SettingData();
-    $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
+    $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
     $cdekShippingSettings = $cdekShipping->settings;
-    $settingData->setMode($cdekShippingSettings['mode']);
     $settingData->setGrantType($cdekShippingSettings['grant_type']);
     $settingData->setClientId($cdekShippingSettings['client_id']);
     $settingData->setClientSecret($cdekShippingSettings['client_secret']);
@@ -344,12 +343,12 @@ function cdek_shipping_method()
 function cdek_map_display($shippingMethod)
 {
     $current = WC()->session->get( 'chosen_shipping_methods')[0];
-    if ($shippingMethod->get_method_id() === 'cdek' &&
+    if ($shippingMethod->get_method_id() === 'official_cdek' &&
         $shippingMethod->get_meta_data()['type'] === '1' &&
         $shippingMethod->get_id() === $current &&
         $_SERVER['REQUEST_URI'] !== '/cart/' &&
         $_SERVER['REQUEST_URI'] !== '/?wc-ajax=update_shipping_method') {
-        $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
+        $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
         $cdekShippingSettings = $cdekShipping->settings;
         $layerMap = $cdekShippingSettings['tiles'];
         include 'templates/public/open-map.php';
@@ -373,7 +372,7 @@ function cdek_woocommerce_new_order_action($order_id, $order)
 {
     $pvzInfo = $_POST['pvz_info'];
     $pvzCode = $_POST['pvz_code'];
-    $tariffId = explode('_', $_POST['shipping_method'][0])[1];
+    $tariffId = explode('_', $_POST['shipping_method'][0])[2];
     $cityCode = $_POST['city_code'];
 
     $order->set_meta_data(['pvz_info' => $pvzInfo, 'pvz_code' => $pvzCode, 'tariff_id' => $tariffId, 'city_code' => $cityCode]);
@@ -386,7 +385,7 @@ function cdek_woocommerce_new_order_action($order_id, $order)
 
 function add_cdek_shipping_method($methods)
 {
-    $methods['cdek'] = 'CdekShippingMethod';
+    $methods['official_cdek'] = 'CdekShippingMethod';
     return $methods;
 }
 
@@ -400,7 +399,7 @@ function cdek_admin_order_data_after_shipping_address ($order)
         $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
     }
 
-    $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
+    $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
     $cdekShippingSettings = $cdekShipping->settings;
     $hasPackages = false;
     if ($cdekShippingSettings['has_packages'] === 'yes') {

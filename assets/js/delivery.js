@@ -3,34 +3,34 @@
         let map = null;
         let cluster = null;
         let cityCodePvzReceived = null;
-        $('#woocommerce_cdek_pvz_info').attr('readonly', true);
+        $('#woocommerce_official_cdek_pvz_info').attr('readonly', true);
         modeToggle();
         cityAutocomplete();
-        $('#woocommerce_cdek_city').after('<div id="region-list"></div>');
+        $('#woocommerce_official_cdek_city').after('<div id="region-list"></div>');
         regionListProcess();
         chooseLayerMap();
 
         function chooseLayerMap() {
-            let tiles = $('#woocommerce_cdek_tiles').val();
+            let tiles = $('#woocommerce_official_cdek_tiles').val();
             if (tiles === '1') {
-                $('#woocommerce_cdek_apikey').get(0).type = 'text';
+                $('#woocommerce_official_cdek_apikey').get(0).type = 'text';
             }
 
-            $('#woocommerce_cdek_tiles').change(function (event) {
+            $('#woocommerce_official_cdek_tiles').change(function (event) {
                 if ($(event.currentTarget).val() === '1') {
-                    $('#woocommerce_cdek_apikey').get(0).type = 'text';
+                    $('#woocommerce_official_cdek_apikey').get(0).type = 'text';
                 } else {
-                    $('#woocommerce_cdek_apikey').get(0).type = 'hidden';
+                    $('#woocommerce_official_cdek_apikey').get(0).type = 'hidden';
                 }
             })
         }
 
 
         function cityAutocomplete() {
-            $('#woocommerce_cdek_city').on('input', function (event) {
+            $('#woocommerce_official_cdek_city').on('input', function (event) {
                 $('#region-list').empty();
-                $('#woocommerce_cdek_pvz_info').val('')
-                $('#woocommerce_cdek_pvz_code').val('')
+                $('#woocommerce_official_cdek_pvz_info').val('')
+                $('#woocommerce_official_cdek_pvz_code').val('')
                 if (event.target.value.length > 2) {
                     $.ajax({
                         method: "GET",
@@ -60,15 +60,15 @@
 
         function regionListProcess() {
             $("#region-list").on('click', function (event) {
-                $('#woocommerce_cdek_city').val(event.target.innerText)
-                $("#woocommerce_cdek_city_code_value").val(event.target.getAttribute("data-code"));
+                $('#woocommerce_official_cdek_city').val(event.target.innerText)
+                $("#woocommerce_official_cdek_city_code_value").val(event.target.getAttribute("data-code"));
                 $('#region-list').empty();
                 getPvz();
             })
         }
 
         function initMap() {
-            $('#woocommerce_cdek_map').after('<div id="map-container"><div id="map"></div></div>')
+            $('#woocommerce_official_cdek_map').after('<div id="map-container"><div id="map"></div></div>')
             // $('#map-container').show();
 
             let mapContainer = $('#map');
@@ -83,7 +83,7 @@
                 cluster = L.markerClusterGroup();
                 map.addLayer(cluster);
                 
-                if ($('#woocommerce_cdek_tiles').val() === '1') {
+                if ($('#woocommerce_official_cdek_tiles').val() === '1') {
                     L.yandex().addTo(map);
                 } else {
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -97,34 +97,34 @@
 
         function modeToggle() {
             initMap();
-            // if ($('#woocommerce_cdek_mode').val() === '1') {
-            //     $('#woocommerce_cdek_street').hide();
-            //     $($('label[for=woocommerce_cdek_street]')[0]).text('Карта');
-            //     $('#woocommerce_cdek_pvz_info').show();
+            // if ($('#woocommerce_official_cdek_mode').val() === '1') {
+            //     $('#woocommerce_official_cdek_street').hide();
+            //     $($('label[for=woocommerce_official_cdek_street]')[0]).text('Карта');
+            //     $('#woocommerce_official_cdek_pvz_info').show();
             //     getPvz();
             // } else {
             //     $('#map-container').hide();
-            //     $('#woocommerce_cdek_pvz_info').hide();
+            //     $('#woocommerce_official_cdek_pvz_info').hide();
             // }
 
-            $('#woocommerce_cdek_mode').change(function (event) {
+            $('#woocommerce_official_cdek_mode').change(function (event) {
                 if ($(event.target).val() === '1') {
-                    $($('label[for=woocommerce_cdek_street]')[0]).text('Карта');
+                    $($('label[for=woocommerce_official_cdek_street]')[0]).text('Карта');
                     $('#map-container').show();
-                    $('#woocommerce_cdek_street').hide();
-                    $('#woocommerce_cdek_pvz_info').show();
+                    $('#woocommerce_official_cdek_street').hide();
+                    $('#woocommerce_official_cdek_pvz_info').show();
                     getPvz();
                 } else {
-                    $($('label[for=woocommerce_cdek_street]')[0]).text('Адрес');
+                    $($('label[for=woocommerce_official_cdek_street]')[0]).text('Адрес');
                     $('#map-container').hide();
-                    $('#woocommerce_cdek_pvz_info').hide();
-                    $('#woocommerce_cdek_street').show();
+                    $('#woocommerce_official_cdek_pvz_info').hide();
+                    $('#woocommerce_official_cdek_street').show();
                 }
             })
         }
 
         function getPvz() {
-            let cityCode = $('#woocommerce_cdek_city_code_value').val();
+            let cityCode = $('#woocommerce_official_cdek_city_code_value').val();
             if (cityCode !== cityCodePvzReceived) {
                 $.ajax({
                     method: "GET",
@@ -158,8 +158,8 @@
         }
 
         function selectMarker(pvz) {
-            $('#woocommerce_cdek_pvz_info').val(pvz.address)
-            $('#woocommerce_cdek_pvz_code').val(pvz.code)
+            $('#woocommerce_official_cdek_pvz_info').val(pvz.address)
+            $('#woocommerce_official_cdek_pvz_code').val(pvz.code)
         }
 
         $('#create-order-btn').click(function () {
