@@ -44,7 +44,6 @@
 <script>
     (function ($) {
         $(document).ready(function () {
-
             let map = null;
             let cluster = null;
 
@@ -75,6 +74,8 @@
                         attribution: '© OpenStreetMap'
                     }).addTo(map);
                 }
+
+                $('#map-loader').show();
 
                 displayPvzOnMap();
             })
@@ -111,6 +112,7 @@
                         city_code: cityCode
                     },
                     success: function (response) {
+                        $('#map-loader').hide();
                         setMarker(JSON.parse(response));
                     },
                     error: function (error) {

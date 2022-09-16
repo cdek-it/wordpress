@@ -347,7 +347,8 @@ function cdek_map_display($shippingMethod)
     if ($shippingMethod->get_method_id() === 'cdek' &&
         $shippingMethod->get_meta_data()['type'] === '1' &&
         $shippingMethod->get_id() === $current &&
-        $_SERVER['REQUEST_URI'] !== '/cart/') {
+        $_SERVER['REQUEST_URI'] !== '/cart/' &&
+        $_SERVER['REQUEST_URI'] !== '/?wc-ajax=update_shipping_method') {
         $cdekShipping = WC()->shipping->load_shipping_methods()['cdek'];
         $cdekShippingSettings = $cdekShipping->settings;
         $layerMap = $cdekShippingSettings['tiles'];
