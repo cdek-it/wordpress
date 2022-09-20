@@ -42,11 +42,6 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'type' => 'text'
             ),
 
-//            'auth_btn' => array(
-//                'type' => 'button',
-//                'default' => 'Авторизоваться'
-//            ),
-
             'seller_name' => array(
                 'title' => __('ФИО', 'official_cdek'),
                 'type' => 'text'
@@ -157,7 +152,6 @@ class CdekShippingMethod extends WC_Shipping_Method
         $tariffList = $cdekShippingSettings['rate'];
         $city = $package["destination"]['city'];
         $state = $package["destination"]['state'];
-//        $postcode = $package["destination"]['postcode'];
 
         $totalWeight = 0;
         foreach ($package['contents'] as $productGroup) {
@@ -171,7 +165,6 @@ class CdekShippingMethod extends WC_Shipping_Method
 
         if ($city) {
             foreach ($tariffList as $tariff) {
-//                $delivery = json_decode(cdekApi()->calculateWP($city, $postcode, $totalWeight, $tariff));
                 $delivery = json_decode(cdekApi()->calculateWP($city, $state, $totalWeight, $tariff));
 
                 if (property_exists($delivery, 'status') && $delivery->status === 'error') {

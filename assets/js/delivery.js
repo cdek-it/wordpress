@@ -7,17 +7,9 @@
 
 
         function auth() {
-            // $('#woocommerce_official_cdek_auth_btn').val('Авторизация');
             $('#woocommerce_official_cdek_client_secret').parent().parent().parent().nextUntil().css('display', 'none');
             checkAuth();
-            // $('#woocommerce_official_cdek_auth_btn').click(function () {
-            //     checkAuth();
-            // })
         }
-
-        //itnWByQqGrGjZGairsWe4co2UrXnnW2h
-        //Er4ApHnJMOn8g6khOCH6IPA4mp5ebmps
-        //800fda93-f994-430a-acea-19891302e826
 
         function checkAuth() {
             let clientId = $('#woocommerce_official_cdek_client_id').val();
@@ -38,7 +30,6 @@
                 success: function (response) {
                     let auth = JSON.parse(response);
                     if (auth.state) {
-                        // $('#woocommerce_official_cdek_auth_btn').parent().parent().parent().css('display', 'none');
                         $('#woocommerce_official_cdek_client_secret').parent().parent().parent().nextUntil().css('display', '');
                         $('#woocommerce_official_cdek_pvz_info').attr('readonly', true);
                         modeToggle();
@@ -115,7 +106,6 @@
 
         function initMap() {
             $('#woocommerce_official_cdek_map').after('<div id="map-container"><div id="map"></div></div>')
-            // $('#map-container').show();
 
             let mapContainer = $('#map');
             if (mapContainer.length) {
@@ -143,16 +133,6 @@
 
         function modeToggle() {
             initMap();
-            // if ($('#woocommerce_official_cdek_mode').val() === '1') {
-            //     $('#woocommerce_official_cdek_street').hide();
-            //     $($('label[for=woocommerce_official_cdek_street]')[0]).text('Карта');
-            //     $('#woocommerce_official_cdek_pvz_info').show();
-            //     getPvz();
-            // } else {
-            //     $('#map-container').hide();
-            //     $('#woocommerce_official_cdek_pvz_info').hide();
-            // }
-
             $('#woocommerce_official_cdek_mode').change(function (event) {
                 if ($(event.target).val() === '1') {
                     $($('label[for=woocommerce_official_cdek_street]')[0]).text('Карта');

@@ -8,7 +8,6 @@ use Cdek\Model\Tariff;
 class CdekApi
 {
     protected const URL = "https://api.cdek.ru/v2/";
-    protected const URL_TEST = "https://api.cdek.ru/v2/";
     protected const TOKEN = "oauth/token";
     protected const REGION = "location/cities";
     protected const ORDERS = "orders/";
@@ -53,7 +52,7 @@ class CdekApi
     public function createOrder($param)
     {
         $url = $this->getUrl() . self::ORDERS;
-//        $param['developer_key'] = $this->settingData->developerKey;
+        $param['developer_key'] = $this->settingData->developerKey;
 
         $param['date_invoice'] = date('Y-m-d');
         $param['shipper_name'] = $this->settingData->shipperName;
