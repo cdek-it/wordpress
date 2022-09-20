@@ -1,5 +1,6 @@
 <?php
 
+use Cdek\CdekApi;
 use Cdek\Model\Tariff;
 
 class CdekShippingMethod extends WC_Shipping_Method
@@ -16,7 +17,7 @@ class CdekShippingMethod extends WC_Shipping_Method
             'instance-settings',
             'instance-settings-modal',
         );
-        $this->enabled = isset($this->settings['enabled']) ? $this->settings['enabled'] : 'yes';
+        $this->enabled = 'yes';
         $this->init();
     }
 
@@ -24,27 +25,13 @@ class CdekShippingMethod extends WC_Shipping_Method
     {
         $this->init_form_fields();
         $this->init_settings();
+        $this->title = 'CDEK Shipping';
         add_action('woocommerce_update_options_shipping_' . $this->id, array($this, 'process_admin_options'));
     }
 
     function init_form_fields()
     {
-
         $this->form_fields = array(
-
-            'enabled' => array(
-                'title' => __('Enable', 'official_cdek'),
-                'type' => 'checkbox',
-                'description' => __('Enable this shipping.', 'official_cdek'),
-                'default' => 'yes'
-            ),
-
-            'grant_type' => array(
-                'title' => __('Тип аутентификации', 'official_cdek'),
-                'type' => 'text',
-                'default' => __('client_credentials', 'official_cdek')
-            ),
-
             'client_id' => array(
                 'title' => __('Идентификатор клиента', 'official_cdek'),
                 'type' => 'text'
@@ -54,6 +41,11 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'title' => __('Секретный ключ клиента', 'official_cdek'),
                 'type' => 'text'
             ),
+
+//            'auth_btn' => array(
+//                'type' => 'button',
+//                'default' => 'Авторизоваться'
+//            ),
 
             'seller_name' => array(
                 'title' => __('ФИО', 'official_cdek'),
@@ -154,7 +146,6 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'css' => 'display: none;',
                 'default' => __('44', 'official_cdek')
             ),
-
         );
 
     }
@@ -165,7 +156,8 @@ class CdekShippingMethod extends WC_Shipping_Method
         $cdekShippingSettings = $cdekShipping->settings;
         $tariffList = $cdekShippingSettings['rate'];
         $city = $package["destination"]['city'];
-        $postcode = $package["destination"]['postcode'];
+        $state = $package["destination"]['state'];
+//        $postcode = $package["destination"]['postcode'];
 
         $totalWeight = 0;
         foreach ($package['contents'] as $productGroup) {
@@ -179,7 +171,8 @@ class CdekShippingMethod extends WC_Shipping_Method
 
         if ($city) {
             foreach ($tariffList as $tariff) {
-                $delivery = json_decode(cdekApi()->calculateWP($city, $postcode, $totalWeight, $tariff));
+//                $delivery = json_decode(cdekApi()->calculateWP($city, $postcode, $totalWeight, $tariff));
+                $delivery = json_decode(cdekApi()->calculateWP($city, $state, $totalWeight, $tariff));
 
                 if (property_exists($delivery, 'status') && $delivery->status === 'error') {
                     continue;

@@ -53,7 +53,7 @@ class CdekApi
     public function createOrder($param)
     {
         $url = $this->getUrl() . self::ORDERS;
-        $param['developer_key'] = $this->settingData->developerKey;
+//        $param['developer_key'] = $this->settingData->developerKey;
 
         $param['date_invoice'] = date('Y-m-d');
         $param['shipper_name'] = $this->settingData->shipperName;
@@ -92,13 +92,15 @@ class CdekApi
             $city = '44';
         }
         $result = $this->httpClient->sendCurl($url, 'GET', $this->getToken(), ['city_code' => $city]);
-        $pvz = array_map(fn($elem) => array_merge(['code' => $elem->code, 'type' => $elem->type], (array)$elem->location), json_decode($result));
+        $pvz = array_map(function($elem) { return array_merge(['code' => $elem->code, 'type' => $elem->type], (array)$elem->location);}, json_decode($result));
         return json_encode($pvz);
     }
 
-    public function calculateWP($city, $postcode, $weight, $tariff)
+    public function calculateWP($city, $state, $weight, $tariff)
     {
         $url = $this->getUrl() . self::CALC;
+
+        $toLocationCityCode = $this->getCityCodeByCityName($city, $state);
 
         $token = $this->getToken();
         $result = $this->httpClient->sendCurl($url, 'POST', $token, json_encode([
@@ -107,8 +109,7 @@ class CdekApi
                 'code' => $this->settingData->getFromCity()
             ],
             'to_location' => [
-                'city' => $city,
-                'postal_code' => $postcode
+                'code' => $toLocationCityCode,
             ],
             'packages' => [
                 'weight' => $weight
@@ -124,12 +125,47 @@ class CdekApi
         return $this->httpClient->sendCurl($url, 'GET', $this->getToken(), ['city' => $city]);
     }
 
+    public function getCityCodeByCityName($city, $state)
+    {
+        $url = $this->getUrl() . self::REGION;
+        $cityData = json_decode($this->httpClient->sendCurl($url, 'GET', $this->getToken(), ['city' => $city]));
+        if (count($cityData) > 1) {
+            foreach ($cityData as $data) {
+                if ($data->region === $state) {
+                    return $data->code;
+                }
+            }
+        }
+        return $cityData[0]->code;
+    }
+
     public function getCityCode($city, $postalCode)
     {
         $url = $this->getUrl() . self::REGION;
         $cityData = json_decode($this->httpClient->sendCurl($url, 'GET', $this->getToken(), ['city' => $city, 'postal_code' => $postalCode]));
         return $cityData[0]->code;
     }
+
+    public function checkAuth($clientId, $clientSecret)
+    {
+        $grantType = 'client_credentials';
+        $authUrl = 'https://api.cdek.ru/v2/oauth/token' . "?grant_type=" . $grantType . "&client_id=" . $clientId . "&client_secret=" . $clientSecret;
+        $curlAuth = curl_init($authUrl);
+        curl_setopt($curlAuth, CURLOPT_URL, $authUrl);
+        curl_setopt($curlAuth, CURLOPT_RETURNTRANSFER, true);
+        $headers = array(
+            "Accept: application/json"
+        );
+        curl_setopt($curlAuth, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($curlAuth, CURLOPT_POST, 1);
+        $respAuth = json_decode(curl_exec($curlAuth));
+        curl_close($curlAuth);
+        if ($respAuth !== null && !property_exists($respAuth, 'error')) {
+            return json_encode(['state' => true]);
+        }
+        return json_encode(['state' => false]);
+    }
+
 
     protected function getUrl() {
         return self::URL;

@@ -3,12 +3,58 @@
         let map = null;
         let cluster = null;
         let cityCodePvzReceived = null;
-        $('#woocommerce_official_cdek_pvz_info').attr('readonly', true);
-        modeToggle();
-        cityAutocomplete();
-        $('#woocommerce_official_cdek_city').after('<div id="region-list"></div>');
-        regionListProcess();
-        chooseLayerMap();
+        auth();
+
+
+        function auth() {
+            // $('#woocommerce_official_cdek_auth_btn').val('Авторизация');
+            $('#woocommerce_official_cdek_client_secret').parent().parent().parent().nextUntil().css('display', 'none');
+            checkAuth();
+            // $('#woocommerce_official_cdek_auth_btn').click(function () {
+            //     checkAuth();
+            // })
+        }
+
+        //itnWByQqGrGjZGairsWe4co2UrXnnW2h
+        //Er4ApHnJMOn8g6khOCH6IPA4mp5ebmps
+        //800fda93-f994-430a-acea-19891302e826
+
+        function checkAuth() {
+            let clientId = $('#woocommerce_official_cdek_client_id').val();
+            let clientSecret = $('#woocommerce_official_cdek_client_secret').val();
+
+            if (clientId === '' || clientSecret === '') {
+                $('#woocommerce_official_cdek_client_secret').after('<p>Введите идентификатор клиента и секретный ключ.</p>');
+                return false;
+            }
+
+            $.ajax({
+                method: "GET",
+                url: "/wp-json/cdek/v1/check-auth",
+                data: {
+                    client_id: clientId,
+                    client_secret: clientSecret
+                },
+                success: function (response) {
+                    let auth = JSON.parse(response);
+                    if (auth.state) {
+                        // $('#woocommerce_official_cdek_auth_btn').parent().parent().parent().css('display', 'none');
+                        $('#woocommerce_official_cdek_client_secret').parent().parent().parent().nextUntil().css('display', '');
+                        $('#woocommerce_official_cdek_pvz_info').attr('readonly', true);
+                        modeToggle();
+                        cityAutocomplete();
+                        $('#woocommerce_official_cdek_city').after('<div id="region-list"></div>');
+                        regionListProcess();
+                        chooseLayerMap();
+                    } else {
+                        $('#woocommerce_official_cdek_client_secret').after('<p>Ошибка авторизации. Введите корректные идентификатор клиента и секретный ключ.</p>');
+                    }
+                },
+                error: function (error) {
+                    console.log({error: error});
+                }
+            });
+        }
 
         function chooseLayerMap() {
             let tiles = $('#woocommerce_official_cdek_tiles').val();
@@ -83,7 +129,7 @@
                 cluster = L.markerClusterGroup();
                 map.addLayer(cluster);
                 
-                if ($('#woocommerce_official_cdek_tiles').val() === '1') {
+                if ($('#woocommerce_official_cdek_tiles').val() === '1' && $('#woocommerce_official_cdek_apikey').val() !== '') {
                     L.yandex().addTo(map);
                 } else {
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

@@ -86,13 +86,13 @@
 
             function getCityCodeByCityNameAndZipCode() {
                 let cityName = $('#billing_city').val();
-                let zipCode = $('#billing_postcode').val();
+                let stateName = $('#billing_state').val();
                 $.ajax({
                     method: "GET",
                     url: "/wp-json/cdek/v1/get-city-code",
                     data: {
                         city_name: cityName,
-                        zip_code: zipCode,
+                        state_name: stateName
                     },
                     success: function (cityCode) {
                         $('#city-code').val(cityCode);

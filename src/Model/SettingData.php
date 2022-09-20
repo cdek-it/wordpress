@@ -20,227 +20,142 @@ class SettingData
     public $shipperAddress;
     public $sellerAddress;
 
-
-    /**
-     * @return mixed
-     */
     public function getGrantType()
     {
         return $this->grantType;
     }
 
-    /**
-     * @param mixed $grantType
-     */
-    public function setGrantType($grantType): void
+    public function setGrantType($grantType)
     {
         $this->grantType = $grantType;
     }
 
-    /**
-     * @return mixed
-     */
     public function getClientId()
     {
         return $this->clientId;
     }
 
-    /**
-     * @param mixed $clientId
-     */
-    public function setClientId($clientId): void
+    public function setClientId($clientId)
     {
         $this->clientId = $clientId;
     }
 
-    /**
-     * @return mixed
-     */
     public function getClientSecret()
     {
         return $this->clientSecret;
     }
 
-    /**
-     * @param mixed $clientSecret
-     */
-    public function setClientSecret($clientSecret): void
+    public function setClientSecret($clientSecret)
     {
         $this->clientSecret = $clientSecret;
     }
 
-    /**
-     * @return mixed
-     */
     public function getTariffCode()
     {
         return $this->tariffCode;
     }
 
-    /**
-     * @param mixed $tariffCode
-     */
-    public function setTariffCode($tariffCode): void
+    public function setTariffCode($tariffCode)
     {
         $this->tariffCode = $tariffCode;
     }
 
-    /**
-     * @return mixed
-     */
     public function getFromCity()
     {
         return $this->fromCity;
     }
 
-    /**
-     * @param mixed $fromCity
-     */
-    public function setFromCity($fromCity): void
+    public function setFromCity($fromCity)
     {
         $this->fromCity = $fromCity;
     }
 
-    /**
-     * @param mixed $fromAddress
-     */
-    public function setFromAddress($fromAddress): void
+    public function setFromAddress($fromAddress)
     {
         $this->fromAddress = $fromAddress;
     }
 
-    /**
-     * @return mixed
-     */
     public function getPvzCode()
     {
         return $this->pvzCode;
     }
 
-    /**
-     * @param mixed $pvzCode
-     */
-    public function setPvzCode($pvzCode): void
+    public function setPvzCode($pvzCode)
     {
         $this->pvzCode = $pvzCode;
     }
 
-    /**
-     * @return mixed
-     */
     public function getPvzAddress()
     {
         return $this->pvzAddress;
     }
 
-    /**
-     * @param mixed $pvzAddress
-     */
-    public function setPvzAddress($pvzAddress): void
+    public function setPvzAddress($pvzAddress)
     {
         $this->pvzAddress = $pvzAddress;
     }
 
-    /**
-     * @return mixed
-     */
     public function getMode()
     {
         return $this->mode;
     }
 
-    /**
-     * @param mixed $mode
-     */
-    public function setMode($mode): void
+    public function setMode($mode)
     {
         $this->mode = $mode;
     }
 
-    /**
-     * @return mixed
-     */
     public function getSellerName()
     {
         return $this->sellerName;
     }
 
-    /**
-     * @param mixed $sellerName
-     */
-    public function setSellerName($sellerName): void
+    public function setSellerName($sellerName)
     {
         $this->sellerName = $sellerName;
     }
 
-    /**
-     * @return mixed
-     */
     public function getSellerPhone()
     {
         return $this->sellerPhone;
     }
 
-    /**
-     * @param mixed $sellerPhone
-     */
-    public function setSellerPhone($sellerPhone): void
+    public function setSellerPhone($sellerPhone)
     {
         $this->sellerPhone = $sellerPhone;
     }
 
-    /**
-     * @param mixed $developerKey
-     */
-    public function setDeveloperKey($developerKey): void
+    public function setDeveloperKey($developerKey)
     {
         $this->developerKey = $developerKey;
     }
 
-    /**
-     * @return mixed
-     */
     public function getShipperName()
     {
         return $this->shipperName;
     }
 
-    /**
-     * @param mixed $shipperName
-     */
-    public function setShipperName($shipperName): void
+    public function setShipperName($shipperName)
     {
         $this->shipperName = $shipperName;
     }
 
-    /**
-     * @return mixed
-     */
     public function getShipperAddress()
     {
         return $this->shipperAddress;
     }
 
-    /**
-     * @param mixed $shipperAddress
-     */
-    public function setShipperAddress($shipperAddress): void
+    public function setShipperAddress($shipperAddress)
     {
         $this->shipperAddress = $shipperAddress;
     }
 
-    /**
-     * @return mixed
-     */
     public function getSellerAddress()
     {
         return $this->sellerAddress;
     }
 
-    /**
-     * @param mixed $sellerAddress
-     */
-    public function setSellerAddress($sellerAddress): void
+    public function setSellerAddress($sellerAddress)
     {
         $this->sellerAddress = $sellerAddress;
     }
