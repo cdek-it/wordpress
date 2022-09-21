@@ -302,12 +302,20 @@ function get_waybill($data)
         exit();
     }
 
-    $order = CdekApi()->getOrder($data->get_param('number'));
+    $order = json_decode(CdekApi()->getOrder($data->get_param('number')));
+    foreach ($order->related_entities as $entity) {
+        if ($entity->uuid === $waybill->entity->uuid) {
+            $result = CdekApi()->getWaybillByLink($entity->url);
+            header("Content-type:application/pdf");
+            echo $result;
+            exit();
+        }
+    }
 
-    $rawFile = CdekApi()->getWaybill($waybill->entity->uuid);
-    header("Content-type:application/pdf");
-    echo $rawFile;
-    exit();
+//    $rawFile = CdekApi()->getWaybill($waybill->entity->uuid);
+//    header("Content-type:application/pdf");
+//    echo $rawFile;
+//    exit();
 }
 
 function check_auth($data)

@@ -4,6 +4,7 @@ namespace Cdek;
 
 use Cdek\Model\SettingData;
 use Cdek\Model\Tariff;
+use WP_Http;
 
 class CdekApi
 {
@@ -76,6 +77,20 @@ class CdekApi
     {
         $url = 'http://api.cdek.ru/v2/' . self::WAYBILL . $number . '.pdf';
         return $this->httpClient->sendCurl($url, 'GET', $this->getToken());
+    }
+
+    public function getWaybillByLink($link)
+    {
+        $WP_Http = new WP_Http();
+        $resp = $WP_Http->request( $link, [
+            'method' => 'GET',
+            'headers' => [
+                "Content-Type" => "application/json",
+                "Authorization" => $this->getToken()
+            ],
+        ] );
+
+        return $resp['body'];
     }
 
     public function createWaybill($orderUuid)
