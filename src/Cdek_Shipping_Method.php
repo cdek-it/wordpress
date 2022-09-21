@@ -158,9 +158,12 @@ class CdekShippingMethod extends WC_Shipping_Method
             $quantity = $productGroup['quantity'];
             $weight = $productGroup['data']->get_weight();
             if ((int)$weight === 0) {
-                $weight = $cdekShippingSettings['default_weight'];
+                $weight = (int)$cdekShippingSettings['default_weight'];
+                if ($weight === 0) {
+                    $weight = 1;
+                }
             }
-            $totalWeight += $quantity * (int) $weight;
+            $totalWeight += $quantity * (int) $weight * 1000;
         }
 
         if ($city) {
