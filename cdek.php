@@ -313,6 +313,7 @@ function get_waybill($data)
     }
 
     print_r($waybill);
+    print_r($order->related_entities);
     exit();
 
 //    $rawFile = CdekApi()->getWaybill($waybill->entity->uuid);
