@@ -175,7 +175,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                     $rate = array(
                         'id' => $this->id . '_' . $tariff,
                         'label' => 'CDEK: ' . Tariff::getTariffNameByCode($tariff) . ', (' . $delivery->period_min . '-' . $delivery->period_max . ' дней)',
-                        'cost' => $delivery->delivery_sum,
+                        'cost' => $delivery->total_sum,
                         'meta_data' => ['type' => Tariff::getTariffTypeToByCode($tariff)]
                     );
                     $this->add_rate($rate);
