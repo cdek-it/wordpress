@@ -74,8 +74,8 @@ class CdekApi
 
     public function getWaybill($number)
     {
-        $url = $this->getUrl() . self::WAYBILL . $number;
-        return $this->httpClient->sendCurl($url . '.pdf', 'GET', $this->getToken());
+        $url = 'http://api.cdek.ru/v2/' . self::WAYBILL . $number . '.pdf';
+        return $this->httpClient->sendCurl($url, 'GET', $this->getToken());
     }
 
     public function createWaybill($orderUuid)
