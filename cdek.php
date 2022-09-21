@@ -238,9 +238,6 @@ function setPackage($data, $orderId, array $param)
         $weightTotal = 0;
         foreach ($items as $item) {
             $product = $item->get_product();
-
-            $weightTotal += (int)$product->get_weight();
-
             $weight = (int)$product->get_weight();
             if ($weight === 0) {
                 $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
@@ -250,6 +247,8 @@ function setPackage($data, $orderId, array $param)
                     $weight = 1;
                 }
             }
+
+            $weightTotal += $weight;
 
             $itemsData[] = [
                 "ware_key" => $product->get_id(),
@@ -389,6 +388,7 @@ function cdek_woocommerce_new_order_action($order_id, $order)
     $order->update_meta_data('pvz_code', $pvzCode);
     $order->update_meta_data('tariff_id', $tariffId);
     $order->update_meta_data('city_code', $cityCode);
+    $order->update_meta_data('cdek_shipping', true);
     $order->save_meta_data();
 }
 
@@ -400,22 +400,26 @@ function add_cdek_shipping_method($methods)
 
 function cdek_admin_order_data_after_shipping_address ($order)
 {
+    $checkCdek = $order->get_meta('cdek_shipping');
     $orderUuid = $order->get_meta('cdek_order_uuid');
-    $waybill = $order->get_meta('cdek_order_waybill');
-    $orderId = $order->get_id();
-    $items = [];
-    foreach ($order->get_items() as $item) {
-        $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
-    }
+    $tariffId = $order->get_meta('tariff_id');
+    if ((int)$checkCdek || !empty($orderUuid) || !empty($tariffId)) {
+        $waybill = $order->get_meta('cdek_order_waybill');
+        $orderId = $order->get_id();
+        $items = [];
+        foreach ($order->get_items() as $item) {
+            $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
+        }
 
-    $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-    $cdekShippingSettings = $cdekShipping->settings;
-    $hasPackages = false;
-    if ($cdekShippingSettings['has_packages'] === 'yes') {
-        $hasPackages = true;
-    }
+        $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
+        $cdekShippingSettings = $cdekShipping->settings;
+        $hasPackages = false;
+        if ($cdekShippingSettings['has_packages'] === 'yes') {
+            $hasPackages = true;
+        }
 
-    include 'templates/admin/create-order.php';
+        include 'templates/admin/create-order.php';
+    }
 }
 
 add_filter('woocommerce_admin_order_data_after_shipping_address', 'cdek_admin_order_data_after_shipping_address');
