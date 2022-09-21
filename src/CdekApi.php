@@ -78,6 +78,12 @@ class CdekApi
         return $this->httpClient->sendCurl($url . '.pdf', 'GET', $this->getToken());
     }
 
+    public function createWaybill($orderUuid)
+    {
+        $url = $this->getUrl() . self::WAYBILL;
+        return $this->httpClient->sendCurl($url, 'POST', $this->getToken(), json_encode(['orders' => ['order_uuid' => $orderUuid]]));
+    }
+
     public function deleteOrder($number)
     {
         $url = $this->getUrl() . self::ORDERS . $number;

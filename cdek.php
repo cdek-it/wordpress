@@ -118,12 +118,25 @@ function get_packages($orderId, $packageData) {
     $result = [];
     foreach ($packageData as $package) {
         $data = get_package_items($package->items);
+
+        $weight = 0;
+        if ($data['weight'] === 0) {
+            $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
+            $cdekShippingSettings = $cdekShipping->settings;
+            $weight = (int)$cdekShippingSettings['default_weight'];
+            if ($weight === 0) {
+                $weight = 1;
+            }
+        } else {
+            $weight = $data['weight'];
+        }
+
         $result[] = [
             'number' => $orderId . '_' . generateRandomString(5),
             'length' => $package->length,
             'width' => $package->width,
             'height' => $package->height,
-            'weight' => $data['weight'],
+            'weight' => $weight,
             'items' => $data['items']
         ];
     }
@@ -136,11 +149,14 @@ function get_package_items($items) {
     $weightTotal = 0;
     foreach ($items as $item) {
         $product = wc_get_product($item[0]);
-        $weight = 0;
+        $weight = 1;
         if ((int)$product->get_weight() === 0) {
             $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
             $cdekShippingSettings = $cdekShipping->settings;
             $weight = (int)$cdekShippingSettings['default_weight'];
+            if ($weight === 0) {
+                $weight = 1;
+            }
         } else {
             $weight = (int)$product->get_weight();
         }
@@ -205,7 +221,6 @@ function create_order($data)
     $code = $orderData->entity->uuid;
     $orderInfoJson = CdekApi()->getOrder($code);
     $orderInfo = json_decode($orderInfoJson);
-    $waybill = $orderData->related_entities[0]->uuid;
     $cdekNumber = null;
     if (property_exists($orderInfo->entity, 'cdek_number')) {
         $cdekNumber = $orderInfo->entity->cdek_number;
@@ -216,9 +231,9 @@ function create_order($data)
     }
 
     $order->update_meta_data('cdek_order_uuid', $cdekNumber);
-    $order->update_meta_data('cdek_order_waybill', $waybill);
+    $order->update_meta_data('cdek_order_waybill', $orderData->entity->uuid);
     $order->save_meta_data();
-    return json_encode(['state' => 'success', 'code' => $cdekNumber, 'waybill' => '/wp-json/cdek/v1/get-waybill?number=' . $waybill]);
+    return json_encode(['state' => 'success', 'code' => $cdekNumber, 'waybill' => '/wp-json/cdek/v1/get-waybill?number=' . $orderData->entity->uuid]);
 }
 
 function setPackage($data, $orderId, array $param)
@@ -276,7 +291,18 @@ function setPackage($data, $orderId, array $param)
 
 function get_waybill($data)
 {
-    $rawFile = CdekApi()->getWaybill($data->get_param('number'));
+    $waybillData = CdekApi()->createWaybill($data->get_param('number'));
+    $waybill = json_decode($waybillData);
+
+    if ($waybill->requests[0]->state === 'INVALID' || property_exists($waybill->requests[0], 'errors')) {
+        echo '
+        Не удалось создать квитанцию. 
+        Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
+        и введите габариты упаковки повторно.';
+        exit();
+    }
+
+    $rawFile = CdekApi()->getWaybill($waybill->entity->uuid);
     header("Content-type:application/pdf");
     echo $rawFile;
     exit();
