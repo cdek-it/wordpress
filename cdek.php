@@ -312,7 +312,7 @@ function get_waybill($data)
         }
     }
 
-    $result = CdekApi()->getWaybillByLink($order->related_entities[0]->url);
+    $result = CdekApi()->getWaybillByLink(end($order->related_entities)->url);
     header("Content-type:application/pdf");
     echo $result;
     exit();
