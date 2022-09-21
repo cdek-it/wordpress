@@ -302,6 +302,8 @@ function get_waybill($data)
         exit();
     }
 
+    $order = CdekApi()->getOrder($data->get_param('number'));
+
     $rawFile = CdekApi()->getWaybill($waybill->entity->uuid);
     header("Content-type:application/pdf");
     echo $rawFile;
