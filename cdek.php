@@ -312,14 +312,10 @@ function get_waybill($data)
         }
     }
 
-    print_r($waybill);
-    print_r($order->related_entities);
+    $result = CdekApi()->getWaybillByLink($order->related_entities[0]->url);
+    header("Content-type:application/pdf");
+    echo $result;
     exit();
-
-//    $rawFile = CdekApi()->getWaybill($waybill->entity->uuid);
-//    header("Content-type:application/pdf");
-//    echo $rawFile;
-//    exit();
 }
 
 function check_auth($data)
