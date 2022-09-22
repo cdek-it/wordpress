@@ -116,7 +116,7 @@ class CdekApi
         return json_encode($pvz);
     }
 
-    public function calculateWP($city, $state, $weight, $tariff)
+    public function calculateWP($city, $state, $weight, $length, $width, $height, $tariff)
     {
         $url = $this->getUrl() . self::CALC;
 
@@ -132,7 +132,10 @@ class CdekApi
                 'code' => $toLocationCityCode,
             ],
             'packages' => [
-                'weight' => $weight
+                'weight' => $weight,
+                'length' => $length,
+                'width' => $width,
+                'height' => $height,
             ]
         ]));
 

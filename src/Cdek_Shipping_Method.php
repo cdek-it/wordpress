@@ -155,17 +155,31 @@ class CdekShippingMethod extends WC_Shipping_Method
         $state = $package["destination"]['state'];
 
         $totalWeight = 0;
+        $lengthList = [];
+        $widthList = [];
+        $heightList = [];
         foreach ($package['contents'] as $productGroup) {
             $quantity = $productGroup['quantity'];
             $weight = $productGroup['data']->get_weight();
+            $lengthList[] = (int)$productGroup['data']->get_length();
+            $widthList[] = (int)$productGroup['data']->get_width();
+            $heightList[] = (int)$productGroup['data']->get_height();
             $weightClass = new WeightCalc();
             $weight = $weightClass->getWeight($weight);
             $totalWeight += $quantity * $weight;
         }
 
+        rsort($lengthList);
+        rsort($widthList);
+        rsort($heightList);
+
+        $length = $lengthList[0];
+        $width = $widthList[0];
+        $height = $heightList[0];
+
         if ($city) {
             foreach ($tariffList as $tariff) {
-                $delivery = json_decode(cdekApi()->calculateWP($city, $state, $totalWeight, $tariff));
+                $delivery = json_decode(cdekApi()->calculateWP($city, $state, $totalWeight, $length, $width, $height, $tariff));
 
                 if (property_exists($delivery, 'status') && $delivery->status === 'error') {
                     continue;
