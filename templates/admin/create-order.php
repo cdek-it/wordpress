@@ -37,15 +37,15 @@
                             <input name="package_order_id" type="text" value="<?php echo $orderId?>">
                         </p>
                         <p class="form-field form-field-wide wc-order-status">
-                            <label for="package_length">Длина</label>
+                            <label for="package_length">Длина см</label>
                             <input name="package_length" type="text">
                         </p>
                         <p class="form-field form-field-wide wc-order-status">
-                            <label for="package_width">Ширина</label>
+                            <label for="package_width">Ширина см</label>
                             <input name="package_width" type="text">
                         </p>
                         <p class="form-field form-field-wide wc-order-status">
-                            <label for="package_height">Высота</label>
+                            <label for="package_height">Высота см</label>
                             <input name="package_height" type="text">
                         </p>
                     </div>
@@ -211,15 +211,15 @@
             <h3>Габариты упаковки</h3>
             <input name="package_order_id" type="hidden" value="<?php echo $order->get_id() ?>">
             <p class="form-field form-field-wide wc-order-status">
-                <label for="package_length">Длина</label>
+                <label for="package_length">Длина см</label>
                 <input name="package_length" type="text">
             </p>
             <p class="form-field form-field-wide wc-order-status">
-                <label for="package_width">Ширина</label>
+                <label for="package_width">Ширина см</label>
                 <input name="package_width" type="text">
             </p>
             <p class="form-field form-field-wide wc-order-status">
-                <label for="package_height">Высота</label>
+                <label for="package_height">Высота см</label>
                 <input name="package_height" type="text">
             </p>
             <p class="form-field form-field-wide wc-order-status">
