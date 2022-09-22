@@ -11,6 +11,7 @@
 use Cdek\CdekApi;
 use Cdek\Model\SettingData;
 use Cdek\Model\Tariff;
+use Cdek\WeightCalc;
 
 if (!function_exists('add_action')) {
     exit();
@@ -118,25 +119,12 @@ function get_packages($orderId, $packageData) {
     $result = [];
     foreach ($packageData as $package) {
         $data = get_package_items($package->items);
-
-        $weight = 0;
-        if ($data['weight'] === 0) {
-            $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-            $cdekShippingSettings = $cdekShipping->settings;
-            $weight = (int)$cdekShippingSettings['default_weight'];
-            if ($weight === 0) {
-                $weight = 1;
-            }
-        } else {
-            $weight = $data['weight'];
-        }
-
         $result[] = [
             'number' => $orderId . '_' . generateRandomString(5),
             'length' => $package->length,
             'width' => $package->width,
             'height' => $package->height,
-            'weight' => $weight,
+            'weight' => $data['weight'],
             'items' => $data['items']
         ];
     }
@@ -146,32 +134,24 @@ function get_packages($orderId, $packageData) {
 
 function get_package_items($items) {
     $itemsData = [];
-    $weightTotal = 0;
+    $totalWeight = 0;
     foreach ($items as $item) {
         $product = wc_get_product($item[0]);
-        $weight = 1;
-        if ((int)$product->get_weight() === 0) {
-            $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-            $cdekShippingSettings = $cdekShipping->settings;
-            $weight = (int)$cdekShippingSettings['default_weight'];
-            if ($weight === 0) {
-                $weight = 1;
-            }
-        } else {
-            $weight = (int)$product->get_weight();
-        }
-        $weightTotal += ($weight * 1000) * (int)$item[2];
+        $weight = $product->get_weight();
+        $weightClass = new WeightCalc();
+        $weight = $weightClass->getWeight($weight);
+        $totalWeight += (int)$item[2] * $weight;
         $itemsData[] = [
             "ware_key" => $product->get_id(),
             "payment" => ["value" => 0],
             "name" => $product->get_name(),
             "cost" => $product->get_price(),
             "amount" => $item[2],
-            "weight" => $weight * 1000,
-            "weight_gross" => ($weight * 1000) + 1,
+            "weight" => $weight,
+            "weight_gross" => $weight + 1,
         ];
     }
-    return ['items' => $itemsData, 'weight' => $weightTotal];
+    return ['items' => $itemsData, 'weight' => $totalWeight];
 }
 
 function create_order($data)
@@ -250,20 +230,14 @@ function setPackage($data, $orderId, array $param)
         $order = wc_get_order($orderId);
         $items = $order->get_items();
         $itemsData = [];
-        $weightTotal = 0;
+        $totalWeight = 0;
         foreach ($items as $item) {
             $product = $item->get_product();
-            $weight = (int)$product->get_weight();
-            if ($weight === 0) {
-                $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-                $cdekShippingSettings = $cdekShipping->settings;
-                $weight = (int)$cdekShippingSettings['default_weight'];
-                if ($weight === 0) {
-                    $weight = 1;
-                }
-            }
-
-            $weightTotal += $weight;
+            $weight = $product->get_weight();
+            $weightClass = new WeightCalc();
+            $weight = $weightClass->getWeight($weight);
+            $quantity = (int)$item->get_quantity();
+            $totalWeight += $quantity * $weight;
 
             $itemsData[] = [
                 "ware_key" => $product->get_id(),
@@ -271,18 +245,17 @@ function setPackage($data, $orderId, array $param)
                 "name" => $product->get_name(),
                 "cost" => $product->get_price(),
                 "amount" => $item->get_quantity(),
-                "weight" => $weight * 1000,
-                "weight_gross" => ($weight * 1000) + 1,
+                "weight" => $weight,
+                "weight_gross" => $weight + 1,
             ];
         }
-        $weightTotal = $weightTotal * 1000;
 
         $param['packages'] = [
             'number' => $orderId,
             'length' => $length,
             'width' => $width,
             'height' => $height,
-            'weight' => $weightTotal,
+            'weight' => $totalWeight,
             'items' => $itemsData
         ];
     }

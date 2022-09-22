@@ -2,6 +2,7 @@
 
 use Cdek\CdekApi;
 use Cdek\Model\Tariff;
+use Cdek\WeightCalc;
 
 class CdekShippingMethod extends WC_Shipping_Method
 {
@@ -157,13 +158,9 @@ class CdekShippingMethod extends WC_Shipping_Method
         foreach ($package['contents'] as $productGroup) {
             $quantity = $productGroup['quantity'];
             $weight = $productGroup['data']->get_weight();
-            if ((int)$weight === 0) {
-                $weight = (int)$cdekShippingSettings['default_weight'];
-                if ($weight === 0) {
-                    $weight = 1;
-                }
-            }
-            $totalWeight += $quantity * (int) $weight * 1000;
+            $weightClass = new WeightCalc();
+            $weight = $weightClass->getWeight($weight);
+            $totalWeight += $quantity * $weight;
         }
 
         if ($city) {
