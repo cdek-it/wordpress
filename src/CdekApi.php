@@ -183,9 +183,13 @@ class CdekApi
         curl_setopt($curlAuth, CURLOPT_POST, 1);
         $respAuth = json_decode(curl_exec($curlAuth));
         curl_close($curlAuth);
+        $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
+        $cdekShippingSettings = $cdekShipping->settings;
         if ($respAuth !== null && !property_exists($respAuth, 'error')) {
+            $cdekShippingSettings['auth_check'] = '1';
             return json_encode(['state' => true]);
         }
+        $cdekShippingSettings['auth_check'] = '0';
         return json_encode(['state' => false]);
     }
 

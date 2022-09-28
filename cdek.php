@@ -293,7 +293,14 @@ function get_waybill($data)
 
 function check_auth($data)
 {
-    return CdekApi()->checkAuth($data->get_param('client_id'), $data->get_param('client_secret'));
+    $response = CdekApi()->checkAuth($data->get_param('client_id'), $data->get_param('client_secret'));
+    $stateAuth = json_decode($response);
+    if ($stateAuth->state) {
+        update_option('cdek_auth_check', '1');
+    } else {
+        update_option('cdek_auth_check', '0');
+    }
+    return $response;
 }
 
 function get_region($data)
@@ -360,10 +367,7 @@ function cdek_map_display($shippingMethod)
     if ($shippingMethod->get_method_id() === 'official_cdek' &&
         $shippingMethod->get_meta_data()['type'] === '1' &&
         $shippingMethod->get_id() === $current &&
-        $_SERVER['REQUEST_URI'] !== '/cart/' &&
-        $_SERVER['REQUEST_URI'] !== '/cart' &&
-        $_SERVER['REQUEST_URI'] !== '/?wc-ajax=update_shipping_method' &&
-        $_SERVER['REQUEST_URI'] !== '/cart/?removed_item=1') {
+        is_checkout()) {
         $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
         $cdekShippingSettings = $cdekShipping->settings;
         $layerMap = $cdekShippingSettings['tiles'];

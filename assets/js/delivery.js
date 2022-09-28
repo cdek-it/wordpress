@@ -16,6 +16,7 @@
             let clientSecret = $('#woocommerce_official_cdek_client_secret').val();
 
             if (clientId === '' || clientSecret === '') {
+                $('#woocommerce_official_cdek_auth_check').val(0);
                 $('#woocommerce_official_cdek_client_secret').after('<p>Введите идентификатор клиента и секретный ключ.</p>');
                 return false;
             }
@@ -30,6 +31,7 @@
                 success: function (response) {
                     let auth = JSON.parse(response);
                     if (auth.state) {
+                        $('#woocommerce_official_cdek_auth_check').val(1);
                         $('#woocommerce_official_cdek_client_secret').parent().parent().parent().nextUntil().css('display', '');
                         $('#woocommerce_official_cdek_pvz_info').attr('readonly', true);
                         modeToggle();
@@ -38,10 +40,12 @@
                         regionListProcess();
                         chooseLayerMap();
                     } else {
+                        $('#woocommerce_official_cdek_auth_check').val(0);
                         $('#woocommerce_official_cdek_client_secret').after('<p>Ошибка авторизации. Введите корректные идентификатор клиента и секретный ключ.</p>');
                     }
                 },
                 error: function (error) {
+                    $('#woocommerce_official_cdek_auth_check').val(0);
                     console.log({error: error});
                 }
             });
