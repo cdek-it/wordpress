@@ -8,14 +8,21 @@ class WeightCalc
     public function getWeight($weight)
     {
         $weight = (float) $weight;
+        $measurement = get_option('woocommerce_weight_unit');
         if (empty($weight)) {
             $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
             $cdekShippingSettings = $cdekShipping->settings;
-            $weight = (float)$cdekShippingSettings['default_weight'];
+            $defaultWeight = (float)$cdekShippingSettings['default_weight'];
+            if ($measurement === 'g') {
+                $weight = $defaultWeight * 1000;
+            } else {
+                $weight = $defaultWeight;
+            }
         }
 
-        $weight = $weight * 1000;
-
+        if ($measurement === 'kg') {
+            $weight = $weight * 1000;
+        }
 
         return (int)$weight;
     }
