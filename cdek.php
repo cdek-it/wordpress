@@ -378,11 +378,6 @@ function cdek_map_display($shippingMethod)
     }
 }
 
-function cdek_checkout_shipping()
-{
-    include 'templates/public/map.php';
-}
-
 function is_pvz_code() {
     $pvzCode = $_POST['pvz_code'];
     $tariff = explode('_', $_POST['shipping_method'][0])[1];
@@ -442,7 +437,6 @@ add_filter( 'woocommerce_new_order' , 'cdek_woocommerce_new_order_action', 10, 2
 add_filter( 'woocommerce_shipping_methods', 'add_cdek_shipping_method' );
 add_action('woocommerce_shipping_init', 'cdek_shipping_method');
 add_action('woocommerce_after_shipping_rate', 'cdek_map_display', 10, 2);
-add_action('woocommerce_checkout_shipping', 'cdek_checkout_shipping');
 add_action('woocommerce_checkout_process', 'is_pvz_code');
 add_action('wp_enqueue_scripts', 'cdek_widget_enqueue_script');
 add_action('admin_enqueue_scripts', 'cdek_admin_enqueue_script');
