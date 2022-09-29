@@ -49,25 +49,20 @@
 
             $('.open-pvz-btn').click(function () {
                 $('#map-frame').css('display', 'flex');
-                if (map === null) {
-                    map = L.map('map', {
-                        center: [55.76, 37.61],
-                        zoom: 9
-                    });
-
-                    map._layersMaxZoom = 19;
-
-                    cluster = L.markerClusterGroup();
-                    map.addLayer(cluster);
-
-                    if (<?php echo $layerMap?> === 1) {
-                        L.yandex().addTo(map);
-                    } else {
-                        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                            maxZoom: 19,
-                            attribution: '© OpenStreetMap'
-                        }).addTo(map);
-                    }
+                map = L.map('map', {
+                    center: [55.76, 37.61],
+                    zoom: 9
+                });
+                map._layersMaxZoom = 19;
+                cluster = L.markerClusterGroup();
+                map.addLayer(cluster);
+                if (<?php echo $layerMap?> === 1) {
+                    L.yandex().addTo(map);
+                } else {
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap'
+                    }).addTo(map);
                 }
 
                 $('#map-loader').show();
@@ -140,6 +135,7 @@
                 $('#pvz-code').val(pvz.code);
                 $('#pvz-info').css('display', 'block');
                 $('#map-frame').css('display', 'none');
+                map.remove();
             }
         })
     })(jQuery);
