@@ -48,10 +48,6 @@
             $(document).ready(function () {
                 $('body').append('<div id="map-frame" style="z-index: 1000;"><div id="map-container"><div id="map"><div id="map-loader"></div></div></div>' +
                     '<div id="background"></div></div>');
-
-                $('#background').click(function () {
-                    $('#map-frame').css('display', 'none');
-                })
             })
         })(jQuery);
     </script>

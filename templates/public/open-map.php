@@ -49,10 +49,12 @@
 
             $('.open-pvz-btn').click(function () {
                 $('#map-frame').css('display', 'flex');
-                map = L.map('map', {
-                    center: [55.76, 37.61],
-                    zoom: 9
-                });
+                if(!map) {
+                    map = L.map('map', {
+                        center: [55.76, 37.61],
+                        zoom: 9
+                    });
+                }
                 map._layersMaxZoom = 19;
                 cluster = L.markerClusterGroup();
                 map.addLayer(cluster);
@@ -68,15 +70,52 @@
                 $('#map-loader').show();
 
                 displayPvzOnMap();
+
+                $('#background').click(function () {
+                    $('#map-frame').css('display', 'none');
+                    uninstallMap();
+                })
             })
+
+            function uninstallMap() {
+                if (map !== null) {
+                    map.off();
+                    map.remove();
+                    map = null;
+                }
+            }
+
+            function getCity(){
+                if ($('#billing_city').length && !$('#ship-to-different-address-checkbox').prop('checked')){
+                    return jQuery('#billing_city').val();
+                }
+
+                if ($('#shipping_city').length){
+                    return $('#shipping_city').val();
+                }
+
+                return false;
+            }
+
+            function getState(){
+                if ($('#billing_state').length && !$('#ship-to-different-address-checkbox').prop('checked')){
+                    return jQuery('#billing_state').val();
+                }
+
+                if ($('#shipping_state').length){
+                    return $('#shipping_state').val();
+                }
+
+                return false;
+            }
 
             function displayPvzOnMap() {
                 getCityCodeByCityNameAndZipCode()
             }
 
             function getCityCodeByCityNameAndZipCode() {
-                let cityName = $('#billing_city').val();
-                let stateName = $('#billing_state').val();
+                let cityName = getCity();
+                let stateName = getState();
                 $.ajax({
                     method: "GET",
                     url: "/wp-json/cdek/v1/get-city-code",
@@ -135,7 +174,7 @@
                 $('#pvz-code').val(pvz.code);
                 $('#pvz-info').css('display', 'block');
                 $('#map-frame').css('display', 'none');
-                map.remove();
+                uninstallMap();
             }
         })
     })(jQuery);
