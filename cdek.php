@@ -20,7 +20,6 @@ if (!function_exists('add_action')) {
 require 'vendor/autoload.php';
 function cdek_widget_enqueue_script()
 {
-
     wp_enqueue_style('cdek-css-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
     wp_enqueue_script('cdek-css-leaflet-min', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
     wp_enqueue_style('cdek-css', plugin_dir_url(__FILE__) . 'assets/css/cdek-map.css');
@@ -103,9 +102,11 @@ function cdek_register_route()
         'callback' => 'check_auth',
         'permission_callback' => '__return_true'
     ));
+
 }
 
-function generateRandomString($length = 10) {
+function generateRandomString($length = 10)
+{
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $charactersLength = strlen($characters);
     $randomString = '';
@@ -115,7 +116,8 @@ function generateRandomString($length = 10) {
     return $randomString;
 }
 
-function get_packages($orderId, $packageData) {
+function get_packages($orderId, $packageData)
+{
     $result = [];
     foreach ($packageData as $package) {
         $data = get_package_items($package->items);
@@ -132,7 +134,8 @@ function get_packages($orderId, $packageData) {
     return $result;
 }
 
-function get_package_items($items) {
+function get_package_items($items)
+{
     $itemsData = [];
     $totalWeight = 0;
     foreach ($items as $item) {
@@ -159,7 +162,7 @@ function create_order($data)
     $param = [];
     $orderId = $data->get_param('package_order_id');
     $param = setPackage($data, $orderId, $param);
-    $order = wc_get_order( $orderId );
+    $order = wc_get_order($orderId);
     $pvzCode = $order->get_meta('pvz_code');
     $tariffId = $order->get_meta('tariff_id');
     $cityCode = $order->get_meta('city_code');
@@ -172,7 +175,7 @@ function create_order($data)
         $cityCode = CdekApi()->getCityCodeByCityName($cityName, $stateName);
     }
 
-    if ((int) Tariff::getTariffTypeToByCode($tariffId)) {
+    if ((int)Tariff::getTariffTypeToByCode($tariffId)) {
         $param['delivery_point'] = $pvzCode;
     } else {
         $param['to_location'] = [
@@ -363,7 +366,7 @@ function cdek_shipping_method()
 
 function cdek_map_display($shippingMethod)
 {
-    $current = WC()->session->get( 'chosen_shipping_methods')[0];
+    $current = WC()->session->get('chosen_shipping_methods')[0];
     if ($shippingMethod->get_method_id() === 'official_cdek' &&
         $shippingMethod->get_meta_data()['type'] === '1' &&
         $shippingMethod->get_id() === $current &&
@@ -378,11 +381,128 @@ function cdek_map_display($shippingMethod)
     }
 }
 
-function is_pvz_code() {
+function cdek_add_update_form_billing($fragments) {
+
+    $checkout = WC()->checkout();
+
+    parse_str( $_POST['post_data'], $fields_values );
+
+    ob_start();
+
+    echo '<div class="woocommerce-billing-fields__field-wrapper">';
+
+    $fields = $checkout->get_checkout_fields( 'billing' );
+
+    foreach ( $fields as $key => $field ) {
+        $value = $checkout->get_value( $key );
+
+        if ( ! $value && ! empty( $fields_values[ $key ] ) ) {
+            $value = $fields_values[ $key ];
+        }
+
+        woocommerce_form_field( $key, $field, $value );
+    }
+
+    echo '</div>';
+
+    $fragments['.woocommerce-billing-fields__field-wrapper'] = ob_get_clean();
+
+    return $fragments;
+}
+
+add_filter( 'woocommerce_update_order_review_fragments', 'cdek_add_update_form_billing', 99 );
+
+function cdek_override_checkout_fields($fields)
+{
+
+    $chosen_methods = WC()->session->get('chosen_shipping_methods');
+
+    if ($chosen_methods === null) {
+        return $fields;
+    }
+
+    $shippingMethodArray = explode('_', $chosen_methods[0]);
+    $shippingMethodName = $shippingMethodArray[0] . '_' . $shippingMethodArray[1];
+    $tariffCode = $shippingMethodArray[2];
+
+    if ($shippingMethodName === 'official_cdek') {
+
+        $tariffType = (int)Tariff::getTariffTypeToByCode($tariffCode);
+
+        if (!isset($fields['billing']['billing_phone'])) {
+            $fields['billing']['billing_phone'] = [
+                'label' => 'Телефон',
+                'required' => true,
+                'class' => ['form-row-wide'],
+                'validate' => ['phone'],
+                'autocomplete' => 'tel',
+                'priority' => 100
+            ];
+        }
+
+        if (!isset($fields['billing']['billing_city'])) {
+            $fields['billing']['billing_city'] = [
+                'label' => 'Населённый пункт',
+                'required' => true,
+                'class' => ['form-row-wide', 'address-field'],
+                'autocomplete' => 'address-level2',
+                'priority' => 70
+            ];
+        }
+
+        if (!isset($fields['billing']['billing_state'])) {
+            $fields['billing']['billing_state'] = [
+                'label' => 'Область / район',
+                'required' => true,
+                'class' => ['form-row-wide', 'address-field'],
+                'validate' => ['state'],
+                'autocomplete' => 'address-level1',
+                'priority' => 80,
+                'country_field' => "billing_country",
+                'country' => "RU",
+            ];
+        }
+
+        if (!$tariffType) {
+            if (!isset($fields['billing']['billing_address_1'])) {
+                $fields['billing']['billing_address_1'] = [
+                    'label' => 'Адрес',
+                    'placeholder' => 'Номер дома и название улицы',
+                    'required' => true,
+                    'class' => ['form-row-wide', 'address-field'],
+                    'autocomplete' => 'address-line1',
+                    'priority' => 50
+                ];
+            }
+        }
+    }
+
+    return $fields;
+}
+
+add_filter('woocommerce_checkout_fields', 'cdek_override_checkout_fields');
+
+function cdek_add_script_update_shipping_method()
+{
+    if (is_checkout()) {
+        ?>
+        <script>
+            jQuery(document).on('change', 'input[name="shipping_method[0]"]', function () {
+                jQuery(document.body).trigger('update_checkout')
+            });
+        </script>
+        <?php
+    }
+}
+
+add_action('wp_footer', 'cdek_add_script_update_shipping_method');
+
+function is_pvz_code()
+{
     $pvzCode = $_POST['pvz_code'];
-    $tariff = explode('_', $_POST['shipping_method'][0])[1];
+    $tariff = explode('_', $_POST['shipping_method'][0])[2];
     if ((int)Tariff::getTariffTypeToByCode($tariff) && empty($pvzCode)) {
-        wc_add_notice( __( 'Не выбран пункт выдачи заказа.' ), 'error' );
+        wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
     }
 }
 
@@ -392,6 +512,11 @@ function cdek_woocommerce_new_order_action($order_id, $order)
     $pvzCode = $_POST['pvz_code'];
     $tariffId = explode('_', $_POST['shipping_method'][0])[2];
     $cityCode = $_POST['city_code'];
+
+    if ($pvzInfo !== null) {
+        $order->set_shipping_address_1($pvzInfo);
+        $order->save();
+    }
 
     $order->set_meta_data(['pvz_info' => $pvzInfo, 'pvz_code' => $pvzCode, 'tariff_id' => $tariffId, 'city_code' => $cityCode]);
     $order->update_meta_data('pvz_info', $pvzInfo);
@@ -408,7 +533,7 @@ function add_cdek_shipping_method($methods)
     return $methods;
 }
 
-function cdek_admin_order_data_after_shipping_address ($order)
+function cdek_admin_order_data_after_shipping_address($order)
 {
     $checkCdek = $order->get_meta('cdek_shipping');
     $orderUuid = $order->get_meta('cdek_order_uuid');
@@ -433,8 +558,8 @@ function cdek_admin_order_data_after_shipping_address ($order)
 }
 
 add_filter('woocommerce_admin_order_data_after_shipping_address', 'cdek_admin_order_data_after_shipping_address');
-add_filter( 'woocommerce_new_order' , 'cdek_woocommerce_new_order_action', 10, 2);
-add_filter( 'woocommerce_shipping_methods', 'add_cdek_shipping_method' );
+add_filter('woocommerce_new_order', 'cdek_woocommerce_new_order_action', 10, 2);
+add_filter('woocommerce_shipping_methods', 'add_cdek_shipping_method');
 add_action('woocommerce_shipping_init', 'cdek_shipping_method');
 add_action('woocommerce_after_shipping_rate', 'cdek_map_display', 10, 2);
 add_action('woocommerce_checkout_process', 'is_pvz_code');
