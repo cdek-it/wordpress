@@ -1,5 +1,6 @@
 <?php
 
+use Cdek\AuthCheck;
 use Cdek\CdekApi;
 use Cdek\Model\Tariff;
 use Cdek\WeightCalc;
@@ -154,63 +155,64 @@ class CdekShippingMethod extends WC_Shipping_Method
 
     public function calculate_shipping($package = [])
     {
-//        $cdekAuth = (int)get_option('cdek_auth_check');
-        $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-        $cdekShippingSettings = $cdekShipping->settings;
-        $tariffList = $cdekShippingSettings['rate'];
-        $city = $package["destination"]['city'];
-        $state = '';
-        if (array_key_exists('state', $package["destination"])) {
-            $state = $package["destination"]['state'];
-        }
-
-        $totalWeight = 0;
-        $lengthList = [];
-        $widthList = [];
-        $heightList = [];
-        foreach ($package['contents'] as $productGroup) {
-            $quantity = $productGroup['quantity'];
-            $weight = $productGroup['data']->get_weight();
-            $dimension = get_option('woocommerce_dimension_unit');
-            if ($dimension === 'mm') {
-                $lengthList[] = (int)($productGroup['data']->get_length() / 10);
-                $widthList[] = (int)($productGroup['data']->get_width() / 10);
-                $heightList[] = (int)($productGroup['data']->get_height() / 10);
-            } else {
-                $lengthList[] = (int)$productGroup['data']->get_length();
-                $widthList[] = (int)$productGroup['data']->get_width();
-                $heightList[] = (int)$productGroup['data']->get_height();
+        if (AuthCheck::check()) {
+            $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
+            $cdekShippingSettings = $cdekShipping->settings;
+            $tariffList = $cdekShippingSettings['rate'];
+            $city = $package["destination"]['city'];
+            $state = '';
+            if (array_key_exists('state', $package["destination"])) {
+                $state = $package["destination"]['state'];
             }
 
-            $weightClass = new WeightCalc();
-            $weight = $weightClass->getWeight($weight);
-            $totalWeight += $quantity * $weight;
-        }
-
-        rsort($lengthList);
-        rsort($widthList);
-        rsort($heightList);
-
-        $length = $lengthList[0];
-        $width = $widthList[0];
-        $height = $heightList[0];
-
-        if ($city) {
-            foreach ($tariffList as $tariff) {
-                $delivery = json_decode(cdekApi()->calculateWP($city, $state, $totalWeight, $length, $width, $height, $tariff));
-
-                if (property_exists($delivery, 'status') && $delivery->status === 'error') {
-                    continue;
+            $totalWeight = 0;
+            $lengthList = [];
+            $widthList = [];
+            $heightList = [];
+            foreach ($package['contents'] as $productGroup) {
+                $quantity = $productGroup['quantity'];
+                $weight = $productGroup['data']->get_weight();
+                $dimension = get_option('woocommerce_dimension_unit');
+                if ($dimension === 'mm') {
+                    $lengthList[] = (int)($productGroup['data']->get_length() / 10);
+                    $widthList[] = (int)($productGroup['data']->get_width() / 10);
+                    $heightList[] = (int)($productGroup['data']->get_height() / 10);
+                } else {
+                    $lengthList[] = (int)$productGroup['data']->get_length();
+                    $widthList[] = (int)$productGroup['data']->get_width();
+                    $heightList[] = (int)$productGroup['data']->get_height();
                 }
 
-                if (empty($delivery->errors) && $delivery->delivery_sum !== null){
-                    $rate = array(
-                        'id' => $this->id . '_' . $tariff,
-                        'label' => 'CDEK: ' . Tariff::getTariffNameByCode($tariff) . ', (' . $delivery->period_min . '-' . $delivery->period_max . ' дней)',
-                        'cost' => $delivery->total_sum,
-                        'meta_data' => ['type' => Tariff::getTariffTypeToByCode($tariff)]
-                    );
-                    $this->add_rate($rate);
+                $weightClass = new WeightCalc();
+                $weight = $weightClass->getWeight($weight);
+                $totalWeight += $quantity * $weight;
+            }
+
+            rsort($lengthList);
+            rsort($widthList);
+            rsort($heightList);
+
+            $length = $lengthList[0];
+            $width = $widthList[0];
+            $height = $heightList[0];
+
+            if ($city) {
+                foreach ($tariffList as $tariff) {
+                    $delivery = json_decode(cdekApi()->calculateWP($city, $state, $totalWeight, $length, $width, $height, $tariff));
+
+                    if (property_exists($delivery, 'status') && $delivery->status === 'error') {
+                        continue;
+                    }
+
+                    if (empty($delivery->errors) && $delivery->delivery_sum !== null){
+                        $rate = array(
+                            'id' => $this->id . '_' . $tariff,
+                            'label' => 'CDEK: ' . Tariff::getTariffNameByCode($tariff) . ', (' . $delivery->period_min . '-' . $delivery->period_max . ' дней)',
+                            'cost' => $delivery->total_sum,
+                            'meta_data' => ['type' => Tariff::getTariffTypeToByCode($tariff)]
+                        );
+                        $this->add_rate($rate);
+                    }
                 }
             }
         }

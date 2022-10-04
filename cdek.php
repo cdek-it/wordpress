@@ -8,6 +8,7 @@
  * Author:            Klementev Ilya
  */
 
+use Cdek\AuthCheck;
 use Cdek\CdekApi;
 use Cdek\Model\SettingData;
 use Cdek\Model\Tariff;
@@ -119,6 +120,9 @@ function generateRandomString($length = 10)
 
 function create_order($data)
 {
+    if (!AuthCheck::check()) {
+        return json_encode(['state' => 'error', 'message' => 'Ошибка авторизации. Проверьте идентификатор и секретный ключ клиента в настройках плагина CDEKDelivery']);
+    }
     $param = [];
     $orderId = $data->get_param('package_order_id');
     $param = setPackage($data, $orderId, $param);
@@ -424,10 +428,10 @@ function cdek_override_checkout_fields($fields)
 
     $shippingMethodArray = explode('_', $chosen_methods[0]);
     $shippingMethodName = $shippingMethodArray[0] . '_' . $shippingMethodArray[1];
-    $tariffCode = $shippingMethodArray[2];
+
 
     if ($shippingMethodName === 'official_cdek') {
-
+        $tariffCode = $shippingMethodArray[2];
         $tariffType = (int)Tariff::getTariffTypeToByCode($tariffCode);
 
         if (!isset($fields['billing']['billing_phone'])) {

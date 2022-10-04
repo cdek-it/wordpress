@@ -47,6 +47,9 @@ class CdekApi
         curl_setopt($curlAuth, CURLOPT_POST, 1);
         $respAuth = json_decode(curl_exec($curlAuth));
         curl_close($curlAuth);
+        if (property_exists($respAuth, 'error')) {
+            return false;
+        }
         return "Bearer " . $respAuth->access_token;
     }
 
