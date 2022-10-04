@@ -171,9 +171,17 @@ class CdekShippingMethod extends WC_Shipping_Method
         foreach ($package['contents'] as $productGroup) {
             $quantity = $productGroup['quantity'];
             $weight = $productGroup['data']->get_weight();
-            $lengthList[] = (int)$productGroup['data']->get_length();
-            $widthList[] = (int)$productGroup['data']->get_width();
-            $heightList[] = (int)$productGroup['data']->get_height();
+            $dimension = get_option('woocommerce_dimension_unit');
+            if ($dimension === 'mm') {
+                $lengthList[] = (int)($productGroup['data']->get_length() / 10);
+                $widthList[] = (int)($productGroup['data']->get_width() / 10);
+                $heightList[] = (int)($productGroup['data']->get_height() / 10);
+            } else {
+                $lengthList[] = (int)$productGroup['data']->get_length();
+                $widthList[] = (int)$productGroup['data']->get_width();
+                $heightList[] = (int)$productGroup['data']->get_height();
+            }
+
             $weightClass = new WeightCalc();
             $weight = $weightClass->getWeight($weight);
             $totalWeight += $quantity * $weight;

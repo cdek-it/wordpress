@@ -117,47 +117,6 @@ function generateRandomString($length = 10)
     return $randomString;
 }
 
-function get_packages($orderId, $packageData)
-{
-    $result = [];
-    foreach ($packageData as $package) {
-        $data = get_package_items($package->items);
-        $result[] = [
-            'number' => $orderId . '_' . generateRandomString(5),
-            'length' => $package->length,
-            'width' => $package->width,
-            'height' => $package->height,
-            'weight' => $data['weight'],
-            'items' => $data['items']
-        ];
-    }
-
-    return $result;
-}
-
-function get_package_items($items)
-{
-    $itemsData = [];
-    $totalWeight = 0;
-    foreach ($items as $item) {
-        $product = wc_get_product($item[0]);
-        $weight = $product->get_weight();
-        $weightClass = new WeightCalc();
-        $weight = $weightClass->getWeight($weight);
-        $totalWeight += (int)$item[2] * $weight;
-        $itemsData[] = [
-            "ware_key" => $product->get_id(),
-            "payment" => ["value" => 0],
-            "name" => $product->get_name(),
-            "cost" => $product->get_price(),
-            "amount" => $item[2],
-            "weight" => $weight,
-            "weight_gross" => $weight + 1,
-        ];
-    }
-    return ['items' => $itemsData, 'weight' => $totalWeight];
-}
-
 function create_order($data)
 {
     $param = [];
@@ -264,6 +223,47 @@ function setPackage($data, $orderId, array $param)
         ];
     }
     return $param;
+}
+
+function get_packages($orderId, $packageData)
+{
+    $result = [];
+    foreach ($packageData as $package) {
+        $data = get_package_items($package->items);
+        $result[] = [
+            'number' => $orderId . '_' . generateRandomString(5),
+            'length' => $package->length,
+            'width' => $package->width,
+            'height' => $package->height,
+            'weight' => $data['weight'],
+            'items' => $data['items']
+        ];
+    }
+
+    return $result;
+}
+
+function get_package_items($items)
+{
+    $itemsData = [];
+    $totalWeight = 0;
+    foreach ($items as $item) {
+        $product = wc_get_product($item[0]);
+        $weight = $product->get_weight();
+        $weightClass = new WeightCalc();
+        $weight = $weightClass->getWeight($weight);
+        $totalWeight += (int)$item[2] * $weight;
+        $itemsData[] = [
+            "ware_key" => $product->get_id(),
+            "payment" => ["value" => 0],
+            "name" => $product->get_name(),
+            "cost" => $product->get_price(),
+            "amount" => $item[2],
+            "weight" => $weight,
+            "weight_gross" => $weight + 1,
+        ];
+    }
+    return ['items' => $itemsData, 'weight' => $totalWeight];
 }
 
 function get_waybill($data)
