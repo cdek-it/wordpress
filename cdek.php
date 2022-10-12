@@ -434,7 +434,7 @@ function cdek_override_checkout_fields($fields)
 
     $chosen_methods = WC()->session->get('chosen_shipping_methods');
 
-    if ($chosen_methods === null) {
+    if ($chosen_methods) {
         return $fields;
     }
 
