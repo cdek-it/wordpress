@@ -8,7 +8,6 @@
  * Author:            Klementev Ilya
  */
 
-use Cdek\AuthCheck;
 use Cdek\CdekApi;
 use Cdek\Model\SettingData;
 use Cdek\Model\Tariff;
@@ -132,9 +131,20 @@ function generateRandomString($length = 10)
     return $randomString;
 }
 
+function getStateAuth()
+{
+    $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
+    $cdekShippingSettings = $cdekShipping->settings;
+    $clientId = $cdekShippingSettings['client_id'];
+    $clientSecret = $cdekShippingSettings['client_secret'];
+    $response = CdekApi()->checkAuth($clientId, $clientSecret);
+    $stateAuth = json_decode($response);
+    return $stateAuth->state;
+}
+
 function create_order($data)
 {
-    if (!AuthCheck::check()) {
+    if (!getStateAuth()) {
         return json_encode(['state' => 'error', 'message' => 'Ошибка авторизации. Проверьте идентификатор и секретный ключ клиента в настройках плагина CDEKDelivery']);
     }
     $param = [];
@@ -531,6 +541,8 @@ function cdek_woocommerce_new_order_action($order_id, $order)
         $order->save();
     }
 
+    //TODO Избавиться от метадаты
+    //TODO cdek_shipping не используется, удалить
     $order->set_meta_data(['pvz_info' => $pvzInfo, 'pvz_code' => $pvzCode, 'tariff_id' => $tariffId, 'city_code' => $cityCode]);
     $order->update_meta_data('pvz_info', $pvzInfo);
     $order->update_meta_data('pvz_code', $pvzCode);
@@ -548,24 +560,41 @@ function add_cdek_shipping_method($methods)
 
 function cdek_admin_order_data_after_shipping_address($order)
 {
-    $checkCdek = $order->get_meta('cdek_shipping');
-    $orderUuid = $order->get_meta('cdek_order_uuid');
-    $tariffId = $order->get_meta('tariff_id');
-    if ((int)$checkCdek || !empty($orderUuid) || !empty($tariffId)) {
-        $waybill = $order->get_meta('cdek_order_waybill');
-        $orderId = $order->get_id();
-        $items = [];
-        foreach ($order->get_items() as $item) {
-            $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
-        }
+    if (isCdekShippingMethod($order)) {
+        if (getStateAuth()) {
+            $orderUuid = $order->get_meta('cdek_order_uuid');
+            $tariffId = $order->get_meta('tariff_id');
+            if (!empty($orderUuid) || !empty($tariffId)) {
+                $waybill = $order->get_meta('cdek_order_waybill');
+                $orderId = $order->get_id();
+                $items = [];
+                foreach ($order->get_items() as $item) {
+                    $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
+                }
 
-        $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-        $cdekShippingSettings = $cdekShipping->settings;
-        $hasPackages = false;
-        if ($cdekShippingSettings['has_packages'] === 'yes') {
-            $hasPackages = true;
-        }
+                $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
+                $cdekShippingSettings = $cdekShipping->settings;
+                $hasPackages = false;
+                if ($cdekShippingSettings['has_packages'] === 'yes') {
+                    $hasPackages = true;
+                }
 
-        include 'templates/admin/create-order.php';
+                include 'templates/admin/create-order.php';
+            }
+        } else {
+            echo 'Авторизация не пройдена. Введите корректные идентификатор и секретный ключ клиента в настройках плагина CDEKDelivery';
+        }
     }
+
+}
+
+function isCdekShippingMethod($order)
+{
+    $shippingMethodArray = $order->get_items('shipping');
+    $shippingMethod = array_shift($shippingMethodArray);
+    $shippingMethodId = $shippingMethod->get_method_id();
+    if ($shippingMethodId === 'official_cdek') {
+        return true;
+    }
+    return false;
 }

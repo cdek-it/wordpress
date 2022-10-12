@@ -1,7 +1,5 @@
 <?php
 
-use Cdek\AuthCheck;
-use Cdek\CdekApi;
 use Cdek\Model\Tariff;
 use Cdek\WeightCalc;
 
@@ -155,7 +153,7 @@ class CdekShippingMethod extends WC_Shipping_Method
 
     public function calculate_shipping($package = [])
     {
-        if (AuthCheck::check()) {
+	    if (getStateAuth()) {
             $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
             $cdekShippingSettings = $cdekShipping->settings;
             $tariffList = $cdekShippingSettings['rate'];

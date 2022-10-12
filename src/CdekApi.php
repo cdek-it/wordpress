@@ -77,7 +77,7 @@ class CdekApi
 	public function getOrder($number)
 	{
 		$url = self::API . self::ORDERS_PATH . $number;
-		return $this->httpClient->sendCurl($url, 'GET', $this->getToken());
+		return $this->httpClient->sendRequest($url, 'GET', $this->getToken());
 	}
 
     public function createOrder($param)
@@ -99,13 +99,13 @@ class CdekApi
             ];
         }
 
-	    return $this->httpClient->sendCurl($url, 'POST', $this->getToken(), json_encode($param));
+	    return $this->httpClient->sendRequest($url, 'POST', $this->getToken(), json_encode($param));
     }
 
     public function getWaybill($number)
     {
         $url = 'http://api.cdek.ru/v2/' . self::WAYBILL_PATH . $number . '.pdf';
-        return $this->httpClient->sendCurl($url, 'GET', $this->getToken());
+        return $this->httpClient->sendRequest($url, 'GET', $this->getToken());
     }
 
     public function getWaybillByLink($link)
@@ -125,13 +125,13 @@ class CdekApi
     public function createWaybill($orderUuid)
     {
         $url = self::API . self::WAYBILL_PATH;
-        return $this->httpClient->sendCurl($url, 'POST', $this->getToken(), json_encode(['orders' => ['order_uuid' => $orderUuid]]));
+        return $this->httpClient->sendRequest($url, 'POST', $this->getToken(), json_encode(['orders' => ['order_uuid' => $orderUuid]]));
     }
 
     public function deleteOrder($number)
     {
         $url = self::API . self::ORDERS_PATH . $number;
-        return $this->httpClient->sendCurl($url, 'DELETE', $this->getToken());
+        return $this->httpClient->sendRequest($url, 'DELETE', $this->getToken());
     }
 
     public function getPvz($city)
@@ -140,7 +140,7 @@ class CdekApi
         if (empty($city)) {
             $city = '44';
         }
-        $result = $this->httpClient->sendCurl($url, 'GET', $this->getToken(), ['city_code' => $city]);
+        $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city_code' => $city]);
         $pvz = array_map(function($elem) { return array_merge(['code' => $elem->code, 'type' => $elem->type], (array)$elem->location);}, json_decode($result));
         return json_encode($pvz);
     }
@@ -152,7 +152,7 @@ class CdekApi
         $toLocationCityCode = $this->getCityCodeByCityName($city, $state);
 
         $token = $this->getToken();
-        $result = $this->httpClient->sendCurl($url, 'POST', $token, json_encode([
+        $result = $this->httpClient->sendRequest($url, 'POST', $token, json_encode([
             'tariff_code' => $tariff,
             'from_location' => [
                 'code' => $this->settingData->getFromCity()
@@ -174,13 +174,13 @@ class CdekApi
     public function getRegion($city = null)
     {
         $url = self::API . self::REGION_PATH;
-        return $this->httpClient->sendCurl($url, 'GET', $this->getToken(), ['city' => $city]);
+        return $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city' => $city]);
     }
 
     public function getCityCodeByCityName($city, $state)
     {
         $url = self::API . self::REGION_PATH;
-        $cityData = json_decode($this->httpClient->sendCurl($url, 'GET', $this->getToken(), ['city' => $city]));
+        $cityData = json_decode($this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city' => $city]));
         if (count($cityData) > 1) {
             foreach ($cityData as $data) {
                 if ($data->region === $state) {
@@ -194,7 +194,7 @@ class CdekApi
     public function getCityCode($city, $postalCode)
     {
         $url = self::API . self::REGION_PATH;
-        $cityData = json_decode($this->httpClient->sendCurl($url, 'GET', $this->getToken(), ['city' => $city, 'postal_code' => $postalCode]));
+        $cityData = json_decode($this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city' => $city, 'postal_code' => $postalCode]));
         return $cityData[0]->code;
     }
 
