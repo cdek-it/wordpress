@@ -8,13 +8,13 @@ use WP_Http;
 
 class CdekApi
 {
-    protected const URL = "https://api.cdek.ru/v2/";
-    protected const TOKEN = "oauth/token";
-    protected const REGION = "location/cities";
-    protected const ORDERS = "orders/";
-    protected const PVZ = "deliverypoints";
-    protected const CALC = "calculator/tariff";
-    protected const WAYBILL = "print/orders/";
+    protected const API = "https://api.cdek.ru/v2/";
+    protected const TOKEN_PATH = "oauth/token";
+    protected const REGION_PATH = "location/cities";
+    protected const ORDERS_PATH = "orders/";
+    protected const PVZ_PATH = "deliverypoints";
+    protected const CALC_PATH = "calculator/tariff";
+    protected const WAYBILL_PATH = "print/orders/";
 
     protected $settingData;
     protected $httpClient;
@@ -25,37 +25,64 @@ class CdekApi
         $this->httpClient = new HttpClientWrapper();
     }
 
-    public function getOrder($number)
-    {
-        $url = $this->getUrl() . self::ORDERS . $number;
-        return $this->httpClient->sendCurl($url, 'GET', $this->getToken());
-    }
-
     public function getToken()
     {
-        $grantType = $this->settingData->getGrantType();
         $clientId = $this->settingData->getClientId();
         $clientSecret = $this->settingData->getClientSecret();
-        $authUrl = $this->getUrl() . self::TOKEN . "?grant_type=" . $grantType . "&client_id=" . $clientId . "&client_secret=" . $clientSecret;
-        $curlAuth = curl_init($authUrl);
-        curl_setopt($curlAuth, CURLOPT_URL, $authUrl);
-        curl_setopt($curlAuth, CURLOPT_RETURNTRANSFER, true);
-        $headers = array(
-            "Accept: application/json"
-        );
-        curl_setopt($curlAuth, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($curlAuth, CURLOPT_POST, 1);
-        $respAuth = json_decode(curl_exec($curlAuth));
-        curl_close($curlAuth);
-        if (property_exists($respAuth, 'error')) {
-            return false;
-        }
-        return "Bearer " . $respAuth->access_token;
+
+	    $body = $this->getResponseBody($clientId, $clientSecret);
+
+	    if (property_exists($body, 'error')) {
+		    return false;
+	    }
+
+	    return "Bearer " . $body->access_token;
     }
+
+	protected function getResponseBody($clientId, $clientSecret)
+	{
+		$authUrl  = $this->getAuthUrl($clientId, $clientSecret);
+		$response = wp_remote_post($authUrl);
+		$bodyJson = wp_remote_retrieve_body($response);
+
+		return json_decode($bodyJson);
+	}
+
+	protected function getAuthUrl($clientId, $clientSecret)
+	{
+		return self::API . self::TOKEN_PATH . "?grant_type=client_credentials&client_id=" . $clientId
+			. "&client_secret=" . $clientSecret;
+	}
+
+	public function checkAuth($clientId, $clientSecret)
+	{
+		$body = $this->getResponseBody($clientId, $clientSecret);
+
+		if (property_exists($body, 'error')) {
+			$this->setSettingPluginAuthCheck(false);
+			return json_encode(['state' => false, 'message' => $body->error_description]);
+		}
+
+		$this->setSettingPluginAuthCheck(true);
+		return json_encode(['state' => true]);
+	}
+
+	protected function setSettingPluginAuthCheck(bool $state)
+	{
+		$cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
+		$cdekShippingSettings = $cdekShipping->settings;
+		$cdekShippingSettings['auth_check'] = (string)(int)$state;
+	}
+
+	public function getOrder($number)
+	{
+		$url = self::API . self::ORDERS_PATH . $number;
+		return $this->httpClient->sendCurl($url, 'GET', $this->getToken());
+	}
 
     public function createOrder($param)
     {
-        $url = $this->getUrl() . self::ORDERS;
+        $url = self::API . self::ORDERS_PATH;
         $param['developer_key'] = $this->settingData->developerKey;
 
         $param['date_invoice'] = date('Y-m-d');
@@ -72,13 +99,12 @@ class CdekApi
             ];
         }
 
-        $result = $this->httpClient->sendCurl($url, 'POST', $this->getToken(), json_encode($param));
-        return $result;
+	    return $this->httpClient->sendCurl($url, 'POST', $this->getToken(), json_encode($param));
     }
 
     public function getWaybill($number)
     {
-        $url = 'http://api.cdek.ru/v2/' . self::WAYBILL . $number . '.pdf';
+        $url = 'http://api.cdek.ru/v2/' . self::WAYBILL_PATH . $number . '.pdf';
         return $this->httpClient->sendCurl($url, 'GET', $this->getToken());
     }
 
@@ -98,19 +124,19 @@ class CdekApi
 
     public function createWaybill($orderUuid)
     {
-        $url = $this->getUrl() . self::WAYBILL;
+        $url = self::API . self::WAYBILL_PATH;
         return $this->httpClient->sendCurl($url, 'POST', $this->getToken(), json_encode(['orders' => ['order_uuid' => $orderUuid]]));
     }
 
     public function deleteOrder($number)
     {
-        $url = $this->getUrl() . self::ORDERS . $number;
+        $url = self::API . self::ORDERS_PATH . $number;
         return $this->httpClient->sendCurl($url, 'DELETE', $this->getToken());
     }
 
     public function getPvz($city)
     {
-        $url = $this->getUrl() . self::PVZ;
+        $url = self::API . self::PVZ_PATH;
         if (empty($city)) {
             $city = '44';
         }
@@ -121,7 +147,7 @@ class CdekApi
 
     public function calculateWP($city, $state, $weight, $length, $width, $height, $tariff)
     {
-        $url = $this->getUrl() . self::CALC;
+        $url = self::API . self::CALC_PATH;
 
         $toLocationCityCode = $this->getCityCodeByCityName($city, $state);
 
@@ -147,13 +173,13 @@ class CdekApi
 
     public function getRegion($city = null)
     {
-        $url = $this->getUrl() . self::REGION;
+        $url = self::API . self::REGION_PATH;
         return $this->httpClient->sendCurl($url, 'GET', $this->getToken(), ['city' => $city]);
     }
 
     public function getCityCodeByCityName($city, $state)
     {
-        $url = $this->getUrl() . self::REGION;
+        $url = self::API . self::REGION_PATH;
         $cityData = json_decode($this->httpClient->sendCurl($url, 'GET', $this->getToken(), ['city' => $city]));
         if (count($cityData) > 1) {
             foreach ($cityData as $data) {
@@ -167,37 +193,9 @@ class CdekApi
 
     public function getCityCode($city, $postalCode)
     {
-        $url = $this->getUrl() . self::REGION;
+        $url = self::API . self::REGION_PATH;
         $cityData = json_decode($this->httpClient->sendCurl($url, 'GET', $this->getToken(), ['city' => $city, 'postal_code' => $postalCode]));
         return $cityData[0]->code;
     }
 
-    public function checkAuth($clientId, $clientSecret)
-    {
-        $grantType = 'client_credentials';
-        $authUrl = 'https://api.cdek.ru/v2/oauth/token' . "?grant_type=" . $grantType . "&client_id=" . $clientId . "&client_secret=" . $clientSecret;
-        $curlAuth = curl_init($authUrl);
-        curl_setopt($curlAuth, CURLOPT_URL, $authUrl);
-        curl_setopt($curlAuth, CURLOPT_RETURNTRANSFER, true);
-        $headers = array(
-            "Accept: application/json"
-        );
-        curl_setopt($curlAuth, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($curlAuth, CURLOPT_POST, 1);
-        $respAuth = json_decode(curl_exec($curlAuth));
-        curl_close($curlAuth);
-        $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-        $cdekShippingSettings = $cdekShipping->settings;
-        if ($respAuth !== null && !property_exists($respAuth, 'error')) {
-            $cdekShippingSettings['auth_check'] = '1';
-            return json_encode(['state' => true]);
-        }
-        $cdekShippingSettings['auth_check'] = '0';
-        return json_encode(['state' => false]);
-    }
-
-
-    protected function getUrl() {
-        return self::URL;
-    }
 }

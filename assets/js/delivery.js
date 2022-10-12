@@ -40,6 +40,7 @@
                         regionListProcess();
                         chooseLayerMap();
                     } else {
+                        console.error({auth: auth.message});
                         $('#woocommerce_official_cdek_auth_check').val(0);
                         $('#woocommerce_official_cdek_client_secret').after('<p>Ошибка авторизации. Введите корректные идентификатор клиента и секретный ключ.</p>');
                     }

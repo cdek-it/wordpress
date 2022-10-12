@@ -20,6 +20,20 @@ if (!function_exists('add_action')) {
 }
 
 require 'vendor/autoload.php';
+
+add_action('rest_api_init', 'cdek_register_route');
+add_filter('woocommerce_admin_order_data_after_shipping_address', 'cdek_admin_order_data_after_shipping_address');
+add_filter('woocommerce_new_order', 'cdek_woocommerce_new_order_action', 10, 2);
+add_filter('woocommerce_shipping_methods', 'add_cdek_shipping_method');
+add_action('woocommerce_shipping_init', 'cdek_shipping_method');
+add_action('woocommerce_after_shipping_rate', 'cdek_map_display', 10, 2);
+add_action('woocommerce_checkout_process', 'is_pvz_code');
+add_action('wp_enqueue_scripts', 'cdek_widget_enqueue_script');
+add_action('admin_enqueue_scripts', 'cdek_admin_enqueue_script');
+add_filter( 'woocommerce_update_order_review_fragments', 'cdek_add_update_form_billing', 99 );
+add_filter('woocommerce_checkout_fields', 'cdek_override_checkout_fields');
+add_action('wp_footer', 'cdek_add_script_update_shipping_method');
+
 function cdek_widget_enqueue_script()
 {
     wp_enqueue_style('cdek-css-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
@@ -415,8 +429,6 @@ function cdek_add_update_form_billing($fragments) {
     return $fragments;
 }
 
-add_filter( 'woocommerce_update_order_review_fragments', 'cdek_add_update_form_billing', 99 );
-
 function cdek_override_checkout_fields($fields)
 {
 
@@ -485,8 +497,6 @@ function cdek_override_checkout_fields($fields)
     return $fields;
 }
 
-add_filter('woocommerce_checkout_fields', 'cdek_override_checkout_fields');
-
 function cdek_add_script_update_shipping_method()
 {
     if (is_checkout()) {
@@ -499,8 +509,6 @@ function cdek_add_script_update_shipping_method()
         <?php
     }
 }
-
-add_action('wp_footer', 'cdek_add_script_update_shipping_method');
 
 function is_pvz_code()
 {
@@ -561,13 +569,3 @@ function cdek_admin_order_data_after_shipping_address($order)
         include 'templates/admin/create-order.php';
     }
 }
-
-add_filter('woocommerce_admin_order_data_after_shipping_address', 'cdek_admin_order_data_after_shipping_address');
-add_filter('woocommerce_new_order', 'cdek_woocommerce_new_order_action', 10, 2);
-add_filter('woocommerce_shipping_methods', 'add_cdek_shipping_method');
-add_action('woocommerce_shipping_init', 'cdek_shipping_method');
-add_action('woocommerce_after_shipping_rate', 'cdek_map_display', 10, 2);
-add_action('woocommerce_checkout_process', 'is_pvz_code');
-add_action('wp_enqueue_scripts', 'cdek_widget_enqueue_script');
-add_action('admin_enqueue_scripts', 'cdek_admin_enqueue_script');
-add_action('rest_api_init', 'cdek_register_route');
