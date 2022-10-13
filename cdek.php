@@ -151,9 +151,12 @@ function create_order($data)
     $orderId = $data->get_param('package_order_id');
     $param = setPackage($data, $orderId, $param);
     $order = wc_get_order($orderId);
-    $pvzCode = $order->get_meta('pvz_code');
-    $tariffId = $order->get_meta('tariff_id');
-    $cityCode = $order->get_meta('city_code');
+
+    $postOrderData = get_post_meta($orderId, 'order_data');
+
+    $pvzCode = $postOrderData[0]['pvz_code'];
+    $tariffId = $postOrderData[0]['tariff_id'];
+    $cityCode = $postOrderData[0]['city_code'];
     $cityName = $order->get_shipping_city();
     $cityAddress = $order->get_shipping_address_1();
 
@@ -201,9 +204,13 @@ function create_order($data)
         $cdekNumber = $code;
     }
 
-    $order->update_meta_data('cdek_order_uuid', $cdekNumber);
-    $order->update_meta_data('cdek_order_waybill', $orderData->entity->uuid);
-    $order->save_meta_data();
+    $postOrderData[0]['cdek_order_uuid'] = $cdekNumber;
+    $postOrderData[0]['cdek_order_waybill'] = $orderData->entity->uuid;
+    update_post_meta($orderId, 'order_data', $postOrderData[0]);
+
+//    $order->update_meta_data('cdek_order_uuid', $cdekNumber);
+//    $order->update_meta_data('cdek_order_waybill', $orderData->entity->uuid);
+//    $order->save_meta_data();
     return json_encode(['state' => 'success', 'code' => $cdekNumber, 'waybill' => '/wp-json/cdek/v1/get-waybill?number=' . $orderData->entity->uuid]);
 }
 
@@ -352,9 +359,11 @@ function get_pvz($data)
 
 function delete_order($data)
 {
-    $order = wc_get_order($data->get_param('order_id'));
-    $order->delete_meta_data('cdek_order_uuid', '');
-    $order->save_meta_data();
+    $orderId = $data->get_param('order_id');
+    $postOrderData = get_post_meta($orderId, 'order_data');
+    $postOrderData[0]['cdek_order_uuid'] = '';
+    update_post_meta($orderId, 'order_data', $postOrderData[0]);
+
     return cdekApi()->deleteOrder($data->get_param('number'));
 }
 
@@ -541,15 +550,12 @@ function cdek_woocommerce_new_order_action($order_id, $order)
         $order->save();
     }
 
-    //TODO Избавиться от метадаты
-    //TODO cdek_shipping не используется, удалить
-    $order->set_meta_data(['pvz_info' => $pvzInfo, 'pvz_code' => $pvzCode, 'tariff_id' => $tariffId, 'city_code' => $cityCode]);
-    $order->update_meta_data('pvz_info', $pvzInfo);
-    $order->update_meta_data('pvz_code', $pvzCode);
-    $order->update_meta_data('tariff_id', $tariffId);
-    $order->update_meta_data('city_code', $cityCode);
-    $order->update_meta_data('cdek_shipping', true);
-    $order->save_meta_data();
+    add_post_meta($order_id, 'order_data', [
+        'pvz_info' => $pvzInfo,
+        'pvz_code' => $pvzCode,
+        'tariff_id' => $tariffId,
+        'city_code' => $cityCode
+    ]);
 }
 
 function add_cdek_shipping_method($methods)
@@ -562,11 +568,12 @@ function cdek_admin_order_data_after_shipping_address($order)
 {
     if (isCdekShippingMethod($order)) {
         if (getStateAuth()) {
-            $orderUuid = $order->get_meta('cdek_order_uuid');
-            $tariffId = $order->get_meta('tariff_id');
+            $orderId = $order->get_id();
+            $postOrderData = get_post_meta($orderId, 'order_data');
+            $orderUuid = $postOrderData[0]['cdek_order_uuid'] ?? '';
+            $tariffId = $postOrderData[0]['tariff_id'];
             if (!empty($orderUuid) || !empty($tariffId)) {
-                $waybill = $order->get_meta('cdek_order_waybill');
-                $orderId = $order->get_id();
+                $waybill = $postOrderData[0]['cdek_order_waybill'] ?? '';
                 $items = [];
                 foreach ($order->get_items() as $item) {
                     $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];

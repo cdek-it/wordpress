@@ -181,6 +181,11 @@ class CdekApi
     {
         $url = self::API . self::REGION_PATH;
         $cityData = json_decode($this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city' => $city]));
+
+        if (empty($cityData)) {
+            return -1;
+        }
+
         if (count($cityData) > 1) {
             foreach ($cityData as $data) {
                 if ($data->region === $state) {
