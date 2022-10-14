@@ -453,7 +453,7 @@ function cdek_override_checkout_fields($fields)
 
     $chosen_methods = WC()->session->get('chosen_shipping_methods');
 
-    if ($chosen_methods) {
+    if (!$chosen_methods) {
         return $fields;
     }
 
@@ -598,6 +598,9 @@ function cdek_admin_order_data_after_shipping_address($order)
 function isCdekShippingMethod($order)
 {
     $shippingMethodArray = $order->get_items('shipping');
+    if (empty($shippingMethodArray)) {
+        return false;
+    }
     $shippingMethod = array_shift($shippingMethodArray);
     $shippingMethodId = $shippingMethod->get_method_id();
     if ($shippingMethodId === 'official_cdek') {
