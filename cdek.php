@@ -543,10 +543,22 @@ function cdek_add_script_update_shipping_method()
 function is_pvz_code()
 {
     $pvzCode = $_POST['pvz_code'];
-    $tariff = explode('_', $_POST['shipping_method'][0])[2];
-    if ((int)Tariff::getTariffTypeToByCode($tariff) && empty($pvzCode)) {
+    $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
+    $tariffCode = getTariffCodeByShippingMethodId($shippingMethodIdSelected);
+    if (checkTariffFromStoreByTariffCode($tariffCode) && empty($pvzCode)) {
         wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
     }
+}
+
+function getTariffCodeByShippingMethodId($shippingMethodId)
+{
+    return explode('_', $shippingMethodId)[2];
+
+}
+
+function checkTariffFromStoreByTariffCode($tariffCode)
+{
+    return (bool)(int)Tariff::getTariffTypeToByCode($tariffCode);
 }
 
 function cdek_woocommerce_new_order_action($order_id, $order)
