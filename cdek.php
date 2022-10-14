@@ -118,6 +118,12 @@ function cdek_register_route()
         'permission_callback' => '__return_true'
     ));
 
+    register_rest_route('cdek/v1', '/set-pvz-code-tmp', array(
+        'methods' => 'GET',
+        'callback' => 'set_pvz_code_tmp',
+        'permission_callback' => '__return_true'
+    ));
+
 }
 
 function generateRandomString($length = 10)
@@ -347,6 +353,15 @@ function get_region($data)
     return CdekApi()->getRegion($data->get_param('city'));
 }
 
+function set_pvz_code_tmp($data)
+{
+    delete_post_meta(-1, 'pvz_code_tmp');
+    $pvzCode = $data->get_param('pvz_code');
+    $pvzInfo = $data->get_param('pvz_info');
+    $cityCode = $data->get_param('city_code');
+    update_post_meta(-1, 'pvz_code_tmp', ['pvz_code' => $pvzCode, 'pvz_info' => $pvzInfo, 'city_code' => $cityCode]);
+}
+
 function get_city_code($data)
 {
     return CdekApi()->getCityCodeByCityName($data->get_param('city_name'), $data->get_param('state_name'));
@@ -545,15 +560,24 @@ function is_pvz_code()
     $pvzCode = $_POST['pvz_code'];
     $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
     $tariffCode = getTariffCodeByShippingMethodId($shippingMethodIdSelected);
-    if (checkTariffFromStoreByTariffCode($tariffCode) && empty($pvzCode)) {
-        wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
+    if (checkTariffFromStoreByTariffCode($tariffCode)) {
+        if (empty($pvzCode)) {
+            $pvzCodeTmp = get_post_meta(-1, 'pvz_code_tmp');
+            if (empty($pvzCodeTmp[0]['pvz_code'])) {
+                wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
+            } else {
+                $_POST['pvz_code'] = $pvzCodeTmp[0]['pvz_code'];
+                $_POST['pvz_info'] = $pvzCodeTmp[0]['pvz_info'];
+                $_POST['city_code'] = $pvzCodeTmp[0]['city_code'];
+                delete_post_meta(-1, 'pvz_code_tmp');
+            }
+        }
     }
 }
 
 function getTariffCodeByShippingMethodId($shippingMethodId)
 {
     return explode('_', $shippingMethodId)[2];
-
 }
 
 function checkTariffFromStoreByTariffCode($tariffCode)

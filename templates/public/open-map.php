@@ -213,10 +213,23 @@
             function selectMarker(pvz) {
                 $('#pvz-info').val(pvz.address);
                 $('#pvz-code').val(pvz.code);
+                let cityCode = $('#city-code').val();
+
+                $.ajax({
+                    method: "GET",
+                    url: "/wp-json/cdek/v1/set-pvz-code-tmp",
+                    data: {
+                        pvz_code: pvz.code,
+                        pvz_info: pvz.address,
+                        city_code: cityCode,
+                    }
+                });
+
                 $('#pvz-info').css('display', 'block');
                 $('#map-frame').css('display', 'none');
                 uninstallMap();
             }
+
         })
     })(jQuery);
 
