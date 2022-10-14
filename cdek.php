@@ -402,13 +402,9 @@ function cdek_shipping_method()
     }
 }
 
-function cdek_map_display($shippingMethod)
+function cdek_map_display($shippingMethodCurrent)
 {
-    $current = WC()->session->get('chosen_shipping_methods')[0];
-    if ($shippingMethod->get_method_id() === 'official_cdek' &&
-        $shippingMethod->get_meta_data()['type'] === '1' &&
-        $shippingMethod->get_id() === $current &&
-        is_checkout()) {
+    if (is_checkout() && isTariffTypeFromStore($shippingMethodCurrent)) {
         $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
         $cdekShippingSettings = $cdekShipping->settings;
         $layerMap = $cdekShippingSettings['tiles'];
@@ -417,6 +413,21 @@ function cdek_map_display($shippingMethod)
         }
         include 'templates/public/open-map.php';
     }
+}
+
+function isTariffTypeFromStore($shippingMethodCurrent) {
+    if ($shippingMethodCurrent->get_method_id() !== 'official_cdek') {
+        return false;
+    }
+
+    $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
+
+    if ($shippingMethodCurrent->get_id() !== $shippingMethodIdSelected) {
+        return false;
+    }
+
+    $tariffCode = explode('_', $shippingMethodIdSelected)[2];
+    return (bool)(int)Tariff::getTariffTypeToByCode($tariffCode);
 }
 
 function cdek_add_update_form_billing($fragments) {
@@ -540,22 +551,25 @@ function is_pvz_code()
 
 function cdek_woocommerce_new_order_action($order_id, $order)
 {
-    $pvzInfo = $_POST['pvz_info'];
-    $pvzCode = $_POST['pvz_code'];
-    $tariffId = explode('_', $_POST['shipping_method'][0])[2];
-    $cityCode = $_POST['city_code'];
+    if (isCdekShippingMethod($order)) {
+        $pvzInfo = $_POST['pvz_info'];
+        $pvzCode = $_POST['pvz_code'];
+        $tariffId = getTariffCodeCdekShippingMethodByOrder($order);
+        $cityCode = $_POST['city_code'];
 
-    if ($pvzInfo !== null) {
-        $order->set_shipping_address_1($pvzInfo);
-        $order->save();
+        if ($pvzInfo !== null) {
+            $order->set_shipping_address_1($pvzInfo);
+            $order->save();
+        }
+
+        add_post_meta($order_id, 'order_data', [
+            'pvz_info' => $pvzInfo,
+            'pvz_code' => $pvzCode,
+            'tariff_id' => $tariffId,
+            'city_code' => $cityCode
+        ]);
     }
 
-    add_post_meta($order_id, 'order_data', [
-        'pvz_info' => $pvzInfo,
-        'pvz_code' => $pvzCode,
-        'tariff_id' => $tariffId,
-        'city_code' => $cityCode
-    ]);
 }
 
 function add_cdek_shipping_method($methods)
@@ -593,6 +607,13 @@ function cdek_admin_order_data_after_shipping_address($order)
         }
     }
 
+}
+
+function getTariffCodeCdekShippingMethodByOrder($order)
+{
+    $shippingMethodArray = $order->get_items('shipping');
+    $shippingMethod = array_shift($shippingMethodArray);
+    return $shippingMethod->get_meta('tariff_code');
 }
 
 function isCdekShippingMethod($order)
