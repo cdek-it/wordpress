@@ -58,8 +58,7 @@ function cdek_admin_enqueue_script()
 
 function addYandexMap()
 {
-    $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-    $cdekShippingSettings = $cdekShipping->settings;
+    $cdekShippingSettings = getSettingDataPlugin();
     if ($cdekShippingSettings['apikey'] !== '') {
         wp_enqueue_script('cdek-admin-yandex-api', 'https://api-maps.yandex.ru/2.1/?lang=en_RU&amp;apikey=' . $cdekShippingSettings['apikey']);
         wp_enqueue_script('cdek-admin-leaflet-yandex', plugin_dir_url(__FILE__) . 'assets/js/lib/Yandex.js');
@@ -139,8 +138,7 @@ function generateRandomString($length = 10)
 
 function getStateAuth()
 {
-    $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-    $cdekShippingSettings = $cdekShipping->settings;
+    $cdekShippingSettings = getSettingDataPlugin();
     $clientId = $cdekShippingSettings['client_id'];
     $clientSecret = $cdekShippingSettings['client_secret'];
     $response = CdekApi()->checkAuth($clientId, $clientSecret);
@@ -191,6 +189,21 @@ function create_order($data)
     $param['tariff_code'] = $tariffId;
     $param['print'] = 'waybill';
 
+    $cdekShippingSettings = getSettingDataPlugin();
+    $services = $cdekShippingSettings['service'];
+
+    if ($services !== "") {
+        $servicesListForParam = [];
+        foreach ($services as $service) {
+            if ($service === 'DELIV_RECEIVER' && $tariffId == '62') {
+                $servicesListForParam['code'] = $service;
+            }
+        }
+        $param['services'] = $servicesListForParam;
+    }
+
+
+
     $orderDataJson = CdekApi()->createOrder($param);
     $orderData = json_decode($orderDataJson);
 
@@ -222,8 +235,7 @@ function create_order($data)
 
 function setPackage($data, $orderId, array $param)
 {
-    $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-    $cdekShippingSettings = $cdekShipping->settings;
+    $cdekShippingSettings = getSettingDataPlugin();
     if ($cdekShippingSettings['has_packages'] === 'yes') {
         $packageData = json_decode($data->get_param('package_data'));
         $param['packages'] = get_packages($orderId, $packageData);
@@ -391,8 +403,7 @@ function cdekApi()
 function getSettingData()
 {
     $settingData = new SettingData();
-    $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-    $cdekShippingSettings = $cdekShipping->settings;
+    $cdekShippingSettings = getSettingDataPlugin();
     $settingData->setGrantType('client_credentials');
     $settingData->setClientId($cdekShippingSettings['client_id']);
     $settingData->setClientSecret($cdekShippingSettings['client_secret']);
@@ -420,12 +431,14 @@ function cdek_shipping_method()
 function cdek_map_display($shippingMethodCurrent)
 {
     if (is_checkout() && isTariffTypeFromStore($shippingMethodCurrent)) {
-        $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-        $cdekShippingSettings = $cdekShipping->settings;
+        $cdekShippingSettings = getSettingDataPlugin();
         $layerMap = $cdekShippingSettings['tiles'];
         if ($cdekShippingSettings['apikey'] === "") {
             $layerMap = "0";
         }
+
+        $postamat = (int)isPostamatOrStore();
+
         include 'templates/public/open-map.php';
     }
 }
@@ -443,6 +456,12 @@ function isTariffTypeFromStore($shippingMethodCurrent) {
 
     $tariffCode = explode('_', $shippingMethodIdSelected)[2];
     return (bool)(int)Tariff::getTariffTypeToByCode($tariffCode);
+}
+
+function isPostamatOrStore() {
+    $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
+    $tariffCode = explode('_', $shippingMethodIdSelected)[2];
+    return Tariff::isTariffEndPointPostamatByCode($tariffCode);
 }
 
 function cdek_add_update_form_billing($fragments) {
@@ -479,7 +498,7 @@ function cdek_override_checkout_fields($fields)
 
     $chosen_methods = WC()->session->get('chosen_shipping_methods');
 
-    if (!$chosen_methods) {
+    if (!$chosen_methods || $chosen_methods[0] === false) {
         return $fields;
     }
 
@@ -629,8 +648,7 @@ function cdek_admin_order_data_after_shipping_address($order)
                     $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
                 }
 
-                $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-                $cdekShippingSettings = $cdekShipping->settings;
+                $cdekShippingSettings = getSettingDataPlugin();
                 $hasPackages = false;
                 if ($cdekShippingSettings['has_packages'] === 'yes') {
                     $hasPackages = true;
@@ -664,4 +682,10 @@ function isCdekShippingMethod($order)
         return true;
     }
     return false;
+}
+
+function getSettingDataPlugin()
+{
+    $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
+    return $cdekShipping->settings;
 }

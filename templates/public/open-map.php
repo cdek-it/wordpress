@@ -1,6 +1,7 @@
 <?php
 /**
  * @var $layerMap
+ * @var $postamat
  */
 ?>
 <div class="open-pvz-btn">Выбрать ПВЗ</div>
@@ -195,13 +196,23 @@
                 map.removeLayer(cluster);
                 cluster = L.markerClusterGroup();
                 map.addLayer(cluster);
+                let postamat = <?php echo $postamat;?>;
                 for (let i = 0; i < pvz.length; i++) {
                     let marker = null;
                     if (pvz[i].type === 'POSTAMAT') {
-                        marker = L.circleMarker([pvz[i].latitude, pvz[i].longitude], {color: '#ffad33'});
+                        if (postamat === 1) {
+                            marker = L.circleMarker([pvz[i].latitude, pvz[i].longitude], {color: '#ffad33'});
+                        }
                     } else {
-                        marker = L.circleMarker([pvz[i].latitude, pvz[i].longitude]);
+                        if (postamat !== 1) {
+                            marker = L.circleMarker([pvz[i].latitude, pvz[i].longitude]);
+                        }
                     }
+
+                    if (marker === null) {
+                        continue;
+                    }
+
                     $(marker).click(function (event) {
                         selectMarker(pvz[i])
                     });

@@ -235,5 +235,57 @@
                 }
             });
         })
+
+
+        $('#woocommerce_official_cdek_rate').change(function (event) {
+            let tariffCode62 = $(event.currentTarget).find('option[value=62]');
+            if ($(tariffCode62).is(':selected')) {
+                $('#woocommerce_official_cdek_service').find('option[value=DELIV_RECEIVER]').css('display', '');
+            } else {
+                $('#woocommerce_official_cdek_service').find('option[value=DELIV_RECEIVER]').removeAttr("selected");
+                $('#woocommerce_official_cdek_service').find('option[value=DELIV_RECEIVER]').css('display', 'none');
+            }
+            hideIfServicesEmpty()
+        })
+
+        $('#woocommerce_official_cdek_service').after('<div id="service-message">Услуг для выбранных тарифов не найдено</div>');
+        $('#woocommerce_official_cdek_service').css('display', 'none');
+        checkServicesAvailable();
+        function checkServicesAvailable() {
+            let tariffCode62IsSelected = false;
+            $('#woocommerce_official_cdek_rate').find('option:selected').each(function (key, option) {
+                if ($(option).val() === '62') {
+                    tariffCode62IsSelected = true;
+                }
+            })
+
+            if (!tariffCode62IsSelected) {
+                $('#woocommerce_official_cdek_service').find('option[value=DELIV_RECEIVER]').removeAttr("selected");
+                $('#woocommerce_official_cdek_service').find('option[value=DELIV_RECEIVER]').css('display', 'none');
+            }
+
+            hideIfServicesEmpty()
+        }
+
+        function hideIfServicesEmpty() {
+            let isEmpty = true;
+            $('#woocommerce_official_cdek_service').find('option').each(function (key, option) {
+                console.log($(option).css('display'))
+                if ($(option).css('display') === 'block') {
+                    isEmpty = false;
+                    return false;
+                }
+            })
+
+            console.log(isEmpty)
+
+            if (isEmpty) {
+                $('#woocommerce_official_cdek_service').css('display', 'none');
+                $('#service-message').css('display', '');
+            } else {
+                $('#woocommerce_official_cdek_service').css('display', '');
+                $('#service-message').css('display', 'none');
+            }
+        }
     })
 })(jQuery);

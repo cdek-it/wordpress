@@ -26,6 +26,7 @@ class Tariff
             'weight' => self::WEIGHT_5,
             'typeFrom' => self::DOOR,
             'typeTo' => self::DOOR,
+            'postamat' => false
         ],
         [
             'code' => 8,
@@ -34,6 +35,7 @@ class Tariff
             'weight' => self::WEIGHT_30,
             'typeFrom' => self::DOOR,
             'typeTo' => self::DOOR,
+            'postamat' => false
         ],
         [
             'code' => 136,
@@ -42,6 +44,7 @@ class Tariff
             'weight' => self::WEIGHT_30,
             'typeFrom' => self::STORE,
             'typeTo' => self::STORE,
+            'postamat' => false
         ],
         [
             'code' => 137,
@@ -50,6 +53,7 @@ class Tariff
             'weight' => self::WEIGHT_30,
             'typeFrom' => self::STORE,
             'typeTo' => self::DOOR,
+            'postamat' => false
         ],
         [
             'code' => 138,
@@ -58,6 +62,7 @@ class Tariff
             'weight' => self::WEIGHT_30,
             'typeFrom' => self::DOOR,
             'typeTo' => self::STORE,
+            'postamat' => false
         ],
         [
             'code' => 139,
@@ -66,6 +71,7 @@ class Tariff
             'weight' => self::WEIGHT_30,
             'typeFrom' => self::DOOR,
             'typeTo' => self::DOOR,
+            'postamat' => false
         ],
         [
             'code' => 233,
@@ -74,6 +80,7 @@ class Tariff
             'weight' => self::WEIGHT_50,
             'typeFrom' => self::STORE,
             'typeTo' => self::DOOR,
+            'postamat' => false
         ],
         [
             'code' => 234,
@@ -82,6 +89,7 @@ class Tariff
             'weight' => self::WEIGHT_50,
             'typeFrom' => self::STORE,
             'typeTo' => self::STORE,
+            'postamat' => false
         ],
         [
             'code' => 291,
@@ -90,6 +98,7 @@ class Tariff
             'weight' => self::WEIGHT_50,
             'typeFrom' => self::STORE,
             'typeTo' => self::STORE,
+            'postamat' => false
         ],
         [
             'code' => 293,
@@ -98,6 +107,7 @@ class Tariff
             'weight' => self::WEIGHT_50,
             'typeFrom' => self::DOOR,
             'typeTo' => self::DOOR,
+            'postamat' => false
         ],
         [
             'code' => 294,
@@ -106,6 +116,7 @@ class Tariff
             'weight' => self::WEIGHT_50,
             'typeFrom' => self::STORE,
             'typeTo' => self::DOOR,
+            'postamat' => false
         ],
         [
             'code' => 295,
@@ -114,6 +125,7 @@ class Tariff
             'weight' => self::WEIGHT_50,
             'typeFrom' => self::DOOR,
             'typeTo' => self::STORE,
+            'postamat' => false
         ],
         [
             'code' => 366,
@@ -122,6 +134,7 @@ class Tariff
             'weight' => self::WEIGHT_30,
             'typeFrom' => self::DOOR,
             'typeTo' => self::STORE,
+            'postamat' => true
         ],
         [
             'code' => 368,
@@ -130,6 +143,7 @@ class Tariff
             'weight' => self::WEIGHT_30,
             'typeFrom' => self::STORE,
             'typeTo' => self::STORE,
+            'postamat' => true
         ],
         [
             'code' => 378,
@@ -138,6 +152,16 @@ class Tariff
             'weight' => self::WEIGHT_50,
             'typeFrom' => self::STORE,
             'typeTo' => self::STORE,
+            'postamat' => true
+        ],
+        [
+            'code' => 62,
+            'name' => 'Магистральный экспресс склад-склад',
+            'mode' => self::SS,
+            'weight' => self::WEIGHT_30,
+            'typeFrom' => self::STORE,
+            'typeTo' => self::STORE,
+            'postamat' => false
         ],
     ];
 
@@ -146,6 +170,15 @@ class Tariff
         foreach (self::TARIFF_DATA as $tariff) {
             if ($tariff['code'] == $code) {
                 return $tariff['typeTo'];
+            }
+        }
+    }
+
+    public static function isTariffEndPointPostamatByCode($code)
+    {
+        foreach (self::TARIFF_DATA as $tariff) {
+            if ($tariff['code'] == $code) {
+                return $tariff['postamat'];
             }
         }
     }

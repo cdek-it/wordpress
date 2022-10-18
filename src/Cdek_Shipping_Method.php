@@ -1,5 +1,6 @@
 <?php
 
+use Cdek\Model\Service;
 use Cdek\Model\Tariff;
 use Cdek\WeightCalc;
 
@@ -87,6 +88,12 @@ class CdekShippingMethod extends WC_Shipping_Method
                             выбор тарифов \"от двери\""
             ),
 
+            'service' => array(
+                'title' => __('Услуги', 'official_cdek'),
+                'type' => 'multiselect',
+                'options' => Service::getServiceList(),
+            ),
+
             'default_weight' => array(
                 'title' => __('Вес одной единицы товара по умолчанию в кг', 'official_cdek'),
                 'description' => "У всех товаров должен быть указан вес, 
@@ -154,8 +161,7 @@ class CdekShippingMethod extends WC_Shipping_Method
     public function calculate_shipping($package = [])
     {
 	    if (getStateAuth()) {
-            $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-            $cdekShippingSettings = $cdekShipping->settings;
+            $cdekShippingSettings = getSettingDataPlugin();
             $tariffList = $cdekShippingSettings['rate'];
             $city = $package["destination"]['city'];
             $state = '';
@@ -195,8 +201,23 @@ class CdekShippingMethod extends WC_Shipping_Method
             $height = $heightList[0];
 
             if ($city) {
+                $cdekShippingSettings = getSettingDataPlugin();
+                $services = $cdekShippingSettings['service'];
                 foreach ($tariffList as $tariff) {
-                    $delivery = json_decode(cdekApi()->calculateWP($city, $state, $totalWeight, $length, $width, $height, $tariff));
+
+                    if ($tariff === '62') {
+                        $v = 1;
+                    }
+
+                    $servicesListForParam = [];
+                    if ($services !== "") {
+                        foreach ($services as $service) {
+                            if ($service === 'DELIV_RECEIVER' && $tariff == '62') {
+                                $servicesListForParam['code'] = $service;
+                            }
+                        }
+                    }
+                    $delivery = json_decode(cdekApi()->calculateWP($city, $state, $totalWeight, $length, $width, $height, $tariff, $servicesListForParam));
 
                     if (property_exists($delivery, 'status') && $delivery->status === 'error') {
                         continue;

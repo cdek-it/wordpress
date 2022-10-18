@@ -69,8 +69,7 @@ class CdekApi
 
 	protected function setSettingPluginAuthCheck(bool $state)
 	{
-		$cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-		$cdekShippingSettings = $cdekShipping->settings;
+		$cdekShippingSettings = getSettingDataPlugin();
 		$cdekShippingSettings['auth_check'] = (string)(int)$state;
 	}
 
@@ -83,7 +82,7 @@ class CdekApi
     public function createOrder($param)
     {
         $url = self::API . self::ORDERS_PATH;
-        $param['developer_key'] = $this->settingData->developerKey;
+//        $param['developer_key'] = $this->settingData->developerKey;
 
         $param['date_invoice'] = date('Y-m-d');
         $param['shipper_name'] = $this->settingData->shipperName;
@@ -145,7 +144,7 @@ class CdekApi
         return json_encode($pvz);
     }
 
-    public function calculateWP($city, $state, $weight, $length, $width, $height, $tariff)
+    public function calculateWP($city, $state, $weight, $length, $width, $height, $tariff, $services)
     {
         $url = self::API . self::CALC_PATH;
 
@@ -165,7 +164,8 @@ class CdekApi
                 'length' => $length,
                 'width' => $width,
                 'height' => $height,
-            ]
+            ],
+            'services' => $services
         ]));
 
         return $result;
