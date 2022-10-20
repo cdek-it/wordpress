@@ -46,6 +46,9 @@
                 },
                 error: function (error) {
                     $('#woocommerce_official_cdek_auth_check').val(0);
+                    let message = "<p>Произошла ошибка при отправки запроса. " +
+                        "Рекомендованная версия Woocommerce 6.0 >, а также убедитесь что на сайте включен REST API</p>";
+                    $('#woocommerce_official_cdek_client_secret').after(message);
                     console.log({error: error});
                 }
             });
@@ -122,10 +125,15 @@
 
                 cluster = L.markerClusterGroup();
                 map.addLayer(cluster);
-                
+
                 if ($('#woocommerce_official_cdek_tiles').val() === '1' && $('#woocommerce_official_cdek_apikey').val() !== '') {
                     L.yandex().addTo(map);
                 } else {
+
+                    if ($('#woocommerce_official_cdek_tiles').val() === '1') {
+                        $('#message').after('<div class="error"><p>Не удалось получить доступ к YandexMap по указанному ApiKey</p></div>')
+                    }
+
                     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                         maxZoom: 19,
                         attribution: '© OpenStreetMap'
@@ -270,14 +278,11 @@
         function hideIfServicesEmpty() {
             let isEmpty = true;
             $('#woocommerce_official_cdek_service').find('option').each(function (key, option) {
-                console.log($(option).css('display'))
                 if ($(option).css('display') === 'block') {
                     isEmpty = false;
                     return false;
                 }
             })
-
-            console.log(isEmpty)
 
             if (isEmpty) {
                 $('#woocommerce_official_cdek_service').css('display', 'none');

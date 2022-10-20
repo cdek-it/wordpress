@@ -1,11 +1,14 @@
 <?php
 /**
  * Plugin Name:       CDEKDelivery
+ * Plugin URI: https://www.cdek.ru/ru/integration/modules/33
  * Description:       Интеграция доставки CDEK
  * Version:           1.0
  * Requires at least: 6.0
  * Requires PHP:      7.2
  * Author:            Klementev Ilya
+ * WC requires at least: 6.0
+ * WC tested up to: 7.0
  */
 
 use Cdek\CdekApi;
@@ -60,15 +63,38 @@ function addYandexMap()
 {
     $cdekShippingSettings = getSettingDataPlugin();
     if ($cdekShippingSettings['apikey'] !== '') {
-        wp_enqueue_script('cdek-admin-yandex-api', 'https://api-maps.yandex.ru/2.1/?lang=en_RU&amp;apikey=' . $cdekShippingSettings['apikey']);
-        wp_enqueue_script('cdek-admin-leaflet-yandex', plugin_dir_url(__FILE__) . 'assets/js/lib/Yandex.js');
+        $WP_Http = new WP_Http();
+        $resp = $WP_Http->request( 'https://api-maps.yandex.ru/2.1?apikey=' . $cdekShippingSettings['apikey'] . '&lang=ru_RU', [
+            'method' => 'GET',
+            'headers' => [
+                "Content-Type" => "application/json",
+            ],
+        ] );
+
+        if ($resp['response']['code'] === 200) {
+            wp_enqueue_script('cdek-admin-yandex-api', 'https://api-maps.yandex.ru/2.1?apikey=' . $cdekShippingSettings['apikey'] . '&lang=ru_RU');
+            wp_enqueue_script('cdek-admin-leaflet-yandex', plugin_dir_url(__FILE__) . 'assets/js/lib/Yandex.js');
+        } else {
+            $setting = WC()->shipping->load_shipping_methods()['official_cdek'];
+            $setting->update_option('apikey', '');
+            $setting->update_option('tiles', '1');
+        }
+
+
     } else {
         $cdekShippingSettings['tiles'] = '0';
+
     }
 }
 
 function cdek_register_route()
 {
+    register_rest_route('cdek/v1', '/check-auth', array(
+        'methods' => 'GET',
+        'callback' => 'check_auth',
+        'permission_callback' => '__return_true'
+    ));
+
     register_rest_route('cdek/v1', '/get-region', array(
         'methods' => 'GET',
         'callback' => 'get_region',
@@ -108,12 +134,6 @@ function cdek_register_route()
     register_rest_route('cdek/v1', '/get-waybill', array(
         'methods' => 'GET',
         'callback' => 'get_waybill',
-        'permission_callback' => '__return_true'
-    ));
-
-    register_rest_route('cdek/v1', '/check-auth', array(
-        'methods' => 'GET',
-        'callback' => 'check_auth',
         'permission_callback' => '__return_true'
     ));
 
