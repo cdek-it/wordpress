@@ -9,6 +9,7 @@
         } else {
             modeToggle();
             cityAutocomplete();
+            $('#woocommerce_official_cdek_city').after('<div id="region-list"></div>');
             regionListProcess();
             chooseLayerMap();
             function chooseLayerMap() {
