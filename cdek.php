@@ -12,10 +12,9 @@
  */
 
 use Cdek\CdekApi;
-use Cdek\Model\SettingData;
+use Cdek\Helper;
 use Cdek\Model\Tariff;
 use Cdek\WeightCalc;
-
 
 if (!function_exists('add_action')) {
     exit();
@@ -61,10 +60,10 @@ function cdek_admin_enqueue_script()
 
 function addYandexMap()
 {
-    $cdekShippingSettings = getSettingDataPlugin();
-    if ($cdekShippingSettings['apikey'] !== '') {
+    $cdekShippingSettings = Helper::getSettingDataPlugin();
+    if ($cdekShippingSettings['yandex_map_api_key'] !== '') {
         $WP_Http = new WP_Http();
-        $resp = $WP_Http->request( 'https://api-maps.yandex.ru/2.1?apikey=' . $cdekShippingSettings['apikey'] . '&lang=ru_RU', [
+        $resp = $WP_Http->request( 'https://api-maps.yandex.ru/2.1?apikey=' . $cdekShippingSettings['yandex_map_api_key'] . '&lang=ru_RU', [
             'method' => 'GET',
             'headers' => [
                 "Content-Type" => "application/json",
@@ -72,17 +71,17 @@ function addYandexMap()
         ] );
 
         if ($resp['response']['code'] === 200) {
-            wp_enqueue_script('cdek-admin-yandex-api', 'https://api-maps.yandex.ru/2.1?apikey=' . $cdekShippingSettings['apikey'] . '&lang=ru_RU');
+            wp_enqueue_script('cdek-admin-yandex-api', 'https://api-maps.yandex.ru/2.1?apikey=' . $cdekShippingSettings['yandex_map_api_key'] . '&lang=ru_RU');
             wp_enqueue_script('cdek-admin-leaflet-yandex', plugin_dir_url(__FILE__) . 'assets/js/lib/Yandex.js');
         } else {
             $setting = WC()->shipping->load_shipping_methods()['official_cdek'];
-            $setting->update_option('apikey', '');
-            $setting->update_option('tiles', '1');
+            $setting->update_option('yandex_map_api_key', '');
+            $setting->update_option('map_layer', '1');
         }
 
 
     } else {
-        $cdekShippingSettings['tiles'] = '0';
+        $cdekShippingSettings['map_layer'] = '0';
 
     }
 }
@@ -156,21 +155,14 @@ function generateRandomString($length = 10)
     return $randomString;
 }
 
-function getStateAuth()
-{
-    $cdekShippingSettings = getSettingDataPlugin();
-    $clientId = $cdekShippingSettings['client_id'];
-    $clientSecret = $cdekShippingSettings['client_secret'];
-    $response = CdekApi()->checkAuth($clientId, $clientSecret);
-    $stateAuth = json_decode($response);
-    return $stateAuth->state;
-}
-
 function create_order($data)
 {
-    if (!getStateAuth()) {
+    $api = new CdekApi();
+
+    if (!$api->checkAuth()) {
         return json_encode(['state' => 'error', 'message' => 'Ошибка авторизации. Проверьте идентификатор и секретный ключ клиента в настройках плагина CDEKDelivery']);
     }
+
     $param = [];
     $orderId = $data->get_param('package_order_id');
     $param = setPackage($data, $orderId, $param);
@@ -187,7 +179,7 @@ function create_order($data)
     if (empty($cityCode)) {
         $cityName = $order->get_shipping_city();
         $stateName = $order->get_shipping_state();
-        $cityCode = CdekApi()->getCityCodeByCityName($cityName, $stateName);
+        $cityCode = $api->getCityCodeByCityName($cityName, $stateName);
     }
 
     if ((int)Tariff::getTariffTypeToByCode($tariffId)) {
@@ -209,8 +201,8 @@ function create_order($data)
     $param['tariff_code'] = $tariffId;
     $param['print'] = 'waybill';
 
-    $cdekShippingSettings = getSettingDataPlugin();
-    $services = $cdekShippingSettings['service'];
+    $cdekShippingSettings = Helper::getSettingDataPlugin();
+    $services = $cdekShippingSettings['service_list'];
 
     if ($services !== "") {
         $servicesListForParam = [];
@@ -222,9 +214,7 @@ function create_order($data)
         $param['services'] = $servicesListForParam;
     }
 
-
-
-    $orderDataJson = CdekApi()->createOrder($param);
+    $orderDataJson = $api->createOrder($param);
     $orderData = json_decode($orderDataJson);
 
     if ($orderData->requests[0]->state === 'INVALID') {
@@ -232,7 +222,7 @@ function create_order($data)
     }
 
     $code = $orderData->entity->uuid;
-    $orderInfoJson = CdekApi()->getOrder($code);
+    $orderInfoJson = $api->getOrder($code);
     $orderInfo = json_decode($orderInfoJson);
     $cdekNumber = null;
     if (property_exists($orderInfo->entity, 'cdek_number')) {
@@ -247,16 +237,13 @@ function create_order($data)
     $postOrderData[0]['cdek_order_waybill'] = $orderData->entity->uuid;
     update_post_meta($orderId, 'order_data', $postOrderData[0]);
 
-//    $order->update_meta_data('cdek_order_uuid', $cdekNumber);
-//    $order->update_meta_data('cdek_order_waybill', $orderData->entity->uuid);
-//    $order->save_meta_data();
     return json_encode(['state' => 'success', 'code' => $cdekNumber, 'waybill' => '/wp-json/cdek/v1/get-waybill?number=' . $orderData->entity->uuid]);
 }
 
 function setPackage($data, $orderId, array $param)
 {
-    $cdekShippingSettings = getSettingDataPlugin();
-    if ($cdekShippingSettings['has_packages'] === 'yes') {
+    $cdekShippingSettings = Helper::getSettingDataPlugin();
+    if ($cdekShippingSettings['has_packages_mode'] === 'yes') {
         $packageData = json_decode($data->get_param('package_data'));
         $param['packages'] = get_packages($orderId, $packageData);
     } else {
@@ -341,7 +328,8 @@ function get_package_items($items)
 
 function get_waybill($data)
 {
-    $waybillData = CdekApi()->createWaybill($data->get_param('number'));
+    $api = new CdekApi();
+    $waybillData = $api->createWaybill($data->get_param('number'));
     $waybill = json_decode($waybillData);
 
     if ($waybill->requests[0]->state === 'INVALID' || property_exists($waybill->requests[0], 'errors')) {
@@ -352,37 +340,38 @@ function get_waybill($data)
         exit();
     }
 
-    $order = json_decode(CdekApi()->getOrder($data->get_param('number')));
+    $order = json_decode($api->getOrder($data->get_param('number')));
     foreach ($order->related_entities as $entity) {
         if ($entity->uuid === $waybill->entity->uuid) {
-            $result = CdekApi()->getWaybillByLink($entity->url);
+            $result = $api->getWaybillByLink($entity->url);
             header("Content-type:application/pdf");
             echo $result;
             exit();
         }
     }
 
-    $result = CdekApi()->getWaybillByLink(end($order->related_entities)->url);
+    $result = $api->getWaybillByLink(end($order->related_entities)->url);
     header("Content-type:application/pdf");
     echo $result;
     exit();
 }
 
-function check_auth($data)
+function check_auth()
 {
-    $response = CdekApi()->checkAuth($data->get_param('client_id'), $data->get_param('client_secret'));
-    $stateAuth = json_decode($response);
-    if ($stateAuth->state) {
+    $api = new CdekApi();
+    $check = $api->checkAuth();
+    if ($check) {
         update_option('cdek_auth_check', '1');
     } else {
         update_option('cdek_auth_check', '0');
     }
-    return $response;
+    return json_encode(['state' => $check]);
 }
 
 function get_region($data)
 {
-    return CdekApi()->getRegion($data->get_param('city'));
+    $api = new CdekApi();
+    return $api->getRegion($data->get_param('city'));
 }
 
 function set_pvz_code_tmp($data)
@@ -396,64 +385,40 @@ function set_pvz_code_tmp($data)
 
 function get_city_code($data)
 {
-    return CdekApi()->getCityCodeByCityName($data->get_param('city_name'), $data->get_param('state_name'));
+    $api = new CdekApi();
+    return $api->getCityCodeByCityName($data->get_param('city_name'), $data->get_param('state_name'));
 }
 
 function get_pvz($data)
 {
-    return cdekApi()->getPvz($data->get_param('city_code'));
+    $api = new CdekApi();
+    return $api->getPvz($data->get_param('city_code'));
 }
 
 function delete_order($data)
 {
+    $api = new CdekApi();
     $orderId = $data->get_param('order_id');
     $postOrderData = get_post_meta($orderId, 'order_data');
     $postOrderData[0]['cdek_order_uuid'] = '';
     update_post_meta($orderId, 'order_data', $postOrderData[0]);
 
-    return cdekApi()->deleteOrder($data->get_param('number'));
-}
-
-function cdekApi()
-{
-    $settingData = getSettingData();
-    return new CdekApi($settingData);
-}
-
-function getSettingData()
-{
-    $settingData = new SettingData();
-    $cdekShippingSettings = getSettingDataPlugin();
-    $settingData->setGrantType('client_credentials');
-    $settingData->setClientId($cdekShippingSettings['client_id']);
-    $settingData->setClientSecret($cdekShippingSettings['client_secret']);
-    $settingData->setDeveloperKey('7wV8tk&r6VH4zK:1&0uDpjOkvM~qngLl');
-    $settingData->setTariffCode($cdekShippingSettings['rate']);
-    $settingData->setSellerName($cdekShippingSettings['seller_name']);
-    $settingData->setSellerPhone($cdekShippingSettings['seller_phone']);
-    $settingData->setFromCity($cdekShippingSettings['city_code_value']);
-    $settingData->setFromAddress($cdekShippingSettings['street']);
-    $settingData->setPvzCode($cdekShippingSettings['pvz_code']);
-    $settingData->setPvzAddress($cdekShippingSettings['pvz_info']);
-    $settingData->setShipperName((string)$cdekShippingSettings['shipper_name']);
-    $settingData->setShipperAddress((string)$cdekShippingSettings['shipper_address']);
-    $settingData->setSellerAddress((string)$cdekShippingSettings['seller_address']);
-    return $settingData;
+    return $api->deleteOrder($data->get_param('number'));
 }
 
 function cdek_shipping_method()
 {
-    if (!class_exists('Cdek_Shipping_Method')) {
-        require_once(plugin_dir_path(__FILE__) . 'src/Cdek_Shipping_Method.php');
+    if (!class_exists('CdekShippingMethod')) {
+        class CdekShippingMethod extends \Cdek\CdekShippingMethod{}
     }
 }
 
 function cdek_map_display($shippingMethodCurrent)
 {
     if (is_checkout() && isTariffTypeFromStore($shippingMethodCurrent)) {
-        $cdekShippingSettings = getSettingDataPlugin();
-        $layerMap = $cdekShippingSettings['tiles'];
-        if ($cdekShippingSettings['apikey'] === "") {
+        $cdekShippingSettings = Helper::getSettingDataPlugin();
+        $layerMap = $cdekShippingSettings['map_layer'];
+        if ($cdekShippingSettings['yandex_map_api_key'] === "") {
             $layerMap = "0";
         }
 
@@ -606,7 +571,7 @@ function is_pvz_code()
                 wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
             } else {
                 $_POST['pvz_code'] = $pvzCodeTmp[0]['pvz_code'];
-                $_POST['pvz_info'] = $pvzCodeTmp[0]['pvz_info'];
+                $_POST['pvz_address'] = $pvzCodeTmp[0]['pvz_address'];
                 $_POST['city_code'] = $pvzCodeTmp[0]['city_code'];
                 delete_post_meta(-1, 'pvz_code_tmp');
             }
@@ -627,7 +592,7 @@ function checkTariffFromStoreByTariffCode($tariffCode)
 function cdek_woocommerce_new_order_action($order_id, $order)
 {
     if (isCdekShippingMethod($order)) {
-        $pvzInfo = $_POST['pvz_info'];
+        $pvzInfo = $_POST['pvz_address'];
         $pvzCode = $_POST['pvz_code'];
         $tariffId = getTariffCodeCdekShippingMethodByOrder($order);
         $cityCode = $_POST['city_code'];
@@ -638,7 +603,7 @@ function cdek_woocommerce_new_order_action($order_id, $order)
         }
 
         add_post_meta($order_id, 'order_data', [
-            'pvz_info' => $pvzInfo,
+            'pvz_address' => $pvzInfo,
             'pvz_code' => $pvzCode,
             'tariff_id' => $tariffId,
             'city_code' => $cityCode
@@ -656,7 +621,8 @@ function add_cdek_shipping_method($methods)
 function cdek_admin_order_data_after_shipping_address($order)
 {
     if (isCdekShippingMethod($order)) {
-        if (getStateAuth()) {
+        $api = new CdekApi();
+        if ($api->checkAuth()) {
             $orderId = $order->get_id();
             $postOrderData = get_post_meta($orderId, 'order_data');
             $orderUuid = $postOrderData[0]['cdek_order_uuid'] ?? '';
@@ -668,9 +634,9 @@ function cdek_admin_order_data_after_shipping_address($order)
                     $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
                 }
 
-                $cdekShippingSettings = getSettingDataPlugin();
+                $cdekShippingSettings = Helper::getSettingDataPlugin();
                 $hasPackages = false;
-                if ($cdekShippingSettings['has_packages'] === 'yes') {
+                if ($cdekShippingSettings['has_packages_mode'] === 'yes') {
                     $hasPackages = true;
                 }
 
@@ -704,8 +670,3 @@ function isCdekShippingMethod($order)
     return false;
 }
 
-function getSettingDataPlugin()
-{
-    $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
-    return $cdekShipping->settings;
-}

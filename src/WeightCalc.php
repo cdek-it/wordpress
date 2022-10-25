@@ -12,7 +12,7 @@ class WeightCalc
         if (empty($weight)) {
             $cdekShipping = WC()->shipping->load_shipping_methods()['official_cdek'];
             $cdekShippingSettings = $cdekShipping->settings;
-            $defaultWeight = (float)str_replace(',', '.', $cdekShippingSettings['default_weight']);
+            $defaultWeight = (float)str_replace(',', '.', $cdekShippingSettings['product_weight_default']);
             if ($measurement === 'g') {
                 $weight = $defaultWeight * 1000;
             } else {
