@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name:       CDEKDelivery
- * Plugin URI: https://www.cdek.ru/ru/integration/modules/33
+ * Plugin URI:        https://www.cdek.ru/ru/integration/modules/33
  * Description:       Интеграция доставки CDEK
  * Version:           1.0
  * Requires at least: 6.0
@@ -82,7 +82,6 @@ function addYandexMap()
 
     } else {
         $cdekShippingSettings['map_layer'] = '0';
-
     }
 }
 
@@ -142,17 +141,6 @@ function cdek_register_route()
         'permission_callback' => '__return_true'
     ));
 
-}
-
-function generateRandomString($length = 10)
-{
-    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    $charactersLength = strlen($characters);
-    $randomString = '';
-    for ($i = 0; $i < $length; $i++) {
-        $randomString .= $characters[rand(0, $charactersLength - 1)];
-    }
-    return $randomString;
 }
 
 function create_order($data)
@@ -291,7 +279,7 @@ function get_packages($orderId, $packageData)
     foreach ($packageData as $package) {
         $data = get_package_items($package->items);
         $result[] = [
-            'number' => $orderId . '_' . generateRandomString(5),
+            'number' => $orderId . '_' . Helper::generateRandomString(5),
             'length' => $package->length,
             'width' => $package->width,
             'height' => $package->height,

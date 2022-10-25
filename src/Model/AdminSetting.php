@@ -20,6 +20,9 @@ class AdminSetting
     public $shipperName;
     public $shipperAddress;
     public $sellerAddress;
+    public $extraDay;
+    public $extraCost;
+    public $insurance;
 
     public function getCurrentSetting($currentAdminSetting = null): AdminSetting
     {
@@ -43,6 +46,9 @@ class AdminSetting
         $adminSetting->shipperName = $cdekShippingSettings['shipper_name'] ?? '';
         $adminSetting->shipperAddress = $cdekShippingSettings['shipper_address'] ?? '';
         $adminSetting->sellerAddress = $cdekShippingSettings['seller_address'] ?? '';
+        $adminSetting->extraDay = $cdekShippingSettings['extra_day'] ?? '';
+        $adminSetting->extraCost = $cdekShippingSettings['extra_cost'] ?? '';
+        $adminSetting->insurance = $cdekShippingSettings['insurance'] ?? '';
         return $adminSetting;
     }
 }

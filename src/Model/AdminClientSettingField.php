@@ -7,7 +7,7 @@ use Cdek\Data;
 class AdminClientSettingField implements Data
 {
 
-    const BLOCK_NAME = 'Продавец';
+    const BLOCK_NAME = 'Клиент';
 
     public function getFields(): array
     {
@@ -67,7 +67,7 @@ class AdminClientSettingField implements Data
         ];
     }
 
-    private function getSellerBlockName()
+    private function getSellerBlockName(): array
     {
         return [
             'title' => '<h3 style="border-bottom: 2px solid; text-align: center;">' . self::BLOCK_NAME . '</h3>',

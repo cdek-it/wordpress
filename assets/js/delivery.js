@@ -158,51 +158,6 @@
                 $('#woocommerce_official_cdek_pvz_code').val(pvz.code)
             }
 
-            $('#create-order-btn').click(function () {
-                $.ajax({
-                    method: "GET",
-                    url: "/wp-json/cdek/v1/create-order",
-                    data: {
-                        package_order_id: $('input[name=package_order_id]').val(),
-                        package_length: $('input[name=package_length]').val(),
-                        package_width: $('input[name=package_width]').val(),
-                        package_height: $('input[name=package_height]').val()
-                    },
-                    success: function (response) {
-                        let resp = JSON.parse(response);
-                        if (resp.state === 'error') {
-                            window.alert(resp.message);
-                        } else {
-                            $('#cdek-create-order-form').hide();
-                            $('#cdek-order-number').html(resp.code);
-                            $('#cdek-order-waybill').attr('href', resp.waybill);
-                            $('#cdek-info-order').show();
-                        }
-                    },
-                    error: function (error) {
-                        console.log({error: error});
-                    }
-                });
-            })
-            $('#delete-order-btn').click(function () {
-                $.ajax({
-                    method: "GET",
-                    url: "/wp-json/cdek/v1/delete-order",
-                    data: {
-                        number: $('#cdek-order-number').html(),
-                        order_id: $('input[name=package_order_id]').val()
-                    },
-                    success: function (response) {
-                        $('#cdek-create-order-form').show();
-                        $('#cdek-info-order').hide();
-                    },
-                    error: function (error) {
-                        console.log({error: error});
-                    }
-                });
-            })
-
-
             $('#woocommerce_official_cdek_tariff_list').change(function (event) {
                 let tariffCode62 = $(event.currentTarget).find('option[value=62]');
                 if ($(tariffCode62).is(':selected')) {
@@ -251,5 +206,53 @@
                 }
             }
         }
+
+        $('#create-order-btn').click(function () {
+            $.ajax({
+                method: "GET",
+                url: "/wp-json/cdek/v1/create-order",
+                data: {
+                    package_order_id: $('input[name=package_order_id]').val(),
+                    package_length: $('input[name=package_length]').val(),
+                    package_width: $('input[name=package_width]').val(),
+                    package_height: $('input[name=package_height]').val()
+                },
+                success: function (response) {
+                    let resp = JSON.parse(response);
+                    if (resp.state === 'error') {
+                        window.alert(resp.message);
+                    } else {
+                        $('#cdek-create-order-form').hide();
+                        $('#cdek-order-number').html(resp.code);
+                        $('#cdek-order-waybill').attr('href', resp.waybill);
+                        $('#cdek-info-order').show();
+                    }
+                },
+                error: function (error) {
+                    console.log({error: error});
+                }
+            });
+        })
+
+        $('#delete-order-btn').click(function () {
+            $.ajax({
+                method: "GET",
+                url: "/wp-json/cdek/v1/delete-order",
+                data: {
+                    number: $('#cdek-order-number').html(),
+                    order_id: $('input[name=package_order_id]').val()
+                },
+                success: function (response) {
+                    $('#cdek-create-order-form').show();
+                    $('#cdek-info-order').hide();
+                },
+                error: function (error) {
+                    console.log({error: error});
+                }
+            });
+        })
+
+        $('#woocommerce_official_cdek_extra_day').attr('min', 0);
+        $('#woocommerce_official_cdek_extra_cost').attr('min', 0);
     })
 })(jQuery);

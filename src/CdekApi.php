@@ -58,12 +58,6 @@ class CdekApi
 		return true;
 	}
 
-	protected function setSettingPluginAuthCheck(bool $state)
-	{
-		$cdekShippingSettings = Helper::getSettingDataPlugin();
-		$cdekShippingSettings['auth_check'] = (string)(int)$state;
-	}
-
 	public function getOrder($number)
 	{
 		$url = self::API . self::ORDERS_PATH . $number;
@@ -89,12 +83,6 @@ class CdekApi
         }
 
 	    return $this->httpClient->sendRequest($url, 'POST', $this->getToken(), json_encode($param));
-    }
-
-    public function getWaybill($number)
-    {
-        $url = 'http://api.cdek.ru/v2/' . self::WAYBILL_PATH . $number . '.pdf';
-        return $this->httpClient->sendRequest($url, 'GET', $this->getToken());
     }
 
     public function getWaybillByLink($link)

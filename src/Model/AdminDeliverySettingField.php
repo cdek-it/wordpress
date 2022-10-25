@@ -23,6 +23,9 @@ class AdminDeliverySettingField implements Data
             'address' => $this->getAddress(),
             'map' => $this->getMap(),
             'pvz_address' => $this->getPvzAddress(),
+            'extra_day' => $this->getExtraDay(),
+            'extra_cost' => $this->getExtraCost(),
+            'insurance' => $this->getInsurance(),
             'pvz_code' => $this->getPvzCode(),
             'city_code_value' => $this->getCityCodeValue()
         ];
@@ -147,6 +150,33 @@ class AdminDeliverySettingField implements Data
             'title' => '<h3 style="border-bottom: 2px solid; text-align: center;">' . self::BLOCK_NAME . '</h3>',
             'type' => 'hidden',
             'class' => 'cdek_setting_block_name'
+        ];
+    }
+
+    private function getExtraDay(): array
+    {
+        return [
+            'title' => 'Дни',
+            'type' => 'number',
+            'description' => "Добавленные дни к доставке",
+        ];
+    }
+
+    private function getExtraCost(): array
+    {
+        return [
+            'title' => 'Цена доставки',
+            'type' => 'number',
+            'description' => "Добавленная цена доставки в рублях",
+        ];
+    }
+
+    private function getInsurance(): array
+    {
+        return [
+            'title' => 'Страховка',
+            'type' => 'checkbox',
+            'description' => "Добавлять к стоимости доставки сумму страховки. Расчитывается по сумме товаров в заказе",
         ];
     }
 }

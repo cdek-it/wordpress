@@ -2,6 +2,7 @@
 
 namespace Cdek;
 
+use Cdek\Model\AdminSetting;
 use Cdek\Model\Tariff;
 
 class DeliveryCalc
@@ -27,8 +28,13 @@ class DeliveryCalc
         $services = $cdekShippingSettings['service_list'];
 
         $api = new CdekApi();
+        $adminSetting = new AdminSetting();
+        $setting = $adminSetting->getCurrentSetting();
         foreach ($tariffList as $tariff) {
             $deliveryParam['selected_services'] = $this->getServicesList($services, $tariff);
+            if ($setting->insurance === 'yes') {
+                $deliveryParam['selected_services'][] = ['code' => 'INSURANCE', 'parameter' => (int)$package['cart_subtotal']];
+            }
 
             $delivery = json_decode($api->calculate($deliveryParam, $tariff));
 
@@ -36,15 +42,18 @@ class DeliveryCalc
                 continue;
             }
 
+            $minDay = (int)$delivery->period_min + (int)$setting->extraDay;
+            $maxDay = (int)$delivery->period_max + (int)$setting->extraDay;
+            $cost = (int)$delivery->total_sum + (int)$setting->extraCost;
             $this->rates[] = [
                 'id' => $id . '_' . $tariff,
                 'label' => sprintf(
                     "CDEK: %s, (%s-%s дней)",
                     Tariff::getTariffNameByCode($tariff),
-                    $delivery->period_min,
-                    $delivery->period_max
+                    $minDay,
+                    $maxDay
                 ),
-                'cost' => $delivery->total_sum,
+                'cost' => $cost,
                 'meta_data' => ['tariff_code' => $tariff]
             ];
         }
