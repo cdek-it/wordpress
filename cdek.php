@@ -392,6 +392,9 @@ function get_city_code($data)
 function get_pvz($data)
 {
     $api = new CdekApi();
+    if ($data->get_param('admin')) {
+        return $api->getPvz($data->get_param('city_code'), true);
+    }
     return $api->getPvz($data->get_param('city_code'));
 }
 

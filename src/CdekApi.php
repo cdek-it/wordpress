@@ -73,7 +73,7 @@ class CdekApi
     public function createOrder($param)
     {
         $url = self::API . self::ORDERS_PATH;
-        $param['developer_key'] = $this->adminSetting->developerKey;
+//        $param['developer_key'] = $this->adminSetting->developerKey;
         $param['date_invoice'] = date('Y-m-d');
         $param['shipper_name'] = $this->adminSetting->shipperName;
         $param['shipper_address'] = $this->adminSetting->shipperAddress;
@@ -123,15 +123,25 @@ class CdekApi
         return $this->httpClient->sendRequest($url, 'DELETE', $this->getToken());
     }
 
-    public function getPvz($city)
+    public function getPvz($city, $admin = false)
     {
         $url = self::API . self::PVZ_PATH;
         if (empty($city)) {
             $city = '44';
         }
-        $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city_code' => $city]);
+        if ($admin) {
+            $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city_code' => $city, 'type' => 'PVZ']);
+        } else {
+            $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city_code' => $city]);
+        }
         $pvz = array_map(function($elem) {
-            return array_merge(['code' => $elem->code, 'type' => $elem->type], (array)$elem->location);
+            return [
+                'code' => $elem->code,
+                'type' => $elem->type,
+                'longitude' => $elem->location->longitude,
+                'latitude' => $elem->location->latitude,
+                'address' => $elem->location->address
+            ];
             }, json_decode($result));
         return json_encode($pvz);
     }

@@ -125,7 +125,8 @@
                         method: "GET",
                         url: "/wp-json/cdek/v1/get-pvz",
                         data: {
-                            city_code: cityCode
+                            city_code: cityCode,
+                            admin: 1
                         },
                         success: function (response) {
                             cityCodePvzReceived = cityCode;
