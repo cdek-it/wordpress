@@ -61,7 +61,7 @@ function cdek_admin_enqueue_script()
 function addYandexMap()
 {
     $cdekShippingSettings = Helper::getSettingDataPlugin();
-    if ($cdekShippingSettings['yandex_map_api_key'] !== '') {
+    if (array_key_exists('yandex_map_api_key', $cdekShippingSettings) && $cdekShippingSettings['yandex_map_api_key'] !== '') {
         $WP_Http = new WP_Http();
         $resp = $WP_Http->request( 'https://api-maps.yandex.ru/2.1?apikey=' . $cdekShippingSettings['yandex_map_api_key'] . '&lang=ru_RU', [
             'method' => 'GET',
@@ -471,18 +471,17 @@ function cdek_add_update_form_billing($fragments) {
 
 function cdek_override_checkout_fields($fields)
 {
-
     $chosen_methods = WC()->session->get('chosen_shipping_methods');
 
     if (!$chosen_methods || $chosen_methods[0] === false) {
         return $fields;
     }
 
-    $shippingMethodArray = explode('_', $chosen_methods[0]);
-    $shippingMethodName = $shippingMethodArray[0] . '_' . $shippingMethodArray[1];
+    $output_array = [];
+    preg_match('/official_cdek/', $chosen_methods[0], $output_array);
 
-
-    if ($shippingMethodName === 'official_cdek') {
+    if (!empty($output_array)) {
+        $shippingMethodArray = explode('_', $chosen_methods[0]);
         $tariffCode = $shippingMethodArray[2];
         $tariffType = (int)Tariff::getTariffTypeToByCode($tariffCode);
 
