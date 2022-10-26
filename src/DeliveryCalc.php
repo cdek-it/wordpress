@@ -121,7 +121,7 @@ class DeliveryCalc
 
     protected function checkDeliveryResponse($delivery): bool
     {
-        if (!property_exists($delivery, 'status')) {
+        if (!property_exists($delivery, 'errors')) {
             return true;
         } else {
             return false;
