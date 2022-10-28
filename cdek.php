@@ -37,13 +37,16 @@ add_action('wp_footer', 'cdek_add_script_update_shipping_method');
 
 function cdek_widget_enqueue_script()
 {
-    wp_enqueue_style('cdek-css-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
-    wp_enqueue_script('cdek-css-leaflet-min', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
-    wp_enqueue_style('cdek-css', plugin_dir_url(__FILE__) . 'assets/css/cdek-map.css');
-    wp_enqueue_style('cdek-admin-leaflet-cluster-default', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.Default.min.css');
-    wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.min.css');
-    wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
-    addYandexMap();
+    if (is_checkout()) {
+        wp_enqueue_style('cdek-css-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
+        wp_enqueue_script('cdek-css-leaflet-min', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
+        wp_enqueue_style('cdek-css', plugin_dir_url(__FILE__) . 'assets/css/cdek-map.css');
+        wp_enqueue_style('cdek-admin-leaflet-cluster-default', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.Default.min.css');
+        wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.min.css');
+        wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
+        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map.js', array('jquery'), '1.7.0', true);
+        addYandexMap();
+    }
 }
 
 function cdek_admin_enqueue_script()
