@@ -2,8 +2,9 @@
 
 namespace Cdek;
 
+use Cdek\Model\Service;
+use Cdek\Model\Tariff;
 use WC_Shipping_Method;
-use Cdek\Model\FieldObjArray;
 
 class CdekShippingMethod extends WC_Shipping_Method
 {
@@ -34,10 +35,164 @@ class CdekShippingMethod extends WC_Shipping_Method
 
     public function init_form_fields()
     {
-        $fieldObjArray = FieldObjArray::get($this->settings);
-        foreach ($fieldObjArray as $fieldObj) {
-            $this->form_fields = array_merge($this->form_fields, $fieldObj->getFields());
-        }
+//        $fieldObjArray = FieldObjArray::get($this->settings);
+//        foreach ($fieldObjArray as $fieldObj) {
+//            $this->form_fields = array_merge($this->form_fields, $fieldObj->getFields());
+//        }
+        $this->form_fields = array(
+
+            'auth_block_name' => array(
+                'title' => '<h3 style="border-bottom: 2px solid; text-align: center;">Авторизация</h3>',
+                'type' => 'hidden',
+                'class' => 'cdek_setting_block_name'
+            ),
+
+            'client_id' => array(
+                'title' => __('Идентификатор клиента', 'official_cdek'),
+                'type' => 'text'
+            ),
+
+            'client_secret' => array(
+                'title' => __('Секретный ключ клиента', 'official_cdek'),
+                'type' => 'text'
+            ),
+
+            'seller_block_name' => array(
+                'title' => '<h3 style="border-bottom: 2px solid; text-align: center;">Клиент</h3>',
+                'type' => 'hidden',
+                'class' => 'cdek_setting_block_name'
+            ),
+
+            'seller_name' => array(
+                'title' => __('ФИО', 'official_cdek'),
+                'type' => 'text'
+            ),
+
+            'seller_phone' => array(
+                'title' => __('Телефон', 'official_cdek'),
+                'type' => 'text',
+                'description' => 'Должен передаваться в международном формате: код страны (для России +7) и сам номер (10 и более цифр)'
+            ),
+
+            'seller_address' => array(
+                'title' => __('Адрес истинного продавца', 'official_cdek'),
+                'type' => 'text',
+                'description' => 'Адрес истинного продавца. Используется при печати инвойсов для отображения адреса настоящего 
+                продавца товара, либо торгового названия. Для международных заказов'
+            ),
+
+            'shipper_name' => array(
+                'title' => __('Грузоотправитель', 'official_cdek'),
+                'type' => 'text',
+                'description' => 'Название компании грузоотправителя для международных заказов'
+            ),
+
+            'shipper_address' => array(
+                'title' => __('Адрес грузоотправителя', 'official_cdek'),
+                'type' => 'text',
+                'description' => 'Адрес компании грузоотправителя для международных заказов'
+            ),
+
+            'delivery_block_name' => array(
+                'title' => '<h3 style="border-bottom: 2px solid; text-align: center;">Доставка</h3>',
+                'type' => 'hidden',
+                'class' => 'cdek_delivery_block_name'
+            ),
+
+            'tariff_list' => array(
+                'title' => __('Тарифы', 'official_cdek'),
+                'type' => 'multiselect',
+                'options' => Tariff::getTariffList(),
+                'description' => "Для выбора нескольких тарифов удерживайте клавишу \"CTRL\" и левой кнопкой мыши выберите тарифы.<br>
+                            Если отправка производится со склада, то рекомендуется выбирать тарифы только от склада. <br> Иначе у пользователя будет 
+                            выбор тарифов \"от двери\""
+            ),
+
+            'service_list' => array(
+                'title' => __('Услуги', 'official_cdek'),
+                'type' => 'multiselect',
+                'options' => Service::getServiceList(),
+            ),
+
+            'product_weight_default' => array(
+                'title' => __('Вес одной единицы товара по умолчанию в кг', 'official_cdek'),
+                'description' => "У всех товаров должен быть указан вес, 
+                            если есть товары без указанного <br> веса то для таких товаров будет подставляться значение из этого поля. <br>
+                            Это повлияет на точность расчета доставки. Значение по умолчанию 1 кг.",
+                'type' => 'text',
+                'default' => __(1, 'official_cdek')
+            ),
+
+            'map_layer' => array(
+                'title' => __('Слой карты', 'official_cdek'),
+                'type' => 'select',
+                'options' => ['OpenStreetMap', 'YandexMap']
+            ),
+
+            'yandex_map_api_key' => array(
+                'type' => 'hidden',
+                'placeholder' => 'Api Key'
+            ),
+
+            'has_packages_mode' => array(
+                'title' => __('Многоместка', 'official_cdek'),
+                'type' => 'checkbox',
+                'description' => "При включенном режиме 'Многоместка', на детальной странице заказа появится
+                 возможность создать несколько упаковок для одного заказа и распределить товары по созданным упаковкам",
+                'default' => 'no'
+            ),
+
+            'city' => array(
+                'title' => __('Город отправления', 'official_cdek'),
+                'type' => 'text',
+                'default' => __('Москва', 'official_cdek')
+            ),
+
+            'street' => array(
+                'title' => __('Адрес', 'official_cdek'),
+                'type' => 'text',
+                'description' => "Адрес отправления для тарифов \"от двери\""
+            ),
+
+            'map' => array(
+                'type' => 'hidden',
+                'title' => __('Выбрать ПВЗ на карте', 'official_cdek'),
+            ),
+
+            'pvz_address' => array(
+                'type' => 'text',
+                'readonly' => 'readonly',
+                'description' => "Адрес отправления для тарифов \"от склада\""
+            ),
+
+            'extra_day' => array(
+                'title' => 'Дни',
+                'type' => 'number',
+                'description' => "Добавленные дни к доставке",
+            ),
+
+            'extra_cost' => array(
+                'title' => 'Цена доставки',
+                'type' => 'number',
+                'description' => "Добавленная цена доставки в рублях",
+            ),
+
+            'insurance' => array(
+                'title' => 'Страховка',
+                'type' => 'checkbox',
+                'description' => "Добавлять к стоимости доставки сумму страховки. Расчитывается по сумме товаров в заказе",
+            ),
+
+            'pvz_code' => array(
+                'type' => 'hidden',
+            ),
+
+            'city_code_value' => array(
+                'type' => 'text',
+                'css' => 'display: none;',
+                'default' => __('44', 'official_cdek')
+            ),
+        );
     }
 
     public function calculate_shipping($package = [])
