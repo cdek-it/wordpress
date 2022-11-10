@@ -31,9 +31,39 @@ add_action('woocommerce_after_shipping_rate', 'cdek_map_display', 10, 2);
 add_action('woocommerce_checkout_process', 'is_pvz_code');
 add_action('wp_enqueue_scripts', 'cdek_widget_enqueue_script');
 add_action('admin_enqueue_scripts', 'cdek_admin_enqueue_script');
-add_filter( 'woocommerce_update_order_review_fragments', 'cdek_add_update_form_billing', 99 );
-add_filter('woocommerce_checkout_fields', 'cdek_override_checkout_fields');
+add_filter('woocommerce_update_order_review_fragments', 'cdek_add_update_form_billing', 99);
+add_filter('woocommerce_checkout_fields', 'cdek_override_checkout_fields', 30);
 add_action('wp_footer', 'cdek_add_script_update_shipping_method');
+//add_filter('woocommerce_billing_fields', 'cdek_woocommerce_billing_fields', 30, 2);
+
+function cdek_woocommerce_billing_fields($fields)
+{
+    if (!array_key_exists('billing_city', $fields)) {
+        $fields['billing_city'] = [
+            'label' => 'Населённый пункт',
+            'placeholder' => '',
+            'class' => [
+                "form-row-wide",
+                "address-field"
+            ],
+            'required' => true,
+            'public' => true,
+            'payment_method' => ["0"],
+            'shipping_method' => ["0"],
+            'order' => 16,
+            'priority' => 16,
+        ];
+    }
+
+//    if (array_key_exists('billing_state', $fields)) {
+//        $fields['billing_state'] = [];
+//    }
+//
+//    if (array_key_exists('billing_address_line_1', $fields)) {
+//        $fields['billing_address_line_1'] = [];
+//    }
+    return $fields;
+}
 
 function cdek_widget_enqueue_script()
 {
@@ -66,12 +96,12 @@ function addYandexMap()
     $cdekShippingSettings = Helper::getSettingDataPlugin();
     if (array_key_exists('yandex_map_api_key', $cdekShippingSettings) && $cdekShippingSettings['yandex_map_api_key'] !== '') {
         $WP_Http = new WP_Http();
-        $resp = $WP_Http->request( 'https://api-maps.yandex.ru/2.1?apikey=' . $cdekShippingSettings['yandex_map_api_key'] . '&lang=ru_RU', [
+        $resp = $WP_Http->request('https://api-maps.yandex.ru/2.1?apikey=' . $cdekShippingSettings['yandex_map_api_key'] . '&lang=ru_RU', [
             'method' => 'GET',
             'headers' => [
                 "Content-Type" => "application/json",
             ],
-        ] );
+        ]);
 
         if ($resp['response']['code'] === 200) {
             wp_enqueue_script('cdek-admin-yandex-api', 'https://api-maps.yandex.ru/2.1?apikey=' . $cdekShippingSettings['yandex_map_api_key'] . '&lang=ru_RU');
@@ -183,8 +213,15 @@ function create_order($data)
         ];
     }
 
+
+    if ($order->get_shipping_first_name() === "") {
+        $name = $order->get_billing_first_name() . ' ' . $order->get_billing_first_name();
+    } else {
+        $name = $order->get_shipping_first_name() . ' ' . $order->get_shipping_first_name();
+    }
+
     $param['recipient'] = [
-        'name' => $order->get_shipping_first_name() . ' ' . $order->get_shipping_last_name(),
+        'name' => $name,
         'phones' => [
             'number' => $order->get_billing_phone()
         ]
@@ -403,7 +440,9 @@ function delete_order($data)
 function cdek_shipping_method()
 {
     if (!class_exists('CdekShippingMethod')) {
-        class CdekShippingMethod extends \Cdek\CdekShippingMethod{}
+        class CdekShippingMethod extends \Cdek\CdekShippingMethod
+        {
+        }
     }
 }
 
@@ -422,7 +461,8 @@ function cdek_map_display($shippingMethodCurrent)
     }
 }
 
-function isTariffTypeFromStore($shippingMethodCurrent) {
+function isTariffTypeFromStore($shippingMethodCurrent)
+{
     if ($shippingMethodCurrent->get_method_id() !== 'official_cdek') {
         return false;
     }
@@ -437,32 +477,34 @@ function isTariffTypeFromStore($shippingMethodCurrent) {
     return (bool)(int)Tariff::getTariffTypeToByCode($tariffCode);
 }
 
-function isPostamatOrStore() {
+function isPostamatOrStore()
+{
     $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
     $tariffCode = explode('_', $shippingMethodIdSelected)[2];
     return Tariff::isTariffEndPointPostamatByCode($tariffCode);
 }
 
-function cdek_add_update_form_billing($fragments) {
+function cdek_add_update_form_billing($fragments)
+{
 
     $checkout = WC()->checkout();
 
-    parse_str( $_POST['post_data'], $fields_values );
+    parse_str($_POST['post_data'], $fields_values);
 
     ob_start();
 
     echo '<div class="woocommerce-billing-fields__field-wrapper">';
 
-    $fields = $checkout->get_checkout_fields( 'billing' );
+    $fields = $checkout->get_checkout_fields('billing');
 
-    foreach ( $fields as $key => $field ) {
-        $value = $checkout->get_value( $key );
+    foreach ($fields as $key => $field) {
+        $value = $checkout->get_value($key);
 
-        if ( ! $value && ! empty( $fields_values[ $key ] ) ) {
-            $value = $fields_values[ $key ];
+        if (!$value && !empty($fields_values[$key])) {
+            $value = $fields_values[$key];
         }
 
-        woocommerce_form_field( $key, $field, $value );
+        woocommerce_form_field($key, $field, $value);
     }
 
     echo '</div>';
@@ -472,30 +514,65 @@ function cdek_add_update_form_billing($fragments) {
     return $fragments;
 }
 
+function getShipToDestination()
+{
+    $shipToDestination = get_option( 'woocommerce_ship_to_destination' );
+    if ($shipToDestination === 'billing_only') {
+        return 'billing';
+    }
+    return $shipToDestination;
+}
+
 function cdek_override_checkout_fields($fields)
 {
-    $chosen_methods = WC()->session->get('chosen_shipping_methods');
+//    $chosen_methods = WC()->session->get('chosen_shipping_methods');
+//
+//    if (!$chosen_methods || $chosen_methods[0] === false) {
+//        return $fields;
+//    }
+//
+//    $output_array = [];
+//    preg_match('/official_cdek/', $chosen_methods[0], $output_array);
 
-    if (!$chosen_methods || $chosen_methods[0] === false) {
-        return $fields;
-    }
+//    $shippingMethodArray = explode('_', $chosen_methods[0]);
 
-    $output_array = [];
-    preg_match('/official_cdek/', $chosen_methods[0], $output_array);
+//    if (!isset($fields['billing']['billing_phone'])) {
+//        $fields['billing']['billing_phone'] = [
+//            'label' => 'Телефон',
+//            'required' => true,
+//            'class' => ['form-row-wide'],
+//            'validate' => ['phone'],
+//            'autocomplete' => 'tel',
+//            'priority' => 100
+//        ];
+//    }
 
-    if (!empty($output_array)) {
-        $shippingMethodArray = explode('_', $chosen_methods[0]);
-        $tariffCode = $shippingMethodArray[2];
-        $tariffType = (int)Tariff::getTariffTypeToByCode($tariffCode);
+    $shipToDestination = getShipToDestination();
 
-        if (!isset($fields['billing']['billing_phone'])) {
-            $fields['billing']['billing_phone'] = [
-                'label' => 'Телефон',
+    if ($shipToDestination === 'billing') {
+        if (!isset($fields['billing']['billing_first_name'])) {
+            $fields['billing']['billing_first_name'] = [
+                'label' => 'Имя',
+                'placeholder' => '',
+                'class' => [0 => 'form-row-first',],
                 'required' => true,
-                'class' => ['form-row-wide'],
-                'validate' => ['phone'],
-                'autocomplete' => 'tel',
-                'priority' => 100
+                'public' => true,
+                'payment_method' => [0 => '0',],
+                'shipping_method' => [0 => '0',],
+                'priority' => 10,
+            ];
+        }
+
+        if (!isset($fields['billing']['billing_last_name'])) {
+            $fields['billing']['billing_last_name'] = [
+                'label' => 'Фамилия',
+                'placeholder' => '',
+                'class' => [0 => 'form-row-last',],
+                'required' => true,
+                'public' => true,
+                'payment_method' => [0 => '0',],
+                'shipping_method' => [0 => '0',],
+                'priority' => 11,
             ];
         }
 
@@ -505,7 +582,7 @@ function cdek_override_checkout_fields($fields)
                 'required' => true,
                 'class' => ['form-row-wide', 'address-field'],
                 'autocomplete' => 'address-level2',
-                'priority' => 70
+                'priority' => 16
             ];
         }
 
@@ -516,25 +593,97 @@ function cdek_override_checkout_fields($fields)
                 'class' => ['form-row-wide', 'address-field'],
                 'validate' => ['state'],
                 'autocomplete' => 'address-level1',
-                'priority' => 80,
+                'priority' => 17,
                 'country_field' => "billing_country",
-                'country' => "RU",
             ];
         }
 
-        if (!$tariffType) {
-            if (!isset($fields['billing']['billing_address_1'])) {
-                $fields['billing']['billing_address_1'] = [
-                    'label' => 'Адрес',
-                    'placeholder' => 'Номер дома и название улицы',
-                    'required' => true,
-                    'class' => ['form-row-wide', 'address-field'],
-                    'autocomplete' => 'address-line1',
-                    'priority' => 50
-                ];
-            }
+        if (!isset($fields['billing']['billing_address_1'])) {
+            $fields['billing']['billing_address_1'] = [
+                'label' => 'Адрес',
+                'placeholder' => 'Номер дома и название улицы',
+                'required' => true,
+                'class' => ['form-row-wide', 'address-field'],
+                'autocomplete' => 'address-line1',
+                'priority' => 18
+            ];
+        }
+
+        if (!isset($fields['billing']['billing_phone'])) {
+            $fields['billing']['billing_phone'] = [
+                'label' => 'Телефон',
+                'placeholder' => '',
+                'type' => 'tel',
+                'required' => true,
+                'public' => true,
+                'class' => ['form-row-wide'],
+                'autocomplete' => 'address-line1',
+                'priority' => 19
+            ];
+        }
+    } else {
+        if (!isset($fields['shipping']['shipping_first_name'])) {
+            $fields['shipping']['shipping_first_name'] = [
+                'label' => 'Имя',
+                'placeholder' => '',
+                'class' => [0 => 'form-row-first',],
+                'required' => true,
+                'public' => true,
+                'payment_method' => [0 => '0',],
+                'shipping_method' => [0 => '0',],
+                'priority' => 10,
+            ];
+        }
+
+        if (!isset($fields['shipping']['shipping_last_name'])) {
+            $fields['shipping']['shipping_last_name'] = [
+                'label' => 'Фамилия',
+                'placeholder' => '',
+                'class' => [0 => 'form-row-last',],
+                'required' => true,
+                'public' => true,
+                'payment_method' => [0 => '0',],
+                'shipping_method' => [0 => '0',],
+                'priority' => 11,
+            ];
+        }
+
+        if (!isset($fields['shipping']['shipping_city'])) {
+            $fields['shipping']['shipping_city'] = [
+                'label' => 'Населённый пункт',
+                'required' => true,
+                'class' => ['form-row-wide', 'address-field'],
+                'autocomplete' => 'address-level2',
+                'priority' => 16
+            ];
+        }
+
+        if (!isset($fields['shipping']['shipping_state'])) {
+            $fields['shipping']['shipping_state'] = [
+                'label' => 'Область / район',
+                'required' => true,
+                'class' => ['form-row-wide', 'address-field'],
+                'validate' => ['state'],
+                'autocomplete' => 'address-level1',
+                'priority' => 17,
+                'country_field' => "billing_country",
+            ];
+        }
+
+        if (!isset($fields['shipping']['shipping_address_1'])) {
+            $fields['shipping']['shipping_address_1'] = [
+                'label' => 'Адрес',
+                'placeholder' => 'Номер дома и название улицы',
+                'required' => true,
+                'class' => ['form-row-wide', 'address-field'],
+                'autocomplete' => 'address-line1',
+                'priority' => 18
+            ];
         }
     }
+
+
+
 
     return $fields;
 }
@@ -585,13 +734,15 @@ function checkTariffFromStoreByTariffCode($tariffCode)
 function cdek_woocommerce_new_order_action($order_id, $order)
 {
     if (isCdekShippingMethod($order)) {
-        $pvzInfo = $_POST['pvz_address'];
+        $pvzInfo = $_POST['pvz_info'];
         $pvzCode = $_POST['pvz_code'];
         $tariffId = getTariffCodeCdekShippingMethodByOrder($order);
         $cityCode = $_POST['city_code'];
 
         if ($pvzInfo !== null) {
             $order->set_shipping_address_1($pvzInfo);
+            $order->set_shipping_city($order->get_billing_city());
+            $order->set_shipping_state($order->get_billing_state());
             $order->save();
         }
 

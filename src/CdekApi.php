@@ -176,12 +176,19 @@ class CdekApi
 
         if (count($cityData) > 1) {
             foreach ($cityData as $data) {
-                if ($data->region === $state) {
+                if ($this->getFormatState($data->region) === $this->getFormatState($state)) {
                     return $data->code;
                 }
             }
+            return -1;
         }
         return $cityData[0]->code;
+    }
+
+    protected function getFormatState($state)
+    {
+        $stateRaw = explode(' ', $state);
+        return strtolower($stateRaw[0]);
     }
 
     public function getCityCode($city, $postalCode)
