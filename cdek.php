@@ -213,15 +213,8 @@ function create_order($data)
         ];
     }
 
-
-    if ($order->get_shipping_first_name() === "") {
-        $name = $order->get_billing_first_name() . ' ' . $order->get_billing_first_name();
-    } else {
-        $name = $order->get_shipping_first_name() . ' ' . $order->get_shipping_first_name();
-    }
-
     $param['recipient'] = [
-        'name' => $name,
+        'name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
         'phones' => [
             'number' => $order->get_billing_phone()
         ]
@@ -622,8 +615,9 @@ function cdek_override_checkout_fields($fields)
             ];
         }
     } else {
-        if (!isset($fields['shipping']['shipping_first_name'])) {
-            $fields['shipping']['shipping_first_name'] = [
+
+        if (!isset($fields['billing']['billing_first_name'])) {
+            $fields['billing']['billing_first_name'] = [
                 'label' => 'Имя',
                 'placeholder' => '',
                 'class' => [0 => 'form-row-first',],
@@ -635,8 +629,8 @@ function cdek_override_checkout_fields($fields)
             ];
         }
 
-        if (!isset($fields['shipping']['shipping_last_name'])) {
-            $fields['shipping']['shipping_last_name'] = [
+        if (!isset($fields['billing']['billing_last_name'])) {
+            $fields['billing']['billing_last_name'] = [
                 'label' => 'Фамилия',
                 'placeholder' => '',
                 'class' => [0 => 'form-row-last',],
@@ -647,6 +641,45 @@ function cdek_override_checkout_fields($fields)
                 'priority' => 11,
             ];
         }
+
+        if (!isset($fields['billing']['billing_phone'])) {
+            $fields['billing']['billing_phone'] = [
+                'label' => 'Телефон',
+                'placeholder' => '',
+                'type' => 'tel',
+                'required' => true,
+                'public' => true,
+                'class' => ['form-row-wide'],
+                'autocomplete' => 'address-line1',
+                'priority' => 19
+            ];
+        }
+
+//        if (!isset($fields['shipping']['shipping_first_name'])) {
+//            $fields['shipping']['shipping_first_name'] = [
+//                'label' => 'Имя',
+//                'placeholder' => '',
+//                'class' => [0 => 'form-row-first',],
+//                'required' => true,
+//                'public' => true,
+//                'payment_method' => [0 => '0',],
+//                'shipping_method' => [0 => '0',],
+//                'priority' => 10,
+//            ];
+//        }
+//
+//        if (!isset($fields['shipping']['shipping_last_name'])) {
+//            $fields['shipping']['shipping_last_name'] = [
+//                'label' => 'Фамилия',
+//                'placeholder' => '',
+//                'class' => [0 => 'form-row-last',],
+//                'required' => true,
+//                'public' => true,
+//                'payment_method' => [0 => '0',],
+//                'shipping_method' => [0 => '0',],
+//                'priority' => 11,
+//            ];
+//        }
 
         if (!isset($fields['shipping']['shipping_city'])) {
             $fields['shipping']['shipping_city'] = [
@@ -740,9 +773,11 @@ function cdek_woocommerce_new_order_action($order_id, $order)
         $cityCode = $_POST['city_code'];
 
         if ($pvzInfo !== null) {
+            $api = new CdekApi();
+            $cityData = $api->getCityByCode($cityCode);
             $order->set_shipping_address_1($pvzInfo);
-            $order->set_shipping_city($order->get_billing_city());
-            $order->set_shipping_state($order->get_billing_state());
+            $order->set_shipping_city($cityData['city']);
+            $order->set_shipping_state($cityData['region']);
             $order->save();
         }
 
