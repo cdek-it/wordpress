@@ -67,7 +67,7 @@ class CdekApi
     public function createOrder($param)
     {
         $url = self::API . self::ORDERS_PATH;
-        $param['developer_key'] = $this->adminSetting->developerKey;
+//        $param['developer_key'] = $this->adminSetting->developerKey;
         $param['date_invoice'] = date('Y-m-d');
         $param['shipper_name'] = $this->adminSetting->shipperName;
         $param['shipper_address'] = $this->adminSetting->shipperAddress;
@@ -179,6 +179,9 @@ class CdekApi
                 if ($this->getFormatState($data->region) === $this->getFormatState($state)) {
                     return $data->code;
                 }
+                if ($this->getFormatState($data->region) === $this->getFormatState($city)) {
+                    return $data->code;
+                }
             }
             return -1;
         }
@@ -188,7 +191,7 @@ class CdekApi
     protected function getFormatState($state)
     {
         $stateRaw = explode(' ', $state);
-        return strtolower($stateRaw[0]);
+        return mb_strtolower($stateRaw[0]);
     }
 
     public function getCityCode($city, $postalCode)
@@ -198,4 +201,10 @@ class CdekApi
         return $cityData[0]->code;
     }
 
+    public function getCityByCode($code)
+    {
+        $url = self::API . self::REGION_PATH;
+        $cityData = json_decode($this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['code' => $code]));
+        return ['city' => $cityData[0]->city, 'region' => $cityData[0]->region];
+    }
 }
