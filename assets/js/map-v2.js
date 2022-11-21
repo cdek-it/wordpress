@@ -144,6 +144,8 @@
 
         function selectMarker(pvz) {
             $('#pvz-info').val(pvz.address);
+            $('#billing_address_1').val(pvz.address);
+            $('#shipping_address_1').val(pvz.address);
             $('#pvz-code').val(pvz.code);
             let cityCode = $('#city-code').val();
 
