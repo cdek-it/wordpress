@@ -140,6 +140,10 @@ class CdekApi
 
         $toLocationCityCode = $this->getCityCodeByCityName($deliveryParam['city'], $deliveryParam['state']);
 
+        if ($toLocationCityCode === -1) {
+            return [];
+        }
+
         $token = $this->getToken();
         return $this->httpClient->sendRequest($url, 'POST', $token, json_encode([
             'tariff_code' => $tariff,
@@ -190,8 +194,12 @@ class CdekApi
 
     protected function getFormatState($state)
     {
-        $stateRaw = explode(' ', $state);
-        return mb_strtolower($stateRaw[0]);
+        $state = mb_strtolower($state);
+        $regionType = ['автономная область', 'область', 'республика', 'респ.', 'автономный округ', 'округ', 'край', 'обл.'];
+        foreach ($regionType as $type) {
+            $state = str_replace($type, '', $state);
+        }
+        return trim($state);
     }
 
     public function getCityCode($city, $postalCode)

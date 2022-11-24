@@ -36,7 +36,13 @@ class DeliveryCalc
                 $deliveryParam['selected_services'][] = ['code' => 'INSURANCE', 'parameter' => (int)$package['cart_subtotal']];
             }
 
-            $delivery = json_decode($api->calculate($deliveryParam, $tariff));
+            $calcResult = $api->calculate($deliveryParam, $tariff);
+
+            if (empty($calcResult)) {
+                continue;
+            }
+
+            $delivery = json_decode($calcResult);
 
             if (!$this->checkDeliveryResponse($delivery)) {
                 continue;

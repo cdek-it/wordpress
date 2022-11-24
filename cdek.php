@@ -74,7 +74,7 @@ function cdek_widget_enqueue_script()
         wp_enqueue_style('cdek-admin-leaflet-cluster-default', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.Default.min.css');
         wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.min.css');
         wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
-        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map-v2.js', array('jquery'), '1.7.0', true);
+        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map-v3.js', array('jquery'), '1.7.0', true);
         addYandexMap();
     }
 }
@@ -201,6 +201,9 @@ function create_order($data)
         $cityName = $order->get_shipping_city();
         $stateName = $order->get_shipping_state();
         $cityCode = $api->getCityCodeByCityName($cityName, $stateName);
+        if ($cityCode === -1) {
+            return json_encode(['state' => 'error', 'message' => 'Ошибка. Не удалось найти город отправки']);
+        }
     }
 
     if ((int)Tariff::getTariffTypeToByCode($tariffId)) {
@@ -595,7 +598,6 @@ function cdek_override_checkout_fields($fields)
             $fields['billing']['billing_address_1'] = [
                 'label' => 'Адрес',
                 'placeholder' => 'Номер дома и название улицы',
-                'required' => true,
                 'class' => ['form-row-wide', 'address-field'],
                 'autocomplete' => 'address-line1',
                 'priority' => 18
@@ -707,16 +709,12 @@ function cdek_override_checkout_fields($fields)
             $fields['shipping']['shipping_address_1'] = [
                 'label' => 'Адрес',
                 'placeholder' => 'Номер дома и название улицы',
-                'required' => true,
                 'class' => ['form-row-wide', 'address-field'],
                 'autocomplete' => 'address-line1',
                 'priority' => 18
             ];
         }
     }
-
-
-
 
     return $fields;
 }
@@ -736,19 +734,37 @@ function cdek_add_script_update_shipping_method()
 
 function is_pvz_code()
 {
-    $pvzCode = $_POST['pvz_code'];
     $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
-    $tariffCode = getTariffCodeByShippingMethodId($shippingMethodIdSelected);
-    if (checkTariffFromStoreByTariffCode($tariffCode)) {
-        if (empty($pvzCode)) {
-            $pvzCodeTmp = get_post_meta(-1, 'pvz_code_tmp');
-            if (empty($pvzCodeTmp[0]['pvz_code'])) {
-                wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
+
+    if (strpos($shippingMethodIdSelected, 'official_cdek') !== false) {
+        $tariffCode = getTariffCodeByShippingMethodId($shippingMethodIdSelected);
+        if (checkTariffFromStoreByTariffCode($tariffCode)) {
+            $pvzCode = $_POST['pvz_code'];
+            if (empty($pvzCode)) {
+                $pvzCodeTmp = get_post_meta(-1, 'pvz_code_tmp');
+                if (empty($pvzCodeTmp[0]['pvz_code'])) {
+                    wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
+                } else {
+                    $_POST['pvz_code'] = $pvzCodeTmp[0]['pvz_code'];
+                    $_POST['pvz_address'] = $pvzCodeTmp[0]['pvz_address'];
+                    $_POST['city_code'] = $pvzCodeTmp[0]['city_code'];
+                    delete_post_meta(-1, 'pvz_code_tmp');
+                }
+            }
+        } else {
+            $shipToDestination = getShipToDestination();
+            if ($shipToDestination === 'billing') {
+                if(array_key_exists('billing_address_1', $_POST)) {
+                    if (empty($_POST['billing_address_1'])) {
+                        wc_add_notice(__('Нет адреса отправки.'), 'error');
+                    }
+                }
             } else {
-                $_POST['pvz_code'] = $pvzCodeTmp[0]['pvz_code'];
-                $_POST['pvz_address'] = $pvzCodeTmp[0]['pvz_address'];
-                $_POST['city_code'] = $pvzCodeTmp[0]['city_code'];
-                delete_post_meta(-1, 'pvz_code_tmp');
+                if(array_key_exists('shipping_address_1', $_POST)) {
+                    if (empty($_POST['shipping_address_1'])) {
+                        wc_add_notice(__('Нет адреса отправки.'), 'error');
+                    }
+                }
             }
         }
     }

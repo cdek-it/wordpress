@@ -84,8 +84,10 @@
                     state_name: stateName
                 },
                 success: function (cityCode) {
-                    $('#city-code').val(cityCode);
-                    getPvz(cityCode)
+                    if (cityCode !== -1) {
+                        $('#city-code').val(cityCode);
+                        getPvz(cityCode)
+                    }
                 },
                 error: function (error) {
                     console.log({error: error});
