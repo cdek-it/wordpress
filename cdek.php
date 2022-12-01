@@ -795,6 +795,11 @@ function cdek_woocommerce_new_order_action($order_id, $order)
             $order->set_shipping_city($cityData['city']);
             $order->set_shipping_state($cityData['region']);
             $order->save();
+
+            $shippingMethodArray = $order->get_items('shipping');
+            $shippingMethod = array_shift($shippingMethodArray);
+            $shippingMethod->add_meta_data('pvz', $pvzCode . ' (' . $pvzInfo . ')');
+            $shippingMethod->save_meta_data();
         }
 
         add_post_meta($order_id, 'order_data', [
