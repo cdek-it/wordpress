@@ -196,6 +196,7 @@ function create_order($data)
     $cityCode = $postOrderData[0]['city_code'];
     $cityName = $order->get_shipping_city();
     $cityAddress = $order->get_shipping_address_1();
+    $email = $order->get_billing_email();
 
     if (empty($cityCode)) {
         $cityName = $order->get_shipping_city();
@@ -218,6 +219,7 @@ function create_order($data)
 
     $param['recipient'] = [
         'name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
+        'email' => (string)$email,
         'phones' => [
             'number' => $order->get_billing_phone()
         ]
