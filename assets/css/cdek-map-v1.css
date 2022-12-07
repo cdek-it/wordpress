@@ -5,6 +5,10 @@
     outline: none;
 }
 
+#map img{
+    max-height: none;
+}
+
 #map-container {
     z-index: 20;
 }
