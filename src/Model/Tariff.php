@@ -198,8 +198,28 @@ class Tariff
 
     public static function getTariffNameByCode($code)
     {
+        $adminSetting = new AdminSetting();
+        $setting = $adminSetting->getCurrentSetting();
+        $tariffNameEdit = $setting->tariffNameEdit;
+        if (!empty($tariffNameEdit)) {
+            $tariffNameEditArray = explode(';',$tariffNameEdit);
+            $tariffEditList = [];
+            foreach ($tariffNameEditArray as $tariffEdit) {
+                $tariffConcrete = explode('-',$tariffEdit);
+                $tariffEditList[$tariffConcrete[0]] = $tariffConcrete[1];
+            }
+        } else {
+            $tariffEditList = [];
+        }
+
         foreach (self::TARIFF_DATA as $tariff) {
             if ($tariff['code'] == $code) {
+                foreach ($tariffEditList as $codeTariff => $tariffEdit) {
+                    if ((int)$code === (int)$codeTariff && !empty($tariffEdit)) {
+                        return $tariffEdit;
+                    }
+                }
+
                 return $tariff['name'];
             }
         }
@@ -220,7 +240,7 @@ class Tariff
     {
         $tariffList = [];
         foreach (self::TARIFF_DATA as $tariff) {
-            $tariffList[$tariff['code']] = $tariff['name'];
+            $tariffList[$tariff['code']] = $tariff['name'] . ' (' . $tariff['code'] . ')';
         }
         return $tariffList;
     }

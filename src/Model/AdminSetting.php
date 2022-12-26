@@ -33,6 +33,7 @@ class AdminSetting
     public $productWidthDefault;
     public $productHeightDefault;
     public $productPackageDefaultToggle;
+    public $tariffNameEdit;
 
     public function getCurrentSetting($currentAdminSetting = null): AdminSetting
     {
@@ -69,6 +70,7 @@ class AdminSetting
         $adminSetting->productWidthDefault = $cdekShippingSettings['product_width_default'] ?? '';
         $adminSetting->productHeightDefault = $cdekShippingSettings['product_height_default'] ?? '';
         $adminSetting->productPackageDefaultToggle = $cdekShippingSettings['product_package_default_toggle'] ?? '';
+        $adminSetting->tariffNameEdit = $cdekShippingSettings['tariff_name'] ?? '';
         return $adminSetting;
     }
 }
