@@ -114,32 +114,18 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'options' => Service::getServiceList(),
             ),
 
-            'product_weight_default' => array(
-                'title' => __('Вес одной единицы товара по умолчанию в кг', 'official_cdek'),
-                'description' => "У всех товаров должен быть указан вес, 
-                            если есть товары без указанного <br> веса то для таких товаров будет подставляться значение из этого поля. <br>
-                            Это повлияет на точность расчета доставки. Значение по умолчанию 1 кг.",
-                'type' => 'text',
-                'default' => __(1, 'official_cdek')
-            ),
-
-            'map_layer' => array(
-                'title' => __('Слой карты', 'official_cdek'),
-                'type' => 'select',
-                'options' => ['OpenStreetMap', 'YandexMap']
-            ),
-
-            'yandex_map_api_key' => array(
-                'type' => 'hidden',
-                'placeholder' => 'Api Key'
-            ),
-
             'has_packages_mode' => array(
                 'title' => __('Многоместка', 'official_cdek'),
                 'type' => 'checkbox',
                 'description' => "При включенном режиме 'Многоместка', на детальной странице заказа появится
                  возможность создать несколько упаковок для одного заказа и распределить товары по созданным упаковкам",
                 'default' => 'no'
+            ),
+
+            'extra_day' => array(
+                'title' => 'Добавленные дни',
+                'type' => 'number',
+                'description' => "Добавленные дни к доставке",
             ),
 
             'city' => array(
@@ -154,9 +140,24 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'description' => "Адрес отправления для тарифов \"от двери\""
             ),
 
+            'map_layer' => array(
+                'title' => __('Слой карты', 'official_cdek'),
+                'type' => 'select',
+                'options' => ['OpenStreetMap', 'YandexMap']
+            ),
+
+            'yandex_map_api_key' => array(
+                'type' => 'hidden',
+                'placeholder' => 'Api Key'
+            ),
+
             'map' => array(
                 'type' => 'hidden',
                 'title' => __('Выбрать ПВЗ на карте', 'official_cdek'),
+            ),
+
+            'pvz_code' => array(
+                'type' => 'hidden',
             ),
 
             'pvz_address' => array(
@@ -165,10 +166,53 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'description' => "Адрес отправления для тарифов \"от склада\""
             ),
 
-            'extra_day' => array(
-                'title' => 'Дни',
+            'package_setting_block_name' => array(
+                'title' => '<h3 style="border-bottom: 2px solid; text-align: center;">Габариты</h3>',
+                'type' => 'hidden',
+                'class' => 'cdek_package_setting_block_name',
+            ),
+
+            'product_weight_default' => array(
+                'title' => __('Вес одной единицы товара по умолчанию в кг', 'official_cdek'),
+                'description' => "У всех товаров должен быть указан вес, 
+                            если есть товары без указанного <br> веса то для таких товаров будет подставляться значение из этого поля. <br>
+                            Это повлияет на точность расчета доставки. Значение по умолчанию 1 кг.",
+                'type' => 'text',
+                'default' => __(1, 'official_cdek')
+            ),
+
+            'product_length_default' => array(
+                'title' => __('Длина товара', 'official_cdek'),
+                'description' => "Длина товара по умолчанию в см",
                 'type' => 'number',
-                'description' => "Добавленные дни к доставке",
+                'default' => __(10, 'official_cdek')
+            ),
+
+            'product_width_default' => array(
+                'title' => __('Ширина товара', 'official_cdek'),
+                'description' => "Ширина товара по умолчанию в см",
+                'type' => 'number',
+                'default' => __(10, 'official_cdek')
+            ),
+
+            'product_height_default' => array(
+                'title' => __('Высота товара', 'official_cdek'),
+                'description' => "Высота товара по умолчанию в см",
+                'type' => 'number',
+                'default' => __(10, 'official_cdek')
+            ),
+
+            'product_package_default_toggle' => array(
+                'title' => __('Габариты товара вкл/выкл', 'official_cdek'),
+                'description' => 'Принудительно использовать габариты товара (длину, ширину и высоту) по умолчанию для всех товаров',
+                'type' => 'checkbox',
+                'default' => 'no'
+            ),
+
+            'delivery_price_block_name' => array(
+                'title' => '<h3 style="border-bottom: 2px solid; text-align: center;">Cтоимость доставки</h3>',
+                'type' => 'hidden',
+                'class' => 'cdek_delivery_price_block_name',
             ),
 
             'extra_cost' => array(
@@ -183,8 +227,41 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'description' => "Добавлять к стоимости доставки сумму страховки. Расчитывается по сумме товаров в заказе",
             ),
 
-            'pvz_code' => array(
-                'type' => 'hidden',
+            'percentprice_toggle' => array(
+                'title' => 'Добавить цену доставки в процентах вкл/выкл',
+                'type' => 'checkbox',
+                'description' => "Использовать надбавку к цене доставки в процентах",
+            ),
+
+            'percentprice' => array(
+                'title' => 'Цена доставки в процентах',
+                'type' => 'number',
+                'description' => "К примеру, 130% означает что к стоимости доставки прибавится 30 процентов от расчетной стоимости.
+                Значение не может быть меньше 100%",
+            ),
+
+            'fixprice_toggle' => array(
+                'title' => 'Фикс цена доставки вкл/выкл',
+                'type' => 'checkbox',
+                'description' => "Использовать фиксированную цену доставки в рублях",
+            ),
+
+            'fixprice' => array(
+                'title' => 'Фиксированная цена',
+                'type' => 'number',
+                'description' => "Фиксированная цена доставки в рублях",
+            ),
+
+            'stepprice_toggle' => array(
+                'title' => 'Бесплатная доставка от суммы заказа вкл/выкл',
+                'type' => 'checkbox',
+                'description' => "Бесплатная доставка от суммы заказа указаной в поле 'Бесплатная доставка от'",
+            ),
+
+            'stepprice' => array(
+                'title' => 'Бесплатная доставка от',
+                'type' => 'number',
+                'description' => "Бесплатная доставка от суммы в рублях",
             ),
 
             'city_code_value' => array(

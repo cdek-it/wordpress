@@ -23,6 +23,16 @@ class AdminSetting
     public $extraDay;
     public $extraCost;
     public $insurance;
+    public $fixPriceToggle;
+    public $fixPrice;
+    public $stepPriceToggle;
+    public $stepPrice;
+    public $percentPriceToggle;
+    public $percentPrice;
+    public $productLengthDefault;
+    public $productWidthDefault;
+    public $productHeightDefault;
+    public $productPackageDefaultToggle;
 
     public function getCurrentSetting($currentAdminSetting = null): AdminSetting
     {
@@ -49,6 +59,16 @@ class AdminSetting
         $adminSetting->extraDay = $cdekShippingSettings['extra_day'] ?? '';
         $adminSetting->extraCost = $cdekShippingSettings['extra_cost'] ?? '';
         $adminSetting->insurance = $cdekShippingSettings['insurance'] ?? '';
+        $adminSetting->fixPriceToggle = $cdekShippingSettings['fixprice_toggle'] ?? '';
+        $adminSetting->fixPrice = $cdekShippingSettings['fixprice'] ?? '';
+        $adminSetting->stepPriceToggle = $cdekShippingSettings['stepprice_toggle'] ?? '';
+        $adminSetting->stepPrice = $cdekShippingSettings['stepprice'] ?? '';
+        $adminSetting->percentPriceToggle = $cdekShippingSettings['percentprice_toggle'] ?? '';
+        $adminSetting->percentPrice = $cdekShippingSettings['percentprice'] ?? '';
+        $adminSetting->productLengthDefault = $cdekShippingSettings['product_length_default'] ?? '';
+        $adminSetting->productWidthDefault = $cdekShippingSettings['product_width_default'] ?? '';
+        $adminSetting->productHeightDefault = $cdekShippingSettings['product_height_default'] ?? '';
+        $adminSetting->productPackageDefaultToggle = $cdekShippingSettings['product_package_default_toggle'] ?? '';
         return $adminSetting;
     }
 }

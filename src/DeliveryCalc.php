@@ -3,6 +3,7 @@
 namespace Cdek;
 
 use Cdek\Model\AdminSetting;
+use Cdek\Model\DefaultPackage;
 use Cdek\Model\Tariff;
 
 class DeliveryCalc
@@ -51,6 +52,21 @@ class DeliveryCalc
             $minDay = (int)$delivery->period_min + (int)$setting->extraDay;
             $maxDay = (int)$delivery->period_max + (int)$setting->extraDay;
             $cost = (int)$delivery->total_sum + (int)$setting->extraCost;
+
+            if ($setting->percentPriceToggle === 'yes') {
+                $cost = (int) (($setting->percentPrice / 100) * $cost);
+            }
+
+            if ($setting->fixPriceToggle === 'yes') {
+                $cost = (int)$setting->fixPrice;
+            }
+
+            if ($setting->stepPriceToggle === 'yes') {
+                if ((int)$package['cart_subtotal'] > (int)$setting->stepPrice) {
+                    $cost = 0;
+                }
+            }
+
             $this->rates[] = [
                 'id' => $id . '_' . $tariff,
                 'label' => sprintf(
@@ -108,6 +124,28 @@ class DeliveryCalc
         $length = $lengthList[0];
         $width = $widthList[0];
         $height = $heightList[0];
+
+        $adminSetting = new AdminSetting();
+        $setting = $adminSetting->getCurrentSetting();
+
+        if ($setting->productPackageDefaultToggle === 'yes') {
+            $length = (int)$setting->productLengthDefault;
+            $width = (int)$setting->productWidthDefault;
+            $height = (int)$setting->productHeightDefault;
+        } else {
+            if ($length === 0) {
+                $length = (int)$setting->productLengthDefault;
+            }
+
+            if ($width === 0) {
+                $width = (int)$setting->productWidthDefault;
+            }
+
+            if ($height === 0) {
+                $height = (int)$setting->productHeightDefault;
+            }
+        }
+
 
         return ['length' => $length, 'width' => $width, 'height' => $height, 'weight' => $totalWeight];
     }
