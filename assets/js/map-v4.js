@@ -3,13 +3,13 @@
         let map = null;
         let cluster = null;
 
-        $('body').append('<div id="map-frame" style="z-index: 1000;"><div id="map-container"><div id="map"><div id="map-loader"></div></div></div>' +
+        $('body').append('<div id="map-frame" style="z-index: 1000;"><div id="map-container"><div id="cdek-map"><div id="map-loader"></div></div></div>' +
             '<div id="background"></div></div>');
 
         $('body').on('click', '.open-pvz-btn', null, function () {
             $('#map-frame').css('display', 'flex');
             if(!map) {
-                map = L.map('map', {
+                map = L.map('cdek-map', {
                     center: [55.76, 37.61],
                     zoom: 9
                 });

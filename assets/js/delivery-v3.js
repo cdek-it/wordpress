@@ -70,11 +70,11 @@
             }
 
             function initMap() {
-                $('#woocommerce_official_cdek_map').after('<div id="map-container"><div id="map"></div></div>')
+                $('#woocommerce_official_cdek_map').after('<div id="map-container"><div id="cdek-map"></div></div>')
 
-                let mapContainer = $('#map');
+                let mapContainer = $('#cdek-map');
                 if (mapContainer.length) {
-                    map = L.map('map', {
+                    map = L.map('cdek-map', {
                         center: [55.76, 37.61],
                         zoom: 9
                     });

@@ -1,11 +1,11 @@
-#map {
+#cdek-map {
     width: 600px;
     height: 400px;
     position: relative;
     outline: none;
 }
 
-#map img{
+#cdek-map img{
     max-height: none;
 }
 
