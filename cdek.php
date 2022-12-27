@@ -70,24 +70,24 @@ function cdek_widget_enqueue_script()
     if (is_checkout()) {
         wp_enqueue_style('cdek-css-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
         wp_enqueue_script('cdek-css-leaflet-min', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
-        wp_enqueue_style('cdek-css', plugin_dir_url(__FILE__) . 'assets/css/cdek-map-v1.css');
+        wp_enqueue_style('cdek-css', plugin_dir_url(__FILE__) . 'assets/css/cdek-map-v2.css');
         wp_enqueue_style('cdek-admin-leaflet-cluster-default', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.Default.min.css');
         wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.min.css');
         wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
-        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map-v3.js', array('jquery'), '1.7.0', true);
+        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map-v4.js', array('jquery'), '1.7.0', true);
         addYandexMap();
     }
 }
 
 function cdek_admin_enqueue_script()
 {
-    wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/js/delivery-v2.js', array('jquery'), '1.7.0', true);
+    wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/js/delivery-v3.js', array('jquery'), '1.7.0', true);
     wp_enqueue_script('cdek-admin-leaflet', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
     wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
     wp_enqueue_style('cdek-admin-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
     wp_enqueue_style('cdek-admin-leaflet-cluster-default', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.Default.min.css');
     wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.min.css');
-    wp_enqueue_style('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/css/delivery-v1.css');
+    wp_enqueue_style('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/css/delivery-v3.css');
     addYandexMap();
 }
 
