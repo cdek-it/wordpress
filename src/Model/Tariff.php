@@ -7,6 +7,7 @@ class Tariff
     public const WEIGHT_5 = '5';
     public const WEIGHT_30 = '30';
     public const WEIGHT_50 = '50';
+    public const WEIGHT_1000 = '1000';
     public const DD = 'дверь-дверь (Д-Д)';
     public const SS = 'склад-склад (С-С)';
     public const SD = 'склад-дверь (С-Д)';
@@ -162,6 +163,60 @@ class Tariff
             'typeFrom' => self::STORE,
             'typeTo' => self::STORE,
             'postamat' => false
+        ],
+        [
+            'code' => 480,
+            'name' => 'Экспресс дверь-дверь',
+            'mode' => self::DD,
+            'weight' => self::WEIGHT_30,
+            'typeFrom' => self::DOOR,
+            'typeTo' => self::DOOR,
+            'postamat' => false
+        ],
+        [
+            'code' => 481,
+            'name' => 'Экспресс дверь-склад',
+            'mode' => self::DS,
+            'weight' => self::WEIGHT_30,
+            'typeFrom' => self::DOOR,
+            'typeTo' => self::STORE,
+            'postamat' => false
+        ],
+        [
+            'code' => 482,
+            'name' => 'Экспресс склад-дверь',
+            'mode' => self::SD,
+            'weight' => self::WEIGHT_30,
+            'typeFrom' => self::STORE,
+            'typeTo' => self::DOOR,
+            'postamat' => false
+        ],
+        [
+            'code' => 483,
+            'name' => 'Экспресс склад-склад',
+            'mode' => self::SS,
+            'weight' => self::WEIGHT_50,
+            'typeFrom' => self::STORE,
+            'typeTo' => self::STORE,
+            'postamat' => false
+        ],
+        [
+            'code' => 485,
+            'name' => 'Экспресс дверь-постамат',
+            'mode' => self::DP,
+            'weight' => self::WEIGHT_30,
+            'typeFrom' => self::DOOR,
+            'typeTo' => self::STORE,
+            'postamat' => true
+        ],
+        [
+            'code' => 486,
+            'name' => 'Экспресс склад-постамат',
+            'mode' => self::SP,
+            'weight' => self::WEIGHT_30,
+            'typeFrom' => self::STORE,
+            'typeTo' => self::STORE,
+            'postamat' => true
         ],
     ];
 
