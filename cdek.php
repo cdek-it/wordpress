@@ -6,7 +6,7 @@
  * Version:           1.0
  * Requires at least: 6.0
  * Requires PHP:      7.2
- * Author:            Klementev Ilya
+ * Author:            CDEK IT
  * WC requires at least: 6.0
  * WC tested up to: 7.0
  */
@@ -286,9 +286,16 @@ function setPackage($data, $orderId, array $param)
             $quantity = (int)$item->get_quantity();
             $totalWeight += $quantity * $weight;
 
+            $selectedPaymentMethodId = $order->get_payment_method();
+            if ($selectedPaymentMethodId === 'cod') {
+                $paymentValue = $order->get_total();
+            } else {
+                $paymentValue = 0;
+            }
+
             $itemsData[] = [
                 "ware_key" => $product->get_id(),
-                "payment" => ["value" => 0],
+                "payment" => ["value" => $paymentValue],
                 "name" => $product->get_name(),
                 "cost" => $product->get_price(),
                 "amount" => $item->get_quantity(),
@@ -312,8 +319,8 @@ function setPackage($data, $orderId, array $param)
 function get_packages($orderId, $packageData)
 {
     $result = [];
-    foreach ($packageData as $package) {
-        $data = get_package_items($package->items);
+    foreach ($packageData as $key => $package) {
+        $data = get_package_items($package->items, $orderId, $key);
         $result[] = [
             'number' => $orderId . '_' . Helper::generateRandomString(5),
             'length' => $package->length,
@@ -327,7 +334,7 @@ function get_packages($orderId, $packageData)
     return $result;
 }
 
-function get_package_items($items)
+function get_package_items($items, $orderId, $key)
 {
     $itemsData = [];
     $totalWeight = 0;
@@ -337,9 +344,22 @@ function get_package_items($items)
         $weightClass = new WeightCalc();
         $weight = $weightClass->getWeight($weight);
         $totalWeight += (int)$item[2] * $weight;
+
+        $order = wc_get_order($orderId);
+        $selectedPaymentMethodId = $order->get_payment_method();
+        if ($selectedPaymentMethodId === 'cod') {
+            if ($key === 0) {
+                $paymentValue = (int)$product->get_price() + (int)$order->get_shipping_total();
+            } else {
+                $paymentValue = $product->get_price();
+            }
+        } else {
+            $paymentValue = 0;
+        }
+
         $itemsData[] = [
             "ware_key" => $product->get_id(),
-            "payment" => ["value" => 0],
+            "payment" => ["value" => $paymentValue],
             "name" => $product->get_name(),
             "cost" => $product->get_price(),
             "amount" => $item[2],
