@@ -273,6 +273,20 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'description' => "Бесплатная доставка от суммы в рублях",
             ),
 
+            'stepcodprice' => array(
+                'title' => 'Бесплатная доставка от суммы заказа для наложенного платежа',
+                'type' => 'number',
+                'description' => "Применяется только для наложенного платежа",
+                'default' => __('100000', 'official_cdek')
+            ),
+
+            'percentcod' => array(
+                'title' => 'Наценка к заказу для наложенного платежа в процентах',
+                'type' => 'number',
+                'description' => "Расчитывается от стоимости заказа при отправке наложенным платежом. 
+                Меняет итоговую сумму и отображается в квитанции. Значение не может быть меньше 100%",
+            ),
+
             'city_code_value' => array(
                 'type' => 'text',
                 'css' => 'display: none;',
