@@ -228,6 +228,14 @@ function create_order($data)
     $cdekShippingSettings = Helper::getSettingDataPlugin();
     $services = $cdekShippingSettings['service_list'];
 
+    $selectedPaymentMethodId = $order->get_payment_method();
+    if ($selectedPaymentMethodId === 'cod') {
+        $param['delivery_recipient_cost_adv'] = [
+            'sum' => $order->get_shipping_total(),
+            'threshold' => (int)$cdekShippingSettings['stepcodprice']
+        ];
+    }
+
     if ($services !== "") {
         $servicesListForParam = [];
         foreach ($services as $service) {
@@ -278,17 +286,18 @@ function setPackage($data, $orderId, array $param)
         $items = $order->get_items();
         $itemsData = [];
         $totalWeight = 0;
-        foreach ($items as $item) {
+        foreach ($items as $key => $item) {
             $product = $item->get_product();
             $weight = $product->get_weight();
             $weightClass = new WeightCalc();
             $weight = $weightClass->getWeight($weight);
             $quantity = (int)$item->get_quantity();
             $totalWeight += $quantity * $weight;
+            $cost = $product->get_price();
 
             $selectedPaymentMethodId = $order->get_payment_method();
             if ($selectedPaymentMethodId === 'cod') {
-                $paymentValue = $order->get_total();
+                $paymentValue = (int) (((int)$cdekShippingSettings['percentcod'] / 100) * $cost);
             } else {
                 $paymentValue = 0;
             }
@@ -297,7 +306,7 @@ function setPackage($data, $orderId, array $param)
                 "ware_key" => $product->get_id(),
                 "payment" => ["value" => $paymentValue],
                 "name" => $product->get_name(),
-                "cost" => $product->get_price(),
+                "cost" => $cost,
                 "amount" => $item->get_quantity(),
                 "weight" => $weight,
                 "weight_gross" => $weight + 1,
@@ -348,11 +357,7 @@ function get_package_items($items, $orderId, $key)
         $order = wc_get_order($orderId);
         $selectedPaymentMethodId = $order->get_payment_method();
         if ($selectedPaymentMethodId === 'cod') {
-            if ($key === 0) {
-                $paymentValue = (int)$product->get_price() + (int)$order->get_shipping_total();
-            } else {
-                $paymentValue = $product->get_price();
-            }
+            $paymentValue = $product->get_price();
         } else {
             $paymentValue = 0;
         }

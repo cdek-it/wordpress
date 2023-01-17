@@ -255,8 +255,11 @@
         $('#woocommerce_official_cdek_extra_day').attr('min', 0);
         $('#woocommerce_official_cdek_extra_cost').attr('min', 0);
         $('#woocommerce_official_cdek_percentprice').attr('min', 100);
+        $('#woocommerce_official_cdek_percentcod').attr('min', 100);
         $('#woocommerce_official_cdek_product_length_default').attr('min', 1);
         $('#woocommerce_official_cdek_product_width_default').attr('min', 1);
         $('#woocommerce_official_cdek_product_height_default').attr('min', 1);
+        $('#woocommerce_official_cdek_stepprice').attr('min', 1);
+        $('#woocommerce_official_cdek_stepcodprice').attr('min', 1);
     })
 })(jQuery);

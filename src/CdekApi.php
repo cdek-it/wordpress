@@ -67,7 +67,7 @@ class CdekApi
     public function createOrder($param)
     {
         $url = self::API . self::ORDERS_PATH;
-        $param['developer_key'] = $this->adminSetting->developerKey;
+//        $param['developer_key'] = $this->adminSetting->developerKey;
         $param['date_invoice'] = date('Y-m-d');
         $param['shipper_name'] = $this->adminSetting->shipperName;
         $param['shipper_address'] = $this->adminSetting->shipperAddress;
