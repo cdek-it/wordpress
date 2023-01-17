@@ -302,8 +302,13 @@ function setPackage($data, $orderId, array $param)
             $cost = $product->get_price();
 
             $selectedPaymentMethodId = $order->get_payment_method();
+            $percentCod = (int)$cdekShippingSettings['percentcod'];
             if ($selectedPaymentMethodId === 'cod') {
-                $paymentValue = (int) (((int)$cdekShippingSettings['percentcod'] / 100) * $cost);
+                if ($percentCod !== 0) {
+                    $paymentValue = (int) (((int)$cdekShippingSettings['percentcod'] / 100) * $cost);
+                } else {
+                    $paymentValue = $cost;
+                }
             } else {
                 $paymentValue = 0;
             }
