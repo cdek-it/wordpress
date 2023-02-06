@@ -27,14 +27,28 @@ class DeliveryCalc
         $deliveryParam['state'] = $this->getState($package["destination"]);
         $deliveryParam['package_data'] = $this->getPackagesData($package['contents']);
         $services = $cdekShippingSettings['service_list'];
+        $weightInKg = $deliveryParam['package_data']['weight'] / 1000;
 
         $api = new CdekApi();
         $adminSetting = new AdminSetting();
         $setting = $adminSetting->getCurrentSetting();
         foreach ($tariffList as $tariff) {
+
+            $weightLimit = (int) Tariff::getTariffWeightByCode($tariff);
+            if ($weightInKg > $weightLimit) {
+                continue;
+            }
+
             $deliveryParam['selected_services'] = $this->getServicesList($services, $tariff);
             if ($setting->insurance === 'yes') {
                 $deliveryParam['selected_services'][] = ['code' => 'INSURANCE', 'parameter' => (int)$package['cart_subtotal']];
+            }
+
+            $codeCity = $api->getCityCodeByCityName($deliveryParam['city'], $deliveryParam['state']);
+            $pvz = json_decode($api->getPvz($codeCity, $deliveryParam['package_data']['weight'] / 1000));
+
+            if (empty($pvz)) {
+                continue;
             }
 
             $calcResult = $api->calculate($deliveryParam, $tariff);
@@ -76,7 +90,10 @@ class DeliveryCalc
                     $maxDay
                 ),
                 'cost' => $cost,
-                'meta_data' => ['tariff_code' => $tariff]
+                'meta_data' => [
+                    'tariff_code' => $tariff,
+                    'total_weight_kg' => $weightInKg
+                ]
             ];
         }
 

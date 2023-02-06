@@ -111,7 +111,7 @@ class CdekApi
         return $this->httpClient->sendRequest($url, 'DELETE', $this->getToken());
     }
 
-    public function getPvz($city, $admin = false)
+    public function getPvz($city, $weight, $admin = false)
     {
         $url = self::API . self::PVZ_PATH;
         if (empty($city)) {
@@ -120,7 +120,7 @@ class CdekApi
         if ($admin) {
             $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city_code' => $city, 'type' => 'PVZ']);
         } else {
-            $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city_code' => $city]);
+            $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city_code' => $city, 'weight_max' => $weight]);
         }
         $pvz = array_map(function($elem) {
             return [

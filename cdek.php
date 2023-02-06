@@ -74,7 +74,7 @@ function cdek_widget_enqueue_script()
         wp_enqueue_style('cdek-admin-leaflet-cluster-default', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.Default.min.css');
         wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.min.css');
         wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
-        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map-v4.js', array('jquery'), '1.7.0', true);
+        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map-v5.js', array('jquery'), '1.7.0', true);
         addYandexMap();
     }
 }
@@ -235,6 +235,7 @@ function create_order($data)
     if ($codPriceThreshold === 0) {
         $codPriceThreshold = 100000;
     }
+    //threshold
     if ($selectedPaymentMethodId === 'cod') {
         $param['delivery_recipient_cost_adv'] = [
             'sum' => $order->get_shipping_total(),
@@ -453,9 +454,9 @@ function get_pvz($data)
 {
     $api = new CdekApi();
     if ($data->get_param('admin')) {
-        return $api->getPvz($data->get_param('city_code'), true);
+        return $api->getPvz($data->get_param('city_code'), 0, true);
     }
-    return $api->getPvz($data->get_param('city_code'));
+    return $api->getPvz($data->get_param('city_code'), $data->get_param('weight'));
 }
 
 function delete_order($data)
@@ -488,6 +489,9 @@ function cdek_map_display($shippingMethodCurrent)
         }
 
         $postamat = (int)isPostamatOrStore();
+
+        $meta = $shippingMethodCurrent->get_meta_data();
+        $weight = $meta['total_weight_kg'];
 
         include 'templates/public/open-map.php';
     }

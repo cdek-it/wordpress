@@ -96,11 +96,13 @@
         }
 
         function getPvz(cityCode) {
+            let weight = $('.open-pvz-btn').data('weight');
             $.ajax({
                 method: "GET",
                 url: "/wp-json/cdek/v1/get-pvz",
                 data: {
-                    city_code: cityCode
+                    city_code: cityCode,
+                    weight: weight
                 },
                 success: function (response) {
                     $('#map-loader').hide();

@@ -7,7 +7,9 @@ class Tariff
     public const WEIGHT_5 = '5';
     public const WEIGHT_30 = '30';
     public const WEIGHT_50 = '50';
-    public const WEIGHT_1000 = '1000';
+    public const WEIGHT_500 = '500';
+    public const WEIGHT_100000 = '100000';
+    public const WEIGHT_20000 = '20000';
     public const DD = 'дверь-дверь (Д-Д)';
     public const SS = 'склад-склад (С-С)';
     public const SD = 'склад-дверь (С-Д)';
@@ -96,7 +98,7 @@ class Tariff
             'code' => 291,
             'name' => 'CDEK Express склад-склад',
             'mode' => self::SS,
-            'weight' => self::WEIGHT_50,
+            'weight' => self::WEIGHT_500,
             'typeFrom' => self::STORE,
             'typeTo' => self::STORE,
             'postamat' => false
@@ -105,7 +107,7 @@ class Tariff
             'code' => 293,
             'name' => 'CDEK Express дверь-дверь',
             'mode' => self::DD,
-            'weight' => self::WEIGHT_50,
+            'weight' => self::WEIGHT_500,
             'typeFrom' => self::DOOR,
             'typeTo' => self::DOOR,
             'postamat' => false
@@ -114,7 +116,7 @@ class Tariff
             'code' => 294,
             'name' => 'CDEK Express склад-дверь',
             'mode' => self::SD,
-            'weight' => self::WEIGHT_50,
+            'weight' => self::WEIGHT_500,
             'typeFrom' => self::STORE,
             'typeTo' => self::DOOR,
             'postamat' => false
@@ -123,7 +125,7 @@ class Tariff
             'code' => 295,
             'name' => 'CDEK Express дверь-склад',
             'mode' => self::DS,
-            'weight' => self::WEIGHT_50,
+            'weight' => self::WEIGHT_500,
             'typeFrom' => self::DOOR,
             'typeTo' => self::STORE,
             'postamat' => false
@@ -159,7 +161,7 @@ class Tariff
             'code' => 62,
             'name' => 'Магистральный экспресс склад-склад',
             'mode' => self::SS,
-            'weight' => self::WEIGHT_30,
+            'weight' => self::WEIGHT_100000,
             'typeFrom' => self::STORE,
             'typeTo' => self::STORE,
             'postamat' => false
@@ -168,7 +170,7 @@ class Tariff
             'code' => 480,
             'name' => 'Экспресс дверь-дверь',
             'mode' => self::DD,
-            'weight' => self::WEIGHT_30,
+            'weight' => self::WEIGHT_100000,
             'typeFrom' => self::DOOR,
             'typeTo' => self::DOOR,
             'postamat' => false
@@ -177,7 +179,7 @@ class Tariff
             'code' => 481,
             'name' => 'Экспресс дверь-склад',
             'mode' => self::DS,
-            'weight' => self::WEIGHT_30,
+            'weight' => self::WEIGHT_100000,
             'typeFrom' => self::DOOR,
             'typeTo' => self::STORE,
             'postamat' => false
@@ -186,7 +188,7 @@ class Tariff
             'code' => 482,
             'name' => 'Экспресс склад-дверь',
             'mode' => self::SD,
-            'weight' => self::WEIGHT_30,
+            'weight' => self::WEIGHT_100000,
             'typeFrom' => self::STORE,
             'typeTo' => self::DOOR,
             'postamat' => false
@@ -195,7 +197,7 @@ class Tariff
             'code' => 483,
             'name' => 'Экспресс склад-склад',
             'mode' => self::SS,
-            'weight' => self::WEIGHT_50,
+            'weight' => self::WEIGHT_100000,
             'typeFrom' => self::STORE,
             'typeTo' => self::STORE,
             'postamat' => false
@@ -204,7 +206,7 @@ class Tariff
             'code' => 485,
             'name' => 'Экспресс дверь-постамат',
             'mode' => self::DP,
-            'weight' => self::WEIGHT_30,
+            'weight' => self::WEIGHT_100000,
             'typeFrom' => self::DOOR,
             'typeTo' => self::STORE,
             'postamat' => true
@@ -213,7 +215,7 @@ class Tariff
             'code' => 486,
             'name' => 'Экспресс склад-постамат',
             'mode' => self::SP,
-            'weight' => self::WEIGHT_30,
+            'weight' => self::WEIGHT_100000,
             'typeFrom' => self::STORE,
             'typeTo' => self::STORE,
             'postamat' => true
@@ -249,6 +251,17 @@ class Tariff
                 }
             }
         }
+    }
+
+    public static function getTariffWeightByCode($code)
+    {
+        foreach (self::TARIFF_DATA as $tariff) {
+            if ($tariff['code'] == $code) {
+                return $tariff['weight'];
+            }
+        }
+
+        return 0;
     }
 
     public static function getTariffNameByCode($code)
