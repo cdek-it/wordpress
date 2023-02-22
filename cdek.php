@@ -232,11 +232,9 @@ function create_order($data)
 
     $selectedPaymentMethodId = $order->get_payment_method();
     $codPriceThreshold = (int)$cdekShippingSettings['stepcodprice'];
-    if ($codPriceThreshold === 0) {
-        $codPriceThreshold = 100000;
-    }
+
     //threshold
-    if ($selectedPaymentMethodId === 'cod') {
+    if ($selectedPaymentMethodId === 'cod' && $codPriceThreshold > 0) {
         $param['delivery_recipient_cost_adv'] = [
             'sum' => $order->get_shipping_total(),
             'threshold' => $codPriceThreshold

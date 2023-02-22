@@ -276,7 +276,7 @@ class CdekShippingMethod extends WC_Shipping_Method
             'stepcodprice' => array(
                 'title' => 'Бесплатная доставка от суммы заказа для наложенного платежа',
                 'type' => 'number',
-                'description' => "Применяется только для наложенного платежа",
+                'description' => "Применяется только для наложенного платежа, если значение не задано, то бесплатная доставка от заданной суммы не применяется.",
                 'default' => __('100000', 'official_cdek')
             ),
 

@@ -117,10 +117,11 @@ class CdekApi
         if (empty($city)) {
             $city = '44';
         }
+
         if ($admin) {
             $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city_code' => $city, 'type' => 'PVZ']);
         } else {
-            $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city_code' => $city, 'weight_max' => $weight]);
+            $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city_code' => $city, 'weight_max' => (int)ceil($weight)]);
         }
         $pvz = array_map(function($elem) {
             return [
