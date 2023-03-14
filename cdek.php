@@ -34,36 +34,6 @@ add_action('admin_enqueue_scripts', 'cdek_admin_enqueue_script');
 add_filter('woocommerce_update_order_review_fragments', 'cdek_add_update_form_billing', 99);
 add_filter('woocommerce_checkout_fields', 'cdek_override_checkout_fields', 30);
 add_action('wp_footer', 'cdek_add_script_update_shipping_method');
-//add_filter('woocommerce_billing_fields', 'cdek_woocommerce_billing_fields', 30, 2);
-
-function cdek_woocommerce_billing_fields($fields)
-{
-    if (!array_key_exists('billing_city', $fields)) {
-        $fields['billing_city'] = [
-            'label' => 'Населённый пункт',
-            'placeholder' => '',
-            'class' => [
-                "form-row-wide",
-                "address-field"
-            ],
-            'required' => true,
-            'public' => true,
-            'payment_method' => ["0"],
-            'shipping_method' => ["0"],
-            'order' => 16,
-            'priority' => 16,
-        ];
-    }
-
-//    if (array_key_exists('billing_state', $fields)) {
-//        $fields['billing_state'] = [];
-//    }
-//
-//    if (array_key_exists('billing_address_line_1', $fields)) {
-//        $fields['billing_address_line_1'] = [];
-//    }
-    return $fields;
-}
 
 function cdek_widget_enqueue_script()
 {
@@ -117,6 +87,19 @@ function addYandexMap()
         $cdekShippingSettings['map_layer'] = '0';
     }
 }
+
+function cdek_admin_notice__error() {
+    if (!function_exists('rest_url')) {
+        deactivate_plugins(plugin_basename(__FILE__));
+        ?>
+        <div class="notice notice-error is-dismissible">
+            <p><?php _e( 'Плагин CDEKDelivery был деактивирован. Для работы плагина требуется включить REST API.', 'cdek' ); ?></p>
+        </div>
+        <?php
+    }
+
+}
+add_action( 'admin_notices', 'cdek_admin_notice__error' );
 
 function cdek_register_route()
 {
