@@ -3,7 +3,6 @@
 namespace Cdek;
 
 use Cdek\Model\AdminSetting;
-use Cdek\Model\DefaultPackage;
 use Cdek\Model\Tariff;
 
 class DeliveryCalc

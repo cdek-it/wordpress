@@ -122,10 +122,12 @@
             cluster = L.markerClusterGroup();
             map.addLayer(cluster);
             let postamat = $('.open-pvz-btn').data('postamat');
+            let hasPostamat = false;
             for (let i = 0; i < pvz.length; i++) {
                 let marker = null;
                 if (pvz[i].type === 'POSTAMAT') {
                     if (postamat === 1) {
+                        hasPostamat = true;
                         marker = L.circleMarker([pvz[i].latitude, pvz[i].longitude], {color: '#ffad33'});
                     }
                 } else {
@@ -143,7 +145,18 @@
                 });
                 cluster.addLayer(marker);
             }
-            map.fitBounds(cluster.getBounds())
+
+            if (postamat === 1 && !hasPostamat) {
+                $('#map-frame').css('display', 'none');
+                uninstallMap();
+                let label = $('.open-pvz-btn').prev()[0];
+                $(label).text('По данному направлению тарифы "до постамата" временно не работают')
+                $('.open-pvz-btn').hide();
+                $('#pvz-info').val("");
+                $('#pvz-code').val("");
+            } else {
+                map.fitBounds(cluster.getBounds())
+            }
         }
 
         function selectMarker(pvz) {
