@@ -156,14 +156,17 @@ function create_order($data)
 
     $param = [];
     $orderId = $data->get_param('package_order_id');
-    $param = setPackage($data, $orderId, $param);
-    $order = wc_get_order($orderId);
 
     $postOrderData = get_post_meta($orderId, 'order_data');
 
     $pvzCode = $postOrderData[0]['pvz_code'];
     $tariffId = $postOrderData[0]['tariff_id'];
     $cityCode = $postOrderData[0]['city_code'];
+    $currency = $postOrderData[0]['currency'];
+
+    $param = setPackage($data, $orderId, $param, $currency);
+    $order = wc_get_order($orderId);
+
     $cityName = $order->get_shipping_city();
     $cityAddress = $order->get_shipping_address_1();
     $email = $order->get_billing_email();
@@ -247,12 +250,12 @@ function create_order($data)
     return json_encode(['state' => 'success', 'code' => $cdekNumber, 'waybill' => '/wp-json/cdek/v1/get-waybill?number=' . $orderData->entity->uuid]);
 }
 
-function setPackage($data, $orderId, array $param)
+function setPackage($data, $orderId, array $param, $currency)
 {
     $cdekShippingSettings = Helper::getSettingDataPlugin();
     if ($cdekShippingSettings['has_packages_mode'] === 'yes') {
         $packageData = json_decode($data->get_param('package_data'));
-        $param['packages'] = get_packages($orderId, $packageData);
+        $param['packages'] = get_packages($orderId, $packageData, $currency);
     } else {
         $length = $data->get_param('package_length');
         $width = $data->get_param('package_width');
@@ -269,6 +272,10 @@ function setPackage($data, $orderId, array $param)
             $quantity = (int)$item->get_quantity();
             $totalWeight += $quantity * $weight;
             $cost = $product->get_price();
+
+            if ($currency !== 'RUB' && function_exists( 'wcml_get_woocommerce_currency_option' )) {
+                $cost = convert_currency_cost_to_rub($cost, $currency);
+            }
 
             $selectedPaymentMethodId = $order->get_payment_method();
             $percentCod = (int)$cdekShippingSettings['percentcod'];
@@ -305,11 +312,40 @@ function setPackage($data, $orderId, array $param)
     return $param;
 }
 
-function get_packages($orderId, $packageData)
+function convert_currency_cost_to_rub($cost, $currency)
+{
+    global $woocommerce_wpml;
+
+    $multiCurrency = $woocommerce_wpml->get_multi_currency();
+    $rates = $multiCurrency->get_exchange_rates();
+
+    if (!array_key_exists('RUB', $rates)) {
+        return $cost;
+    }
+
+    $defaultCurrency = '';
+    foreach ($rates as $key => $rate) {
+        if ($rate === 1) {
+            $defaultCurrency = $key;
+            break;
+        }
+    }
+
+    if ($currency === $defaultCurrency) {
+        $cost = round($cost * (float) $rates['RUB'], 2);
+    } else {
+        $costConvertToDefault = round($cost / (float) $rates[$currency], 2);
+        $cost = round($costConvertToDefault * (float) $rates['RUB'], 2);
+    }
+
+    return $cost;
+}
+
+function get_packages($orderId, $packageData, $currency)
 {
     $result = [];
     foreach ($packageData as $key => $package) {
-        $data = get_package_items($package->items, $orderId, $key);
+        $data = get_package_items($package->items, $orderId, $currency);
         $result[] = [
             'number' => $orderId . '_' . Helper::generateRandomString(5),
             'length' => $package->length,
@@ -323,7 +359,7 @@ function get_packages($orderId, $packageData)
     return $result;
 }
 
-function get_package_items($items, $orderId, $key)
+function get_package_items($items, $orderId, $currency)
 {
     $itemsData = [];
     $totalWeight = 0;
@@ -342,11 +378,17 @@ function get_package_items($items, $orderId, $key)
             $paymentValue = 0;
         }
 
+        $cost = $product->get_price();
+
+        if ($currency !== 'RUB' && function_exists( 'wcml_get_woocommerce_currency_option' )) {
+            $cost = convert_currency_cost_to_rub($cost, $currency);
+        }
+
         $itemsData[] = [
             "ware_key" => $product->get_id(),
             "payment" => ["value" => $paymentValue],
             "name" => $product->get_name(),
-            "cost" => $product->get_price(),
+            "cost" => $cost,
             "amount" => $item[2],
             "weight" => $weight,
             "weight_gross" => $weight + 1,
@@ -796,6 +838,11 @@ function cdek_woocommerce_new_order_action($order_id, $order)
         $tariffId = getTariffCodeCdekShippingMethodByOrder($order);
         $cityCode = $_POST['city_code'];
 
+        $currency = 'RUB';
+        if (function_exists( 'wcml_get_woocommerce_currency_option' )) {
+            $currency = get_woocommerce_currency();
+        }
+
         if ($pvzInfo !== null) {
             $api = new CdekApi();
             $cityData = $api->getCityByCode($cityCode);
@@ -814,7 +861,8 @@ function cdek_woocommerce_new_order_action($order_id, $order)
             'pvz_address' => $pvzInfo,
             'pvz_code' => $pvzCode,
             'tariff_id' => $tariffId,
-            'city_code' => $cityCode
+            'city_code' => $cityCode,
+            'currency' => $currency
         ]);
     }
 

@@ -4,6 +4,7 @@ namespace Cdek;
 
 use Cdek\Model\AdminSetting;
 use Cdek\Model\Tariff;
+use WCML\MultiCurrency\Settings;
 
 class DeliveryCalc
 {
@@ -78,6 +79,12 @@ class DeliveryCalc
                 if ((int)$package['cart_subtotal'] > (int)$setting->stepPrice) {
                     $cost = 0;
                 }
+            }
+
+            if (function_exists( 'wcml_get_woocommerce_currency_option' )) {
+                $costTMP = apply_filters( 'wcml_raw_price_amount', $cost, 'RUB');
+                $coef = $costTMP / $cost;
+                $cost = $cost / $coef;
             }
 
             $this->rates[] = [

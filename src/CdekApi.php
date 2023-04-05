@@ -118,6 +118,10 @@ class CdekApi
             $city = '44';
         }
 
+        if ($city === -1) {
+            return json_encode([]);
+        }
+
         if ($admin) {
             $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city_code' => $city, 'type' => 'PVZ']);
         } else {
@@ -200,7 +204,7 @@ class CdekApi
     protected function getFormatState($state)
     {
         $state = mb_strtolower($state);
-        $regionType = ['автономная область', 'область', 'республика', 'респ.', 'автономный округ', 'округ', 'край', 'обл.'];
+        $regionType = ['автономная область', 'область', 'республика', 'респ.', 'автономный округ', 'округ', 'край', 'обл.', 'обл'];
         foreach ($regionType as $type) {
             $state = str_replace($type, '', $state);
         }
