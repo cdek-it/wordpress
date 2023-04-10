@@ -196,7 +196,6 @@ class CdekApi
                     return $data->code;
                 }
             }
-            return -1;
         }
         return $cityData[0]->code;
     }
