@@ -40,7 +40,7 @@ function cdek_widget_enqueue_script()
     if (is_checkout()) {
         wp_enqueue_style('cdek-css-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
         wp_enqueue_script('cdek-css-leaflet-min', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
-        wp_enqueue_style('cdek-css', plugin_dir_url(__FILE__) . 'assets/css/cdek-map-v2.css');
+        wp_enqueue_style('cdek-css', plugin_dir_url(__FILE__) . 'assets/css/cdek-map-v3.css');
         wp_enqueue_style('cdek-admin-leaflet-cluster-default', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.Default.min.css');
         wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.min.css');
         wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
