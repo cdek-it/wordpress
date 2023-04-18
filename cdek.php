@@ -22,6 +22,9 @@ if (!function_exists('add_action')) {
 
 require 'vendor/autoload.php';
 
+require_once(plugin_dir_path(__FILE__) . 'message.php');
+
+
 add_action('rest_api_init', 'cdek_register_route');
 add_filter('woocommerce_admin_order_data_after_shipping_address', 'cdek_admin_order_data_after_shipping_address');
 add_filter('woocommerce_new_order', 'cdek_woocommerce_new_order_action', 10, 2);
@@ -44,14 +47,14 @@ function cdek_widget_enqueue_script()
         wp_enqueue_style('cdek-admin-leaflet-cluster-default', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.Default.min.css');
         wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.min.css');
         wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
-        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map-v6.js', array('jquery'), '1.7.0', true);
+        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map-v7.js', array('jquery'), '1.7.0', true);
         addYandexMap();
     }
 }
 
 function cdek_admin_enqueue_script()
 {
-    wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/js/delivery-v4.js', array('jquery'), '1.7.0', true);
+    wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/js/delivery-v5.js', array('jquery'), '1.7.0', true);
     wp_enqueue_script('cdek-admin-leaflet', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
     wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
     wp_enqueue_style('cdek-admin-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
@@ -463,10 +466,7 @@ function get_city_code($data)
 function get_pvz($data)
 {
     $api = new CdekApi();
-    if ($data->get_param('admin')) {
-        return $api->getPvz($data->get_param('city_code'), 0, true);
-    }
-    return $api->getPvz($data->get_param('city_code'), $data->get_param('weight'));
+    return $api->getPvz($data->get_param('city_code'), $data->get_param('weight'), $data->get_param('admin'));
 }
 
 function delete_order($data)

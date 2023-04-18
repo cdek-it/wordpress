@@ -2,7 +2,6 @@
 
 namespace Cdek;
 
-use Cdek\Model\AdminSetting;
 use Cdek\Model\Tariff;
 use WCML\MultiCurrency\Settings;
 
@@ -17,21 +16,26 @@ class DeliveryCalc
             return false;
         }
 
-        $deliveryParam['city'] = $package["destination"]['city'];
-        if (!$deliveryParam['city']) {
+        $cityName = $package["destination"]['city'];
+        if (!$cityName) {
             return false;
         }
 
-        $cdekShippingSettings = Helper::getSettingDataPlugin();
-        $tariffList = $cdekShippingSettings['tariff_list'];
-        $deliveryParam['state'] = $this->getState($package["destination"]);
+        $stateName = $this->getState($package["destination"]);
+        $deliveryParam['cityCode'] = $api->getCityCodeByCityName($cityName, $stateName);
+
+        if ($deliveryParam['cityCode'] === -1) {
+            return false;
+        }
+
         $deliveryParam['package_data'] = $this->getPackagesData($package['contents']);
-        $services = $cdekShippingSettings['service_list'];
+        $pvz = json_decode($api->getPvz($deliveryParam['cityCode'], $deliveryParam['package_data']['weight'] / 1000));
+
+        $setting = Helper::getSettingDataPlugin();
+        $tariffList = $setting['tariff_list'];
+        $services = $setting['service_list'];
         $weightInKg = $deliveryParam['package_data']['weight'] / 1000;
 
-        $api = new CdekApi();
-        $adminSetting = new AdminSetting();
-        $setting = $adminSetting->getCurrentSetting();
         foreach ($tariffList as $tariff) {
 
             $weightLimit = (int) Tariff::getTariffWeightByCode($tariff);
@@ -39,16 +43,13 @@ class DeliveryCalc
                 continue;
             }
 
-            $deliveryParam['selected_services'] = $this->getServicesList($services, $tariff);
-            if ($setting->insurance === 'yes') {
-                $deliveryParam['selected_services'][] = ['code' => 'INSURANCE', 'parameter' => (int)$package['cart_subtotal']];
+            if (!$pvz->success && Tariff::isTariffToStoreByCode($tariff)) {
+                continue;
             }
 
-            $codeCity = $api->getCityCodeByCityName($deliveryParam['city'], $deliveryParam['state']);
-            $pvz = json_decode($api->getPvz($codeCity, $deliveryParam['package_data']['weight'] / 1000));
-
-            if (empty($pvz)) {
-                continue;
+            $deliveryParam['selected_services'] = $this->getServicesList($services, $tariff);
+            if ($setting['insurance'] === 'yes') {
+                $deliveryParam['selected_services'][] = ['code' => 'INSURANCE', 'parameter' => (int)$package['cart_subtotal']];
             }
 
             $calcResult = $api->calculate($deliveryParam, $tariff);
@@ -63,20 +64,20 @@ class DeliveryCalc
                 continue;
             }
 
-            $minDay = (int)$delivery->period_min + (int)$setting->extraDay;
-            $maxDay = (int)$delivery->period_max + (int)$setting->extraDay;
-            $cost = (int)$delivery->total_sum + (int)$setting->extraCost;
+            $minDay = (int)$delivery->period_min + (int)$setting['extra_day'];
+            $maxDay = (int)$delivery->period_max + (int)$setting['extra_day'];
+            $cost = (int)$delivery->total_sum + (int)$setting['extra_cost'];
 
-            if ($setting->percentPriceToggle === 'yes') {
-                $cost = (int) (($setting->percentPrice / 100) * $cost);
+            if ($setting['percentprice_toggle'] === 'yes') {
+                $cost = (int) (($setting['percentprice'] / 100) * $cost);
             }
 
-            if ($setting->fixPriceToggle === 'yes') {
-                $cost = (int)$setting->fixPrice;
+            if ($setting['fixprice_toggle'] === 'yes') {
+                $cost = (int)['fixprice'];
             }
 
-            if ($setting->stepPriceToggle === 'yes') {
-                if ((int)$package['cart_subtotal'] > (int)$setting->stepPrice) {
+            if ($setting['stepprice_toggle'] === 'yes') {
+                if ((int)$package['cart_subtotal'] > (int)$setting['stepprice']) {
                     $cost = 0;
                 }
             }
@@ -148,24 +149,23 @@ class DeliveryCalc
         $width = $widthList[0];
         $height = $heightList[0];
 
-        $adminSetting = new AdminSetting();
-        $setting = $adminSetting->getCurrentSetting();
+        $setting = Helper::getSettingDataPlugin();
 
-        if ($setting->productPackageDefaultToggle === 'yes') {
-            $length = (int)$setting->productLengthDefault;
-            $width = (int)$setting->productWidthDefault;
-            $height = (int)$setting->productHeightDefault;
+        if ($setting['product_package_default_toggle'] === 'yes') {
+            $length = (int)$setting['product_length_default'];
+            $width = (int)$setting['product_width_default'];
+            $height = (int)$setting['product_height_default'];
         } else {
             if ($length === 0) {
-                $length = (int)$setting->productLengthDefault;
+                $length = (int)$setting['product_length_default'];
             }
 
             if ($width === 0) {
-                $width = (int)$setting->productWidthDefault;
+                $width = (int)$setting['product_width_default'];
             }
 
             if ($height === 0) {
-                $height = (int)$setting->productHeightDefault;
+                $height = (int)$setting['product_height_default'];
             }
         }
 

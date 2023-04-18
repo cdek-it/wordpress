@@ -2,7 +2,6 @@
 
 namespace Cdek;
 
-use Cdek\Model\AdminSetting;
 use Cdek\Model\Tariff;
 use WP_Http;
 
@@ -19,10 +18,9 @@ class CdekApi
     protected $adminSetting;
     protected $httpClient;
 
-    public function __construct($currentAdminSetting = null)
+    public function __construct()
     {
-        $adminSetting = new AdminSetting();
-        $this->adminSetting = $adminSetting->getCurrentSetting($currentAdminSetting);
+        $this->adminSetting = Helper::getSettingDataPlugin();
 
         $this->httpClient = new HttpClientWrapper();
     }
@@ -43,8 +41,8 @@ class CdekApi
 
 	protected function getAuthUrl(): string
     {
-		return self::API . self::TOKEN_PATH . "?grant_type=client_credentials&client_id=" . $this->adminSetting->clientId
-			. "&client_secret=" . $this->adminSetting->clientSecret;
+		return self::API . self::TOKEN_PATH . "?grant_type=client_credentials&client_id=" . $this->adminSetting['client_id']
+			. "&client_secret=" . $this->adminSetting['client_secret'];
 	}
 
 	public function checkAuth(): bool
@@ -67,18 +65,18 @@ class CdekApi
     public function createOrder($param)
     {
         $url = self::API . self::ORDERS_PATH;
-        $param['developer_key'] = $this->adminSetting->developerKey;
+        $param['developer_key'] = '7wV8tk&r6VH4zK:1&0uDpjOkvM~qngLl';
         $param['date_invoice'] = date('Y-m-d');
-        $param['shipper_name'] = $this->adminSetting->shipperName;
-        $param['shipper_address'] = $this->adminSetting->shipperAddress;
-        $param['seller'] = ['address' => $this->adminSetting->sellerAddress];
+        $param['shipper_name'] = $this->adminSetting['shipper_name'];
+        $param['shipper_address'] = $this->adminSetting['shipper_address'];
+        $param['seller'] = ['address' => $this->adminSetting['seller_address']];
 
-        if (Tariff::getTariffModeByCode($param['tariff_code'])) {
-            $param['shipment_point'] = $this->adminSetting->pvzCode;
+        if (Tariff::isTariffFromStoreByCode($param['tariff_code'])) {
+            $param['shipment_point'] = $this->adminSetting['pvz_code'];
         } else {
             $param['from_location'] = [
-                'code' => $this->adminSetting->fromCity,
-                'address' => $this->adminSetting->fromAddress
+                'code' => $this->adminSetting['city_code_value'],
+                'address' => $this->adminSetting['street']
             ];
         }
 
@@ -122,41 +120,45 @@ class CdekApi
             return json_encode([]);
         }
 
+        $params = ['city_code' => $city];
         if ($admin) {
-            $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city_code' => $city, 'type' => 'PVZ']);
+            $params['type'] = 'PVZ';
         } else {
-            $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city_code' => $city, 'weight_max' => (int)ceil($weight)]);
+            $params['weight_max'] = (int)ceil($weight);
         }
-        $pvz = array_map(function($elem) {
-            return [
-                'code' => $elem->code,
-                'type' => $elem->type,
-                'longitude' => $elem->location->longitude,
-                'latitude' => $elem->location->latitude,
-                'address' => $elem->location->address
-            ];
-            }, json_decode($result));
-        return json_encode($pvz);
+
+        $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), $params);
+        $json = json_decode($result);
+        if (!$json) {
+            return json_encode(['success' => false, 'message' => CDEK_NO_DELIVERY_POINTS_IN_CITY]);
+        }
+
+        $pvz = [];
+        foreach ($json as $elem) {
+            if (isset($elem->code, $elem->type, $elem->location->longitude, $elem->location->latitude, $elem->location->address)) {
+                $pvz[] = [
+                    'code' => $elem->code,
+                    'type' => $elem->type,
+                    'longitude' => $elem->location->longitude,
+                    'latitude' => $elem->location->latitude,
+                    'address' => $elem->location->address
+                ];
+            }
+        }
+
+        return json_encode(['success' => true, 'pvz' => $pvz]);
     }
 
     public function calculate($deliveryParam, $tariff)
     {
         $url = self::API . self::CALC_PATH;
-
-        $toLocationCityCode = $this->getCityCodeByCityName($deliveryParam['city'], $deliveryParam['state']);
-
-        if ($toLocationCityCode === -1) {
-            return [];
-        }
-
-        $token = $this->getToken();
-        return $this->httpClient->sendRequest($url, 'POST', $token, json_encode([
+        return $this->httpClient->sendRequest($url, 'POST', $this->getToken(), json_encode([
             'tariff_code' => $tariff,
             'from_location' => [
-                'code' => $this->adminSetting->fromCity
+                'code' => $this->adminSetting['city_code_value']
             ],
             'to_location' => [
-                'code' => $toLocationCityCode,
+                'code' => $deliveryParam['cityCode'],
             ],
             'packages' => [
                 'weight' => $deliveryParam['package_data']['weight'],

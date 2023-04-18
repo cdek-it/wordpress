@@ -2,6 +2,8 @@
 
 namespace Cdek\Model;
 
+use Cdek\Helper;
+
 class Tariff
 {
     public const WEIGHT_5 = '5';
@@ -240,11 +242,24 @@ class Tariff
         }
     }
 
-    public static function getTariffModeByCode($code)
+    public static function isTariffToStoreByCode($code)
     {
         foreach (self::TARIFF_DATA as $tariff) {
             if ($tariff['code'] == $code) {
                 if ($tariff['typeTo'] === self::STORE) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
+        }
+    }
+
+    public static function isTariffFromStoreByCode($code)
+    {
+        foreach (self::TARIFF_DATA as $tariff) {
+            if ($tariff['code'] == $code) {
+                if ($tariff['typeFrom'] === self::STORE) {
                     return 1;
                 } else {
                     return 0;
@@ -266,9 +281,8 @@ class Tariff
 
     public static function getTariffNameByCode($code)
     {
-        $adminSetting = new AdminSetting();
-        $setting = $adminSetting->getCurrentSetting();
-        $tariffNameEdit = $setting->tariffNameEdit;
+        $setting = Helper::getSettingDataPlugin();
+        $tariffNameEdit = $setting['tariff_name'];
         if (!empty($tariffNameEdit)) {
             $tariffNameEditArray = explode(';',$tariffNameEdit);
             $tariffEditList = [];

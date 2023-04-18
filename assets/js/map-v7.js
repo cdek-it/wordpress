@@ -111,7 +111,12 @@
                 },
                 success: function (response) {
                     $('#map-loader').hide();
-                    setMarker(JSON.parse(response));
+                    let resp = JSON.parse(response);
+                    if (resp.success) {
+                        setMarker(resp.pvz);
+                    } else {
+                        console.log('Не найдено')
+                    }
                 },
                 error: function (error) {
                     console.log({error: error});
