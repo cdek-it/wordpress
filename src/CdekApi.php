@@ -69,6 +69,12 @@ class CdekApi
         $param['date_invoice'] = date('Y-m-d');
         $param['shipper_name'] = $this->adminSetting['shipper_name'];
         $param['shipper_address'] = $this->adminSetting['shipper_address'];
+        $param['sender']['passport_series'] = $this->adminSetting['passport_series'];
+        $param['sender']['passport_number'] = $this->adminSetting['passport_number'];
+        $param['sender']['passport_date_of_issue'] = $this->adminSetting['passport_date_of_issue'];
+        $param['sender']['passport_organization'] = $this->adminSetting['passport_organization'];
+        $param['sender']['tin'] = $this->adminSetting['tin'];
+        $param['sender']['passport_date_of_birth'] = $this->adminSetting['passport_date_of_birth'];
         $param['seller'] = ['address' => $this->adminSetting['seller_address']];
 
         if (Tariff::isTariffFromStoreByCode($param['tariff_code'])) {

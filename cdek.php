@@ -204,7 +204,7 @@ function create_order($data)
     $param['print'] = 'waybill';
 
     $cdekShippingSettings = Helper::getSettingDataPlugin();
-    $services = $cdekShippingSettings['service_list'];
+//    $services = $cdekShippingSettings['service_list'];
 
     $selectedPaymentMethodId = $order->get_payment_method();
     $codPriceThreshold = (int)$cdekShippingSettings['stepcodprice'];
@@ -217,15 +217,15 @@ function create_order($data)
         ];
     }
 
-    if ($services !== "") {
-        $servicesListForParam = [];
-        foreach ($services as $service) {
-            if ($service === 'DELIV_RECEIVER' && $tariffId == '62') {
-                $servicesListForParam['code'] = $service;
-            }
-        }
-        $param['services'] = $servicesListForParam;
-    }
+//    if ($services !== "") {
+//        $servicesListForParam = [];
+//        foreach ($services as $service) {
+//            if ($service === 'DELIV_RECEIVER' && $tariffId == '62') {
+//                $servicesListForParam['code'] = $service;
+//            }
+//        }
+//        $param['services'] = $servicesListForParam;
+//    }
 
     $orderDataJson = $api->createOrder($param);
     $orderData = json_decode($orderDataJson);

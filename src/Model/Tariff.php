@@ -169,6 +169,15 @@ class Tariff
             'postamat' => false
         ],
         [
+            'code' => 122,
+            'name' => 'Магистральный экспресс склад-дверь',
+            'mode' => self::SD,
+            'weight' => self::WEIGHT_100000,
+            'typeFrom' => self::STORE,
+            'typeTo' => self::DOOR,
+            'postamat' => false
+        ],
+        [
             'code' => 480,
             'name' => 'Экспресс дверь-дверь',
             'mode' => self::DD,
@@ -284,10 +293,10 @@ class Tariff
         $setting = Helper::getSettingDataPlugin();
         $tariffNameEdit = $setting['tariff_name'];
         if (!empty($tariffNameEdit)) {
-            $tariffNameEditArray = explode(';',$tariffNameEdit);
+            $tariffNameEditArray = explode(';', $tariffNameEdit);
             $tariffEditList = [];
             foreach ($tariffNameEditArray as $tariffEdit) {
-                $tariffConcrete = explode('-',$tariffEdit);
+                $tariffConcrete = explode('-', $tariffEdit);
                 $tariffEditList[$tariffConcrete[0]] = $tariffConcrete[1];
             }
         } else {

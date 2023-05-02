@@ -130,7 +130,6 @@
                             admin: 1
                         },
                         success: function (response) {
-                            console.log({response: response})
                             let resp = JSON.parse(response);
                             if (resp.success) {
                                 cityCodePvzReceived = cityCode;
@@ -181,7 +180,7 @@
 
             $('#woocommerce_official_cdek_service_list').after('<div id="service-message">Услуг для выбранных тарифов не найдено</div>');
             $('#woocommerce_official_cdek_service_list').css('display', 'none');
-            checkServicesAvailable();
+            // checkServicesAvailable();
             function checkServicesAvailable() {
                 let tariffCode62IsSelected = false;
                 $('#woocommerce_official_cdek_tariff_list').find('option:selected').each(function (key, option) {
@@ -261,15 +260,5 @@
                 }
             });
         })
-
-        $('#woocommerce_official_cdek_extra_day').attr('min', 0);
-        $('#woocommerce_official_cdek_extra_cost').attr('min', 0);
-        $('#woocommerce_official_cdek_percentprice').attr('min', 100);
-        $('#woocommerce_official_cdek_percentcod').attr('min', 100);
-        $('#woocommerce_official_cdek_product_length_default').attr('min', 1);
-        $('#woocommerce_official_cdek_product_width_default').attr('min', 1);
-        $('#woocommerce_official_cdek_product_height_default').attr('min', 1);
-        $('#woocommerce_official_cdek_stepprice').attr('min', 1);
-        $('#woocommerce_official_cdek_stepcodprice').attr('min', 1);
     })
 })(jQuery);
