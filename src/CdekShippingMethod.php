@@ -268,7 +268,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'default' => 0,
                 'custom_attributes' => [
                     'min' => 1,
-                    'step' => 100
+                    'step' => 1
                 ]
             ], 'insurance' => [
                 'title' => 'Страховка',
@@ -290,7 +290,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'default' => 100,
                 'custom_attributes' => [
                     'min' => 100,
-                    'step' => 10
+                    'step' => 1
                 ]
             ], 'fixprice_title' => [
                 'title' => 'Фиксированная стоимость доставки',
@@ -305,7 +305,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'default' => 0,
                 'custom_attributes' => [
                     'min' => 0,
-                    'step' => 100
+                    'step' => 1
                 ]
             ], 'stepprice_title' => [
                 'title' => 'Бесплатная доставка от суммы заказа',
@@ -320,7 +320,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'default' => 1000,
                 'custom_attributes' => [
                     'min' => 0,
-                    'step' => 100
+                    'step' => 1
                 ]
             ], 'stepcodprice_title' => [
                 'title' => 'Настройки наложенного платежа',
@@ -333,7 +333,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'default' => 1000,
                 'custom_attributes' => [
                     'min' => 0,
-                    'step' => 100
+                    'step' => 1
                 ]
             ], 'percentcod' => [
                 'title' => 'Наценка к заказу в процентах',
@@ -344,7 +344,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 о наценки при отправки наложенным платежем.",
                 'custom_attributes' => [
                     'min' => 100,
-                    'step' => 10
+                    'step' => 1
                 ]
             ], 'city_code_value' => [
                 'type' => 'text',
