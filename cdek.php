@@ -37,6 +37,10 @@ add_action('admin_enqueue_scripts', 'cdek_admin_enqueue_script');
 add_filter('woocommerce_update_order_review_fragments', 'cdek_add_update_form_billing', 99);
 //add_filter('woocommerce_checkout_fields', 'cdek_override_checkout_fields', 30);
 add_action('wp_footer', 'cdek_add_script_update_shipping_method');
+add_filter( 'woocommerce_checkout_fields' , 'cdek_add_custom_checkout_field' );
+add_action( 'woocommerce_checkout_create_order', 'cdek_save_custom_checkout_field_to_order', 10, 2 );
+
+
 
 function cdek_widget_enqueue_script()
 {
@@ -200,10 +204,22 @@ function create_order($data)
             'number' => $order->get_billing_phone()
         ]
     ];
+
+    $cdekShippingSettings = Helper::getSettingDataPlugin();
+
+    if ($cdekShippingSettings['international_mode'] === 'yes') {
+        $param['recipient']['passport_series'] = $order->get_meta( '_passport_series', true );
+        $param['recipient']['passport_number'] = $order->get_meta( '_passport_number', true );
+        $param['recipient']['passport_date_of_issue'] = $order->get_meta( '_passport_date_of_issue', true );
+        $param['recipient']['passport_organization'] = $order->get_meta( '_passport_organization', true );
+        $param['recipient']['tin'] = $order->get_meta( '_tin', true );
+        $param['recipient']['passport_date_of_birth'] = $order->get_meta( '_passport_date_of_birth', true );
+    }
+
     $param['tariff_code'] = $tariffId;
     $param['print'] = 'waybill';
 
-    $cdekShippingSettings = Helper::getSettingDataPlugin();
+
 //    $services = $cdekShippingSettings['service_list'];
 
     $selectedPaymentMethodId = $order->get_payment_method();
@@ -926,3 +942,78 @@ function isCdekShippingMethod($order)
     return false;
 }
 
+function cdek_add_custom_checkout_field($fields) {
+    $cdekShippingSettings = Helper::getSettingDataPlugin();
+    if ($cdekShippingSettings['international_mode'] === 'yes') {
+        $fields['billing']['passport_series'] = [
+            'label'       => __('Серия паспорта', 'woocommerce'),
+            'required'    => true,
+            'class'       => ['form-row-wide'],
+            'clear'       => true,
+            'custom_attributes' => [
+                'maxlength' => 4,
+            ],
+        ];
+        $fields['billing']['passport_number'] = [
+            'label'       => __('Номер паспорта', 'woocommerce'),
+            'required'    => true,
+            'class'       => ['form-row-wide'],
+            'clear'       => true,
+            'custom_attributes' => [
+                'maxlength' => 6,
+            ],
+        ];
+        $fields['billing']['passport_date_of_issue'] = [
+            'type' => 'date',
+            'label'       => __('Дата выдачи паспорта', 'woocommerce'),
+            'required'    => true,
+            'class'       => ['form-row-wide'],
+            'clear'       => true
+        ];
+        $fields['billing']['passport_organization'] = [
+            'label'       => __('Орган выдачи паспорта', 'woocommerce'),
+            'required'    => true,
+            'class'       => ['form-row-wide'],
+            'clear'       => true,
+        ];
+        $fields['billing']['tin'] = [
+            'label'       => __('ИНН', 'woocommerce'),
+            'required'    => true,
+            'class'       => ['form-row-wide'],
+            'clear'       => true,
+            'custom_attributes' => [
+                'maxlength' => 12,
+            ],
+        ];
+        $fields['billing']['passport_date_of_birth'] = [
+            'type' => 'date',
+            'label'       => __('Дата рождения', 'woocommerce'),
+            'required'    => true,
+            'class'       => ['form-row-wide'],
+            'clear'       => true
+        ];
+    }
+
+    return $fields;
+}
+
+function cdek_save_custom_checkout_field_to_order( $order, $data ) {
+    if ( isset( $_POST['passport_series'] ) ) {
+        $order->update_meta_data( '_passport_series', sanitize_text_field( $_POST['passport_series'] ) );
+    }
+    if ( isset( $_POST['passport_number'] ) ) {
+        $order->update_meta_data( '_passport_number', sanitize_text_field( $_POST['passport_number'] ) );
+    }
+    if ( isset( $_POST['passport_date_of_issue'] ) ) {
+        $order->update_meta_data( '_passport_date_of_issue', sanitize_text_field( $_POST['passport_date_of_issue'] ) );
+    }
+    if ( isset( $_POST['passport_organization'] ) ) {
+        $order->update_meta_data( '_passport_organization', sanitize_text_field( $_POST['passport_organization'] ) );
+    }
+    if ( isset( $_POST['tin'] ) ) {
+        $order->update_meta_data( '_tin', sanitize_text_field( $_POST['tin'] ) );
+    }
+    if ( isset( $_POST['passport_date_of_birth'] ) ) {
+        $order->update_meta_data( '_passport_date_of_birth', sanitize_text_field( $_POST['passport_date_of_birth'] ) );
+    }
+}

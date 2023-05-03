@@ -71,8 +71,15 @@ class CdekShippingMethod extends WC_Shipping_Method
                     'required' => true,
                 ]
             ], 'international_title' => [
-                'title' => 'Для международных заказов',
+                'title' => 'Международные заказы',
                 'type' => 'title',
+            ], 'international_mode' => [
+                'title' => __('Включить режим международных заказов', 'official_cdek'),
+                'type' => 'checkbox',
+                'desc_tip' => true,
+                'description' => "При включенном режиме международных заказов, на странице чекаута появятся дополнительные поля:
+                серия паспорта, номер паспорта, дата выдачи, отдел, ИНН, дата рождения.",
+                'default' => 'no'
             ], 'seller_address' => [
                 'title' => __('Адрес истинного продавца', 'official_cdek'),
                 'type' => 'text',
