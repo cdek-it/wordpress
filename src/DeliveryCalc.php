@@ -73,7 +73,7 @@ class DeliveryCalc
             }
 
             if ($setting['fixprice_toggle'] === 'yes') {
-                $cost = (int)['fixprice'];
+                $cost = (int)$setting['fixprice'];
             }
 
             if ($setting['stepprice_toggle'] === 'yes') {
