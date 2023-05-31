@@ -231,6 +231,60 @@ class Tariff
             'typeTo' => self::STORE,
             'postamat' => true
         ],
+        [
+            'code' => 184,
+            'name' => 'E-com Standard дверь-дверь',
+            'mode' => self::SP,
+            'weight' => self::WEIGHT_100000,
+            'typeFrom' => self::STORE,
+            'typeTo' => self::STORE,
+            'postamat' => false
+        ],
+        [
+            'code' => 185,
+            'name' => 'E-com Standard склад-склад',
+            'mode' => self::SP,
+            'weight' => self::WEIGHT_100000,
+            'typeFrom' => self::STORE,
+            'typeTo' => self::STORE,
+            'postamat' => false
+        ],
+        [
+            'code' => 186,
+            'name' => 'E-com Standard склад-дверь',
+            'mode' => self::SP,
+            'weight' => self::WEIGHT_100000,
+            'typeFrom' => self::STORE,
+            'typeTo' => self::STORE,
+            'postamat' => false
+        ],
+        [
+            'code' => 187,
+            'name' => 'E-com Standard дверь-склад',
+            'mode' => self::SP,
+            'weight' => self::WEIGHT_100000,
+            'typeFrom' => self::STORE,
+            'typeTo' => self::STORE,
+            'postamat' => false
+        ],
+        [
+            'code' => 497,
+            'name' => 'E-com Standard дверь-постамат',
+            'mode' => self::SP,
+            'weight' => self::WEIGHT_100000,
+            'typeFrom' => self::STORE,
+            'typeTo' => self::STORE,
+            'postamat' => true
+        ],
+        [
+            'code' => 498,
+            'name' => 'E-com Standard склад-постамат',
+            'mode' => self::SP,
+            'weight' => self::WEIGHT_100000,
+            'typeFrom' => self::STORE,
+            'typeTo' => self::STORE,
+            'postamat' => true
+        ],
     ];
 
     public static function getTariffTypeToByCode($code)
