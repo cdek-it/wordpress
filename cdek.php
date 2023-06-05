@@ -800,6 +800,7 @@ function cdek_add_script_update_shipping_method()
 
 function is_pvz_code()
 {
+    
     $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
 
     if (strpos($shippingMethodIdSelected, 'official_cdek') !== false) {
