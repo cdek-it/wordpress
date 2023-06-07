@@ -234,16 +234,16 @@ class Tariff
         [
             'code' => 184,
             'name' => 'E-com Standard дверь-дверь',
-            'mode' => self::SP,
+            'mode' => self::DD,
             'weight' => self::WEIGHT_100000,
-            'typeFrom' => self::STORE,
-            'typeTo' => self::STORE,
+            'typeFrom' => self::DOOR,
+            'typeTo' => self::DOOR,
             'postamat' => false
         ],
         [
             'code' => 185,
             'name' => 'E-com Standard склад-склад',
-            'mode' => self::SP,
+            'mode' => self::SS,
             'weight' => self::WEIGHT_100000,
             'typeFrom' => self::STORE,
             'typeTo' => self::STORE,
@@ -252,27 +252,27 @@ class Tariff
         [
             'code' => 186,
             'name' => 'E-com Standard склад-дверь',
-            'mode' => self::SP,
+            'mode' => self::SD,
             'weight' => self::WEIGHT_100000,
             'typeFrom' => self::STORE,
-            'typeTo' => self::STORE,
+            'typeTo' => self::DOOR,
             'postamat' => false
         ],
         [
             'code' => 187,
             'name' => 'E-com Standard дверь-склад',
-            'mode' => self::SP,
+            'mode' => self::DS,
             'weight' => self::WEIGHT_100000,
-            'typeFrom' => self::STORE,
+            'typeFrom' => self::DOOR,
             'typeTo' => self::STORE,
             'postamat' => false
         ],
         [
             'code' => 497,
             'name' => 'E-com Standard дверь-постамат',
-            'mode' => self::SP,
+            'mode' => self::DP,
             'weight' => self::WEIGHT_100000,
-            'typeFrom' => self::STORE,
+            'typeFrom' => self::DOOR,
             'typeTo' => self::STORE,
             'postamat' => true
         ],

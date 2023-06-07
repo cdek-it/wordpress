@@ -422,7 +422,10 @@ function get_waybill($data)
     $waybillData = $api->createWaybill($data->get_param('number'));
     $waybill = json_decode($waybillData);
 
-    if ($waybill->requests[0]->state === 'INVALID' || property_exists($waybill->requests[0], 'errors')) {
+    $order = json_decode($api->getOrder($data->get_param('number')));
+
+    if ($waybill->requests[0]->state === 'INVALID' || property_exists($waybill->requests[0], 'errors')
+        || !property_exists($order, 'related_entities')) {
         echo '
         Не удалось создать квитанцию. 
         Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
@@ -430,7 +433,6 @@ function get_waybill($data)
         exit();
     }
 
-    $order = json_decode($api->getOrder($data->get_param('number')));
     foreach ($order->related_entities as $entity) {
         if ($entity->uuid === $waybill->entity->uuid) {
             $result = $api->getWaybillByLink($entity->url);
@@ -800,7 +802,7 @@ function cdek_add_script_update_shipping_method()
 
 function is_pvz_code()
 {
-    
+
     $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
 
     if (strpos($shippingMethodIdSelected, 'official_cdek') !== false) {
