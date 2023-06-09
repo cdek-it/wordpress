@@ -32,7 +32,7 @@ class CdekApi
         $bodyJson = wp_remote_retrieve_body($response);
         $body = json_decode($bodyJson);
 
-	    if (property_exists($body, 'error')) {
+	    if ($body === null || property_exists($body, 'error')) {
 		    return false;
 	    }
 
