@@ -208,7 +208,7 @@
 <?php } else { ?>
     <div>
         <div id="cdek-create-order-form" <?php if ($orderUuid) { ?>style="display: none" <?php } ?>
-            <h3>Габариты упаковки ТЕСТ</h3>
+            <h3>Габариты упаковки</h3>
             <input name="package_order_id" type="hidden" value="<?php echo $order->get_id() ?>">
             <p class="form-field form-field-wide wc-order-status">
                 <label for="package_length">Длина см</label>
