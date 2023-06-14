@@ -19,7 +19,6 @@ class CdekShippingMethod extends WC_Shipping_Method
             'settings',
             'shipping-zones',
             'instance-settings',
-            'instance-settings-modal',
         ];
         $this->enabled = 'yes';
         $this->init();
