@@ -1,4 +1,4 @@
-(function ($) {
+(function ($, L) {
     $(document).ready(function () {
         let map = null;
         let cluster = null;
@@ -192,4 +192,4 @@
         }
 
     })
-})(jQuery);
+})(jQuery, L);
