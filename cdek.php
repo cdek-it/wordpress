@@ -851,6 +851,8 @@ function checkTariffFromStoreByTariffCode($tariffCode)
 
 function cdek_woocommerce_new_order_action($order_id, $order)
 {
+//    $order->set_shipping_address_1('');
+//    $order->save();
     if (isCdekShippingMethod($order)) {
         $pvzInfo = $_POST['pvz_info'];
         $pvzCode = $_POST['pvz_code'];
@@ -862,8 +864,16 @@ function cdek_woocommerce_new_order_action($order_id, $order)
             $currency = get_woocommerce_currency();
         }
 
+        $api = new CdekApi();
+//        $pvzInfo = '';
         if ($pvzInfo !== null) {
-            $api = new CdekApi();
+            if ($pvzInfo === '') {
+                $pvzInfo =  $order->get_billing_address_1();
+                $code = $api->getPvzCodeByPvzAddressNCityCode($pvzInfo, $cityCode);
+                if ($code !== false) {
+                    $pvzCode = $code;
+                }
+            }
             $cityData = $api->getCityByCode($cityCode);
             $order->set_shipping_address_1($pvzInfo);
             $order->set_shipping_city($cityData['city']);
@@ -883,6 +893,11 @@ function cdek_woocommerce_new_order_action($order_id, $order)
             'city_code' => $cityCode,
             'currency' => $currency
         ]);
+
+//        $note = sprintf('[CDEKDelivery] Order #%s: Fare - %s, PVZ Code - %s, PVZ Address - %s, City Code - %s',
+//            $order_id, $tariffId, $pvzCode, $pvzInfo, $cityCode);
+//        $order->add_order_note($note);
+//        $order->save();
     }
 
 }
