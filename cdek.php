@@ -851,8 +851,6 @@ function checkTariffFromStoreByTariffCode($tariffCode)
 
 function cdek_woocommerce_new_order_action($order_id, $order)
 {
-//    $order->set_shipping_address_1('');
-//    $order->save();
     if (isCdekShippingMethod($order)) {
         $pvzInfo = $_POST['pvz_info'];
         $pvzCode = $_POST['pvz_code'];
@@ -865,7 +863,6 @@ function cdek_woocommerce_new_order_action($order_id, $order)
         }
 
         $api = new CdekApi();
-//        $pvzInfo = '';
         if ($pvzInfo !== null) {
             if ($pvzInfo === '') {
                 $pvzInfo =  $order->get_billing_address_1();
