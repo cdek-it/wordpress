@@ -324,6 +324,8 @@ class CdekShippingMethod extends WC_Shipping_Method
             ], 'stepcodprice_title' => [
                 'title' => 'Настройки наложенного платежа',
                 'type' => 'title',
+                'description' => 'Настройки для наложенного платежа применяются только во время отправки заказа из админ 
+                панели и для пользователя на странице чекаута не отображаются'
             ], 'stepcodprice' => [
                 'title' => 'Бесплатная доставка от суммы заказа в рублях',
                 'type' => 'number',
