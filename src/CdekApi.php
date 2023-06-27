@@ -7,7 +7,6 @@ use WP_Http;
 
 class CdekApi
 {
-    protected const API = "https://api.cdek.ru/v2/";
     protected const TOKEN_PATH = "oauth/token";
     protected const REGION_PATH = "location/cities";
     protected const ORDERS_PATH = "orders/";
@@ -15,13 +14,14 @@ class CdekApi
     protected const CALC_PATH = "calculator/tariff";
     protected const WAYBILL_PATH = "print/orders/";
 
+    protected $apiUrl;
     protected $adminSetting;
     protected $httpClient;
 
     public function __construct()
     {
         $this->adminSetting = Helper::getSettingDataPlugin();
-
+        $this->apiUrl = $this->getApiUrl();
         $this->httpClient = new HttpClientWrapper();
     }
 
@@ -41,7 +41,7 @@ class CdekApi
 
 	protected function getAuthUrl(): string
     {
-		return self::API . self::TOKEN_PATH . "?grant_type=client_credentials&client_id=" . $this->adminSetting['client_id']
+		return $this->apiUrl . self::TOKEN_PATH . "?grant_type=client_credentials&client_id=" . $this->adminSetting['client_id']
 			. "&client_secret=" . $this->adminSetting['client_secret'];
 	}
 
@@ -58,13 +58,13 @@ class CdekApi
 
 	public function getOrder($number)
 	{
-		$url = self::API . self::ORDERS_PATH . $number;
+		$url = $this->apiUrl . self::ORDERS_PATH . $number;
 		return $this->httpClient->sendRequest($url, 'GET', $this->getToken());
 	}
 
     public function createOrder($param)
     {
-        $url = self::API . self::ORDERS_PATH;
+        $url = $this->apiUrl . self::ORDERS_PATH;
         $param['developer_key'] = '7wV8tk&r6VH4zK:1&0uDpjOkvM~qngLl';
         $param['date_invoice'] = date('Y-m-d');
         $param['shipper_name'] = $this->adminSetting['shipper_name'];
@@ -105,19 +105,19 @@ class CdekApi
 
     public function createWaybill($orderUuid)
     {
-        $url = self::API . self::WAYBILL_PATH;
+        $url = $this->apiUrl . self::WAYBILL_PATH;
         return $this->httpClient->sendRequest($url, 'POST', $this->getToken(), json_encode(['orders' => ['order_uuid' => $orderUuid]]));
     }
 
     public function deleteOrder($number)
     {
-        $url = self::API . self::ORDERS_PATH . $number;
+        $url = $this->apiUrl . self::ORDERS_PATH . $number;
         return $this->httpClient->sendRequest($url, 'DELETE', $this->getToken());
     }
 
     public function getPvz($city, $weight = 0, $admin = false)
     {
-        $url = self::API . self::PVZ_PATH;
+        $url = $this->apiUrl . self::PVZ_PATH;
         if (empty($city)) {
             $city = '44';
         }
@@ -159,7 +159,7 @@ class CdekApi
 
     public function calculate($deliveryParam, $tariff)
     {
-        $url = self::API . self::CALC_PATH;
+        $url = $this->apiUrl . self::CALC_PATH;
         return $this->httpClient->sendRequest($url, 'POST', $this->getToken(), json_encode([
             'tariff_code' => $tariff,
             'from_location' => [
@@ -180,13 +180,13 @@ class CdekApi
 
     public function getRegion($city = null)
     {
-        $url = self::API . self::REGION_PATH;
+        $url = $this->apiUrl . self::REGION_PATH;
         return $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city' => $city]);
     }
 
     public function getCityCodeByCityName($city, $state): int
     {
-        $url = self::API . self::REGION_PATH;
+        $url = $this->apiUrl . self::REGION_PATH;
         $cityData = json_decode($this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city' => $city]));
 
         if ($state == 'false') {
@@ -222,14 +222,14 @@ class CdekApi
 
     public function getCityCode($city, $postalCode)
     {
-        $url = self::API . self::REGION_PATH;
+        $url = $this->apiUrl . self::REGION_PATH;
         $cityData = json_decode($this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city' => $city, 'postal_code' => $postalCode]));
         return $cityData[0]->code;
     }
 
     public function getCityByCode($code)
     {
-        $url = self::API . self::REGION_PATH;
+        $url = $this->apiUrl . self::REGION_PATH;
         $cityData = json_decode($this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['code' => $code]));
         return ['city' => $cityData[0]->city, 'region' => $cityData[0]->region];
     }
@@ -245,5 +245,13 @@ class CdekApi
             }
         }
         return false;
+    }
+    
+    private function getApiUrl() 
+    {
+        if ($this->adminSetting['test_mode'] === 'yes') {
+            return CDEK_API_URL_TEST;
+        }    
+        return CDEK_API_URL;
     }
 }

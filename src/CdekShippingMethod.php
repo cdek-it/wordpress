@@ -11,7 +11,7 @@ class CdekShippingMethod extends WC_Shipping_Method
     public function __construct($instance_id = 0)
     {
         parent::__construct($instance_id);
-        $this->id = 'official_cdek';
+        $this->id = CDEK_DELIVERY_NAME;
         $this->instance_id = absint($instance_id);
         $this->method_title = 'Cdek Shipping';
         $this->method_description = 'Custom Shipping Method for Cdek';
@@ -39,14 +39,20 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'title' => '<h3 style="text-align: center;">Авторизация</h3>',
                 'type' => 'title',
                 'class' => 'cdek_setting_block_name'
+            ], 'test_mode' => [
+                'title' => __('Тестовый режим', CDEK_DELIVERY_NAME),
+                'type' => 'checkbox',
+                'default' => false,
+                'desc_tip' => true,
+                'description' => 'При включенном режиме используется тестовое апи. Введите тестовые идентификатор и секретный ключ.',
             ], 'client_id' => [
-                'title' => __('Идентификатор', 'official_cdek'),
+                'title' => __('Идентификатор', CDEK_DELIVERY_NAME),
                 'type' => 'text',
                 'custom_attributes' => [
                     'required' => true,
                 ]
             ], 'client_secret' => [
-                'title' => __('Секретный ключ', 'official_cdek'),
+                'title' => __('Секретный ключ', CDEK_DELIVERY_NAME),
                 'type' => 'text',
                 'custom_attributes' => [
                     'required' => true,
@@ -56,13 +62,13 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'type' => 'title',
                 'class' => 'cdek_setting_block_name'
             ], 'seller_name' => [
-                'title' => __('ФИО', 'official_cdek'),
+                'title' => __('ФИО', CDEK_DELIVERY_NAME),
                 'type' => 'text',
                 'custom_attributes' => [
                     'required' => true,
                 ]
             ], 'seller_phone' => [
-                'title' => __('Телефон', 'official_cdek'),
+                'title' => __('Телефон', CDEK_DELIVERY_NAME),
                 'type' => 'text',
                 'desc_tip' => true,
                 'description' => 'Должен передаваться в международном формате: код страны (для России +7) и сам номер (10 и более цифр)',
@@ -73,64 +79,64 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'title' => 'Международные заказы',
                 'type' => 'title',
             ], 'international_mode' => [
-                'title' => __('Включить режим международных заказов', 'official_cdek'),
+                'title' => __('Включить режим международных заказов', CDEK_DELIVERY_NAME),
                 'type' => 'checkbox',
                 'desc_tip' => true,
                 'description' => "При включенном режиме международных заказов, на странице чекаута появятся дополнительные поля:
                 серия паспорта, номер паспорта, дата выдачи, отдел, ИНН, дата рождения.",
                 'default' => 'no'
             ], 'seller_address' => [
-                'title' => __('Адрес истинного продавца', 'official_cdek'),
+                'title' => __('Адрес истинного продавца', CDEK_DELIVERY_NAME),
                 'type' => 'text',
                 'desc_tip' => true,
                 'description' => 'Адрес истинного продавца. Используется при печати инвойсов для отображения адреса настоящего 
                 продавца товара, либо торгового названия. Для международных заказов'
             ], 'shipper_name' => [
-                'title' => __('Грузоотправитель', 'official_cdek'),
+                'title' => __('Грузоотправитель', CDEK_DELIVERY_NAME),
                 'type' => 'text',
                 'desc_tip' => true,
                 'description' => 'Название компании грузоотправителя для международных заказов'
             ], 'shipper_address' => [
-                'title' => __('Адрес грузоотправителя', 'official_cdek'),
+                'title' => __('Адрес грузоотправителя', CDEK_DELIVERY_NAME),
                 'type' => 'text',
                 'desc_tip' => true,
                 'description' => 'Адрес компании грузоотправителя для международных заказов'
             ], 'passport_series' => [
-                'title' => __('Серия паспорта', 'official_cdek'),
+                'title' => __('Серия паспорта', CDEK_DELIVERY_NAME),
                 'type' => 'text',
                 'desc_tip' => true,
-                'description' => __('ограничение 4 символа', 'official_cdek'),
+                'description' => __('ограничение 4 символа', CDEK_DELIVERY_NAME),
                 'custom_attributes' => [
                     'maxlength' => 4,
                     'pattern' => '\d*'
                 ],
             ], 'passport_number' => [
-                'title' => __('Номер паспорта', 'official_cdek'),
+                'title' => __('Номер паспорта', CDEK_DELIVERY_NAME),
                 'type' => 'text',
                 'desc_tip' => true,
-                'description' => __('ограничение 6 символов', 'official_cdek'),
+                'description' => __('ограничение 6 символов', CDEK_DELIVERY_NAME),
                 'custom_attributes' => [
                     'maxlength' => 6,
                     'pattern' => '\d*'
                 ],
             ], 'passport_date_of_issue' => [
-                'title' => __('Дата выдачи паспорта', 'official_cdek'),
+                'title' => __('Дата выдачи паспорта', CDEK_DELIVERY_NAME),
                 'type' => 'date',
                 'date_format' => 'd.m.Y'
             ], 'passport_organization' => [
-                'title' => __('Орган выдачи паспорта', 'official_cdek'),
+                'title' => __('Орган выдачи паспорта', CDEK_DELIVERY_NAME),
                 'type' => 'text',
             ], 'tin' => [
-                'title' => __('ИНН', 'official_cdek'),
+                'title' => __('ИНН', CDEK_DELIVERY_NAME),
                 'type' => 'text',
                 'desc_tip' => true,
-                'description' => __('Ограничение 12 символов', 'official_cdek'),
+                'description' => __('Ограничение 12 символов', CDEK_DELIVERY_NAME),
                 'custom_attributes' => [
                     'maxlength' => 12,
                     'pattern' => '\d*'
                 ],
             ], 'passport_date_of_birth' => [
-                'title' => __('Дата рождения', 'official_cdek'),
+                'title' => __('Дата рождения', CDEK_DELIVERY_NAME),
                 'type' => 'date',
                 'date_format' => 'd.m.Y'
             ], 'delivery_block_name' => [
@@ -138,14 +144,14 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'type' => 'title',
                 'class' => 'cdek_delivery_block_name'
             ], 'tariff_list' => [
-                'title' => __('Тарифы', 'official_cdek'),
+                'title' => __('Тарифы', CDEK_DELIVERY_NAME),
                 'type' => 'multiselect',
                 'desc_tip' => true,
                 'options' => Tariff::getTariffList(),
                 'description' => "Для выбора нескольких тарифов удерживайте клавишу \"CTRL\" и левой кнопкой мыши выберите тарифы.",
                 'css' => 'height: 400px;'
             ], 'tariff_name' => [
-                'title' => __('Изменить название тарифа', 'official_cdek'),
+                'title' => __('Изменить название тарифа', CDEK_DELIVERY_NAME),
                 'type' => 'text',
                 'description' => "В списке тарифов в поле \"Тарифы\" в скобках указан код тарифа. Для изменения названия тарифа
                 в поле добавляется запись в формате код-название, для множественного изменения, тарифы отделяются точкой с запятой, например
@@ -153,12 +159,12 @@ class CdekShippingMethod extends WC_Shipping_Method
                 Если значение не задано то названия тарифов будут стандартными."
             ],
 //            'service_list' => [
-//                'title' => __('Услуги', 'official_cdek'),
+//                'title' => __('Услуги', CDEK_DELIVERY_NAME),
 //                'type' => 'multiselect',
 //                'options' => Service::getServiceList(),
 //            ],
             'has_packages_mode' => [
-                'title' => __('Многоместка', 'official_cdek'),
+                'title' => __('Многоместка', CDEK_DELIVERY_NAME),
                 'type' => 'checkbox',
                 'desc_tip' => true,
                 'description' => "При включенном режиме 'Многоместка', на детальной странице заказа появится
@@ -175,19 +181,19 @@ class CdekShippingMethod extends WC_Shipping_Method
                     'step' => 1
                 ]
             ], 'city' => [
-                'title' => __('Город отправления', 'official_cdek'),
+                'title' => __('Город отправления', CDEK_DELIVERY_NAME),
                 'type' => 'text',
-                'default' => __('Москва', 'official_cdek'),
+                'default' => __('Москва', CDEK_DELIVERY_NAME),
                 'custom_attributes' => [
                     'required' => true,
                 ]
             ], 'street' => [
-                'title' => __('Адрес', 'official_cdek'),
+                'title' => __('Адрес', CDEK_DELIVERY_NAME),
                 'type' => 'text',
                 'desc_tip' => true,
                 'description' => "Адрес отправления для тарифов \"от двери\""
             ], 'map_layer' => [
-                'title' => __('Слой карты', 'official_cdek'),
+                'title' => __('Слой карты', CDEK_DELIVERY_NAME),
                 'type' => 'select',
                 'options' => ['OpenStreetMap', 'YandexMap']
             ], 'yandex_map_api_key' => [
@@ -195,7 +201,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'placeholder' => 'Api Key'
             ], 'map' => [
                 'type' => 'hidden',
-                'title' => __('Выбрать ПВЗ на карте', 'official_cdek'),
+                'title' => __('Выбрать ПВЗ на карте', CDEK_DELIVERY_NAME),
             ], 'pvz_code' => [
                 'type' => 'hidden',
             ], 'pvz_address' => [
@@ -208,7 +214,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'type' => 'title',
                 'class' => 'cdek_package_setting_block_name',
             ], 'product_weight_default' => [
-                'title' => __('Вес одной единицы товара по умолчанию в кг', 'official_cdek'),
+                'title' => __('Вес одной единицы товара по умолчанию в кг', CDEK_DELIVERY_NAME),
                 'desc_tip' => true,
                 'description' => "У всех товаров должен быть указан вес, 
                             если есть товары без указанного <br> веса то для таких товаров будет подставляться значение из этого поля. <br>
@@ -220,7 +226,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                     'step' => 1
                 ]
             ], 'product_length_default' => [
-                'title' => __('Длина товара', 'official_cdek'),
+                'title' => __('Длина товара', CDEK_DELIVERY_NAME),
                 'description' => "Длина товара по умолчанию в см",
                 'type' => 'number',
                 'desc_tip' => true,
@@ -230,7 +236,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                     'step' => 1
                 ]
             ], 'product_width_default' => [
-                'title' => __('Ширина товара', 'official_cdek'),
+                'title' => __('Ширина товара', CDEK_DELIVERY_NAME),
                 'description' => "Ширина товара по умолчанию в см",
                 'type' => 'number',
                 'desc_tip' => true,
@@ -240,7 +246,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                     'step' => 1
                 ]
             ], 'product_height_default' => [
-                'title' => __('Высота товара', 'official_cdek'),
+                'title' => __('Высота товара', CDEK_DELIVERY_NAME),
                 'description' => "Высота товара по умолчанию в см",
                 'type' => 'number',
                 'desc_tip' => true,
@@ -250,7 +256,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                     'step' => 1
                 ]
             ], 'product_package_default_toggle' => [
-                'title' => __('Габариты товара вкл/выкл', 'official_cdek'),
+                'title' => __('Габариты товара вкл/выкл', CDEK_DELIVERY_NAME),
                 'description' => 'Принудительно использовать габариты товара (длину, ширину и высоту) по умолчанию для всех товаров',
                 'type' => 'checkbox',
                 'desc_tip' => true,
@@ -350,7 +356,7 @@ class CdekShippingMethod extends WC_Shipping_Method
             ], 'city_code_value' => [
                 'type' => 'text',
                 'css' => 'display: none;',
-                'default' => __('44', 'official_cdek')
+                'default' => __('44', CDEK_DELIVERY_NAME)
             ],
         ];
     }

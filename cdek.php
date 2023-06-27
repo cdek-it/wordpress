@@ -23,6 +23,7 @@ if (!function_exists('add_action')) {
 require 'vendor/autoload.php';
 
 require_once(plugin_dir_path(__FILE__) . 'message.php');
+require_once( plugin_dir_path( __FILE__ ) . 'config.php' );
 
 
 add_action('rest_api_init', 'cdek_register_route');
@@ -59,6 +60,7 @@ function cdek_widget_enqueue_script()
 function cdek_admin_enqueue_script()
 {
     wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/js/delivery-v5.js', array('jquery'), '1.7.0', true);
+    wp_enqueue_script('cdek-admin-create-order', plugin_dir_url(__FILE__) . 'assets/js/create-order.js', array('jquery'), '1.7.0', true);
     wp_enqueue_script('cdek-admin-leaflet', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
     wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
     wp_enqueue_style('cdek-admin-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
