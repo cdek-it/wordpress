@@ -56,11 +56,17 @@ class CdekApi
 		return true;
 	}
 
-	public function getOrder($number)
+	public function getOrder($uuid)
 	{
-		$url = $this->apiUrl . self::ORDERS_PATH . $number;
+		$url = $this->apiUrl . self::ORDERS_PATH . $uuid;
 		return $this->httpClient->sendRequest($url, 'GET', $this->getToken());
 	}
+
+    public function getOrderByCdekNumber($number)
+    {
+        $url = $this->apiUrl . self::ORDERS_PATH;
+        return $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['cdek_number' => $number]);
+    }
 
     public function createOrder($param)
     {
@@ -111,7 +117,9 @@ class CdekApi
 
     public function deleteOrder($number)
     {
-        $url = $this->apiUrl . self::ORDERS_PATH . $number;
+        $orderJson = $this->getOrderByCdekNumber($number);
+        $order = json_decode($orderJson);
+        $url = $this->apiUrl . self::ORDERS_PATH . $order->entity->uuid;
         return $this->httpClient->sendRequest($url, 'DELETE', $this->getToken());
     }
 

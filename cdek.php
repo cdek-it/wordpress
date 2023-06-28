@@ -221,9 +221,6 @@ function create_order($data)
     $param['tariff_code'] = $tariffId;
     $param['print'] = 'waybill';
 
-
-//    $services = $cdekShippingSettings['service_list'];
-
     $selectedPaymentMethodId = $order->get_payment_method();
     $codPriceThreshold = (int)$cdekShippingSettings['stepcodprice'];
 
@@ -235,16 +232,6 @@ function create_order($data)
         ];
     }
 
-//    if ($services !== "") {
-//        $servicesListForParam = [];
-//        foreach ($services as $service) {
-//            if ($service === 'DELIV_RECEIVER' && $tariffId == '62') {
-//                $servicesListForParam['code'] = $service;
-//            }
-//        }
-//        $param['services'] = $servicesListForParam;
-//    }
-
     $orderDataJson = $api->createOrder($param);
     $orderData = json_decode($orderDataJson);
 
@@ -252,23 +239,27 @@ function create_order($data)
         return json_encode(['state' => 'error', 'message' => 'Ошибка. Заказ не создан. (' . $orderData->requests[0]->errors[0]->message . ')']);
     }
 
-    $code = $orderData->entity->uuid;
-    $orderInfoJson = $api->getOrder($code);
-    $orderInfo = json_decode($orderInfoJson);
-    $cdekNumber = null;
-    if (property_exists($orderInfo->entity, 'cdek_number')) {
-        $cdekNumber = $orderInfo->entity->cdek_number;
-    }
-
-    if (empty($cdekNumber)) {
-        $cdekNumber = $code;
-    }
+    $cdekNumber = getCdekOrderNumber($api, $orderData->entity->uuid, 1);
 
     $postOrderData[0]['cdek_order_uuid'] = $cdekNumber;
     $postOrderData[0]['cdek_order_waybill'] = $orderData->entity->uuid;
     update_post_meta($orderId, 'order_data', $postOrderData[0]);
 
     return json_encode(['state' => 'success', 'code' => $cdekNumber, 'waybill' => '/wp-json/cdek/v1/get-waybill?number=' . $orderData->entity->uuid]);
+}
+
+function getCdekOrderNumber($api, $orderUuid, $iteration)
+{
+    if ($iteration === 5) {
+        return $orderUuid;
+    }
+    $orderInfoJson = $api->getOrder($orderUuid);
+    $orderInfo = json_decode($orderInfoJson);
+    if (!property_exists($orderInfo->entity, 'cdek_number')) {
+        //если номер заказа не успел сформироваться запрашиваем еще раз
+        getCdekOrderNumber($api, $orderUuid, $iteration + 1);
+    }
+    return $orderInfo->entity->cdek_number;
 }
 
 function setPackage($data, $orderId, array $param, $currency)

@@ -100,6 +100,9 @@
         <p id="cdek-order-number"><?php echo $orderUuid; ?></p>
         <a id="cdek-order-waybill" target="_blank" href="/wp-json/cdek/v1/get-waybill?number=<?php echo $waybill;?>">Получить квитанцию</a>
     </div>
+    <div>
+        <a id="cdek-order-waybill" target="_blank" href="/wp-json/cdek/v1/get-waybill?number=<?php echo $waybill;?>">Заказать курьера</a>
+    </div>
     <p class="form-field form-field-wide wc-order-status">
         <button id="delete-order-btn" type="button" class="button refund-items">Отменить</button>
     </p>
