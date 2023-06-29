@@ -12,7 +12,11 @@
  */
 
 use Cdek\CdekApi;
+use Cdek\CdekWPAdapter;
+use Cdek\CreateOrder;
+use Cdek\DeleteOrder;
 use Cdek\Helper;
+use Cdek\Model\OrderMetaData;
 use Cdek\Model\Tariff;
 use Cdek\WeightCalc;
 
@@ -21,13 +25,14 @@ if (!function_exists('add_action')) {
 }
 
 require 'vendor/autoload.php';
-
 require_once(plugin_dir_path(__FILE__) . 'message.php');
-require_once( plugin_dir_path( __FILE__ ) . 'config.php' );
+require_once(plugin_dir_path(__FILE__) . 'config.php');
+
+//$cdekWPAdapter = new CdekWPAdapter();
+//$cdekWPAdapter->init();
 
 
 add_action('rest_api_init', 'cdek_register_route');
-add_filter('woocommerce_admin_order_data_after_shipping_address', 'cdek_admin_order_data_after_shipping_address');
 add_filter('woocommerce_new_order', 'cdek_woocommerce_new_order_action', 10, 2);
 add_filter('woocommerce_shipping_methods', 'add_cdek_shipping_method');
 add_action('woocommerce_shipping_init', 'cdek_shipping_method');
@@ -36,11 +41,9 @@ add_action('woocommerce_checkout_process', 'is_pvz_code');
 add_action('wp_enqueue_scripts', 'cdek_widget_enqueue_script');
 add_action('admin_enqueue_scripts', 'cdek_admin_enqueue_script');
 add_filter('woocommerce_update_order_review_fragments', 'cdek_add_update_form_billing', 99);
-//add_filter('woocommerce_checkout_fields', 'cdek_override_checkout_fields', 30);
 add_action('wp_footer', 'cdek_add_script_update_shipping_method');
-add_filter( 'woocommerce_checkout_fields' , 'cdek_add_custom_checkout_field' );
-add_action( 'woocommerce_checkout_create_order', 'cdek_save_custom_checkout_field_to_order', 10, 2 );
-
+add_filter('woocommerce_checkout_fields', 'cdek_add_custom_checkout_field');
+add_action('woocommerce_checkout_create_order', 'cdek_save_custom_checkout_field_to_order', 10, 2);
 
 
 function cdek_widget_enqueue_script()
@@ -155,115 +158,26 @@ function cdek_register_route()
 
 }
 
+
 function create_order($data)
 {
+    $createOrder = new CreateOrder();
+    return $createOrder->createOrder($data);
+}
+
+function getCityCode($city_code, $order)
+{
     $api = new CdekApi();
-
-    if (!$api->checkAuth()) {
-        return json_encode(['state' => 'error', 'message' => 'Ошибка авторизации. Проверьте идентификатор и секретный ключ клиента в настройках плагина CDEKDelivery']);
-    }
-
-    $param = [];
-    $orderId = $data->get_param('package_order_id');
-
-    $postOrderData = get_post_meta($orderId, 'order_data');
-
-    $pvzCode = $postOrderData[0]['pvz_code'];
-    $tariffId = $postOrderData[0]['tariff_id'];
-    $cityCode = $postOrderData[0]['city_code'];
-    $currency = $postOrderData[0]['currency'];
-
-    $param = setPackage($data, $orderId, $param, $currency);
-    $order = wc_get_order($orderId);
-
-    $cityName = $order->get_shipping_city();
-    $cityAddress = $order->get_shipping_address_1();
-    $email = $order->get_billing_email();
-
+    $cityCode = $city_code;
     if (empty($cityCode)) {
-        $cityName = $order->get_shipping_city();
-        $stateName = $order->get_shipping_state();
-        $cityCode = $api->getCityCodeByCityName($cityName, $stateName);
-        if ($cityCode === -1) {
-            return json_encode(['state' => 'error', 'message' => 'Ошибка. Не удалось найти город отправки']);
-        }
+        $cityCode = $api->getCityCodeByCityName($order->get_shipping_city(), $order->get_shipping_state());
     }
-
-    if ((int)Tariff::getTariffTypeToByCode($tariffId)) {
-        $param['delivery_point'] = $pvzCode;
-    } else {
-        $param['to_location'] = [
-            'code' => $cityCode,
-            'city' => $cityName,
-            'address' => $cityAddress
-        ];
-    }
-
-    $param['recipient'] = [
-        'name' => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
-        'email' => (string)$email,
-        'phones' => [
-            'number' => $order->get_billing_phone()
-        ]
-    ];
-
-    $cdekShippingSettings = Helper::getSettingDataPlugin();
-
-    if ($cdekShippingSettings['international_mode'] === 'yes') {
-        $param['recipient']['passport_series'] = $order->get_meta( '_passport_series', true );
-        $param['recipient']['passport_number'] = $order->get_meta( '_passport_number', true );
-        $param['recipient']['passport_date_of_issue'] = $order->get_meta( '_passport_date_of_issue', true );
-        $param['recipient']['passport_organization'] = $order->get_meta( '_passport_organization', true );
-        $param['recipient']['tin'] = $order->get_meta( '_tin', true );
-        $param['recipient']['passport_date_of_birth'] = $order->get_meta( '_passport_date_of_birth', true );
-    }
-
-    $param['tariff_code'] = $tariffId;
-    $param['print'] = 'waybill';
-
-    $selectedPaymentMethodId = $order->get_payment_method();
-    $codPriceThreshold = (int)$cdekShippingSettings['stepcodprice'];
-
-    //threshold
-    if ($selectedPaymentMethodId === 'cod' && $codPriceThreshold > 0) {
-        $param['delivery_recipient_cost_adv'] = [
-            'sum' => $order->get_shipping_total(),
-            'threshold' => $codPriceThreshold
-        ];
-    }
-
-    $orderDataJson = $api->createOrder($param);
-    $orderData = json_decode($orderDataJson);
-
-    if ($orderData->requests[0]->state === 'INVALID') {
-        return json_encode(['state' => 'error', 'message' => 'Ошибка. Заказ не создан. (' . $orderData->requests[0]->errors[0]->message . ')']);
-    }
-
-    $cdekNumber = getCdekOrderNumber($api, $orderData->entity->uuid, 1);
-
-    $postOrderData[0]['cdek_order_uuid'] = $cdekNumber;
-    $postOrderData[0]['cdek_order_waybill'] = $orderData->entity->uuid;
-    update_post_meta($orderId, 'order_data', $postOrderData[0]);
-
-    return json_encode(['state' => 'success', 'code' => $cdekNumber, 'waybill' => '/wp-json/cdek/v1/get-waybill?number=' . $orderData->entity->uuid]);
+    return $cityCode;
 }
 
-function getCdekOrderNumber($api, $orderUuid, $iteration)
+function setPackage($data, $orderId, $currency)
 {
-    if ($iteration === 5) {
-        return $orderUuid;
-    }
-    $orderInfoJson = $api->getOrder($orderUuid);
-    $orderInfo = json_decode($orderInfoJson);
-    if (!property_exists($orderInfo->entity, 'cdek_number')) {
-        //если номер заказа не успел сформироваться запрашиваем еще раз
-        getCdekOrderNumber($api, $orderUuid, $iteration + 1);
-    }
-    return $orderInfo->entity->cdek_number;
-}
-
-function setPackage($data, $orderId, array $param, $currency)
-{
+    $param = [];
     $cdekShippingSettings = Helper::getSettingDataPlugin();
     if ($cdekShippingSettings['has_packages_mode'] === 'yes') {
         $packageData = json_decode($data->get_param('package_data'));
@@ -285,7 +199,7 @@ function setPackage($data, $orderId, array $param, $currency)
             $totalWeight += $quantity * $weight;
             $cost = $product->get_price();
 
-            if ($currency !== 'RUB' && function_exists( 'wcml_get_woocommerce_currency_option' )) {
+            if ($currency !== 'RUB' && function_exists('wcml_get_woocommerce_currency_option')) {
                 $cost = convert_currency_cost_to_rub($cost, $currency);
             }
 
@@ -293,7 +207,7 @@ function setPackage($data, $orderId, array $param, $currency)
             $percentCod = (int)$cdekShippingSettings['percentcod'];
             if ($selectedPaymentMethodId === 'cod') {
                 if ($percentCod !== 0) {
-                    $paymentValue = (int) (((int)$cdekShippingSettings['percentcod'] / 100) * $cost);
+                    $paymentValue = (int)(((int)$cdekShippingSettings['percentcod'] / 100) * $cost);
                 } else {
                     $paymentValue = $cost;
                 }
@@ -344,10 +258,10 @@ function convert_currency_cost_to_rub($cost, $currency)
     }
 
     if ($currency === $defaultCurrency) {
-        $cost = round($cost * (float) $rates['RUB'], 2);
+        $cost = round($cost * (float)$rates['RUB'], 2);
     } else {
-        $costConvertToDefault = round($cost / (float) $rates[$currency], 2);
-        $cost = round($costConvertToDefault * (float) $rates['RUB'], 2);
+        $costConvertToDefault = round($cost / (float)$rates[$currency], 2);
+        $cost = round($costConvertToDefault * (float)$rates['RUB'], 2);
     }
 
     return $cost;
@@ -392,7 +306,7 @@ function get_package_items($items, $orderId, $currency)
 
         $cost = $product->get_price();
 
-        if ($currency !== 'RUB' && function_exists( 'wcml_get_woocommerce_currency_option' )) {
+        if ($currency !== 'RUB' && function_exists('wcml_get_woocommerce_currency_option')) {
             $cost = convert_currency_cost_to_rub($cost, $currency);
         }
 
@@ -482,13 +396,8 @@ function get_pvz($data)
 
 function delete_order($data)
 {
-    $api = new CdekApi();
-    $orderId = $data->get_param('order_id');
-    $postOrderData = get_post_meta($orderId, 'order_data');
-    $postOrderData[0]['cdek_order_uuid'] = '';
-    update_post_meta($orderId, 'order_data', $postOrderData[0]);
-
-    return $api->deleteOrder($data->get_param('number'));
+    $deleteOrder = new DeleteOrder();
+    return $deleteOrder->delete($data->get_param('order_id'), $data->get_param('number'));
 }
 
 function cdek_shipping_method()
@@ -573,7 +482,7 @@ function cdek_add_update_form_billing($fragments)
 
 function getShipToDestination()
 {
-    $shipToDestination = get_option( 'woocommerce_ship_to_destination' );
+    $shipToDestination = get_option('woocommerce_ship_to_destination');
     if ($shipToDestination === 'billing_only') {
         return 'billing';
     }
@@ -816,13 +725,13 @@ function is_pvz_code()
         } else {
             $shipToDestination = getShipToDestination();
             if ($shipToDestination === 'billing') {
-                if(array_key_exists('billing_address_1', $_POST)) {
+                if (array_key_exists('billing_address_1', $_POST)) {
                     if (empty($_POST['billing_address_1'])) {
                         wc_add_notice(__('Нет адреса отправки.'), 'error');
                     }
                 }
             } else {
-                if(array_key_exists('shipping_address_1', $_POST)) {
+                if (array_key_exists('shipping_address_1', $_POST)) {
                     if (empty($_POST['shipping_address_1'])) {
                         wc_add_notice(__('Нет адреса отправки.'), 'error');
                     }
@@ -851,14 +760,14 @@ function cdek_woocommerce_new_order_action($order_id, $order)
         $cityCode = $_POST['city_code'];
 
         $currency = 'RUB';
-        if (function_exists( 'wcml_get_woocommerce_currency_option' )) {
+        if (function_exists('wcml_get_woocommerce_currency_option')) {
             $currency = get_woocommerce_currency();
         }
 
         $api = new CdekApi();
         if ($pvzInfo !== null) {
             if ($pvzInfo === '') {
-                $pvzInfo =  $order->get_billing_address_1();
+                $pvzInfo = $order->get_billing_address_1();
                 $code = $api->getPvzCodeByPvzAddressNCityCode($pvzInfo, $cityCode);
                 if ($code !== false) {
                     $pvzCode = $code;
@@ -876,18 +785,17 @@ function cdek_woocommerce_new_order_action($order_id, $order)
             $shippingMethod->save_meta_data();
         }
 
-        add_post_meta($order_id, 'order_data', [
+        $data = [
             'pvz_address' => $pvzInfo,
             'pvz_code' => $pvzCode,
             'tariff_id' => $tariffId,
             'city_code' => $cityCode,
-            'currency' => $currency
-        ]);
+            'currency' => $currency,
+            'order_number' => '',
+            'order_uuid' => '',
+        ];
 
-//        $note = sprintf('[CDEKDelivery] Order #%s: Fare - %s, PVZ Code - %s, PVZ Address - %s, City Code - %s',
-//            $order_id, $tariffId, $pvzCode, $pvzInfo, $cityCode);
-//        $order->add_order_note($note);
-//        $order->save();
+        OrderMetaData::addMetaByOrderId($order_id, $data);
     }
 
 }
@@ -898,17 +806,28 @@ function add_cdek_shipping_method($methods)
     return $methods;
 }
 
-function cdek_admin_order_data_after_shipping_address($order)
+function add_custom_order_meta_box()
 {
-    if (isCdekShippingMethod($order)) {
-        $api = new CdekApi();
-        if ($api->checkAuth()) {
-            $orderId = $order->get_id();
-            $postOrderData = get_post_meta($orderId, 'order_data');
-            $orderUuid = $postOrderData[0]['cdek_order_uuid'] ?? '';
-            $tariffId = $postOrderData[0]['tariff_id'];
-            if (!empty($orderUuid) || !empty($tariffId)) {
-                $waybill = $postOrderData[0]['cdek_order_waybill'] ?? '';
+    global $post;
+    if ($post && $post->post_type === 'shop_order') {
+        $order_id = $post->ID;
+        $order = wc_get_order($order_id);
+
+        if (isCdekShippingMethod($order)) {
+            $api = new CdekApi();
+            if ($api->checkAuth()) {
+                $orderWP = $order->get_id();
+                $postOrderData = OrderMetaData::getMetaByOrderId($orderWP);
+                if (array_key_exists('cdek_order_uuid', $postOrderData)) {
+                    $orderNumber = $postOrderData['cdek_order_uuid'];
+                } else {
+                    $orderNumber = $postOrderData['order_number'] ;
+                }
+                if (array_key_exists('cdek_order_waybill', $postOrderData)) {
+                    $orderUuid = $postOrderData['cdek_order_waybill'];
+                } else {
+                    $orderUuid = $postOrderData['order_uuid'];
+                }
                 $items = [];
                 foreach ($order->get_items() as $item) {
                     $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
@@ -920,13 +839,64 @@ function cdek_admin_order_data_after_shipping_address($order)
                     $hasPackages = true;
                 }
 
-                include 'templates/admin/create-order.php';
+                add_meta_box(
+                    'cdek_create_order_box',
+                    'CDEKDelivery',
+                    'render_cdek_create_order_box',
+                    'shop_order',
+                    'side',
+                    'core',
+                    [
+                        'status' => true,
+                        'hasPackages' => $hasPackages,
+                        'orderNumber' => $orderNumber,
+                        'orderIdWP' => $orderWP,
+                        'orderUuid' => $orderUuid,
+                        'items' => $items,
+                    ]
+                );
+            } else {
+                add_meta_box(
+                    'cdek_create_order_box',
+                    'CDEKDelivery',
+                    'render_cdek_create_order_box',
+                    'shop_order',
+                    'side',
+                    'core',
+                    [
+                        'status' => false,
+                    ]
+                );
+
             }
-        } else {
-            echo 'Авторизация не пройдена. Введите корректные идентификатор и секретный ключ клиента в настройках плагина CDEKDelivery';
         }
     }
 
+
+}
+
+add_action('add_meta_boxes', 'add_custom_order_meta_box');
+
+function render_cdek_create_order_box($post, $metabox)
+{
+    $args = $metabox['args'];
+    if ($args['status']) {
+        $hasPackages = $args['hasPackages'];
+        $orderNumber = $args['orderNumber'];
+        $orderIdWP = $args['orderIdWP'];
+        $orderUuid = $args['orderUuid'];
+        $items = $args['items'];
+        ob_start();
+        include 'templates/admin/create-order.php';
+        $content = ob_get_clean();
+        echo $content;
+    } else {
+        $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section=official_cdek');
+        echo '<div class="cdek_create_order_box">';
+        echo '<h4>Авторизация не пройдена</h4>';
+        echo '<p>Введите корректные идентификатор и секретный ключ клиента в <a href="' . $settings_page_url . '">настройках</a> плагина CDEKDelivery</p>';
+        echo '</div>';
+    }
 }
 
 function getTariffCodeCdekShippingMethodByOrder($order)
@@ -950,78 +920,80 @@ function isCdekShippingMethod($order)
     return false;
 }
 
-function cdek_add_custom_checkout_field($fields) {
+function cdek_add_custom_checkout_field($fields)
+{
     $cdekShippingSettings = Helper::getSettingDataPlugin();
     if ($cdekShippingSettings['international_mode'] === 'yes') {
         $fields['billing']['passport_series'] = [
-            'label'       => __('Серия паспорта', 'woocommerce'),
-            'required'    => true,
-            'class'       => ['form-row-wide'],
-            'clear'       => true,
+            'label' => __('Серия паспорта', 'woocommerce'),
+            'required' => true,
+            'class' => ['form-row-wide'],
+            'clear' => true,
             'custom_attributes' => [
                 'maxlength' => 4,
             ],
         ];
         $fields['billing']['passport_number'] = [
-            'label'       => __('Номер паспорта', 'woocommerce'),
-            'required'    => true,
-            'class'       => ['form-row-wide'],
-            'clear'       => true,
+            'label' => __('Номер паспорта', 'woocommerce'),
+            'required' => true,
+            'class' => ['form-row-wide'],
+            'clear' => true,
             'custom_attributes' => [
                 'maxlength' => 6,
             ],
         ];
         $fields['billing']['passport_date_of_issue'] = [
             'type' => 'date',
-            'label'       => __('Дата выдачи паспорта', 'woocommerce'),
-            'required'    => true,
-            'class'       => ['form-row-wide'],
-            'clear'       => true
+            'label' => __('Дата выдачи паспорта', 'woocommerce'),
+            'required' => true,
+            'class' => ['form-row-wide'],
+            'clear' => true
         ];
         $fields['billing']['passport_organization'] = [
-            'label'       => __('Орган выдачи паспорта', 'woocommerce'),
-            'required'    => true,
-            'class'       => ['form-row-wide'],
-            'clear'       => true,
+            'label' => __('Орган выдачи паспорта', 'woocommerce'),
+            'required' => true,
+            'class' => ['form-row-wide'],
+            'clear' => true,
         ];
         $fields['billing']['tin'] = [
-            'label'       => __('ИНН', 'woocommerce'),
-            'required'    => true,
-            'class'       => ['form-row-wide'],
-            'clear'       => true,
+            'label' => __('ИНН', 'woocommerce'),
+            'required' => true,
+            'class' => ['form-row-wide'],
+            'clear' => true,
             'custom_attributes' => [
                 'maxlength' => 12,
             ],
         ];
         $fields['billing']['passport_date_of_birth'] = [
             'type' => 'date',
-            'label'       => __('Дата рождения', 'woocommerce'),
-            'required'    => true,
-            'class'       => ['form-row-wide'],
-            'clear'       => true
+            'label' => __('Дата рождения', 'woocommerce'),
+            'required' => true,
+            'class' => ['form-row-wide'],
+            'clear' => true
         ];
     }
 
     return $fields;
 }
 
-function cdek_save_custom_checkout_field_to_order( $order, $data ) {
-    if ( isset( $_POST['passport_series'] ) ) {
-        $order->update_meta_data( '_passport_series', sanitize_text_field( $_POST['passport_series'] ) );
+function cdek_save_custom_checkout_field_to_order($order, $data)
+{
+    if (isset($_POST['passport_series'])) {
+        $order->update_meta_data('_passport_series', sanitize_text_field($_POST['passport_series']));
     }
-    if ( isset( $_POST['passport_number'] ) ) {
-        $order->update_meta_data( '_passport_number', sanitize_text_field( $_POST['passport_number'] ) );
+    if (isset($_POST['passport_number'])) {
+        $order->update_meta_data('_passport_number', sanitize_text_field($_POST['passport_number']));
     }
-    if ( isset( $_POST['passport_date_of_issue'] ) ) {
-        $order->update_meta_data( '_passport_date_of_issue', sanitize_text_field( $_POST['passport_date_of_issue'] ) );
+    if (isset($_POST['passport_date_of_issue'])) {
+        $order->update_meta_data('_passport_date_of_issue', sanitize_text_field($_POST['passport_date_of_issue']));
     }
-    if ( isset( $_POST['passport_organization'] ) ) {
-        $order->update_meta_data( '_passport_organization', sanitize_text_field( $_POST['passport_organization'] ) );
+    if (isset($_POST['passport_organization'])) {
+        $order->update_meta_data('_passport_organization', sanitize_text_field($_POST['passport_organization']));
     }
-    if ( isset( $_POST['tin'] ) ) {
-        $order->update_meta_data( '_tin', sanitize_text_field( $_POST['tin'] ) );
+    if (isset($_POST['tin'])) {
+        $order->update_meta_data('_tin', sanitize_text_field($_POST['tin']));
     }
-    if ( isset( $_POST['passport_date_of_birth'] ) ) {
-        $order->update_meta_data( '_passport_date_of_birth', sanitize_text_field( $_POST['passport_date_of_birth'] ) );
+    if (isset($_POST['passport_date_of_birth'])) {
+        $order->update_meta_data('_passport_date_of_birth', sanitize_text_field($_POST['passport_date_of_birth']));
     }
 }

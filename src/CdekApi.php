@@ -115,11 +115,9 @@ class CdekApi
         return $this->httpClient->sendRequest($url, 'POST', $this->getToken(), json_encode(['orders' => ['order_uuid' => $orderUuid]]));
     }
 
-    public function deleteOrder($number)
+    public function deleteOrder($uuid)
     {
-        $orderJson = $this->getOrderByCdekNumber($number);
-        $order = json_decode($orderJson);
-        $url = $this->apiUrl . self::ORDERS_PATH . $order->entity->uuid;
+        $url = $this->apiUrl . self::ORDERS_PATH . $uuid;
         return $this->httpClient->sendRequest($url, 'DELETE', $this->getToken());
     }
 

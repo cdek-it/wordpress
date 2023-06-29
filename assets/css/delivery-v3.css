@@ -30,3 +30,28 @@
 #region-list:empty {
     display:none;
 }
+
+#delete-order-btn {
+    cursor: pointer;
+    color: #b32d2e;
+    text-decoration: underline;
+    margin-left: auto;
+}
+
+#delete-order-btn:hover {
+    text-decoration: none;
+}
+
+#delete-order-btn.clicked {
+    color: gray;
+    text-decoration: none;
+    cursor: default;
+}
+
+#cdek-create-order-error {
+    color: #b32d2e;
+}
+
+#cdek-delete-order-error {
+    color: #b32d2e;
+}

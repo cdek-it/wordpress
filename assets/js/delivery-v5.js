@@ -217,6 +217,7 @@
         }
 
         $('#create-order-btn').click(function () {
+            $('#cdek-create-order-error').hide();
             $.ajax({
                 method: "GET",
                 url: "/wp-json/cdek/v1/create-order",
@@ -227,12 +228,15 @@
                     package_height: $('input[name=package_height]').val()
                 },
                 success: function (response) {
+                    console.log(response)
                     let resp = JSON.parse(response);
-                    if (resp.state === 'error') {
-                        window.alert(resp.message);
+                    if (!resp.state) {
+                        $('#cdek-create-order-error').text(resp.message);
+                        $('#cdek-create-order-error').show();
                     } else {
                         $('#cdek-create-order-form').hide();
-                        $('#cdek-order-number').html(resp.code);
+                        $('#cdek-order-number').html(`№ <b>${resp.code}</b>`);
+                        $('#cdek-order-number-input').val(resp.code);
                         $('#cdek-order-waybill').attr('href', resp.waybill);
                         $('#cdek-info-order').show();
                     }
@@ -243,17 +247,29 @@
             });
         })
 
-        $('#delete-order-btn').click(function () {
+        $('#delete-order-btn').click(function (event) {
+            $(event.target).addClass('clicked')
+            $('#cdek-create-order-error').hide();
+            console.log();
             $.ajax({
                 method: "GET",
                 url: "/wp-json/cdek/v1/delete-order",
                 data: {
-                    number: $('#cdek-order-number').html(),
+                    number: $('#cdek-order-number-input').val(),
                     order_id: $('input[name=package_order_id]').val()
                 },
                 success: function (response) {
-                    $('#cdek-create-order-form').show();
-                    $('#cdek-info-order').hide();
+                    let resp = JSON.parse(response);
+                    if (!resp.state) {
+                        $('#cdek-delete-order-error').text(resp.message);
+                        $('#cdek-delete-order-error').show();
+                        $('#delete-order-btn').hide();
+                    } else {
+                        alert(resp.message);
+                        $(event.target).removeClass('clicked')
+                        $('#cdek-create-order-form').show();
+                        $('#cdek-info-order').hide();
+                    }
                 },
                 error: function (error) {
                     console.log({error: error});
