@@ -13,6 +13,7 @@ class CdekApi
     protected const PVZ_PATH = "deliverypoints";
     protected const CALC_PATH = "calculator/tariff";
     protected const WAYBILL_PATH = "print/orders/";
+    protected const CALL_COURIER = "intakes";
 
     protected $apiUrl;
     protected $adminSetting;
@@ -259,5 +260,23 @@ class CdekApi
             return CDEK_API_URL_TEST;
         }    
         return CDEK_API_URL;
+    }
+
+    public function callCourier($param)
+    {
+        $url = $this->apiUrl . self::CALL_COURIER;
+        return $this->httpClient->sendRequest($url, 'POST', $this->getToken(), json_encode($param));
+    }
+
+    public function courierInfo($uuid)
+    {
+        $url = $this->apiUrl . self::CALL_COURIER . '/' . $uuid;
+        return $this->httpClient->sendRequest($url, 'GET', $this->getToken());
+    }
+
+    public function callCourierDelete($uuid)
+    {
+        $url = $this->apiUrl . self::CALL_COURIER . '/' . $uuid;
+        return $this->httpClient->sendRequest($url, 'DELETE', $this->getToken());
     }
 }

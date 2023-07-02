@@ -5,6 +5,9 @@
 /** @var $orderUuid */
 /** @var $items */
 /** @var $hasPackages */
+/** @var $dateMin */
+/** @var $dateMax */
+/** @var $courierNumber */
 ?>
 <?php if ($hasPackages) {
     include 'form_package_many.php';

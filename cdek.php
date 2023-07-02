@@ -11,11 +11,13 @@
  * WC tested up to: 7.0
  */
 
+use Cdek\CallCourier;
 use Cdek\CdekApi;
-use Cdek\CdekWPAdapter;
 use Cdek\CreateOrder;
+use Cdek\DataWPScraber;
 use Cdek\DeleteOrder;
 use Cdek\Helper;
+use Cdek\Model\CourierMetaData;
 use Cdek\Model\OrderMetaData;
 use Cdek\Model\Tariff;
 use Cdek\WeightCalc;
@@ -27,10 +29,6 @@ if (!function_exists('add_action')) {
 require 'vendor/autoload.php';
 require_once(plugin_dir_path(__FILE__) . 'message.php');
 require_once(plugin_dir_path(__FILE__) . 'config.php');
-
-//$cdekWPAdapter = new CdekWPAdapter();
-//$cdekWPAdapter->init();
-
 
 add_action('rest_api_init', 'cdek_register_route');
 add_filter('woocommerce_new_order', 'cdek_woocommerce_new_order_action', 10, 2);
@@ -156,8 +154,47 @@ function cdek_register_route()
         'permission_callback' => '__return_true'
     ));
 
+    register_rest_route('cdek/v1', '/call-courier', array(
+        'methods' => 'POST',
+        'callback' => 'call_courier',
+        'permission_callback' => '__return_true'
+    ));
+
+    register_rest_route('cdek/v1', '/call-courier-delete', array(
+        'methods' => 'GET',
+        'callback' => 'call_courier_delete',
+        'permission_callback' => '__return_true'
+    ));
+
 }
 
+function call_courier($data)
+{
+    $callCourier = new CallCourier();
+    $param = DataWPScraber::getData($data, [
+            'order_id',
+            'date',
+            'starttime',
+            'endtime',
+            'desc',
+            'name',
+            'phone',
+            'address',
+            'comment',
+            'weight',
+            'length',
+            'width',
+            'height',
+            'need_call',
+    ]);
+    return $callCourier->call($param);
+}
+
+function call_courier_delete($data)
+{
+    $callCourier = new CallCourier();
+    return $callCourier->delete($data->get_param('order_id'));
+}
 
 function create_order($data)
 {
@@ -839,6 +876,16 @@ function add_custom_order_meta_box()
                     $hasPackages = true;
                 }
 
+                $dateMin = date('Y-m-d');
+                $dateMaxUnix = strtotime($dateMin . " +31 days");
+                $dateMax = date('Y-m-d', $dateMaxUnix);
+
+                $courierMeta = CourierMetaData::getMetaByOrderId($order_id);
+                $courierNumber = '';
+                if (!empty($courierMeta)) {
+                    $courierNumber = $courierMeta['courier_number'];
+                }
+
                 add_meta_box(
                     'cdek_create_order_box',
                     'CDEKDelivery',
@@ -852,7 +899,10 @@ function add_custom_order_meta_box()
                         'orderNumber' => $orderNumber,
                         'orderIdWP' => $orderWP,
                         'orderUuid' => $orderUuid,
+                        'dateMin' => $dateMin,
+                        'dateMax' => $dateMax,
                         'items' => $items,
+                        'courierNumber' => $courierNumber
                     ]
                 );
             } else {
@@ -885,7 +935,10 @@ function render_cdek_create_order_box($post, $metabox)
         $orderNumber = $args['orderNumber'];
         $orderIdWP = $args['orderIdWP'];
         $orderUuid = $args['orderUuid'];
+        $dateMin = $args['dateMin'];
+        $dateMax = $args['dateMax'];
         $items = $args['items'];
+        $courierNumber = $args['courierNumber'];
         ob_start();
         include 'templates/admin/create-order.php';
         $content = ob_get_clean();

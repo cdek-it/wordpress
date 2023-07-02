@@ -276,5 +276,79 @@
                 }
             });
         })
+
+        $('#cdek-courier-send-call').click(function (event) {
+            $('#cdek-courier-error').hide();
+            console.log('click');
+            $.ajax({
+                method: "POST",
+                url: "/wp-json/cdek/v1/call-courier",
+                data: {
+                    order_id: $('input[name=package_order_id]').val(),
+                    date: $('#cdek-courier-date').val(),
+                    starttime: $('#cdek-courier-startime').val(),
+                    endtime: $('#cdek-courier-endtime').val(),
+                    name: $('#cdek-courier-name').val(),
+                    phone: $('#cdek-courier-phone').val(),
+                    address: $('#cdek-courier-address').val(),
+                    desc: $('#cdek-courier-package-desc').val(),
+                    comment: $('#cdek-courier-comment').val(),
+                    weight: $('#cdek-courier-weight').val(),
+                    length: $('#cdek-courier-length').val(),
+                    width: $('#cdek-courier-width').val(),
+                    height: $('#cdek-courier-height').val(),
+                    need_call: $('#cdek-courier-call').prop('checked'),
+                },
+                success: function (response) {
+                    let resp = JSON.parse(response);
+                    if (!resp.state) {
+                        $('#cdek-courier-error').html(resp.message);
+                        $('#cdek-courier-error').show();
+                    } else {
+                        console.log(resp.message)
+                        $('#call-courier-form').hide();
+                        $('#cdek-order-courier').hide();
+                        $('#cdek-courier-info').text(resp.message);
+                        $('#cdek-courier-info').show();
+                        $('#cdek-courier-result-block').show()
+                    }
+                },
+                error: function (error) {
+                    console.log({error: error});
+                }
+            });
+        })
+
+        $('#cdek-order-courier').click(function (event) {
+            if ($('#call-courier-form').is(":hidden")) {
+                $('#call-courier-form').show();
+            } else {
+                $('#call-courier-form').hide();
+            }
+        })
+
+        $('#cdek-courier-delete').click(function (event) {
+            console.log('click');
+            $.ajax({
+                method: "GET",
+                url: "/wp-json/cdek/v1/call-courier-delete",
+                data: {
+                    order_id: $('input[name=package_order_id]').val(),
+                },
+                success: function (response) {
+                    console.log(response)
+                    let resp = JSON.parse(response);
+                    if (!resp.state) {
+
+                    } else {
+                        $('#cdek-courier-result-block').hide();
+                        $('#cdek-order-courier').show();
+                    }
+                },
+                error: function (error) {
+                    console.log({error: error});
+                }
+            });
+        })
     })
 })(jQuery);

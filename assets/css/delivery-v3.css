@@ -34,12 +34,12 @@
 #delete-order-btn {
     cursor: pointer;
     color: #b32d2e;
-    text-decoration: underline;
+    text-decoration: none;
     margin-left: auto;
 }
 
 #delete-order-btn:hover {
-    text-decoration: none;
+    text-decoration: underline;
 }
 
 #delete-order-btn.clicked {
@@ -54,4 +54,60 @@
 
 #cdek-delete-order-error {
     color: #b32d2e;
+}
+
+#cdek-courier-info {
+    margin: auto;
+}
+
+#cdek-courier-error {
+    color: #b32d2e;
+}
+
+#cdek-courier-block {
+    margin-top: 10px;
+}
+
+#call-courier-form {
+    display: none;
+}
+
+#cdek-courier-block input {
+    margin-top: 5px;
+}
+
+#cdek-courier-block p {
+    margin: auto;
+}
+
+#cdek-courier-delete {
+    color: #b32d2e;
+    text-decoration: none;
+}
+
+#cdek-courier-delete:hover {
+    text-decoration-line: underline;
+}
+
+#cdek-order-courier {
+    margin: auto;
+    color: #2271b1;
+    cursor: pointer;
+}
+
+#cdek-order-courier:hover {
+    text-decoration-line: underline;
+}
+
+#cdek-order-waybill {
+    text-decoration: none;
+    margin: auto;
+}
+
+#cdek-order-waybill:hover {
+    text-decoration-line: underline;
+}
+
+#cdek-courier-delete {
+    cursor: pointer;
 }
