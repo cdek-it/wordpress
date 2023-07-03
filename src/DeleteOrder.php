@@ -21,7 +21,7 @@ class DeleteOrder
 
     public function delete($orderId, $orderNumber)
     {
-        $this->cleanMeta($orderId);
+        OrderMetaData::cleanMetaByOrderId($orderId);
 
         $order = $this->api->getOrderByCdekNumber($orderNumber);
         $orderObj = json_decode($order);
@@ -52,15 +52,6 @@ class DeleteOrder
      */
     protected function cleanMeta($orderId): void
     {
-        $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
-        $postOrderData['cdek_order_uuid'] = '';
-        $postOrderData['cdek_order_waybill'] = '';
-        if (array_key_exists('order_number', $postOrderData)) {
-            $postOrderData['order_number'] = '';
-        }
-        if (array_key_exists('order_uuid', $postOrderData)) {
-            $postOrderData['order_uuid'] = '';
-        }
-        OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
+        OrderMetaData::cleanMetaByOrderId($orderId);
     }
 }

@@ -15,10 +15,10 @@
                 <input id="cdek-order-number-input" type="hidden" value="<?php echo $orderNumber; ?>">
                 <a id="cdek-order-waybill" target="_blank"
                    href="/wp-json/cdek/v1/get-waybill?number=<?php echo $orderUuid; ?>">Получить квитанцию</a>
-                <p id="cdek-order-courier" <?php if ($courierNumber !== "") { ?>style="display: none" <?php } ?>>Вызвать курьера</p>
+                <p id="cdek-order-courier" <?php if (!empty($courierNumber)) { ?>style="display: none" <?php } ?>>Вызвать курьера</p>
             </div>
 
-            <div id="cdek-courier-result-block" <?php if ($courierNumber === "") { ?>style="display: none;" <?php } else {?> style="margin-top: 10px;" <?php }?>>
+            <div id="cdek-courier-result-block" <?php if (empty($courierNumber)) { ?>style="display: none;" <?php } else {?> style="margin-top: 10px;" <?php }?>>
                 <hr>
                 <p id="cdek-courier-info">Номер заявки: <?php echo $courierNumber?></p>
                 <p id="cdek-courier-delete">Отменить заявку</p>

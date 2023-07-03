@@ -2,6 +2,7 @@
 
 namespace Cdek;
 
+use Cdek\Model\CourierMetaData;
 use Cdek\Model\OrderMetaData;
 use Cdek\Model\Tariff;
 use Cdek\Validator\ValidateCityCode;
@@ -41,21 +42,20 @@ class CreateOrder
 
         $orderData = $this->create($postOrderData, $order, $param);
 
-        $validate = ValidateOrder::validate($orderData);
         if (!$validate->state) {
             return $validate->response();
         }
 
         $cdekNumber = $this->getCdekOrderNumber($orderData->entity->uuid);
-
-        //cdek_order_uuid и cdek_order_waybill старый формат для поддержки старых заказов, со временем удалить
-        $postOrderData['cdek_order_uuid'] = $cdekNumber;
-        $postOrderData['cdek_order_waybill'] = $orderData->entity->uuid;
         $postOrderData['order_number'] = $cdekNumber;
         $postOrderData['order_uuid'] = $orderData->entity->uuid;
-//    $postOrderData['created'] = true; Заменить флаг создания заказа
         OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
-        return json_encode(['state' => true, 'code' => $cdekNumber, 'waybill' => '/wp-json/cdek/v1/get-waybill?number=' . $orderData->entity->uuid]);
+
+        return json_encode([
+            'state' => true,
+            'code' => $cdekNumber,
+            'waybill' => '/wp-json/cdek/v1/get-waybill?number=' . $orderData->entity->uuid,
+            'door' => Tariff::isTariffFromDoorByCode($postOrderData['tariff_id'])]);
     }
 
     public function create($postOrderData, $order, $param)
@@ -122,5 +122,40 @@ class CreateOrder
             $this->getCdekOrderNumber($orderUuid, $iteration + 1);
         }
         return $orderInfo->entity->cdek_number;
+    }
+
+    /**
+     * 1. Получить order_uuid, если его нет - ничего не делать
+     * 2. Запросить данные по заказу
+     * 3. Проверить существует ли заказ
+     * 4. если да ничего не делать
+     * 5. если нет почистить кеш
+     * Проверить откуда заказ, если от двери то удалить заявку, если нет пропустить
+     * 6. Проверить есть ли заявка привязанная к заказу
+     * 7. Если да, удалить заявку
+     */
+    public function deleteIfNotExist(int $order_id)
+    {
+        $meta = OrderMetaData::getMetaByOrderId($order_id);
+
+        if ($meta['order_uuid'] === '') {
+            return true;
+        }
+
+        $orderJson = $this->api->getOrder($meta['order_uuid']);
+        $order = json_decode($orderJson);
+
+        $validate = ValidateOrder::validate($order);
+        if (!$validate->state()) {
+            OrderMetaData::cleanMetaByOrderId($order_id);
+
+            $courierCallMeta = CourierMetaData::getMetaByOrderId($order_id);
+            if (array_key_exists('not_cons', $courierCallMeta) && $courierCallMeta['not_cons']) {
+                $courierCall = new CallCourier();
+                $courierCall->delete($order_id);
+            }
+        }
+
+        return $validate->state();
     }
 }

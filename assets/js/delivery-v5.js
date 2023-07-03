@@ -234,6 +234,10 @@
                         $('#cdek-create-order-error').text(resp.message);
                         $('#cdek-create-order-error').show();
                     } else {
+                        if (resp.door) {
+                            $('#cdek-courier-result-block').hide()
+                            $('#cdek-order-courier').show()
+                        }
                         $('#cdek-create-order-form').hide();
                         $('#cdek-order-number').html(`№ <b>${resp.code}</b>`);
                         $('#cdek-order-number-input').val(resp.code);
@@ -250,6 +254,7 @@
         $('#delete-order-btn').click(function (event) {
             $(event.target).addClass('clicked')
             $('#cdek-create-order-error').hide();
+            $('#cdek-courier-error').hide();
             console.log();
             $.ajax({
                 method: "GET",

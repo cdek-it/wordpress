@@ -845,56 +845,36 @@ function add_cdek_shipping_method($methods)
 
 function add_custom_order_meta_box()
 {
+    /**
+     * 1. Получить айди заказа
+     * 2. Проверить создан ли заказ с нашим тарифом
+     * 3. Проверить есть ли доступ
+     * 4. Проверить существует ли заказ, если нет очистить метаданные
+     * 5. Проверить существует ли заявка, если нет очистить метаданные
+     * 6. Заполнить поля нужные для работы виджета, передать их в виджет
+     */
     global $post;
     if ($post && $post->post_type === 'shop_order') {
         $order_id = $post->ID;
         $order = wc_get_order($order_id);
-
         if (isCdekShippingMethod($order)) {
             $api = new CdekApi();
             if ($api->checkAuth()) {
+                $createOrder = new CreateOrder();
+                $createOrder->deleteIfNotExist($order_id);
+
                 $callCourier = new CallCourier();
-                if (!$callCourier->checkExistCall($order_id)) {
-                    $callCourier->cleanMetaData($order_id);
-                }
+                $callCourier->deleteIfNotExist($order_id);
+                CourierMetaData::getMetaByOrderId($order_id);
+                //Сбор данных
                 $orderWP = $order->get_id();
                 $postOrderData = OrderMetaData::getMetaByOrderId($orderWP);
-                if (array_key_exists('cdek_order_uuid', $postOrderData)) {
-                    $orderNumber = $postOrderData['cdek_order_uuid'];
-                } else {
-                    $orderNumber = $postOrderData['order_number'] ;
-                }
-                if (array_key_exists('cdek_order_waybill', $postOrderData)) {
-                    $orderUuid = $postOrderData['cdek_order_waybill'];
-                } else {
-                    $orderUuid = $postOrderData['order_uuid'];
-                }
-                $items = [];
-                foreach ($order->get_items() as $item) {
-                    $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
-                }
-
-                $cdekShippingSettings = Helper::getSettingDataPlugin();
-                $hasPackages = false;
-                if ($cdekShippingSettings['has_packages_mode'] === 'yes') {
-                    $hasPackages = true;
-                }
-
+                $orderNumber = getOrderNumber($postOrderData);
+                $orderUuid = getOrderUuid($postOrderData);
+                $items = getItems($order);
                 $dateMin = date('Y-m-d');
-                $dateMaxUnix = strtotime($dateMin . " +31 days");
-                $dateMax = date('Y-m-d', $dateMaxUnix);
-
-                $courierMeta = CourierMetaData::getMetaByOrderId($order_id);
-                $courierNumber = '';
-                if (!empty($courierMeta)) {
-                    $courierNumber = $courierMeta['courier_number'];
-                }
-
-                if (Tariff::isTariffFromDoorByCode($postOrderData['tariff_id'])) {
-                    $fromDoor = true;
-                } else {
-                    $fromDoor = false;
-                }
+                $dateMax = getDateMax($dateMin);
+                $courierNumber = getCourierNumber($order_id);
 
                 add_meta_box(
                     'cdek_create_order_box',
@@ -905,7 +885,7 @@ function add_custom_order_meta_box()
                     'core',
                     [
                         'status' => true,
-                        'hasPackages' => $hasPackages,
+                        'hasPackages' => isHasPackages(),
                         'orderNumber' => $orderNumber,
                         'orderIdWP' => $orderWP,
                         'orderUuid' => $orderUuid,
@@ -913,7 +893,7 @@ function add_custom_order_meta_box()
                         'dateMax' => $dateMax,
                         'items' => $items,
                         'courierNumber' => $courierNumber,
-                        'fromDoor' => $fromDoor
+                        'fromDoor' => Tariff::isTariffFromDoorByCode($postOrderData['tariff_id'])
                     ]
                 );
             } else {
@@ -934,6 +914,84 @@ function add_custom_order_meta_box()
     }
 
 
+}
+
+/**
+ * @param $order
+ * @return array
+ */
+function getItems($order): array
+{
+    $items = [];
+    foreach ($order->get_items() as $item) {
+        $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
+    }
+    return $items;
+}
+
+/**
+ * @param $postOrderData
+ * @return mixed
+ */
+function getOrderUuid($postOrderData)
+{
+    if (array_key_exists('cdek_order_waybill', $postOrderData)) {
+        $orderUuid = $postOrderData['cdek_order_waybill'];
+    } else {
+        $orderUuid = $postOrderData['order_uuid'];
+    }
+    return $orderUuid;
+}
+
+/**
+ * @param $postOrderData
+ * @return mixed
+ */
+function getOrderNumber($postOrderData)
+{
+    if (array_key_exists('cdek_order_uuid', $postOrderData)) {
+        $orderNumber = $postOrderData['cdek_order_uuid'];
+    } else {
+        $orderNumber = $postOrderData['order_number'];
+    }
+    return $orderNumber;
+}
+
+/**
+ * @param int $order_id
+ * @return mixed|string
+ */
+function getCourierNumber(int $order_id)
+{
+    $courierMeta = CourierMetaData::getMetaByOrderId($order_id);
+    $courierNumber = '';
+    if (!empty($courierMeta)) {
+        $courierNumber = $courierMeta['courier_number'];
+    }
+    return $courierNumber;
+}
+
+/**
+ * @param $dateMin
+ * @return false|string
+ */
+function getDateMax($dateMin)
+{
+    $dateMaxUnix = strtotime($dateMin . " +31 days");
+    return date('Y-m-d', $dateMaxUnix);
+}
+
+/**
+ * @return bool
+ */
+function isHasPackages(): bool
+{
+    $cdekShippingSettings = Helper::getSettingDataPlugin();
+    $hasPackages = false;
+    if ($cdekShippingSettings['has_packages_mode'] === 'yes') {
+        $hasPackages = true;
+    }
+    return $hasPackages;
 }
 
 add_action('add_meta_boxes', 'add_custom_order_meta_box');
