@@ -17,4 +17,9 @@ class Validate
     {
         return json_encode(['state' => $this->state, 'message' => $this->message]);
     }
+
+    public function state()
+    {
+        return $this->state;
+    }
 }

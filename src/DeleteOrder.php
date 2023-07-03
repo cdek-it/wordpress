@@ -39,6 +39,9 @@ class DeleteOrder
             return $validate->response();
         }
 
+        $callCourier = new CallCourier();
+        $callCourier->delete($orderId);
+
         $validate = new Validate(true, 'Заказ удален.');
         return $validate->response();
     }

@@ -145,4 +145,29 @@ class CallCourier
         }
         return $param;
     }
+
+    public function checkExistCall(int $order_id)
+    {
+        $postDataCourier = CourierMetaData::getMetaByOrderId($order_id);
+
+        if ($postDataCourier['courier_uuid'] === '') {
+            return false;
+        }
+
+        $callCourierJson = $this->api->courierInfo($postDataCourier['courier_uuid']);
+        $callCourier = json_decode($callCourierJson);
+
+        $validate = ValidateCourier::validateExist($callCourier);
+        if (!$validate->state) {
+            $message = 'Заявка была удалена: ' . $postDataCourier['courier_uuid'];
+            Note::send($order_id, $message);
+        }
+
+        return $validate->state();
+    }
+
+    public function cleanMetaData(int $order_id)
+    {
+        CourierMetaData::cleanMetaByOrderId($order_id);
+    }
 }

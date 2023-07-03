@@ -14,4 +14,13 @@ class ValidateCourier
 
         return new Validate(true);
     }
+
+    public static function validateExist($callCourier)
+    {
+        if ($callCourier->requests[0]->type === 'DELETE' && $callCourier->requests[0]->state === 'SUCCESSFUL') {
+            return new Validate(false, 'Заявка удалена');
+        }
+
+        return new Validate(true);
+    }
 }

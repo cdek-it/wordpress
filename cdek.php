@@ -853,6 +853,10 @@ function add_custom_order_meta_box()
         if (isCdekShippingMethod($order)) {
             $api = new CdekApi();
             if ($api->checkAuth()) {
+                $callCourier = new CallCourier();
+                if (!$callCourier->checkExistCall($order_id)) {
+                    $callCourier->cleanMetaData($order_id);
+                }
                 $orderWP = $order->get_id();
                 $postOrderData = OrderMetaData::getMetaByOrderId($orderWP);
                 if (array_key_exists('cdek_order_uuid', $postOrderData)) {
