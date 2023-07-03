@@ -50,7 +50,7 @@
                         window.alert(resp.message);
                     } else {
                         $('#cdek-create-order-form').hide();
-                        $('#cdek-order-number').html(resp.code);
+                        $('#cdek-order-number').html(`№ <b>${resp.code}</b>`);
                         $('#cdek-order-waybill').attr('href', resp.waybill);
                         $('#cdek-info-order').show();
                     }

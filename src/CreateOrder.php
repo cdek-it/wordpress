@@ -21,9 +21,11 @@ class CreateOrder
 
     public function createOrder($data)
     {
-        $validate = ValidateCreateOrderForm::validate($data);
-        if (!$validate->state) {
-            return $validate->response();
+        if ($this->cdekShippingSettings['has_packages_mode'] !== 'yes') {
+            $validate = ValidateCreateOrderForm::validate($data);
+            if (!$validate->state) {
+                return $validate->response();
+            }
         }
 
         $orderId = $data->get_param('package_order_id');

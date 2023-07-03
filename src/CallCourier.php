@@ -39,6 +39,9 @@ class CallCourier
 
         CourierMetaData::addMetaByOrderId($data['order_id'], ['courier_number' => $intakeNumber, 'courier_uuid' => $courierObj->entity->uuid]);
 
+        $message = 'Создана заявка на вызов курьера: Номер: ' . $intakeNumber . ' | Uuid: ' . $courierObj->entity->uuid;
+        Note::send($data['order_id'], $message);
+
         $validate = new Validate(true, "Номер заявки: " . $intakeNumber);
         return $validate->response();
     }
