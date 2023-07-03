@@ -8,6 +8,7 @@
 /** @var $dateMin */
 /** @var $dateMax */
 /** @var $courierNumber */
+/** @var $fromDoor */
 ?>
 <?php if ($hasPackages) {
     include 'form_package_many.php';

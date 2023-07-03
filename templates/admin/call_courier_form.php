@@ -4,6 +4,7 @@
 /** @var $dateMin */
 /** @var $dateMax */
 /** @var $courierNumber */
+/** @var $fromDoor */
 ?>
 
 <div id="cdek-courier-block">
@@ -37,14 +38,15 @@
         </div>
     </div>
     <input id="cdek-courier-name" type="text" placeholder="ФИО">
-    <input id="cdek-courier-phone" type="number" placeholder="Телефон">
-
+    <input id="cdek-courier-phone" type="tel" min="0" placeholder="Телефон">
+    <?php $tip = "Должен передаваться в международном формате: код страны (для России +7) и сам номер (10 и более цифр)"; echo wc_help_tip($tip, false);?>
     <input id="cdek-courier-address" title="tooltip" type="text" placeholder="Адрес">
     <label for="cdek-courier-address">
         <?php $tip = "Город берется из настроек плагина. В поле 'Адрес' вводится только улица, дом, кв"; echo wc_help_tip($tip, false);?>
     </label>
-    <input id="cdek-courier-package-desc" type="text" placeholder="Описание груза">
     <input id="cdek-courier-comment" type="text" placeholder="Коментарий">
+    <?php if (!$fromDoor) { ?>
+    <input id="cdek-courier-package-desc" type="text" placeholder="Описание груза">
     <div>
         <div style="display: inline-flex; margin-top: 5px; align-items: center;">
             <p style="margin: auto">Габариты</p>
@@ -53,14 +55,15 @@
                     Для тарифов 'От двери' можно продублировать те что указывались при создании заказа"; echo wc_help_tip($tip, false);?>
         </div>
 
-        <input id="cdek-courier-weight" type="number" placeholder="Вес в кг">
-        <input id="cdek-courier-length" type="number" placeholder="Длина в см">
-        <input id="cdek-courier-width" type="number" placeholder="Ширина в см">
-        <input id="cdek-courier-height" type="number" placeholder="Высота в см">
-        <div>
-            <label for="cdek-courier-startime">Необходим звонок</label>
-            <input id="cdek-courier-call" type="checkbox">
-        </div>
+        <input id="cdek-courier-weight" type="number" min="0" placeholder="Вес в кг">
+        <input id="cdek-courier-length" type="number" min="0" placeholder="Длина в см">
+        <input id="cdek-courier-width" type="number"  min="0"placeholder="Ширина в см">
+        <input id="cdek-courier-height" type="number" min="0" placeholder="Высота в см">
+    </div>
+    <?php } ?>
+    <div>
+        <label for="cdek-courier-startime">Необходим звонок</label>
+        <input id="cdek-courier-call" type="checkbox">
     </div>
     <p id="cdek-courier-error" style="display: none"></p>
     <input id="cdek-courier-send-call" class="button save_order button-primary" type="button" value="Отправить">

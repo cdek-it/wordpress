@@ -4,6 +4,7 @@
 /** @var $dateMin */
 /** @var $dateMax */
 /** @var $courierNumber */
+/** @var $fromDoor */
 ?>
 <div id="cdek-info-order" <?php if (!$orderNumber) { ?>style="display: none" <?php } ?>>
     <div>

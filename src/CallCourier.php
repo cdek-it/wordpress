@@ -2,8 +2,11 @@
 
 namespace Cdek;
 use Cdek\Model\CourierMetaData;
+use Cdek\Model\OrderMetaData;
+use Cdek\Model\Tariff;
 use Cdek\Model\Validate;
 use Cdek\Validator\ValidateCourier;
+use Cdek\Validator\ValidateCourierFormData;
 
 class CallCourier
 {
@@ -18,7 +21,27 @@ class CallCourier
 
     public function call($data)
     {
-        $param = $this->createRequestData($data);
+        $validate = ValidateCourierFormData::validate($data);
+        if (!$validate->state) {
+            return $validate->response();
+        }
+
+        $orderMetaData = OrderMetaData::getMetaByOrderId($data['order_id']);
+        $tariffId = $orderMetaData['tariff_id'];
+
+        if (Tariff::isTariffFromDoorByCode($tariffId)) {
+            $orderNumber = $orderMetaData['order_number'];
+            $param = $this->createRequestDataWithOrderNumber($data, $orderNumber);
+        } else {
+            $validate = ValidateCourierFormData::validatePackage($data);
+            if (!$validate->state) {
+                return $validate->response();
+            }
+
+            $param = $this->createRequestData($data);
+        }
+
+
         $response = $this->api->callCourier($param);
         $courierObj = json_decode($response);
 
@@ -97,5 +120,29 @@ class CallCourier
 
         $validate = new Validate(true, 'Заявка удалена.');
         return $validate->response();
+    }
+
+    private function createRequestDataWithOrderNumber($data, $orderNumber)
+    {
+        $param['cdek_number'] = $orderNumber;
+        $param['intake_date'] = $data['date'];
+        $param['intake_time_from'] = $data['starttime'];
+        $param['intake_time_to'] = $data['endtime'];
+        $param['comment'] = $data['comment'];
+        $param['sender'] = [
+            'name' => $data['name'],
+            'phones' => [
+                'number' => $data['phone']
+            ]
+        ];
+        $param['from_location'] = [
+            'address' => $data['address']
+        ];
+        if ($data['need_call'] === "true") {
+            $param['need_call'] = true;
+        } else {
+            $param['need_call'] = false;
+        }
+        return $param;
     }
 }

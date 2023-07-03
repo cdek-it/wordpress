@@ -886,6 +886,12 @@ function add_custom_order_meta_box()
                     $courierNumber = $courierMeta['courier_number'];
                 }
 
+                if (Tariff::isTariffFromDoorByCode($postOrderData['tariff_id'])) {
+                    $fromDoor = true;
+                } else {
+                    $fromDoor = false;
+                }
+
                 add_meta_box(
                     'cdek_create_order_box',
                     'CDEKDelivery',
@@ -902,7 +908,8 @@ function add_custom_order_meta_box()
                         'dateMin' => $dateMin,
                         'dateMax' => $dateMax,
                         'items' => $items,
-                        'courierNumber' => $courierNumber
+                        'courierNumber' => $courierNumber,
+                        'fromDoor' => $fromDoor
                     ]
                 );
             } else {
@@ -939,6 +946,7 @@ function render_cdek_create_order_box($post, $metabox)
         $dateMax = $args['dateMax'];
         $items = $args['items'];
         $courierNumber = $args['courierNumber'];
+        $fromDoor = $args['fromDoor'];
         ob_start();
         include 'templates/admin/create-order.php';
         $content = ob_get_clean();

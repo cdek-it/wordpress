@@ -331,6 +331,20 @@ class Tariff
         }
     }
 
+    public static function isTariffFromDoorByCode($code)
+    {
+        foreach (self::TARIFF_DATA as $tariff) {
+            if ($tariff['code'] == (int) $code) {
+                if ($tariff['typeFrom'] === self::DOOR) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
+        return false;
+    }
+
     public static function getTariffWeightByCode($code)
     {
         foreach (self::TARIFF_DATA as $tariff) {
