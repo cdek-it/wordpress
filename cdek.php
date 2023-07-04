@@ -791,10 +791,10 @@ function checkTariffFromStoreByTariffCode($tariffCode)
 function cdek_woocommerce_new_order_action($order_id, $order)
 {
     if (isCdekShippingMethod($order)) {
-        $pvzInfo = $_POST['pvz_info'];
-        $pvzCode = $_POST['pvz_code'];
+        $pvzInfo = array_key_exists('pvz_info', $_POST) ? $_POST['pvz_info'] : null;
+        $pvzCode = array_key_exists('pvz_code', $_POST) ? $_POST['pvz_code'] : null;
         $tariffId = getTariffCodeCdekShippingMethodByOrder($order);
-        $cityCode = $_POST['city_code'];
+        $cityCode = array_key_exists('city_code', $_POST) ? $_POST['city_code'] : null;
 
         $currency = 'RUB';
         if (function_exists('wcml_get_woocommerce_currency_option')) {
@@ -802,25 +802,28 @@ function cdek_woocommerce_new_order_action($order_id, $order)
         }
 
         $api = new CdekApi();
-        if ($pvzInfo !== null) {
-            if ($pvzInfo === '') {
-                $pvzInfo = $order->get_billing_address_1();
-                $code = $api->getPvzCodeByPvzAddressNCityCode($pvzInfo, $cityCode);
-                if ($code !== false) {
-                    $pvzCode = $code;
-                }
+        if (empty($cityCode)) {
+            $pvzInfo = $order->get_billing_address_1();
+            $cityCode = $api->getCityCodeByCityName($order->get_billing_city(), $order->get_billing_city());
+        }
+        if (empty($pvzInfo) && Tariff::isTariffToStoreByCode($tariffId)) {
+            $pvzInfo = $order->get_billing_address_1();
+            $code = $api->getPvzCodeByPvzAddressNCityCode($pvzInfo, $cityCode);
+            if ($code !== false) {
+                $pvzCode = $code;
             }
-            $cityData = $api->getCityByCode($cityCode);
-            $order->set_shipping_address_1($pvzInfo);
-            $order->set_shipping_city($cityData['city']);
-            $order->set_shipping_state($cityData['region']);
-            $order->save();
-
             $shippingMethodArray = $order->get_items('shipping');
             $shippingMethod = array_shift($shippingMethodArray);
             $shippingMethod->add_meta_data('pvz', $pvzCode . ' (' . $pvzInfo . ')');
             $shippingMethod->save_meta_data();
         }
+        $cityData = $api->getCityByCode($cityCode);
+        $order->set_shipping_address_1($pvzInfo);
+        $order->set_shipping_city($cityData['city']);
+        $order->set_shipping_state($cityData['region']);
+        $order->save();
+
+
 
         $data = [
             'pvz_address' => $pvzInfo,

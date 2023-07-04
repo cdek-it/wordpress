@@ -111,3 +111,13 @@
 #cdek-courier-delete {
     cursor: pointer;
 }
+
+#cdek-loader {
+    z-index: 50;
+    /*background-color: #e3e5e5;*/
+    position: absolute;
+    width: 91%;
+    height: 94%;
+    opacity: 50%;
+    background: rgba(255,255,255,0.8) url(../../templates/public/img/loader.gif) center center no-repeat;
+}

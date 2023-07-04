@@ -42,6 +42,8 @@ class CreateOrder
 
         $orderData = $this->create($postOrderData, $order, $param);
 
+        sleep(5);
+
         if (!$validate->state) {
             return $validate->response();
         }

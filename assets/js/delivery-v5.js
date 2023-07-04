@@ -227,6 +227,12 @@
                     package_width: $('input[name=package_width]').val(),
                     package_height: $('input[name=package_height]').val()
                 },
+                beforeSend: function() {
+                    $('#cdek-loader').show();
+                },
+                complete: function() {
+                    $('#cdek-loader').hide();
+                },
                 success: function (response) {
                     console.log(response)
                     let resp = JSON.parse(response);
@@ -262,6 +268,12 @@
                 data: {
                     number: $('#cdek-order-number-input').val(),
                     order_id: $('input[name=package_order_id]').val()
+                },
+                beforeSend: function() {
+                    $('#cdek-loader').show();
+                },
+                complete: function() {
+                    $('#cdek-loader').hide();
                 },
                 success: function (response) {
                     let resp = JSON.parse(response);
@@ -304,6 +316,12 @@
                     height: $('#cdek-courier-height').val(),
                     need_call: $('#cdek-courier-call').prop('checked'),
                 },
+                beforeSend: function() {
+                    $('#cdek-loader').show();
+                },
+                complete: function() {
+                    $('#cdek-loader').hide();
+                },
                 success: function (response) {
                     let resp = JSON.parse(response);
                     if (!resp.state) {
@@ -339,6 +357,12 @@
                 url: "/wp-json/cdek/v1/call-courier-delete",
                 data: {
                     order_id: $('input[name=package_order_id]').val(),
+                },
+                beforeSend: function() {
+                    $('#cdek-loader').show();
+                },
+                complete: function() {
+                    $('#cdek-loader').hide();
                 },
                 success: function (response) {
                     console.log(response)

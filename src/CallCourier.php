@@ -219,7 +219,7 @@ class CallCourier
     {
         $meta = CourierMetaData::getMetaByOrderId($order_id);
 
-        if ($meta['courier_uuid'] !== '') {
+        if (array_key_exists('courier_uuid', $meta) && $meta['courier_uuid'] !== '') {
             $courierInfoJson = $this->api->courierInfo($meta['courier_uuid']);
             $courierInfo = json_decode($courierInfoJson);
             if ($courierInfo->entity->statuses[0]->code === 'REMOVED') {

@@ -79,6 +79,24 @@ class Tariff
             'postamat' => false
         ],
         [
+            'code' => 231,
+            'name' => 'Экономичная посылка дверь-дверь',
+            'mode' => self::DD,
+            'weight' => self::WEIGHT_50,
+            'typeFrom' => self::DOOR,
+            'typeTo' => self::DOOR,
+            'postamat' => false
+        ],
+        [
+            'code' => 232,
+            'name' => 'Экономичная посылка дверь-склад',
+            'mode' => self::DS,
+            'weight' => self::WEIGHT_50,
+            'typeFrom' => self::DOOR,
+            'typeTo' => self::STORE,
+            'postamat' => false
+        ],
+        [
             'code' => 233,
             'name' => 'Экономичная посылка склад-дверь',
             'mode' => self::SD,

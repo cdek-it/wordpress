@@ -181,7 +181,7 @@ class CdekApi
                 'width' => $deliveryParam['package_data']['width'],
                 'height' => $deliveryParam['package_data']['height'],
             ],
-            'services' => $deliveryParam['selected_services']
+            'services' => array_key_exists('selected_services', $deliveryParam) ? $deliveryParam['selected_services'] : []
         ]));
     }
 

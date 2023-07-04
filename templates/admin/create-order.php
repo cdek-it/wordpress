@@ -10,6 +10,7 @@
 /** @var $courierNumber */
 /** @var $fromDoor */
 ?>
+<div id="cdek-loader" style="display: none"></div>
 <?php if ($hasPackages) {
     include 'form_package_many.php';
 } else {

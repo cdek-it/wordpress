@@ -33,10 +33,14 @@ class DeliveryCalc
 
         $setting = Helper::getSettingDataPlugin();
         $tariffList = $setting['tariff_list'];
-        $services = $setting['service_list'];
+//        $services = $setting['service_list'];
         $weightInKg = $deliveryParam['package_data']['weight'] / 1000;
 
         foreach ($tariffList as $tariff) {
+
+            if ($tariff == 231) {
+                $v = 1;
+            }
 
             $weightLimit = (int) Tariff::getTariffWeightByCode($tariff);
             if ($weightInKg > $weightLimit) {
@@ -47,7 +51,7 @@ class DeliveryCalc
                 continue;
             }
 
-            $deliveryParam['selected_services'] = $this->getServicesList($services, $tariff);
+//            $deliveryParam['selected_services'] = $this->getServicesList($services, $tariff);
             if ($setting['insurance'] === 'yes') {
                 $deliveryParam['selected_services'][] = ['code' => 'INSURANCE', 'parameter' => (int)$package['cart_subtotal']];
             }
@@ -173,18 +177,18 @@ class DeliveryCalc
         return ['length' => $length, 'width' => $width, 'height' => $height, 'weight' => $totalWeight];
     }
 
-    protected function getServicesList($services, $tariff): array
-    {
-        $servicesListForParam = [];
-        if ($services !== "") {
-            foreach ($services as $service) {
-                if ($service === 'DELIV_RECEIVER' && $tariff == '62') {
-                    $servicesListForParam['code'] = $service;
-                }
-            }
-        }
-        return $servicesListForParam;
-    }
+//    protected function getServicesList($services, $tariff): array
+//    {
+//        $servicesListForParam = [];
+//        if ($services !== "") {
+//            foreach ($services as $service) {
+//                if ($service === 'DELIV_RECEIVER' && $tariff == '62') {
+//                    $servicesListForParam['code'] = $service;
+//                }
+//            }
+//        }
+//        return $servicesListForParam;
+//    }
 
     protected function checkDeliveryResponse($delivery): bool
     {
