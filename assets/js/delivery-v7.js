@@ -234,7 +234,6 @@
                     $('#cdek-loader').hide();
                 },
                 success: function (response) {
-                    console.log(response)
                     let resp = JSON.parse(response);
                     if (!resp.state) {
                         $('#cdek-create-order-error').text(resp.message);
@@ -261,7 +260,6 @@
             $(event.target).addClass('clicked')
             $('#cdek-create-order-error').hide();
             $('#cdek-courier-error').hide();
-            console.log();
             $.ajax({
                 method: "GET",
                 url: "/wp-json/cdek/v1/delete-order",
@@ -296,7 +294,6 @@
 
         $('#cdek-courier-send-call').click(function (event) {
             $('#cdek-courier-error').hide();
-            console.log('click');
             $.ajax({
                 method: "POST",
                 url: "/wp-json/cdek/v1/call-courier",
@@ -328,7 +325,6 @@
                         $('#cdek-courier-error').html(resp.message);
                         $('#cdek-courier-error').show();
                     } else {
-                        console.log(resp.message)
                         $('#call-courier-form').hide();
                         $('#cdek-order-courier').hide();
                         $('#cdek-courier-info').text(resp.message);
@@ -351,7 +347,6 @@
         })
 
         $('#cdek-courier-delete').click(function (event) {
-            console.log('click');
             $.ajax({
                 method: "GET",
                 url: "/wp-json/cdek/v1/call-courier-delete",
@@ -365,7 +360,6 @@
                     $('#cdek-loader').hide();
                 },
                 success: function (response) {
-                    console.log(response)
                     let resp = JSON.parse(response);
                     if (!resp.state) {
 

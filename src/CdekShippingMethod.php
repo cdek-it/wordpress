@@ -44,7 +44,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'type' => 'checkbox',
                 'default' => false,
                 'desc_tip' => true,
-                'description' => 'При включенном режиме используется тестовое апи. Введите тестовые идентификатор и секретный ключ.',
+                'description' => 'При включенном режиме используется тестовое апи',
             ], 'client_id' => [
                 'title' => 'Идентификатор',
                 'type' => 'text',

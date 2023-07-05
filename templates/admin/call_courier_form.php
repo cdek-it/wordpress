@@ -44,7 +44,7 @@
     <label for="cdek-courier-address">
         <?php $tip = "Город берется из настроек плагина. В поле 'Адрес' вводится только улица, дом, кв"; echo wc_help_tip($tip, false);?>
     </label>
-    <input id="cdek-courier-comment" type="text" placeholder="Коментарий">
+    <input id="cdek-courier-comment" type="text" placeholder="Комментарий">
     <?php if (!$fromDoor) { ?>
     <input id="cdek-courier-package-desc" type="text" placeholder="Описание груза">
     <div>

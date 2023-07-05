@@ -18,12 +18,22 @@ class CdekApi
     protected $apiUrl;
     protected $adminSetting;
     protected $httpClient;
+    protected $clientId;
+    protected $clientSecret;
 
     public function __construct()
     {
         $this->adminSetting = Helper::getSettingDataPlugin();
         $this->apiUrl = $this->getApiUrl();
         $this->httpClient = new HttpClientWrapper();
+
+        if ($this->adminSetting['test_mode'] === 'yes') {
+            $this->clientId = CDEK_TEST_CLIENT_ID;
+            $this->clientSecret = CDEK_TEST_CLIENT_SECRET;
+        } else {
+            $this->clientId = $this->adminSetting['client_id'];
+            $this->clientSecret = $this->adminSetting['client_secret'];
+        }
     }
 
     public function getToken()
@@ -42,8 +52,7 @@ class CdekApi
 
 	protected function getAuthUrl(): string
     {
-		return $this->apiUrl . self::TOKEN_PATH . "?grant_type=client_credentials&client_id=" . $this->adminSetting['client_id']
-			. "&client_secret=" . $this->adminSetting['client_secret'];
+		return $this->apiUrl . self::TOKEN_PATH . "?grant_type=client_credentials&client_id=" . $this->clientId . "&client_secret=" . $this->clientSecret;
 	}
 
 	public function checkAuth(): bool

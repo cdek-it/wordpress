@@ -60,8 +60,8 @@ function cdek_widget_enqueue_script()
 
 function cdek_admin_enqueue_script()
 {
-    wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/js/delivery-v6.js', array('jquery'), '1.7.0', true);
-    wp_enqueue_script('cdek-admin-create-order', plugin_dir_url(__FILE__) . 'assets/js/create-order-v1.js', array('jquery'), '1.7.0', true);
+    wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/js/delivery-v7.js', array('jquery'), '1.7.0', true);
+    wp_enqueue_script('cdek-admin-create-order', plugin_dir_url(__FILE__) . 'assets/js/create-order-v2.js', array('jquery'), '1.7.0', true);
     wp_enqueue_script('cdek-admin-leaflet', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
     wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
     wp_enqueue_style('cdek-admin-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
@@ -812,10 +812,6 @@ function cdek_woocommerce_new_order_action($order_id, $order)
             if ($code !== false) {
                 $pvzCode = $code;
             }
-            $shippingMethodArray = $order->get_items('shipping');
-            $shippingMethod = array_shift($shippingMethodArray);
-            $shippingMethod->add_meta_data('pvz', $pvzCode . ' (' . $pvzInfo . ')');
-            $shippingMethod->save_meta_data();
         }
         $cityData = $api->getCityByCode($cityCode);
         $order->set_shipping_address_1($pvzInfo);
@@ -823,7 +819,12 @@ function cdek_woocommerce_new_order_action($order_id, $order)
         $order->set_shipping_state($cityData['region']);
         $order->save();
 
-
+        if (Tariff::isTariffToStoreByCode($tariffId)) {
+            $shippingMethodArray = $order->get_items('shipping');
+            $shippingMethod = array_shift($shippingMethodArray);
+            $shippingMethod->add_meta_data('pvz', $pvzCode . ' (' . $pvzInfo . ')');
+            $shippingMethod->save_meta_data();
+        }
 
         $data = [
             'pvz_address' => $pvzInfo,

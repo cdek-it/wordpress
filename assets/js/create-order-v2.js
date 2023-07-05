@@ -44,13 +44,25 @@
                     package_order_id: $('input[name=package_order_id]').val(),
                     package_data: JSON.stringify(packageList),
                 },
+                beforeSend: function() {
+                    $('#cdek-loader').show();
+                },
+                complete: function() {
+                    $('#cdek-loader').hide();
+                },
                 success: function (response) {
                     let resp = JSON.parse(response);
-                    if (resp.state === 'error') {
-                        window.alert(resp.message);
+                    if (!resp.state) {
+                        $('#cdek-create-order-error').text(resp.message);
+                        $('#cdek-create-order-error').show();
                     } else {
+                        if (resp.door) {
+                            $('#cdek-courier-result-block').hide()
+                            $('#cdek-order-courier').show()
+                        }
                         $('#cdek-create-order-form').hide();
                         $('#cdek-order-number').html(`№ <b>${resp.code}</b>`);
+                        $('#cdek-order-number-input').val(resp.code);
                         $('#cdek-order-waybill').attr('href', resp.waybill);
                         $('#cdek-info-order').show();
                     }
