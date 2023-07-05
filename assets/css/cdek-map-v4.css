@@ -74,3 +74,10 @@
 #pvz-info {
     display: none;
 }
+
+/* Media queries for mobile devices */
+@media screen and (max-width: 767px) {
+    #cdek-map {
+        width: 380px;
+    }
+}
