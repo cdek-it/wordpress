@@ -99,15 +99,23 @@ class CreateOrder
         $param['print'] = 'waybill';
 
         $selectedPaymentMethodId = $order->get_payment_method();
-        $codPriceThreshold = (int)$this->cdekShippingSettings['stepcodprice'];
-
-        //threshold
-        if ($selectedPaymentMethodId === 'cod' && $codPriceThreshold > 0) {
-            $param['delivery_recipient_cost_adv'] = [
-                'sum' => $order->get_shipping_total(),
-                'threshold' => $codPriceThreshold
-            ];
+        if ($selectedPaymentMethodId === 'cod') {
+            $codPriceThreshold = (int)$this->cdekShippingSettings['stepcodprice'];
+            $total = $this->getOrderPrice($order);
+            if ($codPriceThreshold === 0 || $codPriceThreshold > $total) {
+                $param['delivery_recipient_cost'] = [
+                    'value' => $order->get_shipping_total()
+                ];
+            }
         }
+
+
+//        if ($selectedPaymentMethodId === 'cod' && $codPriceThreshold > 0) {
+//            $param['delivery_recipient_cost_adv'] = [
+//                'sum' => $order->get_shipping_total(),
+//                'threshold' => $codPriceThreshold
+//            ];
+//        }
 
         return $param;
     }
@@ -159,5 +167,15 @@ class CreateOrder
         }
 
         return $validate->state();
+    }
+
+    /**
+     * @param $order
+     * @return string
+     */
+    protected function getOrderPrice($order): string
+    {
+        $total = number_format((float)$order->get_total() - $order->get_total_tax() - $order->get_total_shipping() - $order->get_shipping_tax(), wc_get_price_decimals(), '.', '');;
+        return $total;
     }
 }
