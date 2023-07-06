@@ -2,6 +2,7 @@
     $(document).ready(function () {
         let map = null;
         let cluster = null;
+        let restApiUrl = cdek_rest_api_path.rest_path;
 
         $('body').append('<div id="map-frame" style="z-index: 1000;"><div id="map-container"><div id="cdek-map"><div id="map-loader"></div></div></div>' +
             '<div id="background"></div></div>');
@@ -78,7 +79,7 @@
             let stateName = getState();
             $.ajax({
                 method: "GET",
-                url: "/wp-json/cdek/v1/get-city-code",
+                url: restApiUrl + "cdek/v1/get-city-code",
                 data: {
                     city_name: cityName,
                     state_name: stateName
@@ -104,7 +105,7 @@
 
             $.ajax({
                 method: "GET",
-                url: "/wp-json/cdek/v1/get-pvz",
+                url: restApiUrl + "cdek/v1/get-pvz",
                 data: {
                     city_code: cityCode,
                     weight: weight
@@ -178,7 +179,7 @@
 
             $.ajax({
                 method: "GET",
-                url: "/wp-json/cdek/v1/set-pvz-code-tmp",
+                url: restApiUrl + "cdek/v1/set-pvz-code-tmp",
                 data: {
                     pvz_code: pvz.code,
                     pvz_info: pvz.address,

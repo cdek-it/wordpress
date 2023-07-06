@@ -357,7 +357,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'type' => 'text',
                 'css' => 'display: none;',
                 'default' => '44'
-            ],
+            ]
         ];
     }
 

@@ -48,6 +48,10 @@ function cdek_widget_enqueue_script()
 {
     if (is_checkout()) {
         wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map-v8.js', array('jquery'), '1.7.0', true);
+        wp_localize_script('cdek-map', 'cdek_rest_api_path', array(
+            'rest_path' => get_rest_path(),
+        ));
+
         wp_enqueue_script('cdek-css-leaflet-min', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
         wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
         wp_enqueue_style('cdek-css-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
@@ -61,7 +65,15 @@ function cdek_widget_enqueue_script()
 function cdek_admin_enqueue_script()
 {
     wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/js/delivery-v7.js', array('jquery'), '1.7.0', true);
+    wp_localize_script('cdek-admin-delivery', 'cdek_rest_api_path', array(
+        'rest_path' => get_rest_path(),
+    ));
+
     wp_enqueue_script('cdek-admin-create-order', plugin_dir_url(__FILE__) . 'assets/js/create-order-v2.js', array('jquery'), '1.7.0', true);
+    wp_localize_script('cdek-admin-create-order', 'cdek_rest_api_path', array(
+        'rest_path' => get_rest_path(),
+    ));
+
     wp_enqueue_script('cdek-admin-leaflet', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
     wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
     wp_enqueue_style('cdek-admin-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
@@ -98,83 +110,78 @@ function addYandexMap()
     }
 }
 
+function get_rest_path() {
+    $rest_url = get_rest_url(); // Get the base REST URL for the site
+    $rest_url_parts = parse_url($rest_url); // Parse the URL into its components
+    return $rest_url_parts['path'];
+}
+
 function cdek_register_route()
 {
     register_rest_route('cdek/v1', '/check-auth', array(
         'methods' => 'GET',
         'callback' => 'check_auth',
         'permission_callback' => '__return_true',
-        'url' => get_rest_url() . '/cdek/v1/check-auth'
     ));
 
     register_rest_route('cdek/v1', '/get-region', array(
         'methods' => 'GET',
         'callback' => 'get_region',
         'permission_callback' => '__return_true',
-        'url' => get_rest_url() . '/cdek/v1/get-region'
     ));
 
     register_rest_route('cdek/v1', '/get-city-code', array(
         'methods' => 'GET',
         'callback' => 'get_city_code',
         'permission_callback' => '__return_true',
-        'url' => get_rest_url() . '/cdek/v1/get-city-code'
     ));
 
     register_rest_route('cdek/v1', '/get-pvz', array(
         'methods' => 'GET',
         'callback' => 'get_pvz',
         'permission_callback' => '__return_true',
-        'url' => get_rest_url() . '/cdek/v1/get-pvz'
     ));
 
     register_rest_route('cdek/v1', '/create-order', array(
         'methods' => 'POST',
         'callback' => 'create_order',
         'permission_callback' => '__return_true',
-        'url' => get_rest_url() . '/cdek/v1/create-order'
     ));
 
     register_rest_route('cdek/v1', '/create-order', array(
         'methods' => 'GET',
         'callback' => 'create_order',
         'permission_callback' => '__return_true',
-        'url' => get_rest_url() . '/cdek/v1/create-order'
     ));
 
     register_rest_route('cdek/v1', '/delete-order', array(
         'methods' => 'GET',
         'callback' => 'delete_order',
         'permission_callback' => '__return_true',
-        'url' => get_rest_url() . '/cdek/v1/delete-order'
     ));
 
     register_rest_route('cdek/v1', '/get-waybill', array(
         'methods' => 'GET',
         'callback' => 'get_waybill',
         'permission_callback' => '__return_true',
-        'url' => get_rest_url() . '/cdek/v1/get-waybill'
     ));
 
     register_rest_route('cdek/v1', '/set-pvz-code-tmp', array(
         'methods' => 'GET',
         'callback' => 'set_pvz_code_tmp',
         'permission_callback' => '__return_true',
-        'url' => get_rest_url() . '/cdek/v1/set-pvz-code-tmp'
     ));
 
     register_rest_route('cdek/v1', '/call-courier', array(
         'methods' => 'POST',
         'callback' => 'call_courier',
         'permission_callback' => '__return_true',
-        'url' => get_rest_url() . '/cdek/v1/call-courier'
     ));
 
     register_rest_route('cdek/v1', '/call-courier-delete', array(
         'methods' => 'GET',
         'callback' => 'call_courier_delete',
         'permission_callback' => '__return_true',
-        'url' => get_rest_url() . '/cdek/v1/call-courier-delete'
     ));
 
 }
