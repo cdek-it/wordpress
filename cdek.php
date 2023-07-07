@@ -47,7 +47,7 @@ add_action('woocommerce_checkout_create_order', 'cdek_save_custom_checkout_field
 function cdek_widget_enqueue_script()
 {
     if (is_checkout()) {
-        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map-v8.js', array('jquery'), '1.7.0', true);
+        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map-v9.js', array('jquery'), '1.7.0', true);
         wp_localize_script('cdek-map', 'cdek_rest_api_path', array(
             'rest_path' => get_rest_path(),
         ));
@@ -64,12 +64,12 @@ function cdek_widget_enqueue_script()
 
 function cdek_admin_enqueue_script()
 {
-    wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/js/delivery-v7.js', array('jquery'), '1.7.0', true);
+    wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/js/delivery-v8.js', array('jquery'), '1.7.0', true);
     wp_localize_script('cdek-admin-delivery', 'cdek_rest_api_path', array(
         'rest_path' => get_rest_path(),
     ));
 
-    wp_enqueue_script('cdek-admin-create-order', plugin_dir_url(__FILE__) . 'assets/js/create-order-v2.js', array('jquery'), '1.7.0', true);
+    wp_enqueue_script('cdek-admin-create-order', plugin_dir_url(__FILE__) . 'assets/js/create-order-v3.js', array('jquery'), '1.7.0', true);
     wp_localize_script('cdek-admin-create-order', 'cdek_rest_api_path', array(
         'rest_path' => get_rest_path(),
     ));

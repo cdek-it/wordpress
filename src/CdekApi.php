@@ -27,7 +27,7 @@ class CdekApi
         $this->apiUrl = $this->getApiUrl();
         $this->httpClient = new HttpClientWrapper();
 
-        if ($this->adminSetting['test_mode'] === 'yes') {
+        if (array_key_exists('test_mode', $this->adminSetting) && $this->adminSetting['test_mode'] === 'yes') {
             $this->clientId = CDEK_TEST_CLIENT_ID;
             $this->clientSecret = CDEK_TEST_CLIENT_SECRET;
         } else {
@@ -265,7 +265,7 @@ class CdekApi
     
     private function getApiUrl() 
     {
-        if ($this->adminSetting['test_mode'] === 'yes') {
+        if (array_key_exists('test_mode', $this->adminSetting) && $this->adminSetting['test_mode'] === 'yes') {
             return CDEK_API_URL_TEST;
         }    
         return CDEK_API_URL;
