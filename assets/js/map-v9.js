@@ -4,9 +4,6 @@
         let cluster = null;
         let restApiUrl = cdek_rest_api_path.rest_path;
 
-        $('body').append('<div id="map-frame" style="z-index: 1000;"><div id="map-container"><div id="cdek-map"><div id="map-loader"></div></div></div>' +
-            '<div id="background"></div></div>');
-
         $('body').on('click', '.open-pvz-btn', null, function () {
             $('#map-frame').css('display', 'flex');
             if(!map) {
@@ -28,14 +25,50 @@
                 }).addTo(map);
             }
 
+            L.Control.PvzList = L.Control.extend(
+                {
+                    options:
+                        {
+                            position: 'topright',
+                        },
+                    onAdd: function (map) {
+                        var controlDiv = L.DomUtil.create('div', 'leaflet-draw-toolbar leaflet-bar');
+                        L.DomEvent
+                            .addListener(controlDiv, 'click', L.DomEvent.stopPropagation)
+                            .addListener(controlDiv, 'click', L.DomEvent.preventDefault)
+                            .addListener(controlDiv, 'click', function () {
+                                if ($('#map-pvz-list').is(":visible")) {
+                                    $('#map-pvz-list').hide();
+                                } else {
+                                    $('#map-pvz-list').show();
+                                }
+                            });
+
+                        var controlUI = L.DomUtil.create('a', 'leaflet-draw-pvz-list', controlDiv);
+                        controlUI.title = 'Pvz list';
+                        controlUI.href = '#';
+                        return controlDiv;
+                    }
+                });
+            let pvzListControl = new L.Control.PvzList();
+            map.addControl(pvzListControl);
+
             $('#map-loader').show();
 
             displayPvzOnMap();
 
             $('#background').click(function () {
                 $('#map-frame').css('display', 'none');
+                $('#map-pvz-list').hide();
                 uninstallMap();
             })
+
+            $('#map-pvz-list-search-clear').click(function () {
+                $('#map-pvz-list-search').val('')
+                $('.item-list-elem').each(function (){
+                    $(this).show();
+                })
+            });
         })
 
         function uninstallMap() {
@@ -134,16 +167,19 @@
             map.addLayer(cluster);
             let postamat = $('.open-pvz-btn').data('postamat');
             let hasPostamat = false;
+            // $('#map-pvz-item-list').empty();
             for (let i = 0; i < pvz.length; i++) {
                 let marker = null;
                 if (pvz[i].type === 'POSTAMAT') {
                     if (postamat === 1) {
                         hasPostamat = true;
                         marker = L.circleMarker([pvz[i].latitude, pvz[i].longitude], {color: '#ffad33'});
+                        $('#map-pvz-item-list').append(`<li class="item-list-elem" data-lat="${pvz[i].latitude}" data-lon="${pvz[i].longitude}">${pvz[i].address}</li>`);
                     }
                 } else {
                     if (postamat !== 1) {
                         marker = L.circleMarker([pvz[i].latitude, pvz[i].longitude]);
+                        $('#map-pvz-item-list').append(`<li class="item-list-elem" data-lat="${pvz[i].latitude}" data-lon="${pvz[i].longitude}">${pvz[i].address}</li>`);
                     }
                 }
 
@@ -168,6 +204,24 @@
             } else {
                 map.fitBounds(cluster.getBounds())
             }
+
+            const $itemList = $('.item-list-elem');
+            $('#map-pvz-list-search').keyup(function (event) {
+                let filterValue = event.target.value.toLowerCase();
+                $itemList.each(function (){
+                    const itemText = $(this).text().toLowerCase();
+                    if (itemText.indexOf(filterValue) !== -1) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                })
+            })
+
+            $itemList.click(function (event) {
+                map.setView(new L.LatLng($(event.target).data('lat'), $(event.target).data('lon')), 16);
+                $('#map-pvz-list').hide();
+            })
         }
 
         function selectMarker(pvz) {

@@ -1,6 +1,6 @@
 #cdek-map {
-    width: 600px;
-    height: 400px;
+    width: 100%;
+    height: 100%;
     position: relative;
     outline: none;
 }
@@ -11,6 +11,100 @@
 
 #map-container {
     z-index: 20;
+    display: inline-flex;
+    font-family: Arial, sans-serif;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+}
+
+#main-map-container {
+    position: relative;
+    width: 1200px;
+    height: 600px;
+}
+
+#map-pvz-list-search-container {
+    display: flex;
+}
+
+#map-pvz-list-search-clear {
+    margin: 10px;
+    background-color: white;
+    border: 1px solid #bfbfbf;
+    border-radius: 5px;
+    color: #bfbfbf;
+    cursor: pointer;
+}
+
+#map-pvz-list-search-clear:hover {
+    background-color: #dedede;
+    color: white;
+}
+
+#map-pvz-list {
+    display: none;
+    background: #ffffff;
+    padding: 10px;
+    position: absolute;
+    z-index: 1010;
+    right: 0;
+    margin-right: 50px;
+    margin-top: 10px;
+    height: 300px;
+    width: 300px;
+}
+
+#map-pvz-list-search {
+    padding: 8px;
+    font-size: 16px;
+    border: 0;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 10px;
+    width: 93%;
+    outline: none;
+}
+
+#map-pvz-list-container {
+    height: 247px; /* Adjust the height to make space for the input box */
+    overflow-y: auto;
+    border-radius: 4px;
+}
+
+.item-list-elem {
+    cursor: pointer;
+}
+
+/* Hide the scrollbar for webkit-based browsers (Chrome, Safari) */
+#map-pvz-list-container::-webkit-scrollbar {
+    width: 0.5em;
+}
+
+#map-pvz-list-container::-webkit-scrollbar-thumb {
+    background-color: transparent;
+}
+
+#map-pvz-list-container::-webkit-scrollbar-track {
+    background-color: transparent;
+}
+
+#map-pvz-list-container {
+    scrollbar-width: none;
+}
+
+#map-pvz-item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#map-pvz-item-list li {
+    padding: 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+#map-pvz-item-list li:last-child {
+    border-bottom: none;
 }
 
 #map-frame {
@@ -24,6 +118,7 @@
     right: 0;
     align-items: center;
     justify-content: center;
+    z-index: 1000;
 
     /*transform: translate(-50%, -50%);*/
 }
@@ -75,9 +170,6 @@
     display: none;
 }
 
-/* Media queries for mobile devices */
-@media screen and (max-width: 767px) {
-    #cdek-map {
-        width: 380px;
-    }
+.leaflet-draw-pvz-list {
+    background-image: url(../../templates/public/img/location.svg);
 }
