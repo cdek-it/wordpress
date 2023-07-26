@@ -47,6 +47,12 @@
                         var controlUI = L.DomUtil.create('a', 'leaflet-draw-pvz-list', controlDiv);
                         controlUI.title = 'Pvz list';
                         controlUI.href = '#';
+
+                        controlUI.ondblclick = (e) => {
+                            e.stopPropagation();
+                        };
+                        controlUI.onclick = this.options.onclickMethod;
+
                         return controlDiv;
                     }
                 });
@@ -60,6 +66,8 @@
             $('#background').click(function () {
                 $('#map-frame').css('display', 'none');
                 $('#map-pvz-list').hide();
+                $('#map-pvz-item-list').empty();
+                $('#map-pvz-list-search').val('');
                 uninstallMap();
             })
 
@@ -167,7 +175,7 @@
             map.addLayer(cluster);
             let postamat = $('.open-pvz-btn').data('postamat');
             let hasPostamat = false;
-            // $('#map-pvz-item-list').empty();
+            $('#map-pvz-item-list').empty();
             for (let i = 0; i < pvz.length; i++) {
                 let marker = null;
                 if (pvz[i].type === 'POSTAMAT') {
