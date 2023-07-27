@@ -37,11 +37,6 @@ class DeliveryCalc
         $weightInKg = $deliveryParam['package_data']['weight'] / 1000;
 
         foreach ($tariffList as $tariff) {
-
-            if ($tariff == 231) {
-                $v = 1;
-            }
-
             $weightLimit = (int) Tariff::getTariffWeightByCode($tariff);
             if ($weightInKg > $weightLimit) {
                 continue;
@@ -53,7 +48,7 @@ class DeliveryCalc
 
 //            $deliveryParam['selected_services'] = $this->getServicesList($services, $tariff);
             if ($setting['insurance'] === 'yes') {
-                $deliveryParam['selected_services'][] = ['code' => 'INSURANCE', 'parameter' => (int)$package['cart_subtotal']];
+                $deliveryParam['selected_services'][0] = ['code' => 'INSURANCE', 'parameter' => (int)$package['cart_subtotal']];
             }
 
             $calcResult = $api->calculate($deliveryParam, $tariff);
