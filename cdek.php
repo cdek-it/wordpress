@@ -749,7 +749,7 @@ function cdek_add_script_update_shipping_method()
     if (is_checkout()) {
         ?>
         <script>
-            jQuery(document).on('change', 'input[name="shipping_method[0]"]', function () {
+            jQuery(document).on('change', '.shipping_method', function () {
                 jQuery(document.body).trigger('update_checkout')
             });
         </script>
