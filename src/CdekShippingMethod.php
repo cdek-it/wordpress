@@ -158,11 +158,6 @@ class CdekShippingMethod extends WC_Shipping_Method
                 запись которая изменит название 136 и 137 тарифа выглядит так: <b>136-Доставка до пвз;137-Доставка курьером</b> <br>
                 Если значение не задано то названия тарифов будут стандартными."
             ],
-            'tariff_plug' => [
-                'title' => 'Название тарифа заглушки',
-                'type' => 'text',
-                'description' => "Этот тариф будет появляться когда у пользователя еще не добавлены параметры для расчета доставки."
-            ],
 //            'service_list' => [
 //                'title' => __('Услуги', CDEK_DELIVERY_NAME),
 //                'type' => 'multiselect',
@@ -376,14 +371,9 @@ class CdekShippingMethod extends WC_Shipping_Method
                 }
             }
         } else {
-            $adminSetting = Helper::getSettingDataPlugin();
-            $tariffPlug = 'Доставка CDEK';
-            if (array_key_exists('tariff_plug', $adminSetting) && $adminSetting['tariff_plug'] !== '') {
-                $tariffPlug = $adminSetting['tariff_plug'];
-            }
             $this->add_rate([
                 'id' => 'official_cdek_plug',
-                'label' => $tariffPlug,
+                'label' => CDEK_TARIFF_PLUG_NAME,
                 'cost' => 0
             ]);
         }
