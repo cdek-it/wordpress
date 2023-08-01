@@ -4,6 +4,29 @@
         let cluster = null;
         let restApiUrl = cdek_rest_api_path.rest_path;
 
+        function triggerWooCommerceUpdate() {
+            let city = $('#billing_city').val();
+            $('#billing_city').val('');
+            $(document.body).trigger('update_checkout');
+            setTimeout(updateCheckout, 1000, city)
+        }
+
+        function updateCheckout(city) {
+            $('#billing_city').val(city);
+            $(document.body).trigger('update_checkout');
+        }
+
+        if ($('#billing_city').val()) {
+            triggerWooCommerceUpdate();
+        }
+
+
+        $('body').on('change', '#billing_city, #billing_state', function() {
+            if ($('#billing_city').val() !== '') {
+                $(document.body).trigger('update_checkout');
+            }
+        });
+
         $('body').on('click', '.open-pvz-btn', null, function () {
             $('#map-frame').css('display', 'flex');
             if(!map) {

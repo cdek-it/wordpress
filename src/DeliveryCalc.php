@@ -3,7 +3,6 @@
 namespace Cdek;
 
 use Cdek\Model\Tariff;
-use WCML\MultiCurrency\Settings;
 
 class DeliveryCalc
 {
@@ -18,22 +17,19 @@ class DeliveryCalc
 
         $cityName = $package["destination"]['city'];
         if (!$cityName) {
-            return false;
+            return $this->plug();
         }
 
         $stateName = $this->getState($package["destination"]);
         $deliveryParam['cityCode'] = $api->getCityCodeByCityName($cityName, $stateName);
-
         if ($deliveryParam['cityCode'] === -1) {
-            return false;
+            return $this->plug();
         }
 
         $deliveryParam['package_data'] = $this->getPackagesData($package['contents']);
         $pvz = json_decode($api->getPvz($deliveryParam['cityCode'], $deliveryParam['package_data']['weight'] / 1000));
-
         $setting = Helper::getSettingDataPlugin();
         $tariffList = $setting['tariff_list'];
-//        $services = $setting['service_list'];
         $weightInKg = $deliveryParam['package_data']['weight'] / 1000;
 
         foreach ($tariffList as $tariff) {
@@ -46,7 +42,6 @@ class DeliveryCalc
                 continue;
             }
 
-//            $deliveryParam['selected_services'] = $this->getServicesList($services, $tariff);
             if ($setting['insurance'] === 'yes') {
                 $deliveryParam['selected_services'][0] = ['code' => 'INSURANCE', 'parameter' => (int)$package['cart_subtotal']];
             }
@@ -172,19 +167,6 @@ class DeliveryCalc
         return ['length' => $length, 'width' => $width, 'height' => $height, 'weight' => $totalWeight];
     }
 
-//    protected function getServicesList($services, $tariff): array
-//    {
-//        $servicesListForParam = [];
-//        if ($services !== "") {
-//            foreach ($services as $service) {
-//                if ($service === 'DELIV_RECEIVER' && $tariff == '62') {
-//                    $servicesListForParam['code'] = $service;
-//                }
-//            }
-//        }
-//        return $servicesListForParam;
-//    }
-
     protected function checkDeliveryResponse($delivery): bool
     {
         if (!property_exists($delivery, 'errors')) {
@@ -192,5 +174,16 @@ class DeliveryCalc
         } else {
             return false;
         }
+    }
+
+
+    protected function plug(): bool
+    {
+        $this->rates[] = [
+            'id' => 'official_cdek_plug',
+            'label' => 'Доставка CDEK',
+            'cost' => 0
+        ];
+        return true;
     }
 }

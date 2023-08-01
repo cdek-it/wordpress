@@ -363,11 +363,19 @@ class CdekShippingMethod extends WC_Shipping_Method
 
     public function calculate_shipping($package = [])
     {
-        $deliveryCalc = new DeliveryCalc();
-        if ($deliveryCalc->calculate($package, $this->id)) {
-            foreach ($deliveryCalc->rates as $rate) {
-                $this->add_rate($rate);
+        if (is_cart() || is_checkout()) {
+            $deliveryCalc = new DeliveryCalc();
+            if ($deliveryCalc->calculate($package, $this->id)) {
+                foreach ($deliveryCalc->rates as $rate) {
+                    $this->add_rate($rate);
+                }
             }
+        } else {
+            $this->add_rate([
+                'id' => 'official_cdek_plug',
+                'label' => 'Доставка CDEK',
+                'cost' => 0
+            ]);
         }
     }
 

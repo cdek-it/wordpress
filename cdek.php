@@ -47,7 +47,7 @@ add_action('woocommerce_checkout_create_order', 'cdek_save_custom_checkout_field
 function cdek_widget_enqueue_script()
 {
     if (is_checkout()) {
-        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map-v10.js', array('jquery'), '1.7.0', true);
+        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map-v11.js', array('jquery'), '1.7.0', true);
         wp_localize_script('cdek-map', 'cdek_rest_api_path', array(
             'rest_path' => get_rest_path(),
         ));
@@ -115,6 +115,14 @@ function get_rest_path() {
     $rest_url_parts = parse_url($rest_url); // Parse the URL into its components
     return $rest_url_parts['path'];
 }
+
+function remove_address_field_requirement($fields) {
+    $fields['billing']['billing_address_1']['required'] = false;
+    $fields['billing']['billing_address_2']['required'] = false;
+
+    return $fields;
+}
+add_filter('woocommerce_checkout_fields', 'remove_address_field_requirement');
 
 function cdek_register_route()
 {
@@ -763,6 +771,15 @@ function is_pvz_code()
     $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
 
     if (strpos($shippingMethodIdSelected, 'official_cdek') !== false) {
+
+        $city = $_POST['billing_city'];
+        $state = $_POST['billing_state'];
+        $api = new CdekApi();
+        $cityCode = $api->getCityCodeByCityName($city, $state);
+        if ($cityCode === -1) {
+            wc_add_notice(__('Не удалось определить населенный пункт.'), 'error');
+        }
+
         $tariffCode = getTariffCodeByShippingMethodId($shippingMethodIdSelected);
         if (checkTariffFromStoreByTariffCode($tariffCode)) {
             $pvzCode = $_POST['pvz_code'];
@@ -867,14 +884,6 @@ function add_cdek_shipping_method($methods)
 
 function add_custom_order_meta_box()
 {
-    /**
-     * 1. Получить айди заказа
-     * 2. Проверить создан ли заказ с нашим тарифом
-     * 3. Проверить есть ли доступ
-     * 4. Проверить существует ли заказ, если нет очистить метаданные
-     * 5. Проверить существует ли заявка, если нет очистить метаданные
-     * 6. Заполнить поля нужные для работы виджета, передать их в виджет
-     */
     global $post;
     if ($post && $post->post_type === 'shop_order') {
         $order_id = $post->ID;
