@@ -146,7 +146,7 @@ class CdekApi
         if ($admin) {
             $params['type'] = 'PVZ';
         } else {
-            if ($weight !== 0) {
+            if ((int)$weight !== 0) {
                 $params['weight_max'] = (int)ceil($weight);
             }
         }
@@ -203,6 +203,12 @@ class CdekApi
     public function getCityCodeByCityName($city, $state): int
     {
         $url = $this->apiUrl . self::REGION_PATH;
+
+        //по запросу к api v2 климовск записан как "климовск микрорайон" поэтому добавляем "микрорайон"
+        if (mb_strtolower($city) === 'климовск') {
+            $city = $city . ' микрорайон';
+        }
+
         $cityData = json_decode($this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city' => $city]));
 
         if ($state == 'false') {
