@@ -22,4 +22,14 @@ class Helper
         }
         return $randomString;
     }
+
+    public static function getTariffPlugName()
+    {
+        $setting = self::getSettingDataPlugin();
+        $tariffPlug = "CDEK";
+        if (array_key_exists('tariff_plug', $setting) && $setting['tariff_plug'] !== "") {
+            $tariffPlug = $setting['tariff_plug'];
+        }
+        return $tariffPlug;
+    }
 }

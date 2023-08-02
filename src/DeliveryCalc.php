@@ -181,7 +181,7 @@ class DeliveryCalc
     {
         $this->rates[] = [
             'id' => 'official_cdek_plug',
-            'label' => 'Доставка CDEK',
+            'label' => Helper::getTariffPlugName(),
             'cost' => 0
         ];
         return true;
