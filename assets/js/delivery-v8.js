@@ -4,8 +4,6 @@
         let cluster = null;
         let cityCodePvzReceived = null;
 
-        let restApiUrl = cdek_rest_api_path.rest_path;
-
         if ($('#woocommerce_official_cdek_seller_name').length === 0) {
             $('#woocommerce_official_cdek_client_secret').after('<p>Ошибка авторизации. Введите корректные идентификатор клиента и секретный ключ.</p>');
         } else {
@@ -39,7 +37,7 @@
                     if (event.target.value.length > 2) {
                         $.ajax({
                             method: "GET",
-                            url: restApiUrl + "cdek/v1/get-region",
+                            url: window.cdek_rest_delivery_api_path.get_region,
                             data: {
                                 city: event.target.value
                             },
@@ -126,7 +124,7 @@
                 if (cityCode !== cityCodePvzReceived) {
                     $.ajax({
                         method: "GET",
-                        url: restApiUrl + "cdek/v1/get-pvz",
+                        url: window.cdek_rest_delivery_api_path.get_pvz,
                         data: {
                             city_code: cityCode,
                             admin: 1
@@ -222,7 +220,7 @@
             $('#cdek-create-order-error').hide();
             $.ajax({
                 method: "GET",
-                url: restApiUrl + "cdek/v1/create-order",
+                url: window.cdek_rest_delivery_api_path.create_order,
                 data: {
                     package_order_id: $('input[name=package_order_id]').val(),
                     package_length: $('input[name=package_length]').val(),
@@ -264,7 +262,7 @@
             $('#cdek-courier-error').hide();
             $.ajax({
                 method: "GET",
-                url: restApiUrl + "cdek/v1/delete-order",
+                url: window.cdek_rest_delivery_api_path.delete_order,
                 data: {
                     number: $('#cdek-order-number-input').val(),
                     order_id: $('input[name=package_order_id]').val()
@@ -298,7 +296,7 @@
             $('#cdek-courier-error').hide();
             $.ajax({
                 method: "POST",
-                url: restApiUrl + "cdek/v1/call-courier",
+                url: window.cdek_rest_delivery_api_path.call-courier,
                 data: {
                     order_id: $('input[name=package_order_id]').val(),
                     date: $('#cdek-courier-date').val(),
@@ -351,7 +349,7 @@
         $('#cdek-courier-delete').click(function (event) {
             $.ajax({
                 method: "GET",
-                url: restApiUrl + "cdek/v1/call-courier-delete",
+                url: window.cdek_rest_delivery_api_path.call_courier_delete,
                 data: {
                     order_id: $('input[name=package_order_id]').val(),
                 },
