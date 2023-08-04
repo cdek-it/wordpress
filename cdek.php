@@ -27,8 +27,8 @@ if (!function_exists('add_action')) {
 }
 
 require 'vendor/autoload.php';
-require_once(plugin_dir_path(__FILE__) . 'message.php');
-require_once(plugin_dir_path(__FILE__) . 'config.php');
+require_once(plugin_dir_path(__FILE__).'message.php');
+require_once(plugin_dir_path(__FILE__).'config.php');
 
 add_action('rest_api_init', 'cdek_register_route');
 add_filter('woocommerce_new_order', 'cdek_woocommerce_new_order_action', 10, 2);
@@ -44,60 +44,74 @@ add_filter('woocommerce_checkout_fields', 'cdek_add_custom_checkout_field');
 add_action('woocommerce_checkout_create_order', 'cdek_save_custom_checkout_field_to_order', 10, 2);
 
 
-function cdek_widget_enqueue_script()
-{
+function cdek_widget_enqueue_script() {
     if (is_checkout()) {
-        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__) . 'assets/js/map-v11.js', array('jquery'), '1.7.0', true);
-        wp_localize_script('cdek-map', 'cdek_rest_api_path', array(
-            'rest_path' => get_rest_path(),
-        ));
+        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__).'assets/js/map-v11.js', ['jquery'], false, true);
+        wp_localize_script('cdek-map', 'cdek_rest_map_api_path', [
+            'get_pvz'      => rest_url('/cdek/v1/get-pvz'),
+            'city_code'    => rest_url('/cdek/v1/get-city-code'),
+            'tmp_pvz_code' => rest_url('/cdek/v1/set-pvz-code-tmp'),
+        ]);
 
-        wp_enqueue_script('cdek-css-leaflet-min', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
-        wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
-        wp_enqueue_style('cdek-css-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
-        wp_enqueue_style('cdek-admin-leaflet-cluster-default', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.Default.min.css');
-        wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.min.css');
-        wp_enqueue_style('cdek-css', plugin_dir_url(__FILE__) . 'assets/css/cdek-map-v6.css');
+        wp_enqueue_script('cdek-css-leaflet-min', plugin_dir_url(__FILE__).'assets/js/lib/leaflet-src.min.js');
+        wp_enqueue_script('cdek-admin-leaflet-cluster',
+            plugin_dir_url(__FILE__).'assets/js/lib/leaflet.markercluster-src.min.js');
+        wp_enqueue_style('cdek-css-leaflet', plugin_dir_url(__FILE__).'assets/css/leaflet.css');
+        wp_enqueue_style('cdek-admin-leaflet-cluster-default',
+            plugin_dir_url(__FILE__).'assets/css/MarkerCluster.Default.min.css');
+        wp_enqueue_style('cdek-admin-leaflet-cluster',
+            plugin_dir_url(__FILE__).'assets/css/MarkerCluster.min.css');
+        wp_enqueue_style('cdek-css', plugin_dir_url(__FILE__).'assets/css/cdek-map-v6.css');
         addYandexMap();
     }
 }
 
-function cdek_admin_enqueue_script()
-{
-    wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/js/delivery-v8.js', array('jquery'), '1.7.0', true);
-    wp_localize_script('cdek-admin-delivery', 'cdek_rest_api_path', array(
-        'rest_path' => get_rest_path(),
-    ));
+function cdek_admin_enqueue_script() {
+    wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__).'assets/js/delivery-v8.js',
+        ['jquery'], '1.7.0', true);
+    wp_localize_script('cdek-admin-delivery', 'cdek_rest_delivery_api_path', [
+        'get_pvz'             => rest_url('/cdek/v1/get-pvz'),
+        'create_order'        => rest_url('/cdek/v1/create-order'),
+        'delete_order'        => rest_url('/cdek/v1/delete-order'),
+        'get_region'          => rest_url('/cdek/v1/get-region'),
+        'call_courier'        => rest_url('/cdek/v1/call-courier'),
+        'call_courier_delete' => rest_url('/cdek/v1/call-courier-delete'),
+    ]);
 
-    wp_enqueue_script('cdek-admin-create-order', plugin_dir_url(__FILE__) . 'assets/js/create-order-v3.js', array('jquery'), '1.7.0', true);
-    wp_localize_script('cdek-admin-create-order', 'cdek_rest_api_path', array(
-        'rest_path' => get_rest_path(),
-    ));
+    wp_enqueue_script('cdek-admin-create-order', plugin_dir_url(__FILE__).'assets/js/create-order-v3.js',
+        ['jquery'], '1.7.0', true);
+    wp_localize_script('cdek-admin-create-order', 'cdek_rest_order_api_path', [
+        'create_order' => rest_url('/cdek/v1/create-order'),
+    ]);
 
-    wp_enqueue_script('cdek-admin-leaflet', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet-src.min.js');
-    wp_enqueue_script('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/js/lib/leaflet.markercluster-src.min.js');
-    wp_enqueue_style('cdek-admin-leaflet', plugin_dir_url(__FILE__) . 'assets/css/leaflet.css');
-    wp_enqueue_style('cdek-admin-leaflet-cluster-default', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.Default.min.css');
-    wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__) . 'assets/css/MarkerCluster.min.css');
-    wp_enqueue_style('cdek-admin-delivery', plugin_dir_url(__FILE__) . 'assets/css/delivery-v4.css');
+    wp_enqueue_script('cdek-admin-leaflet', plugin_dir_url(__FILE__).'assets/js/lib/leaflet-src.min.js');
+    wp_enqueue_script('cdek-admin-leaflet-cluster',
+        plugin_dir_url(__FILE__).'assets/js/lib/leaflet.markercluster-src.min.js');
+    wp_enqueue_style('cdek-admin-leaflet', plugin_dir_url(__FILE__).'assets/css/leaflet.css');
+    wp_enqueue_style('cdek-admin-leaflet-cluster-default',
+        plugin_dir_url(__FILE__).'assets/css/MarkerCluster.Default.min.css');
+    wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__).'assets/css/MarkerCluster.min.css');
+    wp_enqueue_style('cdek-admin-delivery', plugin_dir_url(__FILE__).'assets/css/delivery-v4.css');
     addYandexMap();
 }
 
-function addYandexMap()
-{
+function addYandexMap() {
     $cdekShippingSettings = Helper::getSettingDataPlugin();
-    if (array_key_exists('yandex_map_api_key', $cdekShippingSettings) && $cdekShippingSettings['yandex_map_api_key'] !== '') {
+    if (array_key_exists('yandex_map_api_key',
+            $cdekShippingSettings) && $cdekShippingSettings['yandex_map_api_key'] !== '') {
         $WP_Http = new WP_Http();
-        $resp = $WP_Http->request('https://api-maps.yandex.ru/2.1?apikey=' . $cdekShippingSettings['yandex_map_api_key'] . '&lang=ru_RU', [
-            'method' => 'GET',
-            'headers' => [
-                "Content-Type" => "application/json",
-            ],
-        ]);
+        $resp    = $WP_Http->request('https://api-maps.yandex.ru/2.1?apikey='.$cdekShippingSettings['yandex_map_api_key'].'&lang=ru_RU',
+            [
+                'method'  => 'GET',
+                'headers' => [
+                    "Content-Type" => "application/json",
+                ],
+            ]);
 
         if ($resp['response']['code'] === 200) {
-            wp_enqueue_script('cdek-admin-yandex-api', 'https://api-maps.yandex.ru/2.1?apikey=' . $cdekShippingSettings['yandex_map_api_key'] . '&lang=ru_RU');
-            wp_enqueue_script('cdek-admin-leaflet-yandex', plugin_dir_url(__FILE__) . 'assets/js/lib/Yandex.js');
+            wp_enqueue_script('cdek-admin-yandex-api',
+                'https://api-maps.yandex.ru/2.1?apikey='.$cdekShippingSettings['yandex_map_api_key'].'&lang=ru_RU');
+            wp_enqueue_script('cdek-admin-leaflet-yandex', plugin_dir_url(__FILE__).'assets/js/lib/Yandex.js');
         } else {
             $setting = WC()->shipping->load_shipping_methods()['official_cdek'];
             $setting->update_option('yandex_map_api_key', '');
@@ -111,8 +125,9 @@ function addYandexMap()
 }
 
 function get_rest_path() {
-    $rest_url = get_rest_url(); // Get the base REST URL for the site
+    $rest_url       = get_rest_url(); // Get the base REST URL for the site
     $rest_url_parts = parse_url($rest_url); // Parse the URL into its components
+
     return $rest_url_parts['path'];
 }
 
@@ -122,155 +137,154 @@ function remove_address_field_requirement($fields) {
 
     return $fields;
 }
+
 add_filter('woocommerce_checkout_fields', 'remove_address_field_requirement');
 
-function cdek_register_route()
-{
-    register_rest_route('cdek/v1', '/check-auth', array(
-        'methods' => 'GET',
-        'callback' => 'check_auth',
+function cdek_register_route() {
+    register_rest_route('cdek/v1', '/check-auth', [
+        'methods'             => 'GET',
+        'callback'            => 'check_auth',
         'permission_callback' => '__return_true',
-    ));
+    ]);
 
-    register_rest_route('cdek/v1', '/get-region', array(
-        'methods' => 'GET',
-        'callback' => 'get_region',
+    register_rest_route('cdek/v1', '/get-region', [
+        'methods'             => 'GET',
+        'callback'            => 'get_region',
         'permission_callback' => '__return_true',
-    ));
+    ]);
 
-    register_rest_route('cdek/v1', '/get-city-code', array(
-        'methods' => 'GET',
-        'callback' => 'get_city_code',
+    register_rest_route('cdek/v1', '/get-city-code', [
+        'methods'             => 'GET',
+        'callback'            => 'get_city_code',
         'permission_callback' => '__return_true',
-    ));
+    ]);
 
-    register_rest_route('cdek/v1', '/get-pvz', array(
-        'methods' => 'GET',
-        'callback' => 'get_pvz',
+    register_rest_route('cdek/v1', '/get-pvz', [
+        'methods'             => 'GET',
+        'callback'            => 'get_pvz',
         'permission_callback' => '__return_true',
-    ));
+    ]);
 
-    register_rest_route('cdek/v1', '/create-order', array(
-        'methods' => 'POST',
-        'callback' => 'create_order',
+    register_rest_route('cdek/v1', '/create-order', [
+        'methods'             => 'POST',
+        'callback'            => 'create_order',
         'permission_callback' => '__return_true',
-    ));
+    ]);
 
-    register_rest_route('cdek/v1', '/create-order', array(
-        'methods' => 'GET',
-        'callback' => 'create_order',
+    register_rest_route('cdek/v1', '/create-order', [
+        'methods'             => 'GET',
+        'callback'            => 'create_order',
         'permission_callback' => '__return_true',
-    ));
+    ]);
 
-    register_rest_route('cdek/v1', '/delete-order', array(
-        'methods' => 'GET',
-        'callback' => 'delete_order',
+    register_rest_route('cdek/v1', '/delete-order', [
+        'methods'             => 'GET',
+        'callback'            => 'delete_order',
         'permission_callback' => '__return_true',
-    ));
+    ]);
 
-    register_rest_route('cdek/v1', '/get-waybill', array(
-        'methods' => 'GET',
-        'callback' => 'get_waybill',
+    register_rest_route('cdek/v1', '/get-waybill', [
+        'methods'             => 'GET',
+        'callback'            => 'get_waybill',
         'permission_callback' => '__return_true',
-    ));
+    ]);
 
-    register_rest_route('cdek/v1', '/set-pvz-code-tmp', array(
-        'methods' => 'GET',
-        'callback' => 'set_pvz_code_tmp',
+    register_rest_route('cdek/v1', '/set-pvz-code-tmp', [
+        'methods'             => 'GET',
+        'callback'            => 'set_pvz_code_tmp',
         'permission_callback' => '__return_true',
-    ));
+    ]);
 
-    register_rest_route('cdek/v1', '/call-courier', array(
-        'methods' => 'POST',
-        'callback' => 'call_courier',
+    register_rest_route('cdek/v1', '/call-courier', [
+        'methods'             => 'POST',
+        'callback'            => 'call_courier',
         'permission_callback' => '__return_true',
-    ));
+    ]);
 
-    register_rest_route('cdek/v1', '/call-courier-delete', array(
-        'methods' => 'GET',
-        'callback' => 'call_courier_delete',
+    register_rest_route('cdek/v1', '/call-courier-delete', [
+        'methods'             => 'GET',
+        'callback'            => 'call_courier_delete',
         'permission_callback' => '__return_true',
-    ));
+    ]);
 
 }
 
-function call_courier($data)
-{
+function call_courier($data) {
     $callCourier = new CallCourier();
-    $param = DataWPScraber::getData($data, [
-            'order_id',
-            'date',
-            'starttime',
-            'endtime',
-            'desc',
-            'name',
-            'phone',
-            'address',
-            'comment',
-            'weight',
-            'length',
-            'width',
-            'height',
-            'need_call',
+    $param       = DataWPScraber::getData($data, [
+        'order_id',
+        'date',
+        'starttime',
+        'endtime',
+        'desc',
+        'name',
+        'phone',
+        'address',
+        'comment',
+        'weight',
+        'length',
+        'width',
+        'height',
+        'need_call',
     ]);
+
     return $callCourier->call($param);
 }
 
-function call_courier_delete($data)
-{
+function call_courier_delete($data) {
     $callCourier = new CallCourier();
+
     return $callCourier->delete($data->get_param('order_id'));
 }
 
-function create_order($data)
-{
+function create_order($data) {
     $createOrder = new CreateOrder();
+
     return $createOrder->createOrder($data);
 }
 
-function getCityCode($city_code, $order)
-{
-    $api = new CdekApi();
+function getCityCode($city_code, $order) {
+    $api      = new CdekApi();
     $cityCode = $city_code;
     if (empty($cityCode)) {
         $cityCode = $api->getCityCodeByCityName($order->get_shipping_city(), $order->get_shipping_state());
     }
+
     return $cityCode;
 }
 
-function setPackage($data, $orderId, $currency)
-{
-    $param = [];
+function setPackage($data, $orderId, $currency) {
+    $param                = [];
     $cdekShippingSettings = Helper::getSettingDataPlugin();
     if ($cdekShippingSettings['has_packages_mode'] === 'yes') {
-        $packageData = json_decode($data->get_param('package_data'));
+        $packageData       = json_decode($data->get_param('package_data'));
         $param['packages'] = get_packages($orderId, $packageData, $currency);
     } else {
-        $length = $data->get_param('package_length');
-        $width = $data->get_param('package_width');
-        $height = $data->get_param('package_height');
-        $order = wc_get_order($orderId);
-        $items = $order->get_items();
-        $itemsData = [];
+        $length      = $data->get_param('package_length');
+        $width       = $data->get_param('package_width');
+        $height      = $data->get_param('package_height');
+        $order       = wc_get_order($orderId);
+        $items       = $order->get_items();
+        $itemsData   = [];
         $totalWeight = 0;
         foreach ($items as $key => $item) {
-            $product = $item->get_product();
-            $weight = $product->get_weight();
+            $product     = $item->get_product();
+            $weight      = $product->get_weight();
             $weightClass = new WeightCalc();
-            $weight = $weightClass->getWeight($weight);
-            $quantity = (int)$item->get_quantity();
+            $weight      = $weightClass->getWeight($weight);
+            $quantity    = (int) $item->get_quantity();
             $totalWeight += $quantity * $weight;
-            $cost = $product->get_price();
+            $cost        = $product->get_price();
 
             if ($currency !== 'RUB' && function_exists('wcml_get_woocommerce_currency_option')) {
                 $cost = convert_currency_cost_to_rub($cost, $currency);
             }
 
             $selectedPaymentMethodId = $order->get_payment_method();
-            $percentCod = (int)$cdekShippingSettings['percentcod'];
+            $percentCod              = (int) $cdekShippingSettings['percentcod'];
             if ($selectedPaymentMethodId === 'cod') {
                 if ($percentCod !== 0) {
-                    $paymentValue = (int)(((int)$cdekShippingSettings['percentcod'] / 100) * $cost);
+                    $paymentValue = (int) (((int) $cdekShippingSettings['percentcod'] / 100) * $cost);
                 } else {
                     $paymentValue = $cost;
                 }
@@ -279,12 +293,12 @@ function setPackage($data, $orderId, $currency)
             }
 
             $itemsData[] = [
-                "ware_key" => $product->get_id(),
-                "payment" => ["value" => $paymentValue],
-                "name" => $product->get_name(),
-                "cost" => $cost,
-                "amount" => $item->get_quantity(),
-                "weight" => $weight,
+                "ware_key"     => $product->get_id(),
+                "payment"      => ["value" => $paymentValue],
+                "name"         => $product->get_name(),
+                "cost"         => $cost,
+                "amount"       => $item->get_quantity(),
+                "weight"       => $weight,
                 "weight_gross" => $weight + 1,
             ];
         }
@@ -292,21 +306,21 @@ function setPackage($data, $orderId, $currency)
         $param['packages'] = [
             'number' => $orderId,
             'length' => $length,
-            'width' => $width,
+            'width'  => $width,
             'height' => $height,
             'weight' => $totalWeight,
-            'items' => $itemsData
+            'items'  => $itemsData,
         ];
     }
+
     return $param;
 }
 
-function convert_currency_cost_to_rub($cost, $currency)
-{
+function convert_currency_cost_to_rub($cost, $currency) {
     global $woocommerce_wpml;
 
     $multiCurrency = $woocommerce_wpml->get_multi_currency();
-    $rates = $multiCurrency->get_exchange_rates();
+    $rates         = $multiCurrency->get_exchange_rates();
 
     if (!array_key_exists('RUB', $rates)) {
         return $cost;
@@ -321,45 +335,43 @@ function convert_currency_cost_to_rub($cost, $currency)
     }
 
     if ($currency === $defaultCurrency) {
-        $cost = round($cost * (float)$rates['RUB'], 2);
+        $cost = round($cost * (float) $rates['RUB'], 2);
     } else {
-        $costConvertToDefault = round($cost / (float)$rates[$currency], 2);
-        $cost = round($costConvertToDefault * (float)$rates['RUB'], 2);
+        $costConvertToDefault = round($cost / (float) $rates[$currency], 2);
+        $cost                 = round($costConvertToDefault * (float) $rates['RUB'], 2);
     }
 
     return $cost;
 }
 
-function get_packages($orderId, $packageData, $currency)
-{
+function get_packages($orderId, $packageData, $currency) {
     $result = [];
     foreach ($packageData as $key => $package) {
-        $data = get_package_items($package->items, $orderId, $currency);
+        $data     = get_package_items($package->items, $orderId, $currency);
         $result[] = [
-            'number' => $orderId . '_' . Helper::generateRandomString(5),
+            'number' => $orderId.'_'.Helper::generateRandomString(5),
             'length' => $package->length,
-            'width' => $package->width,
+            'width'  => $package->width,
             'height' => $package->height,
             'weight' => $data['weight'],
-            'items' => $data['items']
+            'items'  => $data['items'],
         ];
     }
 
     return $result;
 }
 
-function get_package_items($items, $orderId, $currency)
-{
-    $itemsData = [];
+function get_package_items($items, $orderId, $currency) {
+    $itemsData   = [];
     $totalWeight = 0;
     foreach ($items as $item) {
-        $product = wc_get_product($item[0]);
-        $weight = $product->get_weight();
+        $product     = wc_get_product($item[0]);
+        $weight      = $product->get_weight();
         $weightClass = new WeightCalc();
-        $weight = $weightClass->getWeight($weight);
-        $totalWeight += (int)$item[2] * $weight;
+        $weight      = $weightClass->getWeight($weight);
+        $totalWeight += (int) $item[2] * $weight;
 
-        $order = wc_get_order($orderId);
+        $order                   = wc_get_order($orderId);
         $selectedPaymentMethodId = $order->get_payment_method();
         if ($selectedPaymentMethodId === 'cod') {
             $paymentValue = $product->get_price();
@@ -374,23 +386,23 @@ function get_package_items($items, $orderId, $currency)
         }
 
         $itemsData[] = [
-            "ware_key" => $product->get_id(),
-            "payment" => ["value" => $paymentValue],
-            "name" => $product->get_name(),
-            "cost" => $cost,
-            "amount" => $item[2],
-            "weight" => $weight,
+            "ware_key"     => $product->get_id(),
+            "payment"      => ["value" => $paymentValue],
+            "name"         => $product->get_name(),
+            "cost"         => $cost,
+            "amount"       => $item[2],
+            "weight"       => $weight,
             "weight_gross" => $weight + 1,
         ];
     }
+
     return ['items' => $itemsData, 'weight' => $totalWeight];
 }
 
-function get_waybill($data)
-{
-    $api = new CdekApi();
+function get_waybill($data) {
+    $api         = new CdekApi();
     $waybillData = $api->createWaybill($data->get_param('number'));
-    $waybill = json_decode($waybillData);
+    $waybill     = json_decode($waybillData);
 
     $order = json_decode($api->getOrder($data->get_param('number')));
 
@@ -418,80 +430,76 @@ function get_waybill($data)
     exit();
 }
 
-function check_auth()
-{
-    $api = new CdekApi();
+function check_auth() {
+    $api   = new CdekApi();
     $check = $api->checkAuth();
     if ($check) {
         update_option('cdek_auth_check', '1');
     } else {
         update_option('cdek_auth_check', '0');
     }
+
     return json_encode(['state' => $check]);
 }
 
-function get_region($data)
-{
+function get_region($data) {
     $api = new CdekApi();
+
     return $api->getRegion($data->get_param('city'));
 }
 
-function set_pvz_code_tmp($data)
-{
+function set_pvz_code_tmp($data) {
     delete_post_meta(-1, 'pvz_code_tmp');
-    $pvzCode = $data->get_param('pvz_code');
-    $pvzInfo = $data->get_param('pvz_info');
+    $pvzCode  = $data->get_param('pvz_code');
+    $pvzInfo  = $data->get_param('pvz_info');
     $cityCode = $data->get_param('city_code');
-    update_post_meta(-1, 'pvz_code_tmp', ['pvz_code' => $pvzCode, 'pvz_info' => $pvzInfo, 'city_code' => $cityCode]);
+    update_post_meta(-1, 'pvz_code_tmp',
+        ['pvz_code' => $pvzCode, 'pvz_info' => $pvzInfo, 'city_code' => $cityCode]);
 }
 
-function get_city_code($data)
-{
+function get_city_code($data) {
     $api = new CdekApi();
+
     return $api->getCityCodeByCityName($data->get_param('city_name'), $data->get_param('state_name'));
 }
 
-function get_pvz($data)
-{
+function get_pvz($data) {
     $api = new CdekApi();
+
     return $api->getPvz($data->get_param('city_code'), $data->get_param('weight'), $data->get_param('admin'));
 }
 
-function delete_order($data)
-{
+function delete_order($data) {
     $deleteOrder = new DeleteOrder();
+
     return $deleteOrder->delete($data->get_param('order_id'), $data->get_param('number'));
 }
 
-function cdek_shipping_method()
-{
+function cdek_shipping_method() {
     if (!class_exists('CdekShippingMethod')) {
-        class CdekShippingMethod extends \Cdek\CdekShippingMethod
-        {
+        class CdekShippingMethod extends \Cdek\CdekShippingMethod {
         }
     }
 }
 
-function cdek_map_display($shippingMethodCurrent)
-{
+function cdek_map_display($shippingMethodCurrent) {
     if (is_checkout() && isTariffTypeFromStore($shippingMethodCurrent)) {
         $cdekShippingSettings = Helper::getSettingDataPlugin();
-        $layerMap = $cdekShippingSettings['map_layer'];
+        $layerMap             = $cdekShippingSettings['map_layer'];
         if ($cdekShippingSettings['yandex_map_api_key'] === "") {
             $layerMap = "0";
         }
 
-        $postamat = (int)isPostamatOrStore();
+        $postamat = (int) isPostamatOrStore();
 
-        $meta = $shippingMethodCurrent->get_meta_data();
+        $meta   = $shippingMethodCurrent->get_meta_data();
         $weight = $meta['total_weight_kg'];
 
         include 'templates/public/open-map.php';
     }
 }
 
-function isTariffTypeFromStore($shippingMethodCurrent)
-{
+function isTariffTypeFromStore($shippingMethodCurrent) {
     if ($shippingMethodCurrent->get_method_id() !== 'official_cdek') {
         return false;
     }
@@ -503,18 +511,18 @@ function isTariffTypeFromStore($shippingMethodCurrent)
     }
 
     $tariffCode = explode('_', $shippingMethodIdSelected)[2];
-    return (bool)(int)Tariff::getTariffTypeToByCode($tariffCode);
+
+    return (bool) (int) Tariff::getTariffTypeToByCode($tariffCode);
 }
 
-function isPostamatOrStore()
-{
+function isPostamatOrStore() {
     $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
-    $tariffCode = explode('_', $shippingMethodIdSelected)[2];
+    $tariffCode               = explode('_', $shippingMethodIdSelected)[2];
+
     return Tariff::isTariffEndPointPostamatByCode($tariffCode);
 }
 
-function cdek_add_update_form_billing($fragments)
-{
+function cdek_add_update_form_billing($fragments) {
 
     $checkout = WC()->checkout();
 
@@ -543,17 +551,16 @@ function cdek_add_update_form_billing($fragments)
     return $fragments;
 }
 
-function getShipToDestination()
-{
+function getShipToDestination() {
     $shipToDestination = get_option('woocommerce_ship_to_destination');
     if ($shipToDestination === 'billing_only') {
         return 'billing';
     }
+
     return $shipToDestination;
 }
 
-function cdek_override_checkout_fields($fields)
-{
+function cdek_override_checkout_fields($fields) {
 //    $chosen_methods = WC()->session->get('chosen_shipping_methods');
 //
 //    if (!$chosen_methods || $chosen_methods[0] === false) {
@@ -581,112 +588,112 @@ function cdek_override_checkout_fields($fields)
     if ($shipToDestination === 'billing') {
         if (!isset($fields['billing']['billing_first_name'])) {
             $fields['billing']['billing_first_name'] = [
-                'label' => 'Имя',
-                'placeholder' => '',
-                'class' => [0 => 'form-row-first',],
-                'required' => true,
-                'public' => true,
-                'payment_method' => [0 => '0',],
+                'label'           => 'Имя',
+                'placeholder'     => '',
+                'class'           => [0 => 'form-row-first',],
+                'required'        => true,
+                'public'          => true,
+                'payment_method'  => [0 => '0',],
                 'shipping_method' => [0 => '0',],
-                'priority' => 10,
+                'priority'        => 10,
             ];
         }
 
         if (!isset($fields['billing']['billing_last_name'])) {
             $fields['billing']['billing_last_name'] = [
-                'label' => 'Фамилия',
-                'placeholder' => '',
-                'class' => [0 => 'form-row-last',],
-                'required' => true,
-                'public' => true,
-                'payment_method' => [0 => '0',],
+                'label'           => 'Фамилия',
+                'placeholder'     => '',
+                'class'           => [0 => 'form-row-last',],
+                'required'        => true,
+                'public'          => true,
+                'payment_method'  => [0 => '0',],
                 'shipping_method' => [0 => '0',],
-                'priority' => 11,
+                'priority'        => 11,
             ];
         }
 
         if (!isset($fields['billing']['billing_city'])) {
             $fields['billing']['billing_city'] = [
-                'label' => 'Населённый пункт',
-                'required' => true,
-                'class' => ['form-row-wide', 'address-field'],
+                'label'        => 'Населённый пункт',
+                'required'     => true,
+                'class'        => ['form-row-wide', 'address-field'],
                 'autocomplete' => 'address-level2',
-                'priority' => 16
+                'priority'     => 16,
             ];
         }
 
         if (!isset($fields['billing']['billing_state'])) {
             $fields['billing']['billing_state'] = [
-                'label' => 'Область / район',
-                'required' => true,
-                'class' => ['form-row-wide', 'address-field'],
-                'validate' => ['state'],
-                'autocomplete' => 'address-level1',
-                'priority' => 17,
+                'label'         => 'Область / район',
+                'required'      => true,
+                'class'         => ['form-row-wide', 'address-field'],
+                'validate'      => ['state'],
+                'autocomplete'  => 'address-level1',
+                'priority'      => 17,
                 'country_field' => "billing_country",
             ];
         }
 
         if (!isset($fields['billing']['billing_address_1'])) {
             $fields['billing']['billing_address_1'] = [
-                'label' => 'Адрес',
-                'placeholder' => 'Номер дома и название улицы',
-                'class' => ['form-row-wide', 'address-field'],
+                'label'        => 'Адрес',
+                'placeholder'  => 'Номер дома и название улицы',
+                'class'        => ['form-row-wide', 'address-field'],
                 'autocomplete' => 'address-line1',
-                'priority' => 18
+                'priority'     => 18,
             ];
         }
 
         if (!isset($fields['billing']['billing_phone'])) {
             $fields['billing']['billing_phone'] = [
-                'label' => 'Телефон',
-                'placeholder' => '',
-                'type' => 'tel',
-                'required' => true,
-                'public' => true,
-                'class' => ['form-row-wide'],
+                'label'        => 'Телефон',
+                'placeholder'  => '',
+                'type'         => 'tel',
+                'required'     => true,
+                'public'       => true,
+                'class'        => ['form-row-wide'],
                 'autocomplete' => 'address-line1',
-                'priority' => 19
+                'priority'     => 19,
             ];
         }
     } else {
 
         if (!isset($fields['billing']['billing_first_name'])) {
             $fields['billing']['billing_first_name'] = [
-                'label' => 'Имя',
-                'placeholder' => '',
-                'class' => [0 => 'form-row-first',],
-                'required' => true,
-                'public' => true,
-                'payment_method' => [0 => '0',],
+                'label'           => 'Имя',
+                'placeholder'     => '',
+                'class'           => [0 => 'form-row-first',],
+                'required'        => true,
+                'public'          => true,
+                'payment_method'  => [0 => '0',],
                 'shipping_method' => [0 => '0',],
-                'priority' => 10,
+                'priority'        => 10,
             ];
         }
 
         if (!isset($fields['billing']['billing_last_name'])) {
             $fields['billing']['billing_last_name'] = [
-                'label' => 'Фамилия',
-                'placeholder' => '',
-                'class' => [0 => 'form-row-last',],
-                'required' => true,
-                'public' => true,
-                'payment_method' => [0 => '0',],
+                'label'           => 'Фамилия',
+                'placeholder'     => '',
+                'class'           => [0 => 'form-row-last',],
+                'required'        => true,
+                'public'          => true,
+                'payment_method'  => [0 => '0',],
                 'shipping_method' => [0 => '0',],
-                'priority' => 11,
+                'priority'        => 11,
             ];
         }
 
         if (!isset($fields['billing']['billing_phone'])) {
             $fields['billing']['billing_phone'] = [
-                'label' => 'Телефон',
-                'placeholder' => '',
-                'type' => 'tel',
-                'required' => true,
-                'public' => true,
-                'class' => ['form-row-wide'],
+                'label'        => 'Телефон',
+                'placeholder'  => '',
+                'type'         => 'tel',
+                'required'     => true,
+                'public'       => true,
+                'class'        => ['form-row-wide'],
                 'autocomplete' => 'address-line1',
-                'priority' => 19
+                'priority'     => 19,
             ];
         }
 
@@ -718,33 +725,33 @@ function cdek_override_checkout_fields($fields)
 
         if (!isset($fields['shipping']['shipping_city'])) {
             $fields['shipping']['shipping_city'] = [
-                'label' => 'Населённый пункт',
-                'required' => true,
-                'class' => ['form-row-wide', 'address-field'],
+                'label'        => 'Населённый пункт',
+                'required'     => true,
+                'class'        => ['form-row-wide', 'address-field'],
                 'autocomplete' => 'address-level2',
-                'priority' => 16
+                'priority'     => 16,
             ];
         }
 
         if (!isset($fields['shipping']['shipping_state'])) {
             $fields['shipping']['shipping_state'] = [
-                'label' => 'Область / район',
-                'required' => true,
-                'class' => ['form-row-wide', 'address-field'],
-                'validate' => ['state'],
-                'autocomplete' => 'address-level1',
-                'priority' => 17,
+                'label'         => 'Область / район',
+                'required'      => true,
+                'class'         => ['form-row-wide', 'address-field'],
+                'validate'      => ['state'],
+                'autocomplete'  => 'address-level1',
+                'priority'      => 17,
                 'country_field' => "billing_country",
             ];
         }
 
         if (!isset($fields['shipping']['shipping_address_1'])) {
             $fields['shipping']['shipping_address_1'] = [
-                'label' => 'Адрес',
-                'placeholder' => 'Номер дома и название улицы',
-                'class' => ['form-row-wide', 'address-field'],
+                'label'        => 'Адрес',
+                'placeholder'  => 'Номер дома и название улицы',
+                'class'        => ['form-row-wide', 'address-field'],
                 'autocomplete' => 'address-line1',
-                'priority' => 18
+                'priority'     => 18,
             ];
         }
     }
@@ -752,29 +759,27 @@ function cdek_override_checkout_fields($fields)
     return $fields;
 }
 
-function cdek_add_script_update_shipping_method()
-{
+function cdek_add_script_update_shipping_method() {
     if (is_checkout()) {
         ?>
         <script>
-            jQuery(document).on('change', '.shipping_method', function () {
-                jQuery(document.body).trigger('update_checkout')
+            jQuery(document).on('change', '.shipping_method', function() {
+                jQuery(document.body).trigger('update_checkout');
             });
         </script>
         <?php
     }
 }
 
-function is_pvz_code()
-{
+function is_pvz_code() {
 
     $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
 
     if (strpos($shippingMethodIdSelected, 'official_cdek') !== false) {
 
-        $city = $_POST['billing_city'];
-        $state = $_POST['billing_state'];
-        $api = new CdekApi();
+        $city     = $_POST['billing_city'];
+        $state    = $_POST['billing_state'];
+        $api      = new CdekApi();
         $cityCode = $api->getCityCodeByCityName($city, $state);
         if ($cityCode === -1) {
             wc_add_notice(__('Не удалось определить населенный пункт.'), 'error');
@@ -788,9 +793,9 @@ function is_pvz_code()
                 if (empty($pvzCodeTmp[0]['pvz_code'])) {
                     wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
                 } else {
-                    $_POST['pvz_code'] = $pvzCodeTmp[0]['pvz_code'];
+                    $_POST['pvz_code']    = $pvzCodeTmp[0]['pvz_code'];
                     $_POST['pvz_address'] = $pvzCodeTmp[0]['pvz_address'];
-                    $_POST['city_code'] = $pvzCodeTmp[0]['city_code'];
+                    $_POST['city_code']   = $pvzCodeTmp[0]['city_code'];
                     delete_post_meta(-1, 'pvz_code_tmp');
                 }
             }
@@ -813,21 +818,18 @@ function is_pvz_code()
     }
 }
 
-function getTariffCodeByShippingMethodId($shippingMethodId)
-{
+function getTariffCodeByShippingMethodId($shippingMethodId) {
     return explode('_', $shippingMethodId)[2];
 }
 
-function checkTariffFromStoreByTariffCode($tariffCode)
-{
-    return (bool)(int)Tariff::getTariffTypeToByCode($tariffCode);
+function checkTariffFromStoreByTariffCode($tariffCode) {
+    return (bool) (int) Tariff::getTariffTypeToByCode($tariffCode);
 }
 
-function cdek_woocommerce_new_order_action($order_id, $order)
-{
+function cdek_woocommerce_new_order_action($order_id, $order) {
     if (isCdekShippingMethod($order)) {
-        $pvzInfo = array_key_exists('pvz_info', $_POST) ? $_POST['pvz_info'] : null;
-        $pvzCode = array_key_exists('pvz_code', $_POST) ? $_POST['pvz_code'] : null;
+        $pvzInfo  = array_key_exists('pvz_info', $_POST) ? $_POST['pvz_info'] : null;
+        $pvzCode  = array_key_exists('pvz_code', $_POST) ? $_POST['pvz_code'] : null;
         $tariffId = getTariffCodeCdekShippingMethodByOrder($order);
         $cityCode = array_key_exists('city_code', $_POST) ? $_POST['city_code'] : null;
 
@@ -838,12 +840,12 @@ function cdek_woocommerce_new_order_action($order_id, $order)
 
         $api = new CdekApi();
         if (empty($cityCode)) {
-            $pvzInfo = $order->get_billing_address_1();
+            $pvzInfo  = $order->get_billing_address_1();
             $cityCode = $api->getCityCodeByCityName($order->get_billing_city(), $order->get_billing_city());
         }
         if (empty($pvzInfo) && Tariff::isTariffToStoreByCode($tariffId)) {
             $pvzInfo = $order->get_billing_address_1();
-            $code = $api->getPvzCodeByPvzAddressNCityCode($pvzInfo, $cityCode);
+            $code    = $api->getPvzCodeByPvzAddressNCityCode($pvzInfo, $cityCode);
             if ($code !== false) {
                 $pvzCode = $code;
             }
@@ -856,19 +858,19 @@ function cdek_woocommerce_new_order_action($order_id, $order)
 
         if (Tariff::isTariffToStoreByCode($tariffId)) {
             $shippingMethodArray = $order->get_items('shipping');
-            $shippingMethod = array_shift($shippingMethodArray);
-            $shippingMethod->add_meta_data('pvz', $pvzCode . ' (' . $pvzInfo . ')');
+            $shippingMethod      = array_shift($shippingMethodArray);
+            $shippingMethod->add_meta_data('pvz', $pvzCode.' ('.$pvzInfo.')');
             $shippingMethod->save_meta_data();
         }
 
         $data = [
-            'pvz_address' => $pvzInfo,
-            'pvz_code' => $pvzCode,
-            'tariff_id' => $tariffId,
-            'city_code' => $cityCode,
-            'currency' => $currency,
+            'pvz_address'  => $pvzInfo,
+            'pvz_code'     => $pvzCode,
+            'tariff_id'    => $tariffId,
+            'city_code'    => $cityCode,
+            'currency'     => $currency,
             'order_number' => '',
-            'order_uuid' => '',
+            'order_uuid'   => '',
         ];
 
         OrderMetaData::addMetaByOrderId($order_id, $data);
@@ -876,18 +878,17 @@ function cdek_woocommerce_new_order_action($order_id, $order)
 
 }
 
-function add_cdek_shipping_method($methods)
-{
+function add_cdek_shipping_method($methods) {
     $methods['official_cdek'] = 'CdekShippingMethod';
+
     return $methods;
 }
 
-function add_custom_order_meta_box()
-{
+function add_custom_order_meta_box() {
     global $post;
     if ($post && $post->post_type === 'shop_order') {
         $order_id = $post->ID;
-        $order = wc_get_order($order_id);
+        $order    = wc_get_order($order_id);
         if (isCdekShippingMethod($order)) {
             $api = new CdekApi();
             if ($api->checkAuth()) {
@@ -898,13 +899,13 @@ function add_custom_order_meta_box()
                 $callCourier->deleteIfNotExist($order_id);
                 CourierMetaData::getMetaByOrderId($order_id);
                 //Сбор данных
-                $orderWP = $order->get_id();
+                $orderWP       = $order->get_id();
                 $postOrderData = OrderMetaData::getMetaByOrderId($orderWP);
-                $orderNumber = getOrderNumber($postOrderData);
-                $orderUuid = getOrderUuid($postOrderData);
-                $items = getItems($order);
-                $dateMin = date('Y-m-d');
-                $dateMax = getDateMax($dateMin);
+                $orderNumber   = getOrderNumber($postOrderData);
+                $orderUuid     = getOrderUuid($postOrderData);
+                $items         = getItems($order);
+                $dateMin       = date('Y-m-d');
+                $dateMax       = getDateMax($dateMin);
                 $courierNumber = getCourierNumber($order_id);
 
                 add_meta_box(
@@ -915,17 +916,17 @@ function add_custom_order_meta_box()
                     'side',
                     'core',
                     [
-                        'status' => true,
-                        'hasPackages' => isHasPackages(),
-                        'orderNumber' => $orderNumber,
-                        'orderIdWP' => $orderWP,
-                        'orderUuid' => $orderUuid,
-                        'dateMin' => $dateMin,
-                        'dateMax' => $dateMax,
-                        'items' => $items,
+                        'status'        => true,
+                        'hasPackages'   => isHasPackages(),
+                        'orderNumber'   => $orderNumber,
+                        'orderIdWP'     => $orderWP,
+                        'orderUuid'     => $orderUuid,
+                        'dateMin'       => $dateMin,
+                        'dateMax'       => $dateMax,
+                        'items'         => $items,
                         'courierNumber' => $courierNumber,
-                        'fromDoor' => Tariff::isTariffFromDoorByCode($postOrderData['tariff_id'])
-                    ]
+                        'fromDoor'      => Tariff::isTariffFromDoorByCode($postOrderData['tariff_id']),
+                    ],
                 );
             } else {
                 add_meta_box(
@@ -937,7 +938,7 @@ function add_custom_order_meta_box()
                     'core',
                     [
                         'status' => false,
-                    ]
+                    ],
                 );
 
             }
@@ -949,97 +950,101 @@ function add_custom_order_meta_box()
 
 /**
  * @param $order
+ *
  * @return array
  */
-function getItems($order): array
-{
+function getItems($order): array {
     $items = [];
     foreach ($order->get_items() as $item) {
         $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
     }
+
     return $items;
 }
 
 /**
  * @param $postOrderData
+ *
  * @return mixed
  */
-function getOrderUuid($postOrderData)
-{
+function getOrderUuid($postOrderData) {
     if (array_key_exists('cdek_order_waybill', $postOrderData)) {
         $orderUuid = $postOrderData['cdek_order_waybill'];
     } else {
         $orderUuid = $postOrderData['order_uuid'];
     }
+
     return $orderUuid;
 }
 
 /**
  * @param $postOrderData
+ *
  * @return mixed
  */
-function getOrderNumber($postOrderData)
-{
+function getOrderNumber($postOrderData) {
     if (array_key_exists('cdek_order_uuid', $postOrderData)) {
         $orderNumber = $postOrderData['cdek_order_uuid'];
     } else {
         $orderNumber = $postOrderData['order_number'];
     }
+
     return $orderNumber;
 }
 
 /**
  * @param int $order_id
+ *
  * @return mixed|string
  */
-function getCourierNumber(int $order_id)
-{
-    $courierMeta = CourierMetaData::getMetaByOrderId($order_id);
+function getCourierNumber(int $order_id) {
+    $courierMeta   = CourierMetaData::getMetaByOrderId($order_id);
     $courierNumber = '';
     if (!empty($courierMeta)) {
         $courierNumber = $courierMeta['courier_number'];
     }
+
     return $courierNumber;
 }
 
 /**
  * @param $dateMin
+ *
  * @return false|string
  */
-function getDateMax($dateMin)
-{
-    $dateMaxUnix = strtotime($dateMin . " +31 days");
+function getDateMax($dateMin) {
+    $dateMaxUnix = strtotime($dateMin." +31 days");
+
     return date('Y-m-d', $dateMaxUnix);
 }
 
 /**
  * @return bool
  */
-function isHasPackages(): bool
-{
+function isHasPackages(): bool {
     $cdekShippingSettings = Helper::getSettingDataPlugin();
-    $hasPackages = false;
+    $hasPackages          = false;
     if ($cdekShippingSettings['has_packages_mode'] === 'yes') {
         $hasPackages = true;
     }
+
     return $hasPackages;
 }
 
 add_action('add_meta_boxes', 'add_custom_order_meta_box');
 
-function render_cdek_create_order_box($post, $metabox)
-{
+function render_cdek_create_order_box($post, $metabox) {
     $args = $metabox['args'];
     if ($args['status']) {
-        $hasPackages = $args['hasPackages'];
-        $orderNumber = $args['orderNumber'];
-        $orderIdWP = $args['orderIdWP'];
-        $orderUuid = $args['orderUuid'];
-        $dateMin = $args['dateMin'];
-        $dateMax = $args['dateMax'];
-        $items = $args['items'];
+        $hasPackages   = $args['hasPackages'];
+        $orderNumber   = $args['orderNumber'];
+        $orderIdWP     = $args['orderIdWP'];
+        $orderUuid     = $args['orderUuid'];
+        $dateMin       = $args['dateMin'];
+        $dateMax       = $args['dateMax'];
+        $items         = $args['items'];
         $courierNumber = $args['courierNumber'];
-        $fromDoor = $args['fromDoor'];
+        $fromDoor      = $args['fromDoor'];
         ob_start();
         include 'templates/admin/create-order.php';
         $content = ob_get_clean();
@@ -1048,90 +1053,88 @@ function render_cdek_create_order_box($post, $metabox)
         $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section=official_cdek');
         echo '<div class="cdek_create_order_box">';
         echo '<h4>Авторизация не пройдена</h4>';
-        echo '<p>Введите корректные идентификатор и секретный ключ клиента в <a href="' . $settings_page_url . '">настройках</a> плагина CDEKDelivery</p>';
+        echo '<p>Введите корректные идентификатор и секретный ключ клиента в <a href="'.$settings_page_url.'">настройках</a> плагина CDEKDelivery</p>';
         echo '</div>';
     }
 }
 
-function getTariffCodeCdekShippingMethodByOrder($order)
-{
+function getTariffCodeCdekShippingMethodByOrder($order) {
     $shippingMethodArray = $order->get_items('shipping');
-    $shippingMethod = array_shift($shippingMethodArray);
+    $shippingMethod      = array_shift($shippingMethodArray);
+
     return $shippingMethod->get_meta('tariff_code');
 }
 
-function isCdekShippingMethod($order)
-{
+function isCdekShippingMethod($order) {
     $shippingMethodArray = $order->get_items('shipping');
     if (empty($shippingMethodArray)) {
         return false;
     }
-    $shippingMethod = array_shift($shippingMethodArray);
+    $shippingMethod   = array_shift($shippingMethodArray);
     $shippingMethodId = $shippingMethod->get_method_id();
     if ($shippingMethodId === 'official_cdek') {
         return true;
     }
+
     return false;
 }
 
-function cdek_add_custom_checkout_field($fields)
-{
+function cdek_add_custom_checkout_field($fields) {
     $cdekShippingSettings = Helper::getSettingDataPlugin();
     if ($cdekShippingSettings['international_mode'] === 'yes') {
-        $fields['billing']['passport_series'] = [
-            'label' => __('Серия паспорта', 'woocommerce'),
-            'required' => true,
-            'class' => ['form-row-wide'],
-            'clear' => true,
+        $fields['billing']['passport_series']        = [
+            'label'             => __('Серия паспорта', 'woocommerce'),
+            'required'          => true,
+            'class'             => ['form-row-wide'],
+            'clear'             => true,
             'custom_attributes' => [
                 'maxlength' => 4,
             ],
         ];
-        $fields['billing']['passport_number'] = [
-            'label' => __('Номер паспорта', 'woocommerce'),
-            'required' => true,
-            'class' => ['form-row-wide'],
-            'clear' => true,
+        $fields['billing']['passport_number']        = [
+            'label'             => __('Номер паспорта', 'woocommerce'),
+            'required'          => true,
+            'class'             => ['form-row-wide'],
+            'clear'             => true,
             'custom_attributes' => [
                 'maxlength' => 6,
             ],
         ];
         $fields['billing']['passport_date_of_issue'] = [
-            'type' => 'date',
-            'label' => __('Дата выдачи паспорта', 'woocommerce'),
+            'type'     => 'date',
+            'label'    => __('Дата выдачи паспорта', 'woocommerce'),
             'required' => true,
-            'class' => ['form-row-wide'],
-            'clear' => true
+            'class'    => ['form-row-wide'],
+            'clear'    => true,
         ];
-        $fields['billing']['passport_organization'] = [
-            'label' => __('Орган выдачи паспорта', 'woocommerce'),
+        $fields['billing']['passport_organization']  = [
+            'label'    => __('Орган выдачи паспорта', 'woocommerce'),
             'required' => true,
-            'class' => ['form-row-wide'],
-            'clear' => true,
+            'class'    => ['form-row-wide'],
+            'clear'    => true,
         ];
-        $fields['billing']['tin'] = [
-            'label' => __('ИНН', 'woocommerce'),
-            'required' => true,
-            'class' => ['form-row-wide'],
-            'clear' => true,
+        $fields['billing']['tin']                    = [
+            'label'             => __('ИНН', 'woocommerce'),
+            'required'          => true,
+            'class'             => ['form-row-wide'],
+            'clear'             => true,
             'custom_attributes' => [
                 'maxlength' => 12,
             ],
         ];
         $fields['billing']['passport_date_of_birth'] = [
-            'type' => 'date',
-            'label' => __('Дата рождения', 'woocommerce'),
+            'type'     => 'date',
+            'label'    => __('Дата рождения', 'woocommerce'),
             'required' => true,
-            'class' => ['form-row-wide'],
-            'clear' => true
+            'class'    => ['form-row-wide'],
+            'clear'    => true,
         ];
     }
 
     return $fields;
 }
 
-function cdek_save_custom_checkout_field_to_order($order, $data)
-{
+function cdek_save_custom_checkout_field_to_order($order, $data) {
     if (isset($_POST['passport_series'])) {
         $order->update_meta_data('_passport_series', sanitize_text_field($_POST['passport_series']));
     }

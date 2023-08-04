@@ -1,7 +1,6 @@
 (function ($) {
     $(document).ready(function () {
         let packageList = [];
-        let restApiUrl = cdek_rest_api_path.rest_path;
 
         $('#selected_product').change(function () {
             let productId = $('#selected_product').val();
@@ -41,7 +40,7 @@
         $('#send_package').click(function () {
             $.ajax({
                 method: "POST",
-                url: restApiUrl + "cdek/v1/create-order",
+                url: window.cdek_rest_order_api_path.create_order,
                 data: {
                     package_order_id: $('input[name=package_order_id]').val(),
                     package_data: JSON.stringify(packageList),
