@@ -2,10 +2,74 @@
 image: alpine:latest
 
 stages:
-  - deploy_wordpress-cdek
+  - build
+  - deploy
 
-deploy_wordpress:
-  stage: deploy_wordpress-cdek
+variables:
+  PACKAGE_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/archive/"
+
+build_tag:
+  image: php:7.4-cli-alpine
+  stage: build
+  tags:
+    - docker
+  only:
+    - tags
+  before_script:
+    - apk add zip
+    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    - php composer-setup.php
+    - php -r "unlink('composer-setup.php');"
+    - mv composer.phar /usr/local/bin/composer
+    - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
+  script:
+    - sed -i "s/\(Version:\)\( *\).*/\1\2${RELEASE_VERSION}/" cdek.php
+    - composer i -a
+    - mkdir /cdek
+    - cp -r * /cdek
+    - zip -r cdek.zip /cdek
+  artifacts:
+    paths:
+      - cdek.zip
+
+build_custom:
+  when: manual
+  image: php:7.4-cli-alpine
+  stage: build
+  tags:
+    - docker
+  artifacts:
+    paths:
+      - cdek.zip
+  before_script:
+    - apk add zip
+    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    - php composer-setup.php
+    - php -r "unlink('composer-setup.php');"
+    - mv composer.phar /usr/local/bin/composer
+    - export RELEASE_VERSION="${CI_COMMIT_REF_NAME}#${CI_COMMIT_SHORT_SHA}"
+  script:
+    - sed -i "s/\(Version:\)\( *\).*/\1\2${RELEASE_VERSION}/" cdek.php
+    - composer i -a
+    - mkdir /cdek
+    - cp -r * /cdek
+    - zip -r cdek.zip /cdek
+
+deploy_package:
+  image: curlimages/curl:latest
+  stage: deploy
+  needs:
+    - job: build_tag
+      artifacts: true
+  only:
+    - tags
+  before_script:
+    - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
+  script:
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file cdek.zip "${PACKAGE_URL}${RELEASE_VERSION}/cdek.zip"'
+
+deploy_staging:
+  stage: deploy
   script:
     - rsync -avz -e "ssh -o StrictHostKeyChecking=no" --delete ./ ${DEPLOY_USERNAME}@${DEPLOY_NODE}:${DEPLOY_DEST_DIR}
   tags:
