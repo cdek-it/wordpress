@@ -16,7 +16,6 @@ build_tag:
   only:
     - tags
   before_script:
-    - apk add zip
     - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     - php composer-setup.php
     - php -r "unlink('composer-setup.php');"
@@ -27,10 +26,11 @@ build_tag:
     - composer i -a
     - mkdir /cdek
     - cp -r * /cdek
-    - zip -r cdek.zip /cdek
+    - mv /cdek .
   artifacts:
+    name: cdek-integration
     paths:
-      - cdek.zip
+      - cdek
 
 build_custom:
   when: manual
@@ -39,10 +39,10 @@ build_custom:
   tags:
     - docker
   artifacts:
+    name: cdek-integration
     paths:
-      - cdek.zip
+      - cdek
   before_script:
-    - apk add zip
     - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     - php composer-setup.php
     - php -r "unlink('composer-setup.php');"
@@ -53,7 +53,7 @@ build_custom:
     - composer i -a
     - mkdir /cdek
     - cp -r * /cdek
-    - zip -r cdek.zip /cdek
+    - mv /cdek .
 
 deploy_package:
   image: curlimages/curl:latest
