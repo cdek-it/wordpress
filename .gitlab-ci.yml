@@ -56,7 +56,6 @@ build_custom:
     - mv /cdek .
 
 deploy_package:
-  image: curlimages/curl:latest
   stage: deploy
   tags:
     - docker
@@ -66,9 +65,11 @@ deploy_package:
   only:
     - tags
   before_script:
+    - apk add curl zip
     - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
   script:
-    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file cdek.zip "${PACKAGE_URL}${RELEASE_VERSION}/cdek.zip"'
+    - zip -r cdek.zip cdek
+    - 'curl --header "JOB-TOKEN: $CI_JOB_TOKEN" --upload-file cdek.zip "${PACKAGE_URL}${RELEASE_VERSION}/cdek-integration.zip"'
 
 deploy_staging:
   stage: deploy
