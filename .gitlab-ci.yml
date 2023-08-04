@@ -58,6 +58,8 @@ build_custom:
 deploy_package:
   image: curlimages/curl:latest
   stage: deploy
+  tags:
+    - docker
   needs:
     - job: build_tag
       artifacts: true
