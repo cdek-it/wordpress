@@ -3,7 +3,7 @@
  * Plugin Name:       CDEKDelivery
  * Plugin URI:        https://www.cdek.ru/ru/integration/modules/33
  * Description:       Интеграция доставки CDEK
- * Version:           1.0
+ * Version:           3.5.6
  * Requires at least: 6.0
  * Requires PHP:      7.2
  * Author:            CDEK IT
@@ -43,10 +43,13 @@ add_action('wp_footer', 'cdek_add_script_update_shipping_method');
 add_filter('woocommerce_checkout_fields', 'cdek_add_custom_checkout_field');
 add_action('woocommerce_checkout_create_order', 'cdek_save_custom_checkout_field_to_order', 10, 2);
 
+$CDEK_PLUGIN_VERSION = get_file_data(__FILE__, ['Version'])[0];
 
 function cdek_widget_enqueue_script() {
+    global $CDEK_PLUGIN_VERSION;
     if (is_checkout()) {
-        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__).'assets/js/map-v11.js', ['jquery'], false, true);
+        wp_enqueue_script('cdek-map', plugin_dir_url(__FILE__).'assets/js/map.js', ['jquery'], $CDEK_PLUGIN_VERSION,
+            true);
         wp_localize_script('cdek-map', 'cdek_rest_map_api_path', [
             'get_pvz'      => rest_url('/cdek/v1/get-pvz'),
             'city_code'    => rest_url('/cdek/v1/get-city-code'),
@@ -61,14 +64,15 @@ function cdek_widget_enqueue_script() {
             plugin_dir_url(__FILE__).'assets/css/MarkerCluster.Default.min.css');
         wp_enqueue_style('cdek-admin-leaflet-cluster',
             plugin_dir_url(__FILE__).'assets/css/MarkerCluster.min.css');
-        wp_enqueue_style('cdek-css', plugin_dir_url(__FILE__).'assets/css/cdek-map-v6.css');
+        wp_enqueue_style('cdek-css', plugin_dir_url(__FILE__).'assets/css/cdek-map.css', [], $CDEK_PLUGIN_VERSION);
         addYandexMap();
     }
 }
 
 function cdek_admin_enqueue_script() {
-    wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__).'assets/js/delivery-v8.js',
-        ['jquery'], '1.7.0', true);
+    global $CDEK_PLUGIN_VERSION;
+    wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__).'assets/js/delivery.js',
+        ['jquery'], $CDEK_PLUGIN_VERSION, true);
     wp_localize_script('cdek-admin-delivery', 'cdek_rest_delivery_api_path', [
         'get_pvz'             => rest_url('/cdek/v1/get-pvz'),
         'create_order'        => rest_url('/cdek/v1/create-order'),
@@ -78,8 +82,8 @@ function cdek_admin_enqueue_script() {
         'call_courier_delete' => rest_url('/cdek/v1/call-courier-delete'),
     ]);
 
-    wp_enqueue_script('cdek-admin-create-order', plugin_dir_url(__FILE__).'assets/js/create-order-v3.js',
-        ['jquery'], '1.7.0', true);
+    wp_enqueue_script('cdek-admin-create-order', plugin_dir_url(__FILE__).'assets/js/create-order.js',
+        ['jquery'], $CDEK_PLUGIN_VERSION, true);
     wp_localize_script('cdek-admin-create-order', 'cdek_rest_order_api_path', [
         'create_order' => rest_url('/cdek/v1/create-order'),
     ]);
@@ -91,7 +95,8 @@ function cdek_admin_enqueue_script() {
     wp_enqueue_style('cdek-admin-leaflet-cluster-default',
         plugin_dir_url(__FILE__).'assets/css/MarkerCluster.Default.min.css');
     wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__).'assets/css/MarkerCluster.min.css');
-    wp_enqueue_style('cdek-admin-delivery', plugin_dir_url(__FILE__).'assets/css/delivery-v4.css');
+    wp_enqueue_style('cdek-admin-delivery', plugin_dir_url(__FILE__).'assets/css/delivery.css', [],
+        $CDEK_PLUGIN_VERSION);
     addYandexMap();
 }
 
@@ -232,15 +237,11 @@ function call_courier($data) {
 }
 
 function call_courier_delete($data) {
-    $callCourier = new CallCourier();
-
-    return $callCourier->delete($data->get_param('order_id'));
+    return (new CallCourier())->delete($data->get_param('order_id'));
 }
 
 function create_order($data) {
-    $createOrder = new CreateOrder();
-
-    return $createOrder->createOrder($data);
+    return (new CreateOrder())->createOrder($data);
 }
 
 function getCityCode($city_code, $order) {
@@ -443,9 +444,7 @@ function check_auth() {
 }
 
 function get_region($data) {
-    $api = new CdekApi();
-
-    return $api->getRegion($data->get_param('city'));
+    return (new CdekApi())->getRegion($data->get_param('city'));
 }
 
 function set_pvz_code_tmp($data) {
@@ -458,21 +457,16 @@ function set_pvz_code_tmp($data) {
 }
 
 function get_city_code($data) {
-    $api = new CdekApi();
-
-    return $api->getCityCodeByCityName($data->get_param('city_name'), $data->get_param('state_name'));
+    return (new CdekApi())->getCityCodeByCityName($data->get_param('city_name'), $data->get_param('state_name'));
 }
 
 function get_pvz($data) {
-    $api = new CdekApi();
-
-    return $api->getPvz($data->get_param('city_code'), $data->get_param('weight'), $data->get_param('admin'));
+    return (new CdekApi())->getPvz($data->get_param('city_code'), $data->get_param('weight'),
+        $data->get_param('admin'));
 }
 
 function delete_order($data) {
-    $deleteOrder = new DeleteOrder();
-
-    return $deleteOrder->delete($data->get_param('order_id'), $data->get_param('number'));
+    return (new DeleteOrder())->delete($data->get_param('order_id'), $data->get_param('number'));
 }
 
 function cdek_shipping_method() {
@@ -1060,9 +1054,8 @@ function render_cdek_create_order_box($post, $metabox) {
 
 function getTariffCodeCdekShippingMethodByOrder($order) {
     $shippingMethodArray = $order->get_items('shipping');
-    $shippingMethod      = array_shift($shippingMethodArray);
 
-    return $shippingMethod->get_meta('tariff_code');
+    return array_shift($shippingMethodArray)->get_meta('tariff_code');
 }
 
 function isCdekShippingMethod($order) {
