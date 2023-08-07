@@ -175,3 +175,8 @@
 .leaflet-draw-pvz-list {
     background-image: url(../../templates/public/img/location.svg);
 }
+
+.leaflet-overlay-pane svg {
+    width: unset !important;
+    height: unset !important;
+}
