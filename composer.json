@@ -1,9 +1,27 @@
 {
-    "name": "root/cdek",
+    "name": "cdek/woocommerce-delivery-integration",
+    "type": "wordpress-plugin",
     "autoload": {
         "psr-4": {
             "Cdek\\": "src/"
         }
     },
-    "require": {}
+    "require": {
+        "php": "~7.2",
+        "composer/installers": "~1.0"
+    },
+    "require-dev": {
+        "roave/security-advisories": "dev-latest"
+    },
+    "config": {
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "composer/installers": true
+        },
+        "platform": {
+            "php": "7.2"
+        }
+    }
+
 }
