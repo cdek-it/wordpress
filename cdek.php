@@ -3,7 +3,7 @@
  * Plugin Name:       CDEKDelivery
  * Plugin URI:        https://www.cdek.ru/ru/integration/modules/33
  * Description:       Интеграция доставки CDEK
- * Version:           3.5.6
+ * Version:           dev
  * Requires at least: 6.0
  * Requires PHP:      7.2
  * Author:            CDEK IT
