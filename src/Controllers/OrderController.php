@@ -13,7 +13,7 @@ namespace Cdek\Controllers {
     class OrderController {
         public function __invoke() {
             register_rest_route('cdek/v1', '/create-order', [
-                'methods'             => 'POST',
+                'methods'             => 'GET',
                 'callback'            => [__CLASS__, 'createOrder'],
                 'permission_callback' => '__return_true',
             ]);
