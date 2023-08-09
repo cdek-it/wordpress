@@ -27,7 +27,7 @@ class DeliveryCalc
         }
 
         $deliveryParam['package_data'] = $this->getPackagesData($package['contents']);
-        $pvz = json_decode($api->getPvz($deliveryParam['cityCode'], $deliveryParam['package_data']['weight'] / 1000));
+        $pvz = $api->getPvz($deliveryParam['cityCode'], $deliveryParam['package_data']['weight'] / 1000);
         $setting = Helper::getSettingDataPlugin();
         $tariffList = $setting['tariff_list'];
         $weightInKg = $deliveryParam['package_data']['weight'] / 1000;
@@ -38,7 +38,7 @@ class DeliveryCalc
                 continue;
             }
 
-            if (!$pvz->success && Tariff::isTariffToStoreByCode($tariff)) {
+            if (!$pvz['success'] && Tariff::isTariffToStoreByCode($tariff)) {
                 continue;
             }
 
@@ -171,9 +171,9 @@ class DeliveryCalc
     {
         if (!property_exists($delivery, 'errors')) {
             return true;
-        } else {
-            return false;
         }
+
+        return false;
     }
 
 
