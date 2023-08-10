@@ -44,7 +44,6 @@ class CallCourier
             $param = $this->createRequestData($data);
         }
 
-
         $response = $this->api->callCourier($param);
         $courierObj = json_decode($response);
 

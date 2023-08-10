@@ -14,10 +14,7 @@
 use Cdek\CallCourier;
 use Cdek\CdekApi;
 use Cdek\CreateOrder;
-use Cdek\DataWPScraber;
-use Cdek\DeleteOrder;
 use Cdek\Helper;
-use Cdek\Loader;
 use Cdek\Model\CourierMetaData;
 use Cdek\Model\OrderMetaData;
 use Cdek\Model\Tariff;
@@ -25,12 +22,18 @@ use Cdek\WeightCalc;
 
 function_exists('add_action') or exit();
 
+defined('ABSPATH') or exit;
+
 if (file_exists(__DIR__.'/vendor/autoload.php')) {
     require __DIR__.'/vendor/autoload.php';
 }
 
-require_once(plugin_dir_path(__FILE__).'message.php');
-require_once(plugin_dir_path(__FILE__).'config.php');
+use Cdek\Loader;
+
+if (!class_exists(Loader::class)) {
+    trigger_error('CDEKDelivery not fully installed! Please install with Composer or download full release archive.',
+        E_USER_ERROR);
+}
 
 (new Loader)(__FILE__);
 
@@ -214,7 +217,6 @@ function get_waybill($data) {
     $waybill     = json_decode($waybillData);
 
     $order = json_decode($api->getOrder($data->get_param('number')));
-
     if ($waybill->requests[0]->state === 'INVALID' || property_exists($waybill->requests[0],
             'errors') || !property_exists($order, 'related_entities')) {
         echo '
@@ -226,14 +228,14 @@ function get_waybill($data) {
 
     foreach ($order->related_entities as $entity) {
         if ($entity->uuid === $waybill->entity->uuid) {
-            $result = $api->getWaybillByLink($entity->url);
+            $result = $api->getFileByLink($entity->url);
             header("Content-type:application/pdf");
             echo $result;
             exit();
         }
     }
 
-    $result = $api->getWaybillByLink(end($order->related_entities)->url);
+    $result = $api->getFileByLink(end($order->related_entities)->url);
     header("Content-type:application/pdf");
     echo $result;
     exit();
