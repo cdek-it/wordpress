@@ -11,6 +11,7 @@
  * WC tested up to: 7.0
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Cdek\CallCourier;
 use Cdek\CdekApi;
 use Cdek\CreateOrder;
@@ -44,6 +45,12 @@ add_filter('woocommerce_checkout_fields', 'cdek_add_custom_checkout_field');
 add_action('woocommerce_checkout_create_order', 'cdek_save_custom_checkout_field_to_order', 10, 2);
 
 $CDEK_PLUGIN_VERSION = get_file_data(__FILE__, ['Version'])[0];
+
+add_action( 'before_woocommerce_init', function() {
+    if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+        \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+    }
+} );
 
 function cdek_widget_enqueue_script() {
     global $CDEK_PLUGIN_VERSION;
@@ -880,7 +887,7 @@ function add_cdek_shipping_method($methods) {
 
 function add_custom_order_meta_box() {
     global $post;
-    if ($post && $post->post_type === 'shop_order') {
+    if ($post && OrderUtil::is_order( $post->ID, wc_get_order_types() )) {
         $order_id = $post->ID;
         $order    = wc_get_order($order_id);
         if (isCdekShippingMethod($order)) {
@@ -895,6 +902,7 @@ function add_custom_order_meta_box() {
                 //Сбор данных
                 $orderWP       = $order->get_id();
                 $postOrderData = OrderMetaData::getMetaByOrderId($orderWP);
+
                 $orderNumber   = getOrderNumber($postOrderData);
                 $orderUuid     = getOrderUuid($postOrderData);
                 $items         = getItems($order);
