@@ -11,12 +11,9 @@ use Cdek\Validator\ValidateCourierFormData;
 class CallCourier
 {
     public $api;
-    public $adminSetting;
-
     public function __construct()
     {
         $this->api = new CdekApi();
-        $this->adminSetting = Helper::getSettingDataPlugin();
     }
 
     public function call($data)
@@ -108,14 +105,12 @@ class CallCourier
             ]
         ];
         $param['from_location'] = [
-            'code' => $this->adminSetting['city_code_value'],
+            'code' => Helper::getActualShippingMethod()->get_option('city_code_value'),
             'address' => $data['address']
         ];
-        if ($data['need_call'] === "true") {
-            $param['need_call'] = true;
-        } else {
-            $param['need_call'] = false;
-        }
+
+        $param['need_call'] = $data['need_call'] === 'true';
+
         return $param;
     }
 

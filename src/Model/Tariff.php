@@ -376,8 +376,7 @@ class Tariff
 
     public static function getTariffNameByCode($code)
     {
-        $setting = Helper::getSettingDataPlugin();
-        $tariffNameEdit = $setting['tariff_name'];
+        $tariffNameEdit = Helper::getActualShippingMethod()->get_option('tariff_name');
         if (!empty($tariffNameEdit)) {
             $tariffNameEditArray = explode(';', $tariffNameEdit);
             $tariffEditList = [];

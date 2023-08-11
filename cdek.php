@@ -62,8 +62,7 @@ function cdek_widget_enqueue_script() {
         wp_enqueue_style('cdek-css-leaflet', plugin_dir_url(__FILE__).'assets/css/leaflet.css');
         wp_enqueue_style('cdek-admin-leaflet-cluster-default',
             plugin_dir_url(__FILE__).'assets/css/MarkerCluster.Default.min.css');
-        wp_enqueue_style('cdek-admin-leaflet-cluster',
-            plugin_dir_url(__FILE__).'assets/css/MarkerCluster.min.css');
+        wp_enqueue_style('cdek-admin-leaflet-cluster', plugin_dir_url(__FILE__).'assets/css/MarkerCluster.min.css');
         wp_enqueue_style('cdek-css', plugin_dir_url(__FILE__).'assets/css/cdek-map.css', [], $CDEK_PLUGIN_VERSION);
         addYandexMap();
     }
@@ -71,8 +70,8 @@ function cdek_widget_enqueue_script() {
 
 function cdek_admin_enqueue_script() {
     global $CDEK_PLUGIN_VERSION;
-    wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__).'assets/js/delivery.js',
-        ['jquery'], $CDEK_PLUGIN_VERSION, true);
+    wp_enqueue_script('cdek-admin-delivery', plugin_dir_url(__FILE__).'assets/js/delivery.js', ['jquery'],
+        $CDEK_PLUGIN_VERSION, true);
     wp_localize_script('cdek-admin-delivery', 'cdek_rest_delivery_api_path', [
         'get_pvz'             => rest_url('/cdek/v1/get-pvz'),
         'create_order'        => rest_url('/cdek/v1/create-order'),
@@ -82,8 +81,8 @@ function cdek_admin_enqueue_script() {
         'call_courier_delete' => rest_url('/cdek/v1/call-courier-delete'),
     ]);
 
-    wp_enqueue_script('cdek-admin-create-order', plugin_dir_url(__FILE__).'assets/js/create-order.js',
-        ['jquery'], $CDEK_PLUGIN_VERSION, true);
+    wp_enqueue_script('cdek-admin-create-order', plugin_dir_url(__FILE__).'assets/js/create-order.js', ['jquery'],
+        $CDEK_PLUGIN_VERSION, true);
     wp_localize_script('cdek-admin-create-order', 'cdek_rest_order_api_path', [
         'create_order' => rest_url('/cdek/v1/create-order'),
     ]);
@@ -101,31 +100,27 @@ function cdek_admin_enqueue_script() {
 }
 
 function addYandexMap() {
-    $cdekShippingSettings = Helper::getSettingDataPlugin();
-    if (array_key_exists('yandex_map_api_key',
-            $cdekShippingSettings) && $cdekShippingSettings['yandex_map_api_key'] !== '') {
-        $WP_Http = new WP_Http();
-        $resp    = $WP_Http->request('https://api-maps.yandex.ru/2.1?apikey='.$cdekShippingSettings['yandex_map_api_key'].'&lang=ru_RU',
-            [
-                'method'  => 'GET',
-                'headers' => [
-                    "Content-Type" => "application/json",
-                ],
-            ]);
+    $apiKey = Helper::getActualShippingMethod()->get_option('yandex_map_api_key');
 
-        if ($resp['response']['code'] === 200) {
-            wp_enqueue_script('cdek-admin-yandex-api',
-                'https://api-maps.yandex.ru/2.1?apikey='.$cdekShippingSettings['yandex_map_api_key'].'&lang=ru_RU');
-            wp_enqueue_script('cdek-admin-leaflet-yandex', plugin_dir_url(__FILE__).'assets/js/lib/Yandex.js');
-        } else {
-            $setting = WC()->shipping->load_shipping_methods()['official_cdek'];
-            $setting->update_option('yandex_map_api_key', '');
-            $setting->update_option('map_layer', '1');
-        }
+    if (!$apiKey) {
+        return;
+    }
 
+    $WP_Http = new WP_Http();
+    $resp    = $WP_Http->request("https://api-maps.yandex.ru/2.1?apikey=$apiKey&lang=ru_RU", [
+        'method'  => 'GET',
+        'headers' => [
+            "Content-Type" => 'application/json',
+        ],
+    ]);
 
+    if ($resp['response']['code'] === 200) {
+        wp_enqueue_script('cdek-admin-yandex-api', "https://api-maps.yandex.ru/2.1?apikey=$apiKey&lang=ru_RU");
+        wp_enqueue_script('cdek-admin-leaflet-yandex', plugin_dir_url(__FILE__).'assets/js/lib/Yandex.js');
     } else {
-        $cdekShippingSettings['map_layer'] = '0';
+        $setting = Helper::getActualShippingMethod();
+        $setting->update_option('yandex_map_api_key', '');
+        $setting->update_option('map_layer', '1');
     }
 }
 
@@ -255,9 +250,8 @@ function getCityCode($city_code, $order) {
 }
 
 function setPackage($data, $orderId, $currency) {
-    $param                = [];
-    $cdekShippingSettings = Helper::getSettingDataPlugin();
-    if ($cdekShippingSettings['has_packages_mode'] === 'yes') {
+    $param = [];
+    if (Helper::getActualShippingMethod()->get_option('has_packages_mode') === 'yes') {
         $packageData       = json_decode($data->get_param('package_data'));
         $param['packages'] = get_packages($orderId, $packageData, $currency);
     } else {
@@ -282,10 +276,10 @@ function setPackage($data, $orderId, $currency) {
             }
 
             $selectedPaymentMethodId = $order->get_payment_method();
-            $percentCod              = (int) $cdekShippingSettings['percentcod'];
+            $percentCod              = (int) Helper::getActualShippingMethod()->get_option('percentcod');
             if ($selectedPaymentMethodId === 'cod') {
                 if ($percentCod !== 0) {
-                    $paymentValue = (int) (((int) $cdekShippingSettings['percentcod'] / 100) * $cost);
+                    $paymentValue = (int) (((int) $percentCod / 100) * $cost);
                 } else {
                     $paymentValue = $cost;
                 }
@@ -294,13 +288,13 @@ function setPackage($data, $orderId, $currency) {
             }
 
             $itemsData[] = [
-                "ware_key"     => $product->get_id(),
-                "payment"      => ["value" => $paymentValue],
-                "name"         => $product->get_name(),
-                "cost"         => $cost,
-                "amount"       => $item->get_quantity(),
-                "weight"       => $weight,
-                "weight_gross" => $weight + 1,
+                'ware_key'     => $product->get_id(),
+                'payment'      => ['value' => $paymentValue],
+                'name'         => $product->get_name(),
+                'cost'         => $cost,
+                'amount'       => $item->get_quantity(),
+                'weight'       => $weight,
+                'weight_gross' => $weight + 1,
             ];
         }
 
@@ -407,8 +401,8 @@ function get_waybill($data) {
 
     $order = json_decode($api->getOrder($data->get_param('number')));
 
-    if ($waybill->requests[0]->state === 'INVALID' || property_exists($waybill->requests[0], 'errors')
-        || !property_exists($order, 'related_entities')) {
+    if ($waybill->requests[0]->state === 'INVALID' || property_exists($waybill->requests[0],
+            'errors') || !property_exists($order, 'related_entities')) {
         echo '
         Не удалось создать квитанцию. 
         Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
@@ -452,8 +446,7 @@ function set_pvz_code_tmp($data) {
     $pvzCode  = $data->get_param('pvz_code');
     $pvzInfo  = $data->get_param('pvz_info');
     $cityCode = $data->get_param('city_code');
-    update_post_meta(-1, 'pvz_code_tmp',
-        ['pvz_code' => $pvzCode, 'pvz_info' => $pvzInfo, 'city_code' => $cityCode]);
+    update_post_meta(-1, 'pvz_code_tmp', ['pvz_code' => $pvzCode, 'pvz_info' => $pvzInfo, 'city_code' => $cityCode]);
 }
 
 function get_city_code($data) {
@@ -478,9 +471,9 @@ function cdek_shipping_method() {
 
 function cdek_map_display($shippingMethodCurrent) {
     if (is_checkout() && isTariffTypeFromStore($shippingMethodCurrent)) {
-        $cdekShippingSettings = Helper::getSettingDataPlugin();
-        $layerMap             = $cdekShippingSettings['map_layer'];
-        if ($cdekShippingSettings['yandex_map_api_key'] === "") {
+        $cdekShippingMethod = Helper::getActualShippingMethod();
+        $layerMap             = $cdekShippingMethod->get_option('map_layer');
+        if ($cdekShippingMethod->get_option('yandex_map_api_key') === "") {
             $layerMap = "0";
         }
 
@@ -902,14 +895,8 @@ function add_custom_order_meta_box() {
                 $dateMax       = getDateMax($dateMin);
                 $courierNumber = getCourierNumber($order_id);
 
-                add_meta_box(
-                    'cdek_create_order_box',
-                    'CDEKDelivery',
-                    'render_cdek_create_order_box',
-                    'shop_order',
-                    'side',
-                    'core',
-                    [
+                add_meta_box('cdek_create_order_box', 'CDEKDelivery', 'render_cdek_create_order_box', 'shop_order',
+                    'side', 'core', [
                         'status'        => true,
                         'hasPackages'   => isHasPackages(),
                         'orderNumber'   => $orderNumber,
@@ -920,20 +907,12 @@ function add_custom_order_meta_box() {
                         'items'         => $items,
                         'courierNumber' => $courierNumber,
                         'fromDoor'      => Tariff::isTariffFromDoorByCode($postOrderData['tariff_id']),
-                    ],
-                );
+                    ],);
             } else {
-                add_meta_box(
-                    'cdek_create_order_box',
-                    'CDEKDelivery',
-                    'render_cdek_create_order_box',
-                    'shop_order',
-                    'side',
-                    'core',
-                    [
+                add_meta_box('cdek_create_order_box', 'CDEKDelivery', 'render_cdek_create_order_box', 'shop_order',
+                    'side', 'core', [
                         'status' => false,
-                    ],
-                );
+                    ],);
 
             }
         }
@@ -1016,13 +995,7 @@ function getDateMax($dateMin) {
  * @return bool
  */
 function isHasPackages(): bool {
-    $cdekShippingSettings = Helper::getSettingDataPlugin();
-    $hasPackages          = false;
-    if ($cdekShippingSettings['has_packages_mode'] === 'yes') {
-        $hasPackages = true;
-    }
-
-    return $hasPackages;
+    return Helper::getActualShippingMethod()->get_option('has_packages_mode') === 'yes';
 }
 
 add_action('add_meta_boxes', 'add_custom_order_meta_box');
@@ -1073,8 +1046,7 @@ function isCdekShippingMethod($order) {
 }
 
 function cdek_add_custom_checkout_field($fields) {
-    $cdekShippingSettings = Helper::getSettingDataPlugin();
-    if ($cdekShippingSettings['international_mode'] === 'yes') {
+    if (Helper::getActualShippingMethod()->get_option('international_mode') === 'yes') {
         $fields['billing']['passport_series']        = [
             'label'             => __('Серия паспорта', 'woocommerce'),
             'required'          => true,
