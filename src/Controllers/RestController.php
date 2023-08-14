@@ -15,6 +15,49 @@ namespace Cdek\Controllers {
     use WP_REST_Server;
 
     class RestController {
+        public static function checkAuth(): string {
+            $api   = new CdekApi;
+            $check = $api->checkAuth();
+            if ($check) {
+                update_option('cdek_auth_check', '1');
+            } else {
+                update_option('cdek_auth_check', '0');
+            }
+
+            return json_encode(['state' => $check]);
+        }
+
+        public static function getWaybill($data): void {
+            $api         = new CdekApi;
+            $waybillData = $api->createWaybill($data->get_param('number'));
+            $waybill     = json_decode($waybillData);
+
+            $order = json_decode($api->getOrder($data->get_param('number')));
+
+            if ($waybill->requests[0]->state === 'INVALID' || property_exists($waybill->requests[0],
+                    'errors') || !property_exists($order, 'related_entities')) {
+                echo '
+        Не удалось создать квитанцию. 
+        Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
+        и введите габариты упаковки повторно.';
+                exit();
+            }
+
+            foreach ($order->related_entities as $entity) {
+                if ($entity->uuid === $waybill->entity->uuid) {
+                    $result = $api->getFileByLink($entity->url);
+                    header("Content-type:application/pdf");
+                    echo $result;
+                    exit();
+                }
+            }
+
+            $result = $api->getFileByLink(end($order->related_entities)->url);
+            header("Content-type:application/pdf");
+            echo $result;
+            exit();
+        }
+
         public static function getBarcode(WP_REST_Request $request) {
             $api = new CdekApi;
 
@@ -32,7 +75,7 @@ namespace Cdek\Controllers {
                     if ($entity['type'] === 'barcode' && isset($entity['url'])) {
                         $barcodeInfo = json_decode($api->getBarcode($entity['uuid']), true);
 
-                        if ($barcodeInfo['entity']['format'] !== BarcodeFormat::getByIndex(Helper::getSettingDataPlugin()['barcode_format'])) {
+                        if ($barcodeInfo['entity']['format'] !== BarcodeFormat::getByIndex(Helper::getActualShippingMethod()->get_option('barcode_format'))) {
                             continue;
                         }
 
@@ -80,7 +123,7 @@ namespace Cdek\Controllers {
         public function __invoke() {
             register_rest_route('cdek/v1', '/check-auth', [
                 'methods'             => 'GET',
-                'callback'            => 'check_auth',
+                'callback'            => [__CLASS__, 'checkAuth'],
                 'permission_callback' => '__return_true',
             ]);
 
@@ -102,32 +145,32 @@ namespace Cdek\Controllers {
                 'permission_callback' => '__return_true',
             ]);
 
-            register_rest_route('cdek/v1', '/get-waybill', [
-                'methods'             => 'GET',
-                'callback'            => 'get_waybill',
-                'permission_callback' => '__return_true',
-            ]);
+                register_rest_route('cdek/v1', '/get-waybill', [
+                    'methods'             => 'GET',
+                    'callback'            => [__CLASS__, 'getWaybill'],
+                    'permission_callback' => '__return_true',
+                ]);
 
-            register_rest_route('cdek/v1', '/set-pvz-code-tmp', [
-                'methods'             => 'GET',
-                'callback'            => 'set_pvz_code_tmp',
-                'permission_callback' => '__return_true',
-            ]);
+                register_rest_route('cdek/v1', '/set-pvz-code-tmp', [
+                    'methods'             => 'GET',
+                    'callback'            => 'set_pvz_code_tmp',
+                    'permission_callback' => '__return_true',
+                ]);
 
-            register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/barcode', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [__CLASS__, 'getBarcode'],
-                'permission_callback' => static fn() => current_user_can('manage_woocommerce'),
-                'show_in_index'       => true,
-                'args'                => [
-                    'id' => [
-                        'description' => 'CDEK Order ID',
-                        'required'    => true,
-                        'type'        => 'number',
+                register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/barcode', [
+                    'methods'             => WP_REST_Server::READABLE,
+                    'callback'            => [__CLASS__, 'getBarcode'],
+                    'permission_callback' => static fn() => current_user_can('manage_woocommerce'),
+                    'show_in_index'       => true,
+                    'args'                => [
+                        'id' => [
+                            'description' => 'CDEK Order ID',
+                            'required'    => true,
+                            'type'        => 'number',
+                        ],
                     ],
-                ],
-            ]);
-        }
+                ]);
+            }
     }
 
 }
