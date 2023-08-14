@@ -274,13 +274,12 @@
                     $('#cdek-loader').hide();
                 },
                 success: function (response) {
-                    let resp = JSON.parse(response);
-                    if (!resp.state) {
-                        $('#cdek-delete-order-error').text(resp.message);
+                    if (!response.state) {
+                        $('#cdek-delete-order-error').text(response.message);
                         $('#cdek-delete-order-error').show();
                         $('#delete-order-btn').hide();
                     } else {
-                        alert(resp.message);
+                        alert(response.message);
                         $(event.target).removeClass('clicked')
                         $('#cdek-create-order-form').show();
                         $('#cdek-info-order').hide();
