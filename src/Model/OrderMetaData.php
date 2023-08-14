@@ -20,7 +20,7 @@ class OrderMetaData {
     public static function cleanMetaByOrderId(int $orderId): void {
         $order = wc_get_order($orderId);
 
-        $meta = $order->get_meta(Config::META_KEY);
+        $meta = $order->get_meta(Config::META_KEY) ?: [];
 
         $meta['order_number'] = '';
         $meta['order_uuid']   = '';
