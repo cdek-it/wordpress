@@ -2,8 +2,10 @@
 
 namespace Cdek;
 
+use Cdek\Enums\BarcodeFormat;
 use Cdek\Model\Tariff;
 use Cdek\Transport\HttpClient;
+use WC_Shipping_Method;
 use WP_Http;
 
 class CdekApi {
@@ -13,6 +15,7 @@ class CdekApi {
     protected const PVZ_PATH = "deliverypoints";
     protected const CALC_PATH = "calculator/tariff";
     protected const WAYBILL_PATH = "print/orders/";
+    protected const BARCODE_PATH = "print/barcodes/";
     protected const CALL_COURIER = "intakes";
 
     protected $apiUrl;
@@ -20,26 +23,21 @@ class CdekApi {
 
     protected $clientId;
     protected $clientSecret;
+    protected WC_Shipping_Method $deliveryMethod;
 
-    public function __construct() {
-        $this->adminSetting = Helper::getSettingDataPlugin();
-        $this->apiUrl       = $this->getApiUrl();
+    public function __construct()
+    {
+        $this->deliveryMethod = Helper::getActualShippingMethod();
+        $this->apiUrl = $this->getApiUrl();
+        $this->httpClient = new HttpClientWrapper();
 
-        if (array_key_exists('test_mode', $this->adminSetting) && $this->adminSetting['test_mode'] === 'yes') {
-            $this->clientId     = CDEK_TEST_CLIENT_ID;
+        if ($this->deliveryMethod->get_option('test_mode') === 'yes') {
+            $this->clientId = CDEK_TEST_CLIENT_ID;
             $this->clientSecret = CDEK_TEST_CLIENT_SECRET;
         } else {
-            $this->clientId     = $this->adminSetting['client_id'];
-            $this->clientSecret = $this->adminSetting['client_secret'];
+            $this->clientId = $this->deliveryMethod->get_option('client_id');
+            $this->clientSecret = $this->deliveryMethod->get_option('client_secret');
         }
-    }
-
-    private function getApiUrl() {
-        if (array_key_exists('test_mode', $this->adminSetting) && $this->adminSetting['test_mode'] === 'yes') {
-            return CDEK_API_URL_TEST;
-        }
-
-        return CDEK_API_URL;
     }
 
     public function checkAuth(): bool {
@@ -49,9 +47,10 @@ class CdekApi {
     }
 
     public function getToken() {
-        $response =  HttpClient::sendRequest($this->getAuthUrl(), 'POST');
-
-        $body     = json_decode($response);
+        $authUrl  = $this->getAuthUrl();
+        $response = wp_remote_post($authUrl);
+        $bodyJson = wp_remote_retrieve_body($response);
+        $body     = json_decode($bodyJson);
 
         if ($body === null || property_exists($body, 'error')) {
             return false;
@@ -80,33 +79,34 @@ class CdekApi {
         return HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['cdek_number' => $number]);
     }
 
-    public function createOrder($param) {
-        $url                                       = $this->apiUrl.self::ORDERS_PATH;
-        $param['developer_key']                    = '7wV8tk&r6VH4zK:1&0uDpjOkvM~qngLl';
-        $param['date_invoice']                     = date('Y-m-d');
-        $param['shipper_name']                     = $this->adminSetting['shipper_name'];
-        $param['shipper_address']                  = $this->adminSetting['shipper_address'];
-        $param['sender']['passport_series']        = $this->adminSetting['passport_series'];
-        $param['sender']['passport_number']        = $this->adminSetting['passport_number'];
-        $param['sender']['passport_date_of_issue'] = $this->adminSetting['passport_date_of_issue'];
-        $param['sender']['passport_organization']  = $this->adminSetting['passport_organization'];
-        $param['sender']['tin']                    = $this->adminSetting['tin'];
-        $param['sender']['passport_date_of_birth'] = $this->adminSetting['passport_date_of_birth'];
-        $param['seller']                           = ['address' => $this->adminSetting['seller_address']];
+    public function createOrder($param)
+    {
+        $url = $this->apiUrl . self::ORDERS_PATH;
+        $param['developer_key'] = '7wV8tk&r6VH4zK:1&0uDpjOkvM~qngLl';
+        $param['date_invoice'] = date('Y-m-d');
+        $param['shipper_name'] = $this->deliveryMethod->get_option('shipper_name');
+        $param['shipper_address'] = $this->deliveryMethod->get_option('shipper_address');
+        $param['sender']['passport_series'] = $this->deliveryMethod->get_option('passport_series');
+        $param['sender']['passport_number'] = $this->deliveryMethod->get_option('passport_number');
+        $param['sender']['passport_date_of_issue'] = $this->deliveryMethod->get_option('passport_date_of_issue');
+        $param['sender']['passport_organization'] = $this->deliveryMethod->get_option('passport_organization');
+        $param['sender']['tin'] = $this->deliveryMethod->get_option('tin');
+        $param['sender']['passport_date_of_birth'] = $this->deliveryMethod->get_option('passport_date_of_birth');
+        $param['seller'] = ['address' => $this->deliveryMethod->get_option('seller_address')];
 
         if (Tariff::isTariffFromStoreByCode($param['tariff_code'])) {
-            $param['shipment_point'] = $this->adminSetting['pvz_code'];
+            $param['shipment_point'] = $this->deliveryMethod->get_option('pvz_code');
         } else {
             $param['from_location'] = [
-                'code'    => $this->adminSetting['city_code_value'],
-                'address' => $this->adminSetting['street'],
+                'code' => $this->deliveryMethod->get_option('city_code_value'),
+                'address' => $this->deliveryMethod->get_option('street'),
             ];
         }
 
         return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), json_encode($param));
     }
 
-    public function getWaybillByLink($link) {
+    public function getFileByLink($link) {
         return HttpClient::sendCdekRequest($link, 'GET', $this->getToken(), '', true);
     }
 
@@ -115,6 +115,15 @@ class CdekApi {
 
         return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(),
             json_encode(['orders' => ['order_uuid' => $orderUuid]]));
+    }
+
+    public function createBarcode($orderUuid) {
+        return HttpClient::sendCdekRequest($this->apiUrl.self::BARCODE_PATH, 'POST', $this->getToken(),
+            json_encode(['orders' => ['order_uuid' => $orderUuid], 'format' => BarcodeFormat::getByIndex($this->adminSetting['barcode_format'])]));
+    }
+
+    public function getBarcode($uuid) {
+        return HttpClient::sendCdekRequest($this->apiUrl.self::BARCODE_PATH.$uuid, 'GET', $this->getToken());
     }
 
     public function deleteOrder($uuid) {
@@ -129,7 +138,7 @@ class CdekApi {
         return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), json_encode([
             'tariff_code'   => $tariff,
             'from_location' => [
-                'code' => $this->adminSetting['city_code_value'],
+                'code' => $this->deliveryMethod->get_option('city_code_value'),
             ],
             'to_location'   => [
                 'code' => $deliveryParam['cityCode'],
@@ -231,7 +240,12 @@ class CdekApi {
         return false;
     }
 
-    public function getPvz($city, $weight = 0, $outgoing = false) {
+    private function getApiUrl()
+    {
+        return $this->deliveryMethod->get_option('test_mode') === 'yes' ? CDEK_API_URL_TEST : CDEK_API_URL;
+    }
+
+    public function getPvz($city, $weight = 0, $admin = false) {
         $url = $this->apiUrl.self::PVZ_PATH;
         if (empty($city)) {
             $city = '44';
@@ -242,11 +256,9 @@ class CdekApi {
         }
 
         $params = ['city_code' => $city];
-        if ($outgoing) {
-            $params['type']         = 'PVZ';
-            $params['is_reception'] = true;
+        if ($admin) {
+            $params['type'] = 'PVZ';
         } else {
-            $params['is_handout'] = true;
             if ((int) $weight !== 0) {
                 $params['weight_max'] = (int) ceil($weight);
             }
@@ -255,25 +267,26 @@ class CdekApi {
         $result = HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), $params);
         $json   = json_decode($result);
         if (!$json) {
-            return ['success' => false, 'message' => CDEK_NO_DELIVERY_POINTS_IN_CITY];
+            return json_encode([
+                'success' => false,
+                'message' => __(Messages::NO_DELIVERY_POINTS_IN_CITY, Config::TRANSLATION_DOMAIN),
+            ]);
         }
 
         $pvz = [];
         foreach ($json as $elem) {
             if (isset($elem->code, $elem->type, $elem->location->longitude, $elem->location->latitude, $elem->location->address)) {
                 $pvz[] = [
-                    'name'      => $elem->name,
                     'code'      => $elem->code,
                     'type'      => $elem->type,
                     'longitude' => $elem->location->longitude,
                     'latitude'  => $elem->location->latitude,
                     'address'   => $elem->location->address,
-                    'work_time' => $elem->work_time,
                 ];
             }
         }
 
-        return ['success' => true, 'pvz' => $pvz];
+        return json_encode(['success' => true, 'pvz' => $pvz]);
     }
 
     public function callCourier($param) {

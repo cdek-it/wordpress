@@ -4,21 +4,25 @@
 /** @var $dateMin */
 /** @var $dateMax */
 /** @var $courierNumber */
+
 /** @var $fromDoor */
 
-$restWaybill = rest_url('/cdek/v1/get-waybill');
+use Cdek\Helper;
 
-$restWaybill .= (parse_url($restWaybill, PHP_URL_QUERY) ? '&' : '?')."number=$orderUuid";
 ?>
 <div id="cdek-info-order" <?php if (!$orderNumber) { ?>style="display: none" <?php } ?>>
     <div>
         <h3 style="margin-bottom: 0">Заказ создан</h3>
         <div id="cdek-order-number-block">
             <div>
-                <p id="cdek-order-number" data-number="<?= $orderNumber ?>">№ <b><?= $orderNumber ?></b></p>
+                <p id="cdek-order-number" data-number="<?= $orderNumber ?>">№ <b><?= $orderNumber ?></b>
+                </p>
                 <input id="cdek-order-number-input" type="hidden" value="<?= $orderNumber ?>">
                 <a id="cdek-order-waybill" target="_blank"
-                   href="<?= $restWaybill ?>">Получить квитанцию</a>
+                   href="<?= Helper::buildRestUrl('cdek/v1/get-waybill', ['number' => $orderUuid], '') ?>">Получить
+                    квитанцию</a>
+                <a id="cdek-order-barcode" target="_blank"
+                   href="<?= Helper::buildRestUrl("order/$orderNumber/barcode") ?>">Получить ШК</a>
                 <p id="cdek-order-courier" <?php if (!empty($courierNumber)) { ?>style="display: none" <?php } ?>>
                     Вызвать курьера</p>
             </div>

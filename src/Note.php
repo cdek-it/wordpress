@@ -2,12 +2,10 @@
 
 namespace Cdek;
 
-class Note
-{
+class Note {
 
-    public static function send($orderId, $message)
-    {
-        $note = '[CDEKDelivery] ' . $message;
+    public static function send($orderId, $message): void {
+        $note  = '[CDEKDelivery] '.$message;
         $order = wc_get_order($orderId);
         $order->add_order_note($note);
         $order->save();

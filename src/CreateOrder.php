@@ -11,15 +11,15 @@ use Cdek\Validator\ValidateOrder;
 
 class CreateOrder {
     protected $api;
-    protected $cdekShippingSettings;
 
-    public function __construct() {
-        $this->api                  = new CdekApi();
-        $this->cdekShippingSettings = Helper::getSettingDataPlugin();
+    public function __construct()
+    {
+        $this->api = new CdekApi();
     }
 
-    public function createOrder($data) {
-        if ($this->cdekShippingSettings['has_packages_mode'] !== 'yes') {
+    public function createOrder($data)
+    {
+        if (Helper::getActualShippingMethod()->get_option('has_packages_mode') !== 'yes') {
             $validate = ValidateCreateOrderForm::validate($data);
             if (!$validate->state) {
                 return $validate->response();
@@ -87,9 +87,9 @@ class CreateOrder {
             ],
         ];
 
-        if ($this->cdekShippingSettings['international_mode'] === 'yes') {
-            $param['recipient']['passport_series']        = $order->get_meta('_passport_series', true);
-            $param['recipient']['passport_number']        = $order->get_meta('_passport_number', true);
+        if (Helper::getActualShippingMethod()->get_option('international_mode') === 'yes') {
+            $param['recipient']['passport_series'] = $order->get_meta('_passport_series', true);
+            $param['recipient']['passport_number'] = $order->get_meta('_passport_number', true);
             $param['recipient']['passport_date_of_issue'] = $order->get_meta('_passport_date_of_issue', true);
             $param['recipient']['passport_organization']  = $order->get_meta('_passport_organization', true);
             $param['recipient']['tin']                    = $order->get_meta('_tin', true);
@@ -101,8 +101,8 @@ class CreateOrder {
 
         $selectedPaymentMethodId = $order->get_payment_method();
         if ($selectedPaymentMethodId === 'cod') {
-            $codPriceThreshold = (int) $this->cdekShippingSettings['stepcodprice'];
-            $total             = $this->getOrderPrice($order);
+            $codPriceThreshold = (int)Helper::getActualShippingMethod()->get_option('stepcodprice');
+            $total = $this->getOrderPrice($order);
             if ($codPriceThreshold === 0 || $codPriceThreshold > $total) {
                 $param['delivery_recipient_cost'] = [
                     'value' => $order->get_shipping_total(),

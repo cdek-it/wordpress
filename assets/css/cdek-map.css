@@ -185,3 +185,8 @@
 .leaflet-close-map {
     background-image: url(../../assets/img/x.svg);
 }
+
+.leaflet-overlay-pane svg {
+    width: unset !important;
+    height: unset !important;
+}

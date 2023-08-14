@@ -81,6 +81,11 @@ namespace Cdek {
             add_action('rest_api_init', new CourierController);
             add_action('rest_api_init', new LocationController);
 
+            add_action( 'before_woocommerce_init', function() {
+                if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
+                    \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
+                }
+            } );
             add_action('woocommerce_shipping_methods',
                 static fn($methods) => array_merge($methods, ['official_cdek' => CdekShippingMethod::class]));
 
