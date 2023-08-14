@@ -3,6 +3,7 @@
 namespace Cdek;
 
 use Cdek\Model\Tariff;
+use Cdek\Transport\HttpClient;
 use WP_Http;
 
 class CdekApi
@@ -17,7 +18,7 @@ class CdekApi
 
     protected $apiUrl;
     protected $adminSetting;
-    protected $httpClient;
+
     protected $clientId;
     protected $clientSecret;
 
@@ -25,7 +26,6 @@ class CdekApi
     {
         $this->adminSetting = Helper::getSettingDataPlugin();
         $this->apiUrl = $this->getApiUrl();
-        $this->httpClient = new HttpClientWrapper();
 
         if (array_key_exists('test_mode', $this->adminSetting) && $this->adminSetting['test_mode'] === 'yes') {
             $this->clientId = CDEK_TEST_CLIENT_ID;
@@ -69,13 +69,13 @@ class CdekApi
 	public function getOrder($uuid)
 	{
 		$url = $this->apiUrl . self::ORDERS_PATH . $uuid;
-		return $this->httpClient->sendRequest($url, 'GET', $this->getToken());
+		return HttpClient::sendCdekRequest($url, 'GET', $this->getToken());
 	}
 
     public function getOrderByCdekNumber($number)
     {
         $url = $this->apiUrl . self::ORDERS_PATH;
-        return $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['cdek_number' => $number]);
+        return HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['cdek_number' => $number]);
     }
 
     public function createOrder($param)
@@ -102,7 +102,7 @@ class CdekApi
             ];
         }
 
-	    return $this->httpClient->sendRequest($url, 'POST', $this->getToken(), json_encode($param));
+	    return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), json_encode($param));
     }
 
     public function getWaybillByLink($link)
@@ -122,13 +122,13 @@ class CdekApi
     public function createWaybill($orderUuid)
     {
         $url = $this->apiUrl . self::WAYBILL_PATH;
-        return $this->httpClient->sendRequest($url, 'POST', $this->getToken(), json_encode(['orders' => ['order_uuid' => $orderUuid]]));
+        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), json_encode(['orders' => ['order_uuid' => $orderUuid]]));
     }
 
     public function deleteOrder($uuid)
     {
         $url = $this->apiUrl . self::ORDERS_PATH . $uuid;
-        return $this->httpClient->sendRequest($url, 'DELETE', $this->getToken());
+        return HttpClient::sendCdekRequest($url, 'DELETE', $this->getToken());
     }
 
     public function getPvz($city, $weight = 0, $admin = false)
@@ -151,7 +151,7 @@ class CdekApi
             }
         }
 
-        $result = $this->httpClient->sendRequest($url, 'GET', $this->getToken(), $params);
+        $result = HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), $params);
         $json = json_decode($result);
         if (!$json) {
             return json_encode(['success' => false, 'message' => CDEK_NO_DELIVERY_POINTS_IN_CITY]);
@@ -176,7 +176,7 @@ class CdekApi
     public function calculate($deliveryParam, $tariff)
     {
         $url = $this->apiUrl . self::CALC_PATH;
-        return $this->httpClient->sendRequest($url, 'POST', $this->getToken(), json_encode([
+        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), json_encode([
             'tariff_code' => $tariff,
             'from_location' => [
                 'code' => $this->adminSetting['city_code_value']
@@ -197,7 +197,7 @@ class CdekApi
     public function getRegion($city = null)
     {
         $url = $this->apiUrl . self::REGION_PATH;
-        return $this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city' => $city]);
+        return HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['city' => $city]);
     }
 
     public function getCityCodeByCityName($city, $state): int
@@ -209,7 +209,7 @@ class CdekApi
             $city = $city . ' микрорайон';
         }
 
-        $cityData = json_decode($this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city' => $city]));
+        $cityData = json_decode(HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['city' => $city]));
 
         if ($state == 'false') {
             return $cityData[0]->code;
@@ -245,14 +245,14 @@ class CdekApi
     public function getCityCode($city, $postalCode)
     {
         $url = $this->apiUrl . self::REGION_PATH;
-        $cityData = json_decode($this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['city' => $city, 'postal_code' => $postalCode]));
+        $cityData = json_decode(HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['city' => $city, 'postal_code' => $postalCode]));
         return $cityData[0]->code;
     }
 
     public function getCityByCode($code)
     {
         $url = $this->apiUrl . self::REGION_PATH;
-        $cityData = json_decode($this->httpClient->sendRequest($url, 'GET', $this->getToken(), ['code' => $code]));
+        $cityData = json_decode(HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['code' => $code]));
         return ['city' => $cityData[0]->city, 'region' => $cityData[0]->region];
     }
 
@@ -268,30 +268,30 @@ class CdekApi
         }
         return false;
     }
-    
-    private function getApiUrl() 
+
+    private function getApiUrl()
     {
         if (array_key_exists('test_mode', $this->adminSetting) && $this->adminSetting['test_mode'] === 'yes') {
             return CDEK_API_URL_TEST;
-        }    
+        }
         return CDEK_API_URL;
     }
 
     public function callCourier($param)
     {
         $url = $this->apiUrl . self::CALL_COURIER;
-        return $this->httpClient->sendRequest($url, 'POST', $this->getToken(), json_encode($param));
+        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), json_encode($param));
     }
 
     public function courierInfo($uuid)
     {
         $url = $this->apiUrl . self::CALL_COURIER . '/' . $uuid;
-        return $this->httpClient->sendRequest($url, 'GET', $this->getToken());
+        return HttpClient::sendCdekRequest($url, 'GET', $this->getToken());
     }
 
     public function callCourierDelete($uuid)
     {
         $url = $this->apiUrl . self::CALL_COURIER . '/' . $uuid;
-        return $this->httpClient->sendRequest($url, 'DELETE', $this->getToken());
+        return HttpClient::sendCdekRequest($url, 'DELETE', $this->getToken());
     }
 }

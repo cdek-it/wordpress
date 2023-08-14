@@ -296,7 +296,7 @@
             $('#cdek-courier-error').hide();
             $.ajax({
                 method: "POST",
-                url: window.cdek_rest_delivery_api_path.call-courier,
+                url: window.cdek_rest_delivery_api_path.call_courier,
                 data: {
                     order_id: $('input[name=package_order_id]').val(),
                     date: $('#cdek-courier-date').val(),
