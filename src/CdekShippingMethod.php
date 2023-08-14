@@ -2,6 +2,7 @@
 
 namespace Cdek;
 
+use Cdek\Enums\BarcodeFormat;
 use Cdek\Model\Service;
 use Cdek\Model\Tariff;
 use WC_Shipping_Method;
@@ -9,7 +10,7 @@ use WC_Shipping_Method;
 class CdekShippingMethod extends WC_Shipping_Method {
     public function __construct($instance_id = 0) {
         parent::__construct($instance_id);
-        $this->id                 = CDEK_DELIVERY_NAME;
+        $this->id                 = Config::DELIVERY_NAME;
         $this->instance_id        = absint($instance_id);
         $this->method_title       = 'Cdek Shipping';
         $this->method_description = 'Custom Shipping Method for Cdek';
@@ -22,14 +23,14 @@ class CdekShippingMethod extends WC_Shipping_Method {
         $this->init();
     }
 
-    public function init() {
+    public function init(): void {
         $this->title = 'CDEK Shipping';
         $this->init_settings();
         add_action('woocommerce_update_options_shipping_'.$this->id, [$this, 'process_admin_options']);
         $this->init_form_fields();
     }
 
-    public function init_form_fields() {
+    public function init_form_fields(): void {
         $this->instance_form_fields = [
             'extra_cost'                     => [
                 'title'             => 'Доп. цена к доставке',
@@ -43,7 +44,7 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 ],
             ],
         ];
-        $this->form_fields          = [
+        $this->form_fields = [
             'auth_block_name'                => [
                 'title' => '<h3 style="text-align: center;">Авторизация</h3>',
                 'type'  => 'title',
@@ -312,7 +313,7 @@ class CdekShippingMethod extends WC_Shipping_Method {
             ],
             'delivery_price_block_name'      => [
                 'title' => '<h3 style="text-align: center;">Cтоимость доставки</h3>',
-                'type'  => 'title',
+                'type' => 'title',
                 'class' => 'cdek_delivery_price_block_name',
             ],
             'extra_cost'                     => [
@@ -422,10 +423,19 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'css'     => 'display: none;',
                 'default' => '44',
             ],
+            'barcode_format_title'             => [
+                'title'       => 'Настройки печати',
+                'type'        => 'title',
+            ],
+            'barcode_format' => [
+                'title' => 'Формат ШК',
+                'type'    => 'select',
+                'options' => BarcodeFormat::getAll(),
+            ],
         ];
     }
 
-    public function calculate_shipping($package = []) {
+    public function calculate_shipping($package = []): void {
         if (is_cart() || is_checkout()) {
             $deliveryCalc = new DeliveryCalc();
             if ($deliveryCalc->calculate($package, $this->id)) {

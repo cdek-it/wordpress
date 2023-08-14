@@ -99,13 +99,17 @@
     text-decoration-line: underline;
 }
 
-#cdek-order-waybill {
+#cdek-order-waybill, #cdek-order-barcode {
     text-decoration: none;
     margin: auto;
 }
 
-#cdek-order-waybill:hover {
+#cdek-order-waybill:hover, #cdek-order-barcode:hover {
     text-decoration-line: underline;
+}
+
+#cdek-order-barcode {
+    display: block;
 }
 
 #cdek-courier-delete {

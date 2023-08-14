@@ -33,4 +33,16 @@ class Helper {
 
         return WC()->shipping->load_shipping_methods()['official_cdek'];
     }
+
+    public static function buildRestUrl(
+        string $route,
+        array $args = [],
+        string $prefix = Config::DELIVERY_NAME
+    ): string {
+        $prefix = substr($prefix, -1) === '/' ? $prefix : "$prefix/";
+
+        $args['_wpnonce'] = wp_create_nonce( 'wp_rest' );
+
+        return add_query_arg($args, rest_url($prefix.$route));
+    }
 }

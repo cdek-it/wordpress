@@ -165,11 +165,8 @@ class DeliveryCalc {
         return ['length' => $length, 'width' => $width, 'height' => $height, 'weight' => $totalWeight];
     }
 
-    protected function checkDeliveryResponse($delivery): bool {
-        if (!property_exists($delivery, 'errors')) {
-            return true;
-        } else {
-            return false;
-        }
+    protected function checkDeliveryResponse($delivery): bool
+    {
+        return !property_exists($delivery, 'errors');
     }
 }
