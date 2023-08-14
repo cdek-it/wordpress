@@ -9,8 +9,18 @@ namespace Cdek\Controllers {
 
     use Cdek\CreateOrder;
     use Cdek\DeleteOrder;
+    use WP_REST_Response;
 
     class OrderController {
+        public static function createOrder($data): WP_REST_Response {
+            return new WP_REST_Response((new CreateOrder)->createOrder($data), 200);
+        }
+
+        public static function deleteOrder($data): WP_REST_Response {
+            return new WP_REST_Response((new DeleteOrder())->delete($data->get_param('order_id'),
+                $data->get_param('number')), 200);
+        }
+
         public function __invoke() {
             register_rest_route('cdek/v1', '/create-order', [
                 'methods'             => 'GET',
@@ -23,14 +33,6 @@ namespace Cdek\Controllers {
                 'callback'            => [__CLASS__, 'deleteOrder'],
                 'permission_callback' => '__return_true',
             ]);
-        }
-
-        public static function createOrder($data): string {
-            return (new CreateOrder)->createOrder($data);
-        }
-
-        public static function deleteOrder($data): string {
-            return (new DeleteOrder())->delete($data->get_param('order_id'), $data->get_param('number'));
         }
     }
 

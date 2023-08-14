@@ -234,19 +234,19 @@
                     $('#cdek-loader').hide();
                 },
                 success: function (response) {
-                    let resp = JSON.parse(response);
-                    if (!resp.state) {
-                        $('#cdek-create-order-error').text(resp.message);
+                    if (!response.state) {
+                        $('#cdek-create-order-error').text(response.message);
                         $('#cdek-create-order-error').show();
                     } else {
-                        if (resp.door) {
+                        if (response.door) {
                             $('#cdek-courier-result-block').hide()
                             $('#cdek-order-courier').show()
                         }
                         $('#cdek-create-order-form').hide();
-                        $('#cdek-order-number').html(`№ <b>${resp.code}</b>`);
-                        $('#cdek-order-number-input').val(resp.code);
-                        $('#cdek-order-waybill').attr('href', resp.waybill);
+                        $('#cdek-order-number').html(`№ <b>${response.code}</b>`);
+                        $('#cdek-order-number-input').val(response.code);
+                        $('#cdek-order-waybill').attr('href', response.waybill);
+                        $('#cdek-order-barcode').attr('href', response.barcode);
                         $('#cdek-info-order').show();
                     }
                 },

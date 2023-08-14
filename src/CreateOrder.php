@@ -50,16 +50,13 @@ class CreateOrder {
         $postOrderData['order_uuid']   = $orderData->entity->uuid;
         OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
 
-        $restWaybill = rest_url('/cdek/v1/get-waybill');
-
-        $restWaybill .= (parse_url($restWaybill, PHP_URL_QUERY) ? '&' : '?').'number='.$orderData->entity->uuid;
-
-        return json_encode([
+        return [
             'state'   => true,
             'code'    => $cdekNumber,
-            'waybill' => $restWaybill,
+            'waybill' => Helper::buildRestUrl('/cdek/v1/get-waybill', ['number' => $orderData->entity->uuid] ,''),
+            'barcode' => Helper::buildRestUrl("order/$cdekNumber/barcode"),
             'door'    => Tariff::isTariffFromDoorByCode($postOrderData['tariff_id']),
-        ]);
+        ];
     }
 
     public function create($postOrderData, $order, $param) {

@@ -15,7 +15,7 @@ class Validate
 
     public function response()
     {
-        return json_encode(['state' => $this->state, 'message' => $this->message]);
+        return ['state' => $this->state, 'message' => $this->message];
     }
 
     public function state()
