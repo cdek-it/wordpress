@@ -11,12 +11,10 @@ class DeleteOrder
 {
 
     protected $api;
-    protected $cdekShippingSettings;
 
     public function __construct()
     {
         $this->api = new CdekApi();
-        $this->cdekShippingSettings = Helper::getSettingDataPlugin();
     }
 
     public function delete($orderId, $orderNumber)

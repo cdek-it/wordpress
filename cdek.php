@@ -67,9 +67,8 @@ function getCityCode($city_code, $order) {
 }
 
 function setPackage($data, $orderId, $currency) {
-    $param                = [];
-    $cdekShippingSettings = Helper::getSettingDataPlugin();
-    if ($cdekShippingSettings['has_packages_mode'] === 'yes') {
+    $param = [];
+    if (Helper::getActualShippingMethod()->get_option('has_packages_mode') === 'yes') {
         $packageData       = json_decode($data->get_param('package_data'));
         $param['packages'] = get_packages($orderId, $packageData, $currency);
     } else {
@@ -94,10 +93,10 @@ function setPackage($data, $orderId, $currency) {
             }
 
             $selectedPaymentMethodId = $order->get_payment_method();
-            $percentCod              = (int) $cdekShippingSettings['percentcod'];
+            $percentCod              = (int) Helper::getActualShippingMethod()->get_option('percentcod');
             if ($selectedPaymentMethodId === 'cod') {
                 if ($percentCod !== 0) {
-                    $paymentValue = (int) (((int) $cdekShippingSettings['percentcod'] / 100) * $cost);
+                    $paymentValue = (int) (((int) $percentCod / 100) * $cost);
                 } else {
                     $paymentValue = $cost;
                 }
@@ -106,13 +105,13 @@ function setPackage($data, $orderId, $currency) {
             }
 
             $itemsData[] = [
-                "ware_key"     => $product->get_id(),
-                "payment"      => ["value" => $paymentValue],
-                "name"         => $product->get_name(),
-                "cost"         => $cost,
-                "amount"       => $item->get_quantity(),
-                "weight"       => $weight,
-                "weight_gross" => $weight + 1,
+                'ware_key'     => $product->get_id(),
+                'payment'      => ['value' => $paymentValue],
+                'name'         => $product->get_name(),
+                'cost'         => $cost,
+                'amount'       => $item->get_quantity(),
+                'weight'       => $weight,
+                'weight_gross' => $weight + 1,
             ];
         }
 
@@ -218,6 +217,7 @@ function get_waybill($data) {
     $waybill     = json_decode($waybillData);
 
     $order = json_decode($api->getOrder($data->get_param('number')));
+
     if ($waybill->requests[0]->state === 'INVALID' || property_exists($waybill->requests[0],
             'errors') || !property_exists($order, 'related_entities')) {
         echo '
@@ -284,9 +284,9 @@ function cdek_shipping_method() {
 
 function cdek_map_display($shippingMethodCurrent) {
     if (is_checkout() && isTariffTypeFromStore($shippingMethodCurrent)) {
-        $cdekShippingSettings = Helper::getSettingDataPlugin();
-        $layerMap             = $cdekShippingSettings['map_layer'];
-        if ($cdekShippingSettings['yandex_map_api_key'] === "") {
+        $cdekShippingMethod = Helper::getActualShippingMethod();
+        $layerMap             = $cdekShippingMethod->get_option('map_layer');
+        if ($cdekShippingMethod->get_option('yandex_map_api_key') === "") {
             $layerMap = "0";
         }
 
@@ -610,13 +610,7 @@ function getDateMax($dateMin) {
  * @return bool
  */
 function isHasPackages(): bool {
-    $cdekShippingSettings = Helper::getSettingDataPlugin();
-    $hasPackages          = false;
-    if ($cdekShippingSettings['has_packages_mode'] === 'yes') {
-        $hasPackages = true;
-    }
-
-    return $hasPackages;
+    return Helper::getActualShippingMethod()->get_option('has_packages_mode') === 'yes';
 }
 
 add_action('add_meta_boxes', 'add_custom_order_meta_box');
@@ -683,8 +677,7 @@ function cdek_add_custom_checkout_field($fields) {
         $fields['billing'][$requiredField] = $fields['billing'][$requiredField] ?? $originalFields[$requiredField];
     }
 
-    $cdekShippingSettings = Helper::getSettingDataPlugin();
-    if ($cdekShippingSettings['international_mode'] === 'yes') {
+    if (Helper::getActualShippingMethod()->get_option('international_mode') === 'yes') {
         $fields['billing']['passport_series']        = [
             'label'             => __('Серия паспорта', 'woocommerce'),
             'required'          => true,

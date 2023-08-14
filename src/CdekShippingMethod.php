@@ -31,6 +31,19 @@ class CdekShippingMethod extends WC_Shipping_Method {
     }
 
     public function init_form_fields(): void {
+        $this->instance_form_fields = [
+            'extra_cost'                     => [
+                'title'             => 'Доп. цена к доставке',
+                'type'              => 'number',
+                'description'       => "стоимость доставки в рублях которая будет добавлена к расчетной стоимости доставки",
+                'desc_tip'          => true,
+                'default'           => 0,
+                'custom_attributes' => [
+                    'min'  => 1,
+                    'step' => 1,
+                ],
+            ],
+        ];
         $this->form_fields = [
             'auth_block_name'                => [
                 'title' => '<h3 style="text-align: center;">Авторизация</h3>',
@@ -300,7 +313,7 @@ class CdekShippingMethod extends WC_Shipping_Method {
             ],
             'delivery_price_block_name'      => [
                 'title' => '<h3 style="text-align: center;">Cтоимость доставки</h3>',
-                'type'  => 'title',
+                'type' => 'title',
                 'class' => 'cdek_delivery_price_block_name',
             ],
             'extra_cost'                     => [
