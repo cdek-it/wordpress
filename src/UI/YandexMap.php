@@ -16,11 +16,10 @@ namespace Cdek\UI {
                 return;
             }
 
-            $WP_Http = new WP_Http();
-            $resp    = $WP_Http->request("https://api-maps.yandex.ru/2.1?apikey=$apiKey&lang=ru_RU", [
+            $resp    = (new WP_Http())->request("https://api-maps.yandex.ru/2.1?apikey=$apiKey&lang=ru_RU", [
                     'method'  => 'GET',
                     'headers' => [
-                        "Content-Type" => "application/json",
+                        "Content-Type" => 'application/json',
                     ],
                 ]);
 
