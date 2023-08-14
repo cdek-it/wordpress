@@ -135,6 +135,17 @@
                       controlUI.ondblclick = (e) => e.stopPropagation();
                       controlUI.onclick = uninstallMap;
 
+                      const sidebarUI = L.DomUtil.create('a',
+                        'leaflet-expand-list', controlDiv);
+                      sidebarUI.title = 'Открыть список';
+                      sidebarUI.href = '#';
+
+                      sidebarUI.ondblclick = (e) => e.stopPropagation();
+                      sidebarUI.onclick = () => {
+                          console.debug('[CDEK-MAP] Toggle offices list');
+                          $('#main-map-container').toggleClass('mobile-toggle');
+                      };
+
                       return controlDiv;
                   },
               });

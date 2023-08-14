@@ -190,3 +190,22 @@
     width: unset !important;
     height: unset !important;
 }
+
+.leaflet-touch .leaflet-bar a.leaflet-expand-list {
+    display: none;
+}
+
+@media only screen and (max-width: 480px) {
+    #main-map-container:not(.mobile-toggle) #map-pvz-list, #main-map-container.mobile-toggle .leaflet-control-container .leaflet-control-zoom {
+        display: none;
+    }
+
+    .leaflet-touch .leaflet-bar a.leaflet-expand-list {
+        display: block;
+        background-image: url(../../assets/img/layout-sidebar-left-expand.svg);
+    }
+
+    #main-map-container.mobile-toggle .leaflet-touch .leaflet-bar a.leaflet-expand-list {
+        background-image: url(../../assets/img/layout-sidebar-left-collapse.svg);
+    }
+}
