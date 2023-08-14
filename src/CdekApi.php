@@ -232,7 +232,7 @@ class CdekApi {
     }
 
     public function getPvzCodeByPvzAddressNCityCode($pvzInfo, $cityCode) {
-        $pvz = json_decode($this->getPvz($cityCode), true);
+        $pvz = $this->getPvz($cityCode);
         if ($pvz['success']) {
             foreach ($pvz['pvz'] as $point) {
                 if ($point['address'] === $pvzInfo) {
@@ -244,14 +244,14 @@ class CdekApi {
         return false;
     }
 
-    public function getPvz($city, $weight = 0, $admin = false) {
+    public function getPvz($city, $weight = 0, $admin = false): array {
         $url = $this->apiUrl.self::PVZ_PATH;
         if (empty($city)) {
             $city = '44';
         }
 
         if ($city === -1) {
-            return json_encode([]);
+            return [];
         }
 
         $params = ['city_code' => $city];
@@ -266,26 +266,28 @@ class CdekApi {
         $result = HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), $params);
         $json   = json_decode($result);
         if (!$json) {
-            return json_encode([
+            return [
                 'success' => false,
                 'message' => __(Messages::NO_DELIVERY_POINTS_IN_CITY, Config::TRANSLATION_DOMAIN),
-            ]);
+            ];
         }
 
         $pvz = [];
         foreach ($json as $elem) {
             if (isset($elem->code, $elem->type, $elem->location->longitude, $elem->location->latitude, $elem->location->address)) {
                 $pvz[] = [
+                    'name'      => $elem->name,
                     'code'      => $elem->code,
                     'type'      => $elem->type,
                     'longitude' => $elem->location->longitude,
                     'latitude'  => $elem->location->latitude,
                     'address'   => $elem->location->address,
+                    'work_time' => $elem->work_time,
                 ];
             }
         }
 
-        return json_encode(['success' => true, 'pvz' => $pvz]);
+        return ['success' => true, 'pvz' => $pvz];
     }
 
     public function callCourier($param) {

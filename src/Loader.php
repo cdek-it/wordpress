@@ -9,12 +9,15 @@ namespace {
 namespace Cdek {
 
     use Cdek\Controllers\CourierController;
+    use Cdek\Controllers\LocationController;
     use Cdek\Controllers\OrderController;
     use Cdek\Controllers\RestController;
     use Cdek\UI\Admin;
     use Cdek\UI\Frontend;
     use Cdek\UI\Leaflet;
+    use Cdek\Validator\CheckoutProcessValidator;
     use RuntimeException;
+    use function deactivate_plugins;
 
     class Loader {
         public const REQUIRED_PLUGINS = [
@@ -65,8 +68,9 @@ namespace Cdek {
             try {
                 self::checkRequirements();
             } catch (RuntimeException $e) {
-                require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
-                \deactivate_plugins(self::$pluginMainFile);
+                require_once(ABSPATH.'wp-admin/includes/plugin.php');
+                deactivate_plugins(self::$pluginMainFile);
+
                 return;
             }
 
@@ -75,12 +79,17 @@ namespace Cdek {
             add_action('rest_api_init', new RestController);
             add_action('rest_api_init', new OrderController);
             add_action('rest_api_init', new CourierController);
+            add_action('rest_api_init', new LocationController);
 
             add_action( 'before_woocommerce_init', function() {
                 if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
                     \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
                 }
             } );
+            add_action('woocommerce_shipping_methods',
+                static fn($methods) => array_merge($methods, ['official_cdek' => CdekShippingMethod::class]));
+
+            add_action('woocommerce_checkout_process', new CheckoutProcessValidator);
 
             (new Admin)();
             (new Leaflet)();

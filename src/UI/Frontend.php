@@ -17,9 +17,11 @@ namespace Cdek\UI {
 
             wp_enqueue_script('cdek-map', Loader::getPluginUrl().'assets/js/map.js', ['jquery'], Loader::getPluginVersion(),
                 true);
-            wp_localize_script('cdek-map', 'cdek_rest_map_api_path', [
-                'get_pvz'      => rest_url('/cdek/v1/get-pvz'),
-                'city_code'    => rest_url('/cdek/v1/get-city-code'),
+            wp_localize_script('cdek-map', 'cdek_map', [
+                'icons' => [
+                    'office' => Loader::getPluginUrl().'assets/img/point.svg',
+                    'postamat' => Loader::getPluginUrl().'assets/img/postamat.svg',
+                ],
                 'tmp_pvz_code' => rest_url('/cdek/v1/set-pvz-code-tmp'),
             ]);
         }

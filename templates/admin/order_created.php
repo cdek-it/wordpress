@@ -15,9 +15,9 @@ use Cdek\Helper;
         <h3 style="margin-bottom: 0">Заказ создан</h3>
         <div id="cdek-order-number-block">
             <div>
-                <p id="cdek-order-number" data-number="<?php echo $orderNumber; ?>">№ <b><?php echo $orderNumber; ?></b>
+                <p id="cdek-order-number" data-number="<?= $orderNumber ?>">№ <b><?= $orderNumber ?></b>
                 </p>
-                <input id="cdek-order-number-input" type="hidden" value="<?php echo $orderNumber; ?>">
+                <input id="cdek-order-number-input" type="hidden" value="<?= $orderNumber ?>">
                 <a id="cdek-order-waybill" target="_blank"
                    href="<?= Helper::buildRestUrl('cdek/v1/get-waybill', ['number' => $orderUuid], '') ?>">Получить
                     квитанцию</a>
@@ -30,7 +30,7 @@ use Cdek\Helper;
             <div id="cdek-courier-result-block"
                  <?php if (empty($courierNumber)) { ?>style="display: none;" <?php } else { ?> style="margin-top: 10px;" <?php } ?>>
                 <hr>
-                <p id="cdek-courier-info">Номер заявки: <?php echo $courierNumber ?></p>
+                <p id="cdek-courier-info">Номер заявки: <?= $courierNumber ?></p>
                 <p id="cdek-courier-delete">Отменить заявку</p>
             </div>
 

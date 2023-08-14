@@ -1,295 +1,300 @@
+'use strict';
 (function($, L) {
+    function debounce(callee, timeoutMs) {
+        return function action(...args) {
+            let previousCall = this.lastCall;
+            this.lastCall = Date.now();
+            if (previousCall && this.lastCall - previousCall <= timeoutMs) {
+                clearTimeout(this.lastCallTimer);
+            }
+            this.lastCallTimer = setTimeout(() => callee(...args), timeoutMs);
+        };
+    }
+
     $(document).ready(function() {
         let map = null;
         let cluster = null;
-        function triggerWooCommerceUpdate() {
-            let city = $('#billing_city').val();
-            $('#billing_city').val('');
-            $(document.body).trigger('update_checkout');
-            setTimeout(updateCheckout, 1000, city);
-        }
 
-        function updateCheckout(city) {
-            $('#billing_city').val(city);
-            $(document.body).trigger('update_checkout');
-        }
+        function uninstallMap(errorMessage = null) {
+            console.debug('[CDEK-MAP] Closing map');
 
-        if ($('#billing_city').val()) {
-            triggerWooCommerceUpdate();
-        }
+            $('#map-pvz-list-search').val('');
+            $('#map-frame').css('display', 'none');
 
-        $('body').on('change', '#billing_city, #billing_state', function() {
-            if ($('#billing_city').val() !== '') {
-                $(document.body).trigger('update_checkout');
-            }
-        });
-
-        $('body').on('click', '.open-pvz-btn', null, function() {
-            $('#map-frame').css('display', 'flex');
-            if (!map) {
-                map = L.map('cdek-map', {
-                    center: [55.76, 37.61],
-                    zoom: 9,
-                });
-            }
-            map._layersMaxZoom = 19;
-            cluster = L.markerClusterGroup();
-            map.addLayer(cluster);
-            let layerMap = $('.open-pvz-btn').data('layer-map');
-            if (layerMap === 1) {
-                L.yandex().addTo(map);
-            } else {
-                L.tileLayer(
-                  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                      maxZoom: 19,
-                      attribution: '© OpenStreetMap',
-                  }).addTo(map);
-            }
-
-            L.Control.PvzList = L.Control.extend(
-              {
-                  options:
-                    {
-                        position: 'topright',
-                    },
-                  onAdd: function(map) {
-                      var controlDiv = L.DomUtil.create('div',
-                        'leaflet-draw-toolbar leaflet-bar');
-                      L.DomEvent
-                        .addListener(controlDiv, 'click',
-                          L.DomEvent.stopPropagation)
-                        .addListener(controlDiv, 'click',
-                          L.DomEvent.preventDefault)
-                        .addListener(controlDiv, 'click', function() {
-                            if ($('#map-pvz-list').is(':visible')) {
-                                $('#map-pvz-list').hide();
-                            } else {
-                                $('#map-pvz-list').show();
-                            }
-                        });
-
-                      var controlUI = L.DomUtil.create('a',
-                        'leaflet-draw-pvz-list', controlDiv);
-                      controlUI.title = 'Pvz list';
-                      controlUI.href = '#';
-
-                      controlUI.ondblclick = (e) => {
-                          e.stopPropagation();
-                      };
-                      controlUI.onclick = this.options.onclickMethod;
-
-                      return controlDiv;
-                  },
-              });
-            let pvzListControl = new L.Control.PvzList();
-            map.addControl(pvzListControl);
-
-            $('#map-loader').show();
-
-            displayPvzOnMap();
-
-            $('#background').click(function() {
-                $('#map-frame').css('display', 'none');
-                $('#map-pvz-list').hide();
-                $('#map-pvz-item-list').empty();
-                $('#map-pvz-list-search').val('');
-                uninstallMap();
-            });
-
-            $('#map-pvz-list-search-clear').click(function() {
-                $('#map-pvz-list-search').val('');
-                $('.item-list-elem').each(function() {
-                    $(this).show();
-                });
-            });
-        });
-
-        function uninstallMap() {
             if (map !== null) {
                 map.off();
                 map.remove();
                 map = null;
             }
+
+            if (typeof errorMessage === 'string') {
+                console.debug('[CDEK-MAP] Rendering error message');
+
+                const triggerBtn = $('.open-pvz-btn');
+                triggerBtn.prev().text(errorMessage);
+                triggerBtn.remove();
+
+                $('#pvz-info').hide();
+                $('#pvz-code').val('');
+            }
         }
 
-        function getCity() {
-            if ($('#billing_city').length &&
-              !$('#ship-to-different-address-checkbox').prop('checked')) {
-                return jQuery('#billing_city').val();
+        const cityInput = $('#billing_city');
+
+        const loadPoints = () => {
+            const triggerBtn = $('.open-pvz-btn');
+            const points = triggerBtn.data('points');
+            console.debug('[CDEK-MAP] Got points from backend:', points);
+
+            if (typeof points !== 'object') {
+                console.error('[CDEK_MAP] backend points not object');
+                uninstallMap(
+                  'CDEK не смог загрузить список доступных ПВЗ, выберите другой метод доставки');
+
+                return [];
+            } else if (!points.length) {
+                console.warn('[CDEK_MAP] backend points are empty');
+                uninstallMap(
+                  'По данному направлению нет доступных пунктов выдачи CDEK, выберите другой метод доставки');
+
+                return [];
             }
 
-            if ($('#shipping_city').length) {
-                return $('#shipping_city').val();
+            return points;
+        };
+
+        $(document.body).on('updated_checkout', () => {
+            if (!$('.open-pvz-btn').length) {
+                console.debug(
+                  '[CDEK-MAP] Checkout updated! No map button, doing nothing');
+                return;
             }
 
-            return false;
+            console.debug('[CDEK-MAP] Checkout updated! Applying new points');
+            renderPointsOnMap(loadPoints());
+        });
+
+        if (cityInput.val()) {
+            console.debug(
+              '[CDEK-MAP] City has value, initiating checkout update');
+            const city = cityInput.val();
+            cityInput.val('');
+            $(document.body).trigger('update_checkout');
+
+            setTimeout(() => {
+                cityInput.val(city);
+                $(document.body).trigger('update_checkout');
+            }, 1000);
         }
 
-        function getState() {
-            if ($('#billing_state').length &&
-              !$('#ship-to-different-address-checkbox').prop('checked')) {
-                return jQuery('#billing_state').val();
-            }
+        $('body')
+          .on('change', '#billing_city, #billing_state', () => {
+              if (cityInput.val() !== '') {
+                  console.debug(
+                    '[CDEK-MAP] City or state changed, initiating checkout update');
+                  $(document.body).trigger('update_checkout');
+              }
+          })
+          .on('click', '.open-pvz-btn', null, () => {
+              console.debug('[CDEK-MAP] Start map render');
 
-            if ($('#shipping_state').length) {
-                return $('#shipping_state').val();
-            }
+              const triggerBtn = $('.open-pvz-btn');
+              $('#map-frame').css('display', 'flex');
 
-            return false;
-        }
+              if (!map) {
+                  map = L.map('cdek-map', {
+                      center: [55.76, 37.61], zoom: 9,
+                  });
+              }
 
-        function displayPvzOnMap() {
-            getCityCodeByCityNameAndZipCode();
-        }
+              map._layersMaxZoom = 19;
 
-        function getCityCodeByCityNameAndZipCode() {
-            let cityName = getCity();
-            let stateName = getState();
-            $.ajax({
-                method: 'GET',
-                url: window.cdek_rest_map_api_path.city_code,
-                data: {
-                    city_name: cityName,
-                    state_name: stateName,
-                },
-                success: function(cityCode) {
-                    if (cityCode !== -1) {
-                        $('#city-code').val(cityCode);
-                        getPvz(cityCode);
-                    }
-                },
-                error: function(error) {
-                    console.log({ error: error });
-                },
-            });
-        }
+              if (triggerBtn.data('layer-map') === 1) {
+                  L.yandex().addTo(map);
+                  console.info('[CDEK-MAP] Using Yandex');
+              } else {
+                  L.tileLayer(
+                    'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+                    {
+                        maxZoom: 19,
+                        attribution: '© OpenStreetMap contributors © CARTO',
+                    }).addTo(map);
+                  console.info('[CDEK-MAP] Using Basemap');
+              }
 
-        function getPvz(cityCode) {
-            let weight = $('.open-pvz-btn').data('weight');
+              L.Control.PvzList = L.Control.extend({
+                  options: { position: 'topright' }, onAdd: () => {
+                      const controlDiv = L.DomUtil.create('div',
+                        'leaflet-draw-toolbar leaflet-bar');
 
-            if (weight === '') {
-                weight = 1;
-            }
+                      const controlUI = L.DomUtil.create('a',
+                        'leaflet-close-map', controlDiv);
+                      controlUI.title = 'Закрыть карту';
+                      controlUI.href = '#';
 
-            $.ajax({
-                method: 'GET',
-                url: window.cdek_rest_map_api_path.get_pvz,
-                data: {
-                    city_code: cityCode,
-                    weight: weight,
-                },
-                success: function(response) {
-                    $('#map-loader').hide();
-                    let resp = JSON.parse(response);
-                    if (resp.success) {
-                        setMarker(resp.pvz);
-                    } else {
-                        console.log('Не найдено');
-                    }
-                },
-                error: function(error) {
-                    console.log({ error: error });
-                },
-            });
-        }
+                      controlUI.ondblclick = (e) => e.stopPropagation();
+                      controlUI.onclick = uninstallMap;
 
-        function setMarker(pvz) {
+                      const sidebarUI = L.DomUtil.create('a',
+                        'leaflet-expand-list', controlDiv);
+                      sidebarUI.title = 'Открыть список';
+                      sidebarUI.href = '#';
+
+                      sidebarUI.ondblclick = (e) => e.stopPropagation();
+                      sidebarUI.onclick = () => {
+                          console.debug('[CDEK-MAP] Toggle offices list');
+                          $('#main-map-container').toggleClass('mobile-toggle');
+                      };
+
+                      return controlDiv;
+                  },
+              });
+
+              map.addControl(new L.Control.PvzList());
+
+              renderPointsOnMap(loadPoints());
+
+              $('#background').on('click', uninstallMap);
+
+              $('#map-pvz-list-search-clear')
+                .on('click',
+                  () => $('#map-pvz-list-search').val('').trigger('input'));
+
+              $('#map-pvz-list-search').on('input', debounce((el) => {
+                  const searchPredicate = el.target.value.toLowerCase();
+                  console.info('[CDEK-MAP] Starting search with value',
+                    searchPredicate);
+
+                  const result = loadPoints()
+                    .filter((point) => point.name.toLowerCase()
+                        .indexOf(searchPredicate) !== -1 ||
+                      point.address.toLowerCase().indexOf(searchPredicate) !==
+                      -1 ||
+                      point.code.toLowerCase().indexOf(searchPredicate) !== -1);
+
+                  console.debug('[CDEK-MAP] Search found that points:', result);
+
+                  renderPointsOnMap(result, false);
+              }, 500));
+          });
+
+        function renderPointsOnMap(points, initialRender = true) {
             if (!map) {
-                return false;
+                console.debug('[CDEK-MAP] No map for points to render, sorry');
+                return;
             }
-            map.removeLayer(cluster);
+
+            if (cluster) {
+                console.debug('[CDEK-MAP] Clearing previous points');
+                map.removeLayer(cluster);
+
+                $('#map-pvz-item-list').empty();
+            }
             cluster = L.markerClusterGroup();
             map.addLayer(cluster);
-            let postamat = $('.open-pvz-btn').data('postamat');
-            let hasPostamat = false;
-            $('#map-pvz-item-list').empty();
-            for (let i = 0; i < pvz.length; i++) {
-                let marker = null;
-                if (pvz[i].type === 'POSTAMAT') {
-                    if (postamat === 1) {
-                        hasPostamat = true;
-                        marker = L.circleMarker(
-                          [pvz[i].latitude, pvz[i].longitude],
-                          { color: '#ffad33' });
-                        $('#map-pvz-item-list')
-                          .append(
-                            `<li class="item-list-elem" data-lat="${pvz[i].latitude}" data-lon="${pvz[i].longitude}">${pvz[i].address}</li>`);
+
+            const postamatIcon = L.icon({
+                iconUrl: window.cdek_map.icons.postamat,
+                iconSize: [28, 36],
+                iconAnchor: [14, 36],
+                popupAnchor: [0, -40],
+            });
+
+            const officeIcon = L.icon({
+                iconUrl: window.cdek_map.icons.office,
+                iconSize: [28, 36],
+                iconAnchor: [14, 36],
+                popupAnchor: [0, -40],
+            });
+
+            const selectedPoint = initialRender ? $('#pvz-code').val() : null;
+            if (initialRender) {
+                console.debug(
+                  `[CDEK-MAP] Using previous selected point: ${selectedPoint}`);
+            }
+
+            Promise.all(points.map((point) => {
+                const domEl = $('<li></li>');
+                const marker = L.marker([point.latitude, point.longitude], {
+                    icon: point.type === 'PVZ' ? officeIcon : postamatIcon,
+                }).bindPopup(`[${point.code}] ${point.name}`);
+
+                const onClick = (type) => {
+                    console.debug(`[CDEK-MAP] Selected point from ${type}`,
+                      point);
+
+                    const showPopUp = () => {
+                        marker.openPopup();
+                        map.off('zoomend', showPopUp);
+                    };
+
+                    map.on('zoomend', showPopUp);
+
+                    map.closePopup();
+                    map.flyTo([point.latitude, point.longitude], 16);
+
+                    if (type !== 'list') {
+                        domEl[0].scrollIntoView({
+                            behavior: 'smooth',
+                        });
+                    }
+
+                    $('#map-pvz-item-list .item-list-elem.selected')
+                      .removeClass('selected');
+                    domEl.addClass('selected');
+
+                    $('#pvz-info').text(`[${point.code}] ${point.name}`).show();
+                    $('#pvz-code').val(point.code);
+                    $('#billing_address_1').val(point.address);
+                    $('#shipping_address_1').val(point.address);
+
+                    $.ajax({
+                        method: 'GET',
+                        url: window.cdek_map.tmp_pvz_code,
+                        data: {
+                            pvz_code: point.code,
+                        },
+                    });
+                };
+
+                domEl.html(
+                  `<h6>[${point.code}] ${point.name}</h6><i>${point.address}</i><br>${point.work_time}`);
+                domEl.addClass('item-list-elem');
+                domEl.on('click', () => {
+                    onClick('list');
+                });
+
+                marker.on('click', () => {
+                    onClick('map');
+                });
+
+                $('#map-pvz-item-list').append(domEl);
+                marker.addTo(cluster);
+
+                if (initialRender && selectedPoint === point.code) {
+                    onClick('external');
+                }
+
+            })).then(() => {
+                if (!selectedPoint) {
+                    const newBounds = cluster.getBounds();
+                    if (newBounds.isValid()) {
+                        console.debug('[CDEK-MAP] Render done! Resizing map');
+                        map.fitBounds(cluster.getBounds());
+                    } else {
+                        console.debug(
+                          '[CDEK-MAP] Render done! New bounds for resize are empty');
                     }
                 } else {
-                    if (postamat !== 1) {
-                        marker = L.circleMarker(
-                          [pvz[i].latitude, pvz[i].longitude]);
-                        $('#map-pvz-item-list')
-                          .append(
-                            `<li class="item-list-elem" data-lat="${pvz[i].latitude}" data-lon="${pvz[i].longitude}">${pvz[i].address}</li>`);
-                    }
+                    console.debug(
+                      '[CDEK-MAP] Render done! Map resize not required');
                 }
-
-                if (marker === null) {
-                    continue;
-                }
-
-                $(marker).click(function(event) {
-                    selectMarker(pvz[i]);
-                });
-                cluster.addLayer(marker);
-            }
-
-            if (postamat === 1 && !hasPostamat) {
-                $('#map-frame').css('display', 'none');
-                uninstallMap();
-                let label = $('.open-pvz-btn').prev()[0];
-                $(label)
-                  .text(
-                    'По данному направлению тарифы "до постамата" временно не работают');
-                $('.open-pvz-btn').hide();
-                $('#pvz-info').val('');
-                $('#pvz-code').val('');
-            } else {
-                map.fitBounds(cluster.getBounds());
-            }
-
-            const $itemList = $('.item-list-elem');
-            $('#map-pvz-list-search').keyup(function(event) {
-                let filterValue = event.target.value.toLowerCase();
-                $itemList.each(function() {
-                    const itemText = $(this).text().toLowerCase();
-                    if (itemText.indexOf(filterValue) !== -1) {
-                        $(this).show();
-                    } else {
-                        $(this).hide();
-                    }
-                });
-            });
-
-            $itemList.click(function(event) {
-                map.setView(new L.LatLng($(event.target).data('lat'),
-                  $(event.target).data('lon')), 16);
-                $('#map-pvz-list').hide();
+            }).catch((e) => {
+                //IDK when it can happen, but...
+                console.error('[CDEK-MAP] Render failed!', e);
+                uninstallMap(
+                  'Произошла ошибка при загрузке карты CDEK, выберите другой метод доставки');
             });
         }
-
-        function selectMarker(pvz) {
-            $('#pvz-info').val(pvz.address);
-            $('#billing_address_1').val(pvz.address);
-            $('#shipping_address_1').val(pvz.address);
-            $('#pvz-code').val(pvz.code);
-            let cityCode = $('#city-code').val();
-
-            $.ajax({
-                method: 'GET',
-                url: window.cdek_rest_map_api_path.tmp_pvz_code,
-                data: {
-                    pvz_code: pvz.code,
-                    pvz_info: pvz.address,
-                    city_code: cityCode,
-                },
-            });
-
-            $('#pvz-info').css('display', 'block');
-            $('#map-frame').css('display', 'none');
-            uninstallMap();
-        }
-
     });
 })(jQuery, L);
