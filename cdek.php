@@ -39,9 +39,8 @@ add_filter('woocommerce_shipping_methods', 'add_cdek_shipping_method');
 add_action('woocommerce_shipping_init', 'cdek_shipping_method');
 add_action('woocommerce_after_shipping_rate', 'cdek_map_display', 10, 2);
 add_action('woocommerce_checkout_process', 'is_pvz_code');
-add_filter('woocommerce_update_order_review_fragments', 'cdek_add_update_form_billing', 99);
 add_action('wp_footer', 'cdek_add_script_update_shipping_method');
-add_filter('woocommerce_checkout_fields', 'cdek_add_custom_checkout_field');
+add_filter('woocommerce_checkout_fields', 'cdek_add_custom_checkout_field', 1090);
 add_action('woocommerce_checkout_create_order', 'cdek_save_custom_checkout_field_to_order', 10, 2);
 function remove_address_field_requirement($fields) {
     $fields['billing']['billing_address_1']['required'] = false;
@@ -357,205 +356,6 @@ function getShipToDestination() {
     return $shipToDestination;
 }
 
-function cdek_override_checkout_fields($fields) {
-//    $chosen_methods = WC()->session->get('chosen_shipping_methods');
-//
-//    if (!$chosen_methods || $chosen_methods[0] === false) {
-//        return $fields;
-//    }
-//
-//    $output_array = [];
-//    preg_match('/official_cdek/', $chosen_methods[0], $output_array);
-
-//    $shippingMethodArray = explode('_', $chosen_methods[0]);
-
-//    if (!isset($fields['billing']['billing_phone'])) {
-//        $fields['billing']['billing_phone'] = [
-//            'label' => 'Телефон',
-//            'required' => true,
-//            'class' => ['form-row-wide'],
-//            'validate' => ['phone'],
-//            'autocomplete' => 'tel',
-//            'priority' => 100
-//        ];
-//    }
-
-    $shipToDestination = getShipToDestination();
-
-    if ($shipToDestination === 'billing') {
-        if (!isset($fields['billing']['billing_first_name'])) {
-            $fields['billing']['billing_first_name'] = [
-                'label'           => 'Имя',
-                'placeholder'     => '',
-                'class'           => [0 => 'form-row-first',],
-                'required'        => true,
-                'public'          => true,
-                'payment_method'  => [0 => '0',],
-                'shipping_method' => [0 => '0',],
-                'priority'        => 10,
-            ];
-        }
-
-        if (!isset($fields['billing']['billing_last_name'])) {
-            $fields['billing']['billing_last_name'] = [
-                'label'           => 'Фамилия',
-                'placeholder'     => '',
-                'class'           => [0 => 'form-row-last',],
-                'required'        => true,
-                'public'          => true,
-                'payment_method'  => [0 => '0',],
-                'shipping_method' => [0 => '0',],
-                'priority'        => 11,
-            ];
-        }
-
-        if (!isset($fields['billing']['billing_city'])) {
-            $fields['billing']['billing_city'] = [
-                'label'        => 'Населённый пункт',
-                'required'     => true,
-                'class'        => ['form-row-wide', 'address-field'],
-                'autocomplete' => 'address-level2',
-                'priority'     => 16,
-            ];
-        }
-
-        if (!isset($fields['billing']['billing_state'])) {
-            $fields['billing']['billing_state'] = [
-                'label'         => 'Область / район',
-                'required'      => true,
-                'class'         => ['form-row-wide', 'address-field'],
-                'validate'      => ['state'],
-                'autocomplete'  => 'address-level1',
-                'priority'      => 17,
-                'country_field' => "billing_country",
-            ];
-        }
-
-        if (!isset($fields['billing']['billing_address_1'])) {
-            $fields['billing']['billing_address_1'] = [
-                'label'        => 'Адрес',
-                'placeholder'  => 'Номер дома и название улицы',
-                'class'        => ['form-row-wide', 'address-field'],
-                'autocomplete' => 'address-line1',
-                'priority'     => 18,
-            ];
-        }
-
-        if (!isset($fields['billing']['billing_phone'])) {
-            $fields['billing']['billing_phone'] = [
-                'label'        => 'Телефон',
-                'placeholder'  => '',
-                'type'         => 'tel',
-                'required'     => true,
-                'public'       => true,
-                'class'        => ['form-row-wide'],
-                'autocomplete' => 'address-line1',
-                'priority'     => 19,
-            ];
-        }
-    } else {
-
-        if (!isset($fields['billing']['billing_first_name'])) {
-            $fields['billing']['billing_first_name'] = [
-                'label'           => 'Имя',
-                'placeholder'     => '',
-                'class'           => [0 => 'form-row-first',],
-                'required'        => true,
-                'public'          => true,
-                'payment_method'  => [0 => '0',],
-                'shipping_method' => [0 => '0',],
-                'priority'        => 10,
-            ];
-        }
-
-        if (!isset($fields['billing']['billing_last_name'])) {
-            $fields['billing']['billing_last_name'] = [
-                'label'           => 'Фамилия',
-                'placeholder'     => '',
-                'class'           => [0 => 'form-row-last',],
-                'required'        => true,
-                'public'          => true,
-                'payment_method'  => [0 => '0',],
-                'shipping_method' => [0 => '0',],
-                'priority'        => 11,
-            ];
-        }
-
-        if (!isset($fields['billing']['billing_phone'])) {
-            $fields['billing']['billing_phone'] = [
-                'label'        => 'Телефон',
-                'placeholder'  => '',
-                'type'         => 'tel',
-                'required'     => true,
-                'public'       => true,
-                'class'        => ['form-row-wide'],
-                'autocomplete' => 'address-line1',
-                'priority'     => 19,
-            ];
-        }
-
-//        if (!isset($fields['shipping']['shipping_first_name'])) {
-//            $fields['shipping']['shipping_first_name'] = [
-//                'label' => 'Имя',
-//                'placeholder' => '',
-//                'class' => [0 => 'form-row-first',],
-//                'required' => true,
-//                'public' => true,
-//                'payment_method' => [0 => '0',],
-//                'shipping_method' => [0 => '0',],
-//                'priority' => 10,
-//            ];
-//        }
-//
-//        if (!isset($fields['shipping']['shipping_last_name'])) {
-//            $fields['shipping']['shipping_last_name'] = [
-//                'label' => 'Фамилия',
-//                'placeholder' => '',
-//                'class' => [0 => 'form-row-last',],
-//                'required' => true,
-//                'public' => true,
-//                'payment_method' => [0 => '0',],
-//                'shipping_method' => [0 => '0',],
-//                'priority' => 11,
-//            ];
-//        }
-
-        if (!isset($fields['shipping']['shipping_city'])) {
-            $fields['shipping']['shipping_city'] = [
-                'label'        => 'Населённый пункт',
-                'required'     => true,
-                'class'        => ['form-row-wide', 'address-field'],
-                'autocomplete' => 'address-level2',
-                'priority'     => 16,
-            ];
-        }
-
-        if (!isset($fields['shipping']['shipping_state'])) {
-            $fields['shipping']['shipping_state'] = [
-                'label'         => 'Область / район',
-                'required'      => true,
-                'class'         => ['form-row-wide', 'address-field'],
-                'validate'      => ['state'],
-                'autocomplete'  => 'address-level1',
-                'priority'      => 17,
-                'country_field' => "billing_country",
-            ];
-        }
-
-        if (!isset($fields['shipping']['shipping_address_1'])) {
-            $fields['shipping']['shipping_address_1'] = [
-                'label'        => 'Адрес',
-                'placeholder'  => 'Номер дома и название улицы',
-                'class'        => ['form-row-wide', 'address-field'],
-                'autocomplete' => 'address-line1',
-                'priority'     => 18,
-            ];
-        }
-    }
-
-    return $fields;
-}
-
 function cdek_add_script_update_shipping_method() {
     if (is_checkout()) {
         ?>
@@ -854,14 +654,30 @@ function isCdekShippingMethod($order) {
     }
     $shippingMethod   = array_shift($shippingMethodArray);
     $shippingMethodId = $shippingMethod->get_method_id();
-    if ($shippingMethodId === 'official_cdek') {
-        return true;
-    }
 
-    return false;
+    return $shippingMethodId === 'official_cdek';
 }
 
 function cdek_add_custom_checkout_field($fields) {
+
+    $checkout = WC()->checkout();
+
+    $originalFields = $checkout->get_checkout_fields('billing');
+
+    //Восстанавливаем требуемые поля для чекаута
+    foreach (
+        [
+            'billing_first_name',
+            'billing_last_name',
+            'billing_city',
+            'billing_state',
+            'billing_phone',
+            'billing_address_1',
+        ] as $requiredField
+    ) {
+        $fields['billing'][$requiredField] = $fields['billing'][$requiredField] ?? $originalFields[$requiredField];
+    }
+
     $cdekShippingSettings = Helper::getSettingDataPlugin();
     if ($cdekShippingSettings['international_mode'] === 'yes') {
         $fields['billing']['passport_series']        = [
