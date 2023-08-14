@@ -11,6 +11,7 @@
  * WC tested up to: 7.0
  */
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Cdek\CallCourier;
 use Cdek\CdekApi;
 use Cdek\CreateOrder;
@@ -51,6 +52,7 @@ function remove_address_field_requirement($fields) {
 
     return $fields;
 }
+
 
 add_filter('woocommerce_checkout_fields', 'remove_address_field_requirement');
 
@@ -485,7 +487,7 @@ function add_cdek_shipping_method($methods) {
 
 function add_custom_order_meta_box() {
     global $post;
-    if ($post && $post->post_type === 'shop_order') {
+    if ($post && OrderUtil::is_order( $post->ID, wc_get_order_types() )) {
         $order_id = $post->ID;
         $order    = wc_get_order($order_id);
         if (isCdekShippingMethod($order)) {
@@ -500,6 +502,7 @@ function add_custom_order_meta_box() {
                 //Сбор данных
                 $orderWP       = $order->get_id();
                 $postOrderData = OrderMetaData::getMetaByOrderId($orderWP);
+
                 $orderNumber   = getOrderNumber($postOrderData);
                 $orderUuid     = getOrderUuid($postOrderData);
                 $items         = getItems($order);
