@@ -16,12 +16,12 @@ namespace Cdek\UI {
                 return;
             }
 
-            $resp    = (new WP_Http())->request("https://api-maps.yandex.ru/2.1?apikey=$apiKey&lang=ru_RU", [
-                    'method'  => 'GET',
-                    'headers' => [
-                        "Content-Type" => 'application/json',
-                    ],
-                ]);
+            $resp = (new WP_Http())->request("https://api-maps.yandex.ru/2.1?apikey=$apiKey&lang=ru_RU", [
+                'method'  => 'GET',
+                'headers' => [
+                    "Content-Type" => 'application/json',
+                ],
+            ]);
 
             if ($resp['response']['code'] === 200) {
                 wp_enqueue_script('cdek-admin-yandex-api', "https://api-maps.yandex.ru/2.1?apikey=$apiKey&lang=ru_RU");

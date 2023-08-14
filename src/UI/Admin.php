@@ -27,7 +27,6 @@ namespace Cdek\UI {
             wp_localize_script('cdek-admin-create-order', 'cdek_rest_order_api_path', [
                 'create_order' => rest_url('/cdek/v1/create-order'),
             ]);
-
         }
 
         public static function registerStyles(): void {

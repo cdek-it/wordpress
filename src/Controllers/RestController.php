@@ -12,6 +12,7 @@ namespace Cdek\Controllers {
     use Cdek\Enums\BarcodeFormat;
     use Cdek\Helper;
     use WP_REST_Request;
+    use WP_REST_Server;
 
     class RestController {
         public static function checkAuth(): string {
@@ -44,14 +45,14 @@ namespace Cdek\Controllers {
 
             foreach ($order->related_entities as $entity) {
                 if ($entity->uuid === $waybill->entity->uuid) {
-                    $result = $api->getWaybillByLink($entity->url);
+                    $result = $api->getFileByLink($entity->url);
                     header("Content-type:application/pdf");
                     echo $result;
                     exit();
                 }
             }
 
-            $result = $api->getWaybillByLink(end($order->related_entities)->url);
+            $result = $api->getFileByLink(end($order->related_entities)->url);
             header("Content-type:application/pdf");
             echo $result;
             exit();
@@ -74,7 +75,7 @@ namespace Cdek\Controllers {
                     if ($entity['type'] === 'barcode' && isset($entity['url'])) {
                         $barcodeInfo = json_decode($api->getBarcode($entity['uuid']), true);
 
-                        if ($barcodeInfo['entity']['format'] !== BarcodeFormat::getByIndex(Helper::getSettingDataPlugin()['barcode_format'])) {
+                        if ($barcodeInfo['entity']['format'] !== BarcodeFormat::getByIndex(Helper::getActualShippingMethod()->get_option('barcode_format'))) {
                             continue;
                         }
 

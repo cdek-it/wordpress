@@ -25,19 +25,22 @@ class CdekApi {
     protected $clientSecret;
     protected WC_Shipping_Method $deliveryMethod;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->deliveryMethod = Helper::getActualShippingMethod();
-        $this->apiUrl = $this->getApiUrl();
-        $this->httpClient = new HttpClientWrapper();
+        $this->apiUrl         = $this->getApiUrl();
+        $this->httpClient     = new HttpClient();
 
         if ($this->deliveryMethod->get_option('test_mode') === 'yes') {
-            $this->clientId = CDEK_TEST_CLIENT_ID;
-            $this->clientSecret = CDEK_TEST_CLIENT_SECRET;
+            $this->clientId     = Config::TEST_CLIENT_ID;
+            $this->clientSecret = Config::TEST_CLIENT_SECRET;
         } else {
-            $this->clientId = $this->deliveryMethod->get_option('client_id');
+            $this->clientId     = $this->deliveryMethod->get_option('client_id');
             $this->clientSecret = $this->deliveryMethod->get_option('client_secret');
         }
+    }
+
+    private function getApiUrl() {
+        return $this->deliveryMethod->get_option('test_mode') === 'yes' ? Config::TEST_API_URL : Config::API_URL;
     }
 
     public function checkAuth(): bool {
@@ -79,26 +82,25 @@ class CdekApi {
         return HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['cdek_number' => $number]);
     }
 
-    public function createOrder($param)
-    {
-        $url = $this->apiUrl . self::ORDERS_PATH;
-        $param['developer_key'] = '7wV8tk&r6VH4zK:1&0uDpjOkvM~qngLl';
-        $param['date_invoice'] = date('Y-m-d');
-        $param['shipper_name'] = $this->deliveryMethod->get_option('shipper_name');
-        $param['shipper_address'] = $this->deliveryMethod->get_option('shipper_address');
-        $param['sender']['passport_series'] = $this->deliveryMethod->get_option('passport_series');
-        $param['sender']['passport_number'] = $this->deliveryMethod->get_option('passport_number');
+    public function createOrder($param) {
+        $url                                       = $this->apiUrl.self::ORDERS_PATH;
+        $param['developer_key']                    = Config::DEV_KEY;
+        $param['date_invoice']                     = date('Y-m-d');
+        $param['shipper_name']                     = $this->deliveryMethod->get_option('shipper_name');
+        $param['shipper_address']                  = $this->deliveryMethod->get_option('shipper_address');
+        $param['sender']['passport_series']        = $this->deliveryMethod->get_option('passport_series');
+        $param['sender']['passport_number']        = $this->deliveryMethod->get_option('passport_number');
         $param['sender']['passport_date_of_issue'] = $this->deliveryMethod->get_option('passport_date_of_issue');
-        $param['sender']['passport_organization'] = $this->deliveryMethod->get_option('passport_organization');
-        $param['sender']['tin'] = $this->deliveryMethod->get_option('tin');
+        $param['sender']['passport_organization']  = $this->deliveryMethod->get_option('passport_organization');
+        $param['sender']['tin']                    = $this->deliveryMethod->get_option('tin');
         $param['sender']['passport_date_of_birth'] = $this->deliveryMethod->get_option('passport_date_of_birth');
-        $param['seller'] = ['address' => $this->deliveryMethod->get_option('seller_address')];
+        $param['seller']                           = ['address' => $this->deliveryMethod->get_option('seller_address')];
 
         if (Tariff::isTariffFromStoreByCode($param['tariff_code'])) {
             $param['shipment_point'] = $this->deliveryMethod->get_option('pvz_code');
         } else {
             $param['from_location'] = [
-                'code' => $this->deliveryMethod->get_option('city_code_value'),
+                'code'    => $this->deliveryMethod->get_option('city_code_value'),
                 'address' => $this->deliveryMethod->get_option('street'),
             ];
         }
@@ -118,8 +120,10 @@ class CdekApi {
     }
 
     public function createBarcode($orderUuid) {
-        return HttpClient::sendCdekRequest($this->apiUrl.self::BARCODE_PATH, 'POST', $this->getToken(),
-            json_encode(['orders' => ['order_uuid' => $orderUuid], 'format' => BarcodeFormat::getByIndex($this->adminSetting['barcode_format'])]));
+        return HttpClient::sendCdekRequest($this->apiUrl.self::BARCODE_PATH, 'POST', $this->getToken(), json_encode([
+            'orders' => ['order_uuid' => $orderUuid],
+            'format' => BarcodeFormat::getByIndex($this->deliveryMethod->get_option('barcode_format', 0)),
+        ]));
     }
 
     public function getBarcode($uuid) {
@@ -228,7 +232,7 @@ class CdekApi {
     }
 
     public function getPvzCodeByPvzAddressNCityCode($pvzInfo, $cityCode) {
-        $pvz = $this->getPvz($cityCode);
+        $pvz = json_decode($this->getPvz($cityCode), true);
         if ($pvz['success']) {
             foreach ($pvz['pvz'] as $point) {
                 if ($point['address'] === $pvzInfo) {
@@ -238,11 +242,6 @@ class CdekApi {
         }
 
         return false;
-    }
-
-    private function getApiUrl()
-    {
-        return $this->deliveryMethod->get_option('test_mode') === 'yes' ? CDEK_API_URL_TEST : CDEK_API_URL;
     }
 
     public function getPvz($city, $weight = 0, $admin = false) {

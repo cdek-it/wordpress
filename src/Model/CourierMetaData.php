@@ -17,6 +17,6 @@ class CourierMetaData {
     }
 
     public static function getMetaByOrderId($orderId) {
-        return wc_get_order($orderId)->get_meta('courier_data') ?? [];
+        return wc_get_order($orderId)->get_meta('courier_data') ?: [];
     }
 }
