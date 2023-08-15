@@ -6,7 +6,6 @@ use Cdek\Enums\BarcodeFormat;
 use Cdek\Model\Tariff;
 use Cdek\Transport\HttpClient;
 use WC_Shipping_Method;
-use WP_Http;
 
 class CdekApi {
     protected const TOKEN_PATH = "oauth/token";
@@ -19,7 +18,6 @@ class CdekApi {
     protected const CALL_COURIER = "intakes";
 
     protected $apiUrl;
-    protected $adminSetting;
 
     protected $clientId;
     protected $clientSecret;
@@ -105,25 +103,24 @@ class CdekApi {
             ];
         }
 
-        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), json_encode($param));
+        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), $param);
     }
 
     public function getFileByLink($link) {
-        return HttpClient::sendCdekRequest($link, 'GET', $this->getToken(), '', true);
+        return HttpClient::sendCdekRequest($link, 'GET', $this->getToken(), null, true);
     }
 
     public function createWaybill($orderUuid) {
         $url = $this->apiUrl.self::WAYBILL_PATH;
 
-        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(),
-            json_encode(['orders' => ['order_uuid' => $orderUuid]]));
+        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), ['orders' => ['order_uuid' => $orderUuid]]);
     }
 
     public function createBarcode($orderUuid) {
-        return HttpClient::sendCdekRequest($this->apiUrl.self::BARCODE_PATH, 'POST', $this->getToken(), json_encode([
+        return HttpClient::sendCdekRequest($this->apiUrl.self::BARCODE_PATH, 'POST', $this->getToken(), [
             'orders' => ['order_uuid' => $orderUuid],
             'format' => BarcodeFormat::getByIndex($this->deliveryMethod->get_option('barcode_format', 0)),
-        ]));
+        ]);
     }
 
     public function getBarcode($uuid) {
@@ -139,7 +136,7 @@ class CdekApi {
     public function calculate($deliveryParam, $tariff) {
         $url = $this->apiUrl.self::CALC_PATH;
 
-        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), json_encode([
+        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), [
             'tariff_code'   => $tariff,
             'from_location' => [
                 'code' => $this->deliveryMethod->get_option('city_code_value'),
@@ -155,7 +152,7 @@ class CdekApi {
             ],
             'services'      => array_key_exists('selected_services',
                 $deliveryParam) ? $deliveryParam['selected_services'] : [],
-        ]));
+        ]);
     }
 
     public function getRegion($city = null) {
@@ -216,32 +213,11 @@ class CdekApi {
         return trim($state);
     }
 
-    public function getCityCode($city, $postalCode) {
-        $url      = $this->apiUrl.self::REGION_PATH;
-        $cityData = json_decode(HttpClient::sendCdekRequest($url, 'GET', $this->getToken(),
-            ['city' => $city, 'postal_code' => $postalCode]));
-
-        return $cityData[0]->code;
-    }
-
-    public function getCityByCode($code) {
+    public function getCityByCode($code): array {
         $url      = $this->apiUrl.self::REGION_PATH;
         $cityData = json_decode(HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['code' => $code]));
 
         return ['city' => $cityData[0]->city, 'region' => $cityData[0]->region];
-    }
-
-    public function getPvzCodeByPvzAddressNCityCode($pvzInfo, $cityCode) {
-        $pvz = $this->getPvz($cityCode);
-        if ($pvz['success']) {
-            foreach ($pvz['pvz'] as $point) {
-                if ($point['address'] === $pvzInfo) {
-                    return $point->code;
-                }
-            }
-        }
-
-        return false;
     }
 
     public function getPvz($city, $weight = 0, $admin = false): array {
@@ -291,20 +267,14 @@ class CdekApi {
     }
 
     public function callCourier($param) {
-        $url = $this->apiUrl.self::CALL_COURIER;
-
-        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), json_encode($param));
+        return HttpClient::sendCdekRequest($this->apiUrl.self::CALL_COURIER, 'POST', $this->getToken(), $param);
     }
 
     public function courierInfo($uuid) {
-        $url = $this->apiUrl.self::CALL_COURIER.'/'.$uuid;
-
-        return HttpClient::sendCdekRequest($url, 'GET', $this->getToken());
+        return HttpClient::sendCdekRequest($this->apiUrl.self::CALL_COURIER.'/'.$uuid, 'GET', $this->getToken());
     }
 
     public function callCourierDelete($uuid) {
-        $url = $this->apiUrl.self::CALL_COURIER.'/'.$uuid;
-
-        return HttpClient::sendCdekRequest($url, 'DELETE', $this->getToken());
+        return HttpClient::sendCdekRequest($this->apiUrl.self::CALL_COURIER.'/'.$uuid, 'DELETE', $this->getToken());
     }
 }

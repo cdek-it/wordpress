@@ -7,7 +7,7 @@
 
 /** @var $fromDoor */
 
-use Cdek\Helper;
+use Cdek\Helpers\UrlHelper;
 
 ?>
 <div id="cdek-info-order" <?php if (!$orderNumber) { ?>style="display: none" <?php } ?>>
@@ -23,10 +23,10 @@ use Cdek\Helper;
                     <a id="cdek-order-barcode">ШК будет доступна позже</a>
                 <?php else: ?>
                     <a id="cdek-order-waybill" target="_blank"
-                       href="<?= Helper::buildRestUrl('cdek/v1/get-waybill', ['number' => $orderUuid], '') ?>">Получить
+                       href="<?= UrlHelper::buildRest('/get-waybill', ['number' => $orderUuid], '') ?>">Получить
                         квитанцию</a>
                     <a id="cdek-order-barcode" target="_blank"
-                       href="<?= Helper::buildRestUrl("order/$orderNumber/barcode") ?>">Получить ШК</a>
+                       href="<?= UrlHelper::buildRest("order/$orderNumber/barcode") ?>">Получить ШК</a>
                     <p id="cdek-order-courier">
                         Вызвать курьера</p>
                 <?php endif; ?>

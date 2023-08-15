@@ -7,6 +7,7 @@ namespace {
 
 namespace Cdek\UI {
 
+    use Cdek\Helpers\UrlHelper;
     use Cdek\Loader;
 
     class Admin {
@@ -14,18 +15,18 @@ namespace Cdek\UI {
             wp_enqueue_script('cdek-admin-delivery', Loader::getPluginUrl().'assets/js/delivery.js', ['jquery'],
                 Loader::getPluginVersion(), true);
             wp_localize_script('cdek-admin-delivery', 'cdek_rest_delivery_api_path', [
-                'get_pvz'             => rest_url('/cdek/v1/get-pvz'),
-                'create_order'        => rest_url('/cdek/v1/create-order'),
-                'delete_order'        => rest_url('/cdek/v1/delete-order'),
-                'get_region'          => rest_url('/cdek/v1/get-region'),
-                'call_courier'        => rest_url('/cdek/v1/call-courier'),
-                'call_courier_delete' => rest_url('/cdek/v1/call-courier-delete'),
+                'get_pvz'             => UrlHelper::buildRest('/get-pvz'),
+                'create_order'        => UrlHelper::buildRest('/create-order'),
+                'delete_order'        => UrlHelper::buildRest('/delete-order'),
+                'get_region'          => UrlHelper::buildRest('/get-region'),
+                'call_courier'        => UrlHelper::buildRest('/call-courier'),
+                'call_courier_delete' => UrlHelper::buildRest('/call-courier-delete'),
             ]);
 
-            wp_enqueue_script('cdek-admin-create-order', Loader::getPluginUrl().'assets/js/create-order.js',
-                ['jquery'], Loader::getPluginVersion(), true);
+            wp_enqueue_script('cdek-admin-create-order', Loader::getPluginUrl().'assets/js/create-order.js', ['jquery'],
+                Loader::getPluginVersion(), true);
             wp_localize_script('cdek-admin-create-order', 'cdek_rest_order_api_path', [
-                'create_order' => rest_url('/cdek/v1/create-order'),
+                'create_order' => UrlHelper::buildRest('/create-order'),
             ]);
         }
 

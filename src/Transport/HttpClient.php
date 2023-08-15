@@ -10,9 +10,15 @@ namespace Cdek\Transport {
     use WP_Http;
 
     class HttpClient {
-        public static function sendCdekRequest($url, $method, $token, $data = null, $plain = false) {
+        public static function sendCdekRequest(
+            string $url,
+            string $method,
+            string $token,
+            array $data = null,
+            bool $plain = false
+        ) {
             return self::sendRequest($url, $method, [
-                'body'    => $data,
+                'body'    => json_encode($data),
                 'headers' => [
                     "Content-Type"  => 'application/json',
                     "Authorization" => $token,
@@ -20,7 +26,7 @@ namespace Cdek\Transport {
             ], $plain);
         }
 
-        public static function sendRequest($url, $method, $config = [], $plain = false) {
+        public static function sendRequest(string $url, string $method, array $config = [], bool $plain = false) {
             $resp = (new WP_Http())->request($url, array_merge($config, ['method' => $method]));
 
             if ($plain || is_array($resp)) {

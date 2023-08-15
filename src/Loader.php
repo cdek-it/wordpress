@@ -8,6 +8,7 @@ namespace {
 
 namespace Cdek {
 
+    use Automattic\WooCommerce\Utilities\FeaturesUtil;
     use Cdek\Controllers\CourierController;
     use Cdek\Controllers\LocationController;
     use Cdek\Controllers\OrderController;
@@ -61,6 +62,14 @@ namespace Cdek {
             }
         }
 
+        private static function declareCompatibility(): void {
+            add_action( 'before_woocommerce_init', static function() {
+                if ( class_exists( FeaturesUtil::class ) ) {
+                    FeaturesUtil::declare_compatibility( 'custom_order_tables', self::$pluginMainFile, true );
+                }
+            } );
+        }
+
         public function __invoke(string $pluginMainFile): void {
             self::$pluginMainFile = $pluginMainFile;
             add_action('activate_cdek/cdek.php', [__CLASS__, 'activate']);
@@ -76,16 +85,13 @@ namespace Cdek {
 
             self::$pluginVersion = get_file_data(self::$pluginMainFile, ['Version'])[0];
 
+            self::declareCompatibility();
+
             add_action('rest_api_init', new RestController);
             add_action('rest_api_init', new OrderController);
             add_action('rest_api_init', new CourierController);
             add_action('rest_api_init', new LocationController);
 
-            add_action( 'before_woocommerce_init', function() {
-                if ( class_exists( \Automattic\WooCommerce\Utilities\FeaturesUtil::class ) ) {
-                    \Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
-                }
-            } );
             add_action('woocommerce_shipping_methods',
                 static fn($methods) => array_merge($methods, ['official_cdek' => CdekShippingMethod::class]));
 

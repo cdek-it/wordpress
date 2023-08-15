@@ -12,19 +12,12 @@ namespace Cdek\Controllers {
     use Cdek\Enums\BarcodeFormat;
     use Cdek\Helper;
     use WP_REST_Request;
+    use WP_REST_Response;
     use WP_REST_Server;
 
     class RestController {
-        public static function checkAuth(): string {
-            $api   = new CdekApi;
-            $check = $api->checkAuth();
-            if ($check) {
-                update_option('cdek_auth_check', '1');
-            } else {
-                update_option('cdek_auth_check', '0');
-            }
-
-            return json_encode(['state' => $check]);
+        public static function checkAuth(): WP_REST_Response {
+            return new WP_REST_Response(['state' => (new CdekApi)->checkAuth()], 200);
         }
 
         public static function getWaybill($data): void {
@@ -58,7 +51,7 @@ namespace Cdek\Controllers {
             exit();
         }
 
-        public static function getBarcode(WP_REST_Request $request) {
+        public static function getBarcode(WP_REST_Request $request): void {
             $api = new CdekApi;
 
             $order = json_decode($api->getOrderByCdekNumber($request->get_param('id')), true);
@@ -121,37 +114,37 @@ namespace Cdek\Controllers {
         }
 
         public function __invoke() {
-            register_rest_route('cdek/v1', '/check-auth', [
+            register_rest_route(Config::DELIVERY_NAME, '/check-auth', [
                 'methods'             => 'GET',
                 'callback'            => [__CLASS__, 'checkAuth'],
                 'permission_callback' => '__return_true',
             ]);
 
-            register_rest_route('cdek/v1', '/get-region', [
+            register_rest_route(Config::DELIVERY_NAME, '/get-region', [
                 'methods'             => 'GET',
                 'callback'            => 'get_region',
                 'permission_callback' => '__return_true',
             ]);
 
-            register_rest_route('cdek/v1', '/get-city-code', [
+            register_rest_route(Config::DELIVERY_NAME, '/get-city-code', [
                 'methods'             => 'GET',
                 'callback'            => 'get_city_code',
                 'permission_callback' => '__return_true',
             ]);
 
-            register_rest_route('cdek/v1', '/get-pvz', [
+            register_rest_route(Config::DELIVERY_NAME, '/get-pvz', [
                 'methods'             => 'GET',
                 'callback'            => 'get_pvz',
                 'permission_callback' => '__return_true',
             ]);
 
-                register_rest_route('cdek/v1', '/get-waybill', [
+                register_rest_route(Config::DELIVERY_NAME, '/get-waybill', [
                     'methods'             => 'GET',
                     'callback'            => [__CLASS__, 'getWaybill'],
                     'permission_callback' => '__return_true',
                 ]);
 
-                register_rest_route('cdek/v1', '/set-pvz-code-tmp', [
+                register_rest_route(Config::DELIVERY_NAME, '/set-pvz-code-tmp', [
                     'methods'             => 'GET',
                     'callback'            => 'set_pvz_code_tmp',
                     'permission_callback' => '__return_true',

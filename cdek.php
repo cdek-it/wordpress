@@ -12,17 +12,18 @@
  */
 
 use Automattic\WooCommerce\Utilities\OrderUtil;
-use Cdek\CallCourier;
+use Cdek\Actions\CallCourier;
+use Cdek\Actions\CreateOrder;
 use Cdek\CdekApi;
 use Cdek\Config;
-use Cdek\CreateOrder;
 use Cdek\Helper;
 use Cdek\Helpers\CheckoutHelper;
+use Cdek\Helpers\StringHelper;
+use Cdek\Helpers\WeightCalc;
 use Cdek\Loader;
 use Cdek\Model\CourierMetaData;
 use Cdek\Model\OrderMetaData;
 use Cdek\Model\Tariff;
-use Cdek\WeightCalc;
 
 function_exists('add_action') or exit();
 
@@ -160,7 +161,7 @@ function get_packages($orderId, $packageData, $currency) {
     foreach ($packageData as $key => $package) {
         $data     = get_package_items($package->items, $orderId, $currency);
         $result[] = [
-            'number' => $orderId.'_'.Helper::generateRandomString(5),
+            'number' => $orderId.'_'.StringHelper::generateRandom(5),
             'length' => $package->length,
             'width'  => $package->width,
             'height' => $package->height,

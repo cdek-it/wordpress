@@ -3,7 +3,7 @@
 namespace Cdek;
 
 use Cdek\Enums\BarcodeFormat;
-use Cdek\Model\Service;
+use Cdek\Helpers\DeliveryCalc;
 use Cdek\Model\Tariff;
 use WC_Shipping_Method;
 

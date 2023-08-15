@@ -7,6 +7,7 @@ namespace {
 
 namespace Cdek\UI {
 
+    use Cdek\Helpers\UrlHelper;
     use Cdek\Loader;
 
     class Frontend {
@@ -22,7 +23,7 @@ namespace Cdek\UI {
                     'office' => Loader::getPluginUrl().'assets/img/point.svg',
                     'postamat' => Loader::getPluginUrl().'assets/img/postamat.svg',
                 ],
-                'tmp_pvz_code' => rest_url('/cdek/v1/set-pvz-code-tmp'),
+                'tmp_pvz_code' => UrlHelper::buildRest('/set-pvz-code-tmp'),
             ]);
         }
 
