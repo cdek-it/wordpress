@@ -245,8 +245,6 @@
                         $('#cdek-create-order-form').hide();
                         $('#cdek-order-number').html(`№ <b>${response.code}</b>`);
                         $('#cdek-order-number-input').val(response.code);
-                        $('#cdek-order-waybill').attr('href', response.waybill);
-                        $('#cdek-order-barcode').attr('href', response.barcode);
                         $('#cdek-info-order').show();
                     }
                 },

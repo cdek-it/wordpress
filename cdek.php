@@ -14,6 +14,7 @@
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Cdek\CallCourier;
 use Cdek\CdekApi;
+use Cdek\Config;
 use Cdek\CreateOrder;
 use Cdek\Helper;
 use Cdek\Helpers\CheckoutHelper;
@@ -212,7 +213,7 @@ function get_package_items($items, $orderId, $currency) {
 function cdek_map_display($shippingMethodCurrent) {
     if (is_checkout() && isTariffTypeFromStore($shippingMethodCurrent)) {
         $cdekShippingMethod = Helper::getActualShippingMethod();
-        $layerMap             = $cdekShippingMethod->get_option('map_layer');
+        $layerMap           = $cdekShippingMethod->get_option('map_layer');
         if ($cdekShippingMethod->get_option('yandex_map_api_key') === "") {
             $layerMap = "0";
         }
@@ -304,7 +305,7 @@ function cdek_woocommerce_new_order_action($order_id, $order) {
         $tariffId = getTariffCodeCdekShippingMethodByOrder($order);
         $cityCode = CheckoutHelper::getValueFromCurrentSession('city_code');
 
-        $currency = function_exists('wcml_get_woocommerce_currency_option') ? get_woocommerce_currency() :'RUB';
+        $currency = function_exists('wcml_get_woocommerce_currency_option') ? get_woocommerce_currency() : 'RUB';
 
         $api = new CdekApi;
         if (empty($cityCode)) {
@@ -343,7 +344,7 @@ function cdek_woocommerce_new_order_action($order_id, $order) {
 
 function add_custom_order_meta_box() {
     global $post;
-    if ($post && OrderUtil::is_order( $post->ID, wc_get_order_types() )) {
+    if ($post && OrderUtil::is_order($post->ID, wc_get_order_types())) {
         $order_id = $post->ID;
         $order    = wc_get_order($order_id);
         if (isCdekShippingMethod($order)) {
@@ -605,4 +606,42 @@ function cdek_save_custom_checkout_field_to_order($order, $data) {
     if (isset($_POST['passport_date_of_birth'])) {
         $order->update_meta_data('_passport_date_of_birth', sanitize_text_field($_POST['passport_date_of_birth']));
     }
+}
+
+function is_pvz_code() {
+    $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
+
+    if (strpos($shippingMethodIdSelected, Config::DELIVERY_NAME) !== false) {
+        $api      = new CdekApi();
+        $cityCode = $api->getCityCodeByCityName(CheckoutHelper::getValueFromCurrentSession('city'),
+            CheckoutHelper::getValueFromCurrentSession('state'));
+        if ($cityCode === -1) {
+            wc_add_notice(__('Не удалось определить населенный пункт.'), 'error');
+        }
+
+        $tariffCode = getTariffCodeByShippingMethodId($shippingMethodIdSelected);
+        if (checkTariffFromStoreByTariffCode($tariffCode)) {
+            if (empty(CheckoutHelper::getValueFromCurrentSession('pvz_code'))) {
+                $pvzCodeTmp = WC()->session->get('pvz_code');
+                if (empty($pvzCodeTmp[0]['pvz_code'])) {
+                    wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
+                } else {
+                    $_POST['pvz_code']    = $pvzCodeTmp[0]['pvz_code'];
+                    $_POST['pvz_address'] = $pvzCodeTmp[0]['pvz_address'];
+                    $_POST['city_code']   = $pvzCodeTmp[0]['city_code'];
+                    WC()->session->set('pvz_code', null);
+                }
+            }
+        } elseif (empty(CheckoutHelper::getValueFromCurrentSession('address_1'))) {
+            wc_add_notice(__('Нет адреса отправки.'), 'error');
+        }
+    }
+}
+
+function getTariffCodeByShippingMethodId($shippingMethodId) {
+    return explode('_', $shippingMethodId)[2];
+}
+
+function checkTariffFromStoreByTariffCode($tariffCode): bool {
+    return (bool) Tariff::getTariffTypeToByCode($tariffCode);
 }

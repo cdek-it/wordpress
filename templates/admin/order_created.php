@@ -18,13 +18,18 @@ use Cdek\Helper;
                 <p id="cdek-order-number" data-number="<?= $orderNumber ?>">№ <b><?= $orderNumber ?></b>
                 </p>
                 <input id="cdek-order-number-input" type="hidden" value="<?= $orderNumber ?>">
-                <a id="cdek-order-waybill" target="_blank"
-                   href="<?= Helper::buildRestUrl('cdek/v1/get-waybill', ['number' => $orderUuid], '') ?>">Получить
-                    квитанцию</a>
-                <a id="cdek-order-barcode" target="_blank"
-                   href="<?= Helper::buildRestUrl("order/$orderNumber/barcode") ?>">Получить ШК</a>
-                <p id="cdek-order-courier" <?php if (!empty($courierNumber)) { ?>style="display: none" <?php } ?>>
-                    Вызвать курьера</p>
+                <?php if (empty($orderNumber)): ?>
+                    <a id="cdek-order-waybill">Квитанция будет доступна позже</a>
+                    <a id="cdek-order-barcode">ШК будет доступна позже</a>
+                <?php else: ?>
+                    <a id="cdek-order-waybill" target="_blank"
+                       href="<?= Helper::buildRestUrl('cdek/v1/get-waybill', ['number' => $orderUuid], '') ?>">Получить
+                        квитанцию</a>
+                    <a id="cdek-order-barcode" target="_blank"
+                       href="<?= Helper::buildRestUrl("order/$orderNumber/barcode") ?>">Получить ШК</a>
+                    <p id="cdek-order-courier">
+                        Вызвать курьера</p>
+                <?php endif; ?>
             </div>
 
             <div id="cdek-courier-result-block"
