@@ -49,8 +49,7 @@
                               data: {
                                   city: event.target.value,
                               },
-                              success: function(response) {
-                                  let regions = JSON.parse(response);
+                              success: function(regions) {
                                   if (regions.length > 0) {
                                       for (let i = 0; i < regions.length; i++) {
                                           if (regions[i].region ===
@@ -154,15 +153,14 @@
                             city_code: cityCode, admin: 1,
                         },
                         success: function(response) {
-                            let resp = JSON.parse(response);
-                            if (resp.success) {
+                            if (response.success) {
                                 cityCodePvzReceived = cityCode;
-                                setMarker(resp.pvz);
+                                setMarker(response.pvz);
                             } else {
                                 $('#no_delivery_points_in_city').remove();
                                 $('#woocommerce_official_cdek_city')
                                   .before(
-                                    `<p id="no_delivery_points_in_city" className="description">${resp.message}</p>`);
+                                    `<p id="no_delivery_points_in_city" className="description">${response.message}</p>`);
                             }
                         },
                         error: function(xhr, status, error) {

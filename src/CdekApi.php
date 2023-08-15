@@ -162,7 +162,7 @@ class CdekApi {
     public function getRegion($city = null) {
         $url = $this->apiUrl.self::REGION_PATH;
 
-        return HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['city' => $city]);
+        return json_decode(HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['city' => $city]), true);
     }
 
     public function getCityCodeByCityName($city, $state): int {
