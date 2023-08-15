@@ -23,7 +23,7 @@ use Cdek\Helpers\UrlHelper;
                     <a id="cdek-order-barcode">ШК будет доступна позже</a>
                 <?php else: ?>
                     <a id="cdek-order-waybill" target="_blank"
-                       href="<?= UrlHelper::buildRest('/get-waybill', ['number' => $orderUuid], '') ?>">Получить
+                       href="<?= UrlHelper::buildRest('/get-waybill', ['number' => $orderUuid]) ?>">Получить
                         квитанцию</a>
                     <a id="cdek-order-barcode" target="_blank"
                        href="<?= UrlHelper::buildRest("order/$orderNumber/barcode") ?>">Получить ШК</a>
