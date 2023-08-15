@@ -53,8 +53,7 @@
                 },
                 success: function (response) {
                     if (!response.state) {
-                        $('#cdek-create-order-error').text(response.message);
-                        $('#cdek-create-order-error').show();
+                        $('#cdek-create-order-error').text(response.message).show();
                     } else {
                         if (response.door) {
                             $('#cdek-courier-result-block').hide()

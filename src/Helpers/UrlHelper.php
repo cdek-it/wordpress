@@ -17,6 +17,8 @@ namespace Cdek\Helpers {
         ): string {
             $prefix = substr($prefix, -1) === '/' ? $prefix : "$prefix/";
 
+            $route = substr($route, 0, 1) === '/' ? substr($route, 1) : $route;
+
             $args['_wpnonce'] = wp_create_nonce('wp_rest');
 
             return add_query_arg($args, rest_url($prefix.$route));
