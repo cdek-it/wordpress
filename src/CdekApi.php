@@ -127,6 +127,10 @@ class CdekApi {
         return HttpClient::sendCdekRequest($this->apiUrl.self::BARCODE_PATH.$uuid, 'GET', $this->getToken());
     }
 
+    public function getWaybill($uuid) {
+        return HttpClient::sendCdekRequest($this->apiUrl.self::WAYBILL_PATH.$uuid, 'GET', $this->getToken());
+    }
+
     public function deleteOrder($uuid) {
         $url = $this->apiUrl.self::ORDERS_PATH.$uuid;
 

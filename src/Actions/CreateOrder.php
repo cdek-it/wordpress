@@ -56,8 +56,6 @@ class CreateOrder {
         return [
             'state'   => true,
             'code'    => $cdekNumber,
-            'waybill' => UrlHelper::buildRest('/get-waybill', ['number' => $orderData->entity->uuid]),
-            'barcode' => UrlHelper::buildRest("order/$cdekNumber/barcode"),
             'door'    => Tariff::isTariffFromDoorByCode($postOrderData['tariff_id']),
         ];
     }
