@@ -25,6 +25,13 @@ namespace Cdek\Controllers {
             $api   = new CdekApi;
             $order = json_decode($api->getOrderByCdekNumber($data->get_param('id')), true);
 
+            if (!isset($order['entity'])) {
+                echo 'Не удалось создать квитанцию. 
+        Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
+        и введите габариты упаковки повторно.';
+                exit();
+            }
+
             foreach ($order['related_entities'] as $entity) {
                 if ($entity['type'] === 'waybill' && isset($entity['url'])) {
                     header("Content-type:application/pdf");
@@ -85,7 +92,7 @@ namespace Cdek\Controllers {
                     if ($entity['type'] === 'barcode' && isset($entity['url'])) {
                         $barcodeInfo = json_decode($api->getBarcode($entity['uuid']), true);
 
-                        if ($barcodeInfo['entity']['format'] !== BarcodeFormat::getByIndex(Helper::getActualShippingMethod()->get_option('barcode_format'))) {
+                        if ($barcodeInfo['entity']['format'] !== BarcodeFormat::getByIndex(Helper::getActualShippingMethod()->get_option('barcode_format', 0))) {
                             continue;
                         }
 
@@ -136,31 +143,6 @@ namespace Cdek\Controllers {
                 'callback'            => [__CLASS__, 'checkAuth'],
                 'permission_callback' => '__return_true',
             ]);
-
-            register_rest_route(Config::DELIVERY_NAME, '/get-region', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => 'get_region',
-                'permission_callback' => '__return_true',
-            ]);
-
-            register_rest_route(Config::DELIVERY_NAME, '/get-city-code', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => 'get_city_code',
-                'permission_callback' => '__return_true',
-            ]);
-
-            register_rest_route(Config::DELIVERY_NAME, '/get-pvz', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => 'get_pvz',
-                'permission_callback' => '__return_true',
-            ]);
-
-            register_rest_route(Config::DELIVERY_NAME, '/set-pvz-code-tmp', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => 'set_pvz_code_tmp',
-                'permission_callback' => '__return_true',
-            ]);
-
 
             register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/waybill', [
                 'methods'             => WP_REST_Server::READABLE,
