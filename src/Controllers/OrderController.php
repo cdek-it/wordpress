@@ -12,6 +12,7 @@ namespace Cdek\Controllers {
     use Cdek\Config;
     use WP_REST_Request;
     use WP_REST_Response;
+    use WP_REST_Server;
 
     class OrderController {
         public static function createOrder(WP_REST_Request $data): WP_REST_Response {
@@ -25,13 +26,13 @@ namespace Cdek\Controllers {
 
         public function __invoke() {
             register_rest_route(Config::DELIVERY_NAME, '/create-order', [
-                'methods'             => 'GET',
+                'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [__CLASS__, 'createOrder'],
                 'permission_callback' => '__return_true',
             ]);
 
             register_rest_route(Config::DELIVERY_NAME, '/delete-order', [
-                'methods'             => 'GET',
+                'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [__CLASS__, 'deleteOrder'],
                 'permission_callback' => '__return_true',
             ]);

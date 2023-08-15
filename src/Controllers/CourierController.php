@@ -13,6 +13,7 @@ namespace Cdek\Controllers {
     use Cdek\Helpers\DataWPScraber;
     use WP_REST_Request;
     use WP_REST_Response;
+    use WP_REST_Server;
 
     class CourierController {
         public static function callCourier(WP_REST_Request $data): WP_REST_Response {
@@ -43,13 +44,13 @@ namespace Cdek\Controllers {
 
         public function __invoke() {
             register_rest_route(Config::DELIVERY_NAME, '/call-courier', [
-                'methods'             => 'POST',
+                'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [__CLASS__, 'callCourier'],
                 'permission_callback' => '__return_true',
             ]);
 
             register_rest_route(Config::DELIVERY_NAME, '/call-courier-delete', [
-                'methods'             => 'GET',
+                'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [__CLASS__, 'deleteCourierCall'],
                 'permission_callback' => '__return_true',
             ]);

@@ -11,6 +11,7 @@ namespace Cdek\Controllers {
     use Cdek\Config;
     use WP_REST_Request;
     use WP_REST_Response;
+    use WP_REST_Server;
 
     class LocationController {
 
@@ -31,19 +32,19 @@ namespace Cdek\Controllers {
 
         public function __invoke() {
             register_rest_route(Config::DELIVERY_NAME, '/get-region', [
-                'methods'             => 'GET',
+                'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [__CLASS__, 'getRegion'],
                 'permission_callback' => '__return_true',
             ]);
 
             register_rest_route(Config::DELIVERY_NAME, '/get-pvz', [
-                'methods'             => 'GET',
+                'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [__CLASS__, 'getPoints'],
                 'permission_callback' => '__return_true',
             ]);
 
             register_rest_route(Config::DELIVERY_NAME, '/set-pvz-code-tmp', [
-                'methods'             => 'GET',
+                'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [__CLASS__, 'setTmpPointCode'],
                 'permission_callback' => '__return_true',
             ]);

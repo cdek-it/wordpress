@@ -115,37 +115,37 @@ namespace Cdek\Controllers {
 
         public function __invoke() {
             register_rest_route(Config::DELIVERY_NAME, '/check-auth', [
-                'methods'             => 'GET',
+                'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [__CLASS__, 'checkAuth'],
                 'permission_callback' => '__return_true',
             ]);
 
             register_rest_route(Config::DELIVERY_NAME, '/get-region', [
-                'methods'             => 'GET',
+                'methods'             => WP_REST_Server::READABLE,
                 'callback'            => 'get_region',
                 'permission_callback' => '__return_true',
             ]);
 
             register_rest_route(Config::DELIVERY_NAME, '/get-city-code', [
-                'methods'             => 'GET',
+                'methods'             => WP_REST_Server::READABLE,
                 'callback'            => 'get_city_code',
                 'permission_callback' => '__return_true',
             ]);
 
             register_rest_route(Config::DELIVERY_NAME, '/get-pvz', [
-                'methods'             => 'GET',
+                'methods'             => WP_REST_Server::READABLE,
                 'callback'            => 'get_pvz',
                 'permission_callback' => '__return_true',
             ]);
 
                 register_rest_route(Config::DELIVERY_NAME, '/get-waybill', [
-                    'methods'             => 'GET',
+                    'methods'             => WP_REST_Server::READABLE,
                     'callback'            => [__CLASS__, 'getWaybill'],
                     'permission_callback' => '__return_true',
                 ]);
 
                 register_rest_route(Config::DELIVERY_NAME, '/set-pvz-code-tmp', [
-                    'methods'             => 'GET',
+                    'methods'             => WP_REST_Server::READABLE,
                     'callback'            => 'set_pvz_code_tmp',
                     'permission_callback' => '__return_true',
                 ]);

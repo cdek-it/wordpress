@@ -8,6 +8,7 @@ namespace {
 namespace Cdek\Transport {
 
     use WP_Http;
+    use WP_REST_Server;
 
     class HttpClient {
         public static function sendCdekRequest(
@@ -25,7 +26,7 @@ namespace Cdek\Transport {
             ];
 
             if (!empty($data)) {
-                $config['body'] = json_encode($data);
+                $config['body'] = ($method === WP_REST_Server::READABLE) ? $data : json_encode($data);
             }
 
             return self::sendRequest($url, $method, $config, $plain);
