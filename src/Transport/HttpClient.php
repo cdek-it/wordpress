@@ -17,13 +17,18 @@ namespace Cdek\Transport {
             array $data = null,
             bool $plain = false
         ) {
-            return self::sendRequest($url, $method, [
-                'body'    => json_encode($data),
+            $config = [
                 'headers' => [
                     "Content-Type"  => 'application/json',
                     "Authorization" => $token,
                 ],
-            ], $plain);
+            ];
+
+            if (!empty($data)) {
+                $config['body'] = json_encode($data);
+            }
+
+            return self::sendRequest($url, $method, $config, $plain);
         }
 
         public static function sendRequest(string $url, string $method, array $config = [], bool $plain = false) {
