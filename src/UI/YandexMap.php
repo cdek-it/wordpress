@@ -8,6 +8,7 @@ namespace {
 namespace Cdek\UI {
 
     use Cdek\Helper;
+    use Cdek\Loader;
     use WP_Http;
 
     class YandexMap {
@@ -24,8 +25,8 @@ namespace Cdek\UI {
             ]);
 
             if ($resp['response']['code'] === 200) {
-                wp_enqueue_script('cdek-admin-yandex-api', "https://api-maps.yandex.ru/2.1?apikey=$apiKey&lang=ru_RU");
-                wp_enqueue_script('cdek-admin-leaflet-yandex', plugin_dir_url(__FILE__).'assets/js/lib/Yandex.js');
+                wp_enqueue_script('yandex-api', "https://api-maps.yandex.ru/2.1?apikey=$apiKey&lang=ru_RU");
+                wp_enqueue_script('leaflet-yandex', Loader::getPluginUrl().'assets/js/lib/Yandex.js', ['yandex-api', 'leaflet']);
             } else {
                 $setting = Helper::getActualShippingMethod();
                 $setting->update_option('yandex_map_api_key', '');
