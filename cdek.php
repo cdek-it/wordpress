@@ -7,8 +7,8 @@
  * Requires at least: 6.0
  * Requires PHP:      7.2
  * Author:            CDEK IT
- * WC requires at least: 6.0
- * WC tested up to: 7.0
+ * WC requires at least: 6.9
+ * WC tested up to: 8.0
  */
 
 use Automattic\WooCommerce\Utilities\OrderUtil;
