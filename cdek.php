@@ -44,17 +44,8 @@ add_filter('woocommerce_new_order', 'cdek_woocommerce_new_order_action', 10, 2);
 add_action('woocommerce_after_shipping_rate', 'cdek_map_display', 10, 2);
 add_action('woocommerce_checkout_process', 'is_pvz_code');
 add_action('wp_footer', 'cdek_add_script_update_shipping_method');
-add_filter('woocommerce_checkout_fields', 'cdek_add_custom_checkout_field', 1090);
+add_filter('woocommerce_checkout_fields', 'cdek_checkout_fields', 1090);
 add_action('woocommerce_checkout_create_order', 'cdek_save_custom_checkout_field_to_order', 10, 2);
-function remove_address_field_requirement($fields) {
-    $fields['billing']['billing_address_1']['required'] = false;
-    $fields['billing']['billing_address_2']['required'] = false;
-
-    return $fields;
-}
-
-
-add_filter('woocommerce_checkout_fields', 'remove_address_field_requirement');
 
 function getCityCode($city_code, $order) {
     $api      = new CdekApi();
@@ -250,7 +241,6 @@ function isTariffTypeFromStore($shippingMethodCurrent) {
 }
 
 function cdek_add_update_form_billing($fragments) {
-
     $checkout = WC()->checkout();
 
     parse_str($_POST['post_data'], $fields_values);
@@ -515,7 +505,7 @@ function isCdekShippingMethod($order) {
     return $shippingMethodId === 'official_cdek';
 }
 
-function cdek_add_custom_checkout_field($fields) {
+function cdek_checkout_fields($fields) {
 
     $checkout = WC()->checkout();
 
@@ -533,6 +523,12 @@ function cdek_add_custom_checkout_field($fields) {
         ] as $requiredField
     ) {
         $fields['billing'][$requiredField] = $fields['billing'][$requiredField] ?? $originalFields[$requiredField];
+    }
+
+    foreach (['billing_address_1', 'billing_address_2'] as $field) {
+        if (isset($fields['billing'][$field])) {
+            $fields['billing'][$field]['required'] = false;
+        }
     }
 
     if (Helper::getActualShippingMethod()->get_option('international_mode') === 'yes') {
