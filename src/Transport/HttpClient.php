@@ -7,6 +7,7 @@ namespace {
 
 namespace Cdek\Transport {
 
+    use Cdek\Loader;
     use WP_Http;
     use WP_REST_Server;
 
@@ -18,11 +19,14 @@ namespace Cdek\Transport {
             array $data = null,
             bool $plain = false
         ) {
+            $pluginVersion = Loader::getPluginVersion();
+
             $config = [
                 'headers' => [
-                    "Content-Type"  => 'application/json',
-                    "Authorization" => $token,
+                    'Content-Type'  => 'application/json',
+                    'Authorization' => $token,
                 ],
+                'user-agent' => "wp/$pluginVersion",
             ];
 
             if (!empty($data)) {
