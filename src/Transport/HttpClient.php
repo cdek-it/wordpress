@@ -19,14 +19,11 @@ namespace Cdek\Transport {
             array $data = null,
             bool $plain = false
         ) {
-            $pluginVersion = Loader::getPluginVersion();
-
             $config = [
                 'headers' => [
                     'Content-Type'  => 'application/json',
                     'Authorization' => $token,
                 ],
-                'user-agent' => "wp/$pluginVersion",
             ];
 
             if (!empty($data)) {
@@ -37,7 +34,9 @@ namespace Cdek\Transport {
         }
 
         public static function sendRequest(string $url, string $method, array $config = [], bool $plain = false) {
-            $resp = (new WP_Http())->request($url, array_merge($config, ['method' => $method]));
+            $pluginVersion = Loader::getPluginVersion();
+
+            $resp = (new WP_Http())->request($url, array_merge($config, ['method' => $method, 'user-agent' => "wp/$pluginVersion"]));
 
             if ($plain || is_array($resp)) {
                 return $resp['body'];

@@ -48,10 +48,7 @@ class CdekApi {
     }
 
     public function getToken() {
-        $authUrl  = $this->getAuthUrl();
-        $response = wp_remote_post($authUrl);
-        $bodyJson = wp_remote_retrieve_body($response);
-        $body     = json_decode($bodyJson);
+        $body = json_decode(HttpClient::sendRequest($this->getAuthUrl(), 'POST'));
 
         if ($body === null || property_exists($body, 'error')) {
             return false;
