@@ -77,14 +77,7 @@
         if (cityInput.val()) {
             console.debug(
               '[CDEK-MAP] City has value, initiating checkout update');
-            const city = cityInput.val();
-            cityInput.val('');
             $(document.body).trigger('update_checkout');
-
-            setTimeout(() => {
-                cityInput.val(city);
-                $(document.body).trigger('update_checkout');
-            }, 1000);
         }
 
         $('body')
