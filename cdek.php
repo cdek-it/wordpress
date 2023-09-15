@@ -229,7 +229,7 @@ function isTariffTypeFromStore($shippingMethodCurrent) {
         return false;
     }
 
-    $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
+    $shippingMethodIdSelected = wc_get_chosen_shipping_method_ids()[0];
 
     if ($shippingMethodCurrent->get_id() !== $shippingMethodIdSelected) {
         return false;
