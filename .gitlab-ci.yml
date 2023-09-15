@@ -90,6 +90,16 @@ release:
     - |
       release-cli create --name $CI_COMMIT_TAG --tag-name $CI_COMMIT_TAG \
         --assets-link "{\"name\":\"Архив\",\"filepath\":\"/archive\",\"url\":\"${PACKAGE_URL}${RELEASE_VERSION}/wordpress_${ARCHIVE_VERSION}.zip\", \"link_type\":\"package\"}" \
+  after_script:
+    - |
+      curl -X POST -H "Content-Type: application/json" \
+            -d '{"channel": "cms-support",
+                "username": "GitLab",
+                "text": "##### ${CI_PROJECT_NAME} :white_check_mark:\n
+                | Component | URL | Build | User |
+                |:----------|:--------|:------|:-----|
+                | ${CI_PROJECT_NAME} | [GitLab](https://gitlab.cdek.ru/${CI_PROJECT_PATH_SLUG}/-/releases/${CI_COMMIT_TAG}) | ${CI_COMMIT_TAG} | ${CI_COMMIT_AUTHOR} |
+                "}' ${WEBHOOK_URL}
 
 deploy_staging:
   stage: deploy
