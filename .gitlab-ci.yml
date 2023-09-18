@@ -5,6 +5,7 @@ stages:
   - build
   - upload
   - deploy
+  - notify
 
 variables:
   PACKAGE_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/archive/"
@@ -81,7 +82,6 @@ release:
     - job: upload
   only:
     - tags
-  when: manual
   image: registry.gitlab.com/gitlab-org/release-cli:latest
   before_script:
     - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
@@ -90,7 +90,17 @@ release:
     - |
       release-cli create --name $CI_COMMIT_TAG --tag-name $CI_COMMIT_TAG \
         --assets-link "{\"name\":\"Архив\",\"filepath\":\"/archive\",\"url\":\"${PACKAGE_URL}${RELEASE_VERSION}/wordpress_${ARCHIVE_VERSION}.zip\", \"link_type\":\"package\"}" \
-  after_script:
+
+notify:
+  stage: notify
+  tags:
+    - docker
+  image: curlimages/curl
+  needs:
+    - job: release
+  only:
+    - tags
+  script:
     - |
       curl -X POST -H "Content-Type: application/json" \
             -d '{"channel": "cms-support",
