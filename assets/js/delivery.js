@@ -264,7 +264,7 @@
         $('#create-order-btn').click(function() {
             $('#cdek-create-order-error').hide();
             $.ajax({
-                method: 'GET',
+                method: 'POST',
                 url: window.cdek_rest_delivery_api_path.create_order,
                 data: {
                     package_order_id: $('input[name=package_order_id]').val(),
