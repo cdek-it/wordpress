@@ -26,7 +26,7 @@ namespace Cdek\Controllers {
 
         public function __invoke() {
             register_rest_route(Config::DELIVERY_NAME, '/create-order', [
-                'methods'             => WP_REST_Server::READABLE,
+                'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [__CLASS__, 'createOrder'],
                 'permission_callback' => '__return_true',
             ]);

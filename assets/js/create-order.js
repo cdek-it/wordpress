@@ -39,7 +39,7 @@
 
         $('#send_package').click(function () {
             $.ajax({
-                method: "POST",
+                method: 'POST',
                 url: window.cdek_rest_order_api_path.create_order,
                 data: {
                     package_order_id: $('input[name=package_order_id]').val(),
