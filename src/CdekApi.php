@@ -38,7 +38,7 @@ class CdekApi {
     }
 
     private function getApiUrl() {
-        return $this->deliveryMethod->get_option('test_mode') === 'yes' ? Config::TEST_API_URL : Config::API_URL;
+        return defined('CDEK_REST_API') ? CDEK_REST_API : ($this->deliveryMethod->get_option('test_mode') === 'yes' ? Config::TEST_API_URL : Config::API_URL);
     }
 
     public function checkAuth(): bool {
@@ -95,7 +95,7 @@ class CdekApi {
             $param['shipment_point'] = explode(' ',$this->deliveryMethod->get_option('pvz_code'))[1];
         } else {
             $param['from_location'] = [
-                'address' => $this->deliveryMethod->get_option('street'),
+                'address' => $this->deliveryMethod->get_option('address'),
             ];
         }
 

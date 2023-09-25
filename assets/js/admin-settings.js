@@ -51,7 +51,6 @@ jQuery(($) => {
         new window.CDEKWidget({
             apiKey: window.cdek.apiKey,
             sender: true,
-            debug: true,
             defaultLocation: 'Новосибирск',
             servicePath: window.cdek_admin_settings.api.offices,
             hideFilters: {

@@ -56,7 +56,7 @@ class DeliveryCalc {
 
             $minDay = (int) $tariff['period_min'] + (int) $this->method->get_option('extra_day');
             $maxDay = (int) $tariff['period_max'] + (int) $this->method->get_option('extra_day');
-            $cost   = (int) $tariff['total_sum'] + (int) $this->method->get_option('extra_cost');
+            $cost   = (int) ($tariff['total_sum'] ?? $tariff['delivery_sum']) + (int) $this->method->get_option('extra_cost');
 
             if ($this->method->get_option('percentprice_toggle') === 'yes') {
                 $cost = (int) (($this->method->get_option('percentprice') / 100) * $cost);
