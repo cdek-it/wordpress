@@ -14,26 +14,6 @@
             $('#woocommerce_official_cdek_city')
               .after('<div id="region-list"></div>');
             regionListProcess();
-            chooseLayerMap();
-
-            function chooseLayerMap() {
-                let tiles = $('#woocommerce_official_cdek_map_layer').val();
-                if (tiles === '1') {
-                    $('#woocommerce_official_cdek_yandex_map_api_key')
-                      .get(0).type = 'text';
-                }
-
-                $('#woocommerce_official_cdek_map_layer')
-                  .change(function(event) {
-                      if ($(event.currentTarget).val() === '1') {
-                          $('#woocommerce_official_cdek_yandex_map_api_key')
-                            .get(0).type = 'text';
-                      } else {
-                          $('#woocommerce_official_cdek_yandex_map_api_key')
-                            .get(0).type = 'hidden';
-                      }
-                  });
-            }
 
             function cityAutocomplete() {
                 $('#woocommerce_official_cdek_city')

@@ -20,8 +20,7 @@ namespace Cdek\Controllers {
         }
 
         public static function getPoints(WP_REST_Request $data): WP_REST_Response {
-            return new WP_REST_Response((new CdekApi)->getPvz($data->get_param('city_code'), $data->get_param('weight'),
-                $data->get_param('admin')), 200);
+            return new WP_REST_Response((new CdekApi)->getOffices($data->get_params()), 200);
         }
 
         public static function setTmpPointCode(WP_REST_Request $data): WP_REST_Response {
@@ -37,10 +36,10 @@ namespace Cdek\Controllers {
                 'permission_callback' => '__return_true',
             ]);
 
-            register_rest_route(Config::DELIVERY_NAME, '/get-pvz', [
+            register_rest_route(Config::DELIVERY_NAME, '/get-offices', [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [__CLASS__, 'getPoints'],
-                'permission_callback' => '__return_true',
+                'permission_callback' => static fn() => current_user_can('manage_woocommerce'),
             ]);
 
             register_rest_route(Config::DELIVERY_NAME, '/set-pvz-code-tmp', [

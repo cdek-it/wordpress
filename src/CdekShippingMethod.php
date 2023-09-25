@@ -32,7 +32,7 @@ class CdekShippingMethod extends WC_Shipping_Method {
 
     public function init_form_fields(): void {
         $this->instance_form_fields = [
-            'extra_cost'                     => [
+            'extra_cost' => [
                 'title'             => 'Доп. цена к доставке',
                 'type'              => 'number',
                 'description'       => "стоимость доставки в рублях которая будет добавлена к расчетной стоимости доставки",
@@ -44,7 +44,8 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 ],
             ],
         ];
-        $this->form_fields = [
+
+        $this->form_fields          = [
             'auth_block_name'                => [
                 'title' => '<h3 style="text-align: center;">Авторизация</h3>',
                 'type'  => 'title',
@@ -67,6 +68,14 @@ class CdekShippingMethod extends WC_Shipping_Method {
             'client_secret'                  => [
                 'title'             => 'Секретный ключ',
                 'type'              => 'text',
+                'custom_attributes' => [
+                    'required' => true,
+                ],
+            ],
+            'yandex_map_api_key'             => [
+                'type'              => 'text',
+                'title'             => 'Ключ Яндекс.Карты',
+                'description'       => 'Ключ доступа к API Яндекс. Процесс генерации описан на <a rel="noopener nofollower" href="https://yandex.ru/dev/jsapi-v2-1/doc/ru/#get-api-key" target="_blank">странице</a>.',
                 'custom_attributes' => [
                     'required' => true,
                 ],
@@ -217,41 +226,15 @@ class CdekShippingMethod extends WC_Shipping_Method {
                     'step' => 1,
                 ],
             ],
-            'city'                           => [
-                'title'             => 'Город отправления',
-                'type'              => 'text',
-                'default'           => 'Москва',
-                'custom_attributes' => [
-                    'required' => true,
-                ],
-            ],
-            'street'                         => [
-                'title'       => 'Адрес',
-                'type'        => 'text',
-                'desc_tip'    => true,
-                'description' => "Адрес отправления для тарифов \"от двери\"",
-            ],
-            'map_layer'                      => [
-                'title'   => 'Слой карты',
-                'type'    => 'select',
-                'options' => ['OpenStreetMap', 'YandexMap'],
-            ],
-            'yandex_map_api_key'             => [
-                'type'        => 'hidden',
-                'placeholder' => 'Api Key',
-            ],
             'map'                            => [
                 'type'  => 'hidden',
-                'title' => 'Выбрать ПВЗ на карте',
+                'title' => 'Выбрать адреса для отправки на карте',
             ],
             'pvz_code'                       => [
                 'type' => 'hidden',
             ],
-            'pvz_address'                    => [
-                'type'        => 'text',
-                'readonly'    => 'readonly',
-                'desc_tip'    => true,
-                'description' => "Адрес отправления для тарифов \"от склада\"",
+            'address'                         => [
+                'type' => 'hidden',
             ],
             'package_setting_block_name'     => [
                 'title' => '<h3 style="text-align: center;">Габариты</h3>',
@@ -313,7 +296,7 @@ class CdekShippingMethod extends WC_Shipping_Method {
             ],
             'delivery_price_block_name'      => [
                 'title' => '<h3 style="text-align: center;">Cтоимость доставки</h3>',
-                'type' => 'title',
+                'type'  => 'title',
                 'class' => 'cdek_delivery_price_block_name',
             ],
             'extra_cost'                     => [
@@ -423,12 +406,12 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'css'     => 'display: none;',
                 'default' => '44',
             ],
-            'barcode_format_title'             => [
-                'title'       => 'Настройки печати',
-                'type'        => 'title',
+            'barcode_format_title'           => [
+                'title' => 'Настройки печати',
+                'type'  => 'title',
             ],
-            'barcode_format' => [
-                'title' => 'Формат ШК',
+            'barcode_format'                 => [
+                'title'   => 'Формат ШК',
                 'type'    => 'select',
                 'options' => BarcodeFormat::getAll(),
             ],

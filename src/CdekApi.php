@@ -12,7 +12,7 @@ class CdekApi {
     protected const REGION_PATH = "location/cities";
     protected const ORDERS_PATH = "orders/";
     protected const PVZ_PATH = "deliverypoints";
-    protected const CALC_PATH = "calculator/tariff";
+    protected const CALC_PATH = "calculator/tarifflist";
     protected const WAYBILL_PATH = "print/orders/";
     protected const BARCODE_PATH = "print/barcodes/";
     protected const CALL_COURIER = "intakes";
@@ -92,10 +92,9 @@ class CdekApi {
         $param['seller']                           = ['address' => $this->deliveryMethod->get_option('seller_address')];
 
         if (Tariff::isTariffFromStoreByCode($param['tariff_code'])) {
-            $param['shipment_point'] = $this->deliveryMethod->get_option('pvz_code');
+            $param['shipment_point'] = explode(' ',$this->deliveryMethod->get_option('pvz_code'))[1];
         } else {
             $param['from_location'] = [
-                'code'    => $this->deliveryMethod->get_option('city_code_value'),
                 'address' => $this->deliveryMethod->get_option('street'),
             ];
         }
@@ -134,16 +133,16 @@ class CdekApi {
         return HttpClient::sendCdekRequest($url, 'DELETE', $this->getToken());
     }
 
-    public function calculate($deliveryParam, $tariff) {
+    public function calculate($deliveryParam) {
         $url = $this->apiUrl.self::CALC_PATH;
 
         return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), [
-            'tariff_code'   => $tariff,
             'from_location' => [
-                'code' => $this->deliveryMethod->get_option('city_code_value'),
+                'address' => $this->deliveryMethod->get_option('pvz_code') ? explode(' ',
+                    $this->deliveryMethod->get_option('pvz_code'))[0] : $this->deliveryMethod->get_option('address'),
             ],
             'to_location'   => [
-                'code' => $deliveryParam['cityCode'],
+                'address' => $deliveryParam['address'],
             ],
             'packages'      => [
                 'weight' => $deliveryParam['package_data']['weight'],
@@ -221,50 +220,18 @@ class CdekApi {
         return ['city' => $cityData[0]->city, 'region' => $cityData[0]->region];
     }
 
-    public function getPvz($city, $weight = 0, $admin = false): array {
+    public function getOffices($filter) {
         $url = $this->apiUrl.self::PVZ_PATH;
-        if (empty($city)) {
-            $city = '44';
-        }
 
-        if ($city === -1) {
-            return [];
-        }
-
-        $params = ['city_code' => $city];
-        if ($admin) {
-            $params['type'] = 'PVZ';
-        } else {
-            if ((int) $weight !== 0) {
-                $params['weight_max'] = (int) ceil($weight);
-            }
-        }
-
-        $result = HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), $params);
-        $json   = json_decode($result);
-        if (!$json) {
+        $result = HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), $filter, true);
+        if (!$result) {
             return [
                 'success' => false,
                 'message' => __(Messages::NO_DELIVERY_POINTS_IN_CITY, Config::TRANSLATION_DOMAIN),
             ];
         }
 
-        $pvz = [];
-        foreach ($json as $elem) {
-            if (isset($elem->code, $elem->type, $elem->location->longitude, $elem->location->latitude, $elem->location->address)) {
-                $pvz[] = [
-                    'name'      => $elem->name,
-                    'code'      => $elem->code,
-                    'type'      => $elem->type,
-                    'longitude' => $elem->location->longitude,
-                    'latitude'  => $elem->location->latitude,
-                    'address'   => $elem->location->address,
-                    'work_time' => $elem->work_time,
-                ];
-            }
-        }
-
-        return ['success' => true, 'pvz' => $pvz];
+        return $result;
     }
 
     public function callCourier($param) {

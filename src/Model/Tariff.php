@@ -4,8 +4,7 @@ namespace Cdek\Model;
 
 use Cdek\Helper;
 
-class Tariff
-{
+class Tariff {
     public const WEIGHT_5 = '5';
     public const WEIGHT_30 = '30';
     public const WEIGHT_50 = '50';
@@ -25,288 +24,287 @@ class Tariff
 
     public const TARIFF_DATA = [
         [
-            'code' => 7,
-            'name' => 'Международный экспресс документы дверь-дверь',
-            'mode' => self::DD,
-            'weight' => self::WEIGHT_5,
+            'code'     => 7,
+            'name'     => 'Международный экспресс документы дверь-дверь',
+            'mode'     => self::DD,
+            'weight'   => self::WEIGHT_5,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::DOOR,
-            'postamat' => false
+            'typeTo'   => self::DOOR,
+            'postamat' => false,
         ],
         [
-            'code' => 8,
-            'name' => 'Международный экспресс грузы дверь-дверь',
-            'mode' => self::DD,
-            'weight' => self::WEIGHT_30,
+            'code'     => 8,
+            'name'     => 'Международный экспресс грузы дверь-дверь',
+            'mode'     => self::DD,
+            'weight'   => self::WEIGHT_30,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::DOOR,
-            'postamat' => false
+            'typeTo'   => self::DOOR,
+            'postamat' => false,
         ],
         [
-            'code' => 136,
-            'name' => 'Посылка склад-склад',
-            'mode' => self::SS,
-            'weight' => self::WEIGHT_30,
+            'code'     => 136,
+            'name'     => 'Посылка склад-склад',
+            'mode'     => self::SS,
+            'weight'   => self::WEIGHT_30,
             'typeFrom' => self::STORE,
-            'typeTo' => self::STORE,
-            'postamat' => false
+            'typeTo'   => self::STORE,
+            'postamat' => false,
         ],
         [
-            'code' => 137,
-            'name' => 'Посылка склад-дверь',
-            'mode' => self::SD,
-            'weight' => self::WEIGHT_30,
+            'code'     => 137,
+            'name'     => 'Посылка склад-дверь',
+            'mode'     => self::SD,
+            'weight'   => self::WEIGHT_30,
             'typeFrom' => self::STORE,
-            'typeTo' => self::DOOR,
-            'postamat' => false
+            'typeTo'   => self::DOOR,
+            'postamat' => false,
         ],
         [
-            'code' => 138,
-            'name' => 'Посылка дверь-склад',
-            'mode' => self::DS,
-            'weight' => self::WEIGHT_30,
+            'code'     => 138,
+            'name'     => 'Посылка дверь-склад',
+            'mode'     => self::DS,
+            'weight'   => self::WEIGHT_30,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::STORE,
-            'postamat' => false
+            'typeTo'   => self::STORE,
+            'postamat' => false,
         ],
         [
-            'code' => 139,
-            'name' => 'Посылка дверь-дверь',
-            'mode' => self::DD,
-            'weight' => self::WEIGHT_30,
+            'code'     => 139,
+            'name'     => 'Посылка дверь-дверь',
+            'mode'     => self::DD,
+            'weight'   => self::WEIGHT_30,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::DOOR,
-            'postamat' => false
+            'typeTo'   => self::DOOR,
+            'postamat' => false,
         ],
         [
-            'code' => 231,
-            'name' => 'Экономичная посылка дверь-дверь',
-            'mode' => self::DD,
-            'weight' => self::WEIGHT_50,
+            'code'     => 231,
+            'name'     => 'Экономичная посылка дверь-дверь',
+            'mode'     => self::DD,
+            'weight'   => self::WEIGHT_50,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::DOOR,
-            'postamat' => false
+            'typeTo'   => self::DOOR,
+            'postamat' => false,
         ],
         [
-            'code' => 232,
-            'name' => 'Экономичная посылка дверь-склад',
-            'mode' => self::DS,
-            'weight' => self::WEIGHT_50,
+            'code'     => 232,
+            'name'     => 'Экономичная посылка дверь-склад',
+            'mode'     => self::DS,
+            'weight'   => self::WEIGHT_50,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::STORE,
-            'postamat' => false
+            'typeTo'   => self::STORE,
+            'postamat' => false,
         ],
         [
-            'code' => 233,
-            'name' => 'Экономичная посылка склад-дверь',
-            'mode' => self::SD,
-            'weight' => self::WEIGHT_50,
+            'code'     => 233,
+            'name'     => 'Экономичная посылка склад-дверь',
+            'mode'     => self::SD,
+            'weight'   => self::WEIGHT_50,
             'typeFrom' => self::STORE,
-            'typeTo' => self::DOOR,
-            'postamat' => false
+            'typeTo'   => self::DOOR,
+            'postamat' => false,
         ],
         [
-            'code' => 234,
-            'name' => 'Экономичная посылка склад-склад',
-            'mode' => self::SS,
-            'weight' => self::WEIGHT_50,
+            'code'     => 234,
+            'name'     => 'Экономичная посылка склад-склад',
+            'mode'     => self::SS,
+            'weight'   => self::WEIGHT_50,
             'typeFrom' => self::STORE,
-            'typeTo' => self::STORE,
-            'postamat' => false
+            'typeTo'   => self::STORE,
+            'postamat' => false,
         ],
         [
-            'code' => 291,
-            'name' => 'CDEK Express склад-склад',
-            'mode' => self::SS,
-            'weight' => self::WEIGHT_500,
+            'code'     => 291,
+            'name'     => 'CDEK Express склад-склад',
+            'mode'     => self::SS,
+            'weight'   => self::WEIGHT_500,
             'typeFrom' => self::STORE,
-            'typeTo' => self::STORE,
-            'postamat' => false
+            'typeTo'   => self::STORE,
+            'postamat' => false,
         ],
         [
-            'code' => 293,
-            'name' => 'CDEK Express дверь-дверь',
-            'mode' => self::DD,
-            'weight' => self::WEIGHT_500,
+            'code'     => 293,
+            'name'     => 'CDEK Express дверь-дверь',
+            'mode'     => self::DD,
+            'weight'   => self::WEIGHT_500,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::DOOR,
-            'postamat' => false
+            'typeTo'   => self::DOOR,
+            'postamat' => false,
         ],
         [
-            'code' => 294,
-            'name' => 'CDEK Express склад-дверь',
-            'mode' => self::SD,
-            'weight' => self::WEIGHT_500,
+            'code'     => 294,
+            'name'     => 'CDEK Express склад-дверь',
+            'mode'     => self::SD,
+            'weight'   => self::WEIGHT_500,
             'typeFrom' => self::STORE,
-            'typeTo' => self::DOOR,
-            'postamat' => false
+            'typeTo'   => self::DOOR,
+            'postamat' => false,
         ],
         [
-            'code' => 295,
-            'name' => 'CDEK Express дверь-склад',
-            'mode' => self::DS,
-            'weight' => self::WEIGHT_500,
+            'code'     => 295,
+            'name'     => 'CDEK Express дверь-склад',
+            'mode'     => self::DS,
+            'weight'   => self::WEIGHT_500,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::STORE,
-            'postamat' => false
+            'typeTo'   => self::STORE,
+            'postamat' => false,
         ],
         [
-            'code' => 366,
-            'name' => 'Посылка дверь-постамат',
-            'mode' => self::DP,
-            'weight' => self::WEIGHT_30,
+            'code'     => 366,
+            'name'     => 'Посылка дверь-постамат',
+            'mode'     => self::DP,
+            'weight'   => self::WEIGHT_30,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::STORE,
-            'postamat' => true
+            'typeTo'   => self::STORE,
+            'postamat' => true,
         ],
         [
-            'code' => 368,
-            'name' => 'Посылка склад-постамат',
-            'mode' => self::SP,
-            'weight' => self::WEIGHT_30,
+            'code'     => 368,
+            'name'     => 'Посылка склад-постамат',
+            'mode'     => self::SP,
+            'weight'   => self::WEIGHT_30,
             'typeFrom' => self::STORE,
-            'typeTo' => self::STORE,
-            'postamat' => true
+            'typeTo'   => self::STORE,
+            'postamat' => true,
         ],
         [
-            'code' => 378,
-            'name' => 'Экономичная посылка склад-постамат',
-            'mode' => self::SP,
-            'weight' => self::WEIGHT_50,
+            'code'     => 378,
+            'name'     => 'Экономичная посылка склад-постамат',
+            'mode'     => self::SP,
+            'weight'   => self::WEIGHT_50,
             'typeFrom' => self::STORE,
-            'typeTo' => self::STORE,
-            'postamat' => true
+            'typeTo'   => self::STORE,
+            'postamat' => true,
         ],
         [
-            'code' => 62,
-            'name' => 'Магистральный экспресс склад-склад',
-            'mode' => self::SS,
-            'weight' => self::WEIGHT_100000,
+            'code'     => 62,
+            'name'     => 'Магистральный экспресс склад-склад',
+            'mode'     => self::SS,
+            'weight'   => self::WEIGHT_100000,
             'typeFrom' => self::STORE,
-            'typeTo' => self::STORE,
-            'postamat' => false
+            'typeTo'   => self::STORE,
+            'postamat' => false,
         ],
         [
-            'code' => 122,
-            'name' => 'Магистральный экспресс склад-дверь',
-            'mode' => self::SD,
-            'weight' => self::WEIGHT_100000,
+            'code'     => 122,
+            'name'     => 'Магистральный экспресс склад-дверь',
+            'mode'     => self::SD,
+            'weight'   => self::WEIGHT_100000,
             'typeFrom' => self::STORE,
-            'typeTo' => self::DOOR,
-            'postamat' => false
+            'typeTo'   => self::DOOR,
+            'postamat' => false,
         ],
         [
-            'code' => 480,
-            'name' => 'Экспресс дверь-дверь',
-            'mode' => self::DD,
-            'weight' => self::WEIGHT_100000,
+            'code'     => 480,
+            'name'     => 'Экспресс дверь-дверь',
+            'mode'     => self::DD,
+            'weight'   => self::WEIGHT_100000,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::DOOR,
-            'postamat' => false
+            'typeTo'   => self::DOOR,
+            'postamat' => false,
         ],
         [
-            'code' => 481,
-            'name' => 'Экспресс дверь-склад',
-            'mode' => self::DS,
-            'weight' => self::WEIGHT_100000,
+            'code'     => 481,
+            'name'     => 'Экспресс дверь-склад',
+            'mode'     => self::DS,
+            'weight'   => self::WEIGHT_100000,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::STORE,
-            'postamat' => false
+            'typeTo'   => self::STORE,
+            'postamat' => false,
         ],
         [
-            'code' => 482,
-            'name' => 'Экспресс склад-дверь',
-            'mode' => self::SD,
-            'weight' => self::WEIGHT_100000,
+            'code'     => 482,
+            'name'     => 'Экспресс склад-дверь',
+            'mode'     => self::SD,
+            'weight'   => self::WEIGHT_100000,
             'typeFrom' => self::STORE,
-            'typeTo' => self::DOOR,
-            'postamat' => false
+            'typeTo'   => self::DOOR,
+            'postamat' => false,
         ],
         [
-            'code' => 483,
-            'name' => 'Экспресс склад-склад',
-            'mode' => self::SS,
-            'weight' => self::WEIGHT_100000,
+            'code'     => 483,
+            'name'     => 'Экспресс склад-склад',
+            'mode'     => self::SS,
+            'weight'   => self::WEIGHT_100000,
             'typeFrom' => self::STORE,
-            'typeTo' => self::STORE,
-            'postamat' => false
+            'typeTo'   => self::STORE,
+            'postamat' => false,
         ],
         [
-            'code' => 485,
-            'name' => 'Экспресс дверь-постамат',
-            'mode' => self::DP,
-            'weight' => self::WEIGHT_100000,
+            'code'     => 485,
+            'name'     => 'Экспресс дверь-постамат',
+            'mode'     => self::DP,
+            'weight'   => self::WEIGHT_100000,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::STORE,
-            'postamat' => true
+            'typeTo'   => self::STORE,
+            'postamat' => true,
         ],
         [
-            'code' => 486,
-            'name' => 'Экспресс склад-постамат',
-            'mode' => self::SP,
-            'weight' => self::WEIGHT_100000,
+            'code'     => 486,
+            'name'     => 'Экспресс склад-постамат',
+            'mode'     => self::SP,
+            'weight'   => self::WEIGHT_100000,
             'typeFrom' => self::STORE,
-            'typeTo' => self::STORE,
-            'postamat' => true
+            'typeTo'   => self::STORE,
+            'postamat' => true,
         ],
         [
-            'code' => 184,
-            'name' => 'E-com Standard дверь-дверь',
-            'mode' => self::DD,
-            'weight' => self::WEIGHT_100000,
+            'code'     => 184,
+            'name'     => 'E-com Standard дверь-дверь',
+            'mode'     => self::DD,
+            'weight'   => self::WEIGHT_100000,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::DOOR,
-            'postamat' => false
+            'typeTo'   => self::DOOR,
+            'postamat' => false,
         ],
         [
-            'code' => 185,
-            'name' => 'E-com Standard склад-склад',
-            'mode' => self::SS,
-            'weight' => self::WEIGHT_100000,
+            'code'     => 185,
+            'name'     => 'E-com Standard склад-склад',
+            'mode'     => self::SS,
+            'weight'   => self::WEIGHT_100000,
             'typeFrom' => self::STORE,
-            'typeTo' => self::STORE,
-            'postamat' => false
+            'typeTo'   => self::STORE,
+            'postamat' => false,
         ],
         [
-            'code' => 186,
-            'name' => 'E-com Standard склад-дверь',
-            'mode' => self::SD,
-            'weight' => self::WEIGHT_100000,
+            'code'     => 186,
+            'name'     => 'E-com Standard склад-дверь',
+            'mode'     => self::SD,
+            'weight'   => self::WEIGHT_100000,
             'typeFrom' => self::STORE,
-            'typeTo' => self::DOOR,
-            'postamat' => false
+            'typeTo'   => self::DOOR,
+            'postamat' => false,
         ],
         [
-            'code' => 187,
-            'name' => 'E-com Standard дверь-склад',
-            'mode' => self::DS,
-            'weight' => self::WEIGHT_100000,
+            'code'     => 187,
+            'name'     => 'E-com Standard дверь-склад',
+            'mode'     => self::DS,
+            'weight'   => self::WEIGHT_100000,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::STORE,
-            'postamat' => false
+            'typeTo'   => self::STORE,
+            'postamat' => false,
         ],
         [
-            'code' => 497,
-            'name' => 'E-com Standard дверь-постамат',
-            'mode' => self::DP,
-            'weight' => self::WEIGHT_100000,
+            'code'     => 497,
+            'name'     => 'E-com Standard дверь-постамат',
+            'mode'     => self::DP,
+            'weight'   => self::WEIGHT_100000,
             'typeFrom' => self::DOOR,
-            'typeTo' => self::STORE,
-            'postamat' => true
+            'typeTo'   => self::STORE,
+            'postamat' => true,
         ],
         [
-            'code' => 498,
-            'name' => 'E-com Standard склад-постамат',
-            'mode' => self::SP,
-            'weight' => self::WEIGHT_100000,
+            'code'     => 498,
+            'name'     => 'E-com Standard склад-постамат',
+            'mode'     => self::SP,
+            'weight'   => self::WEIGHT_100000,
             'typeFrom' => self::STORE,
-            'typeTo' => self::STORE,
-            'postamat' => true
+            'typeTo'   => self::STORE,
+            'postamat' => true,
         ],
     ];
 
-    public static function getTariffTypeToByCode($code)
-    {
+    public static function getTariffTypeToByCode($code) {
         foreach (self::TARIFF_DATA as $tariff) {
             if ($tariff['code'] == $code) {
                 return $tariff['typeTo'];
@@ -314,8 +312,7 @@ class Tariff
         }
     }
 
-    public static function isTariffEndPointPostamatByCode($code)
-    {
+    public static function isTariffEndPointPostamatByCode($code) {
         foreach (self::TARIFF_DATA as $tariff) {
             if ($tariff['code'] == $code) {
                 return $tariff['postamat'];
@@ -323,50 +320,37 @@ class Tariff
         }
     }
 
-    public static function isTariffToStoreByCode($code)
-    {
+    public static function isTariffToStoreByCode(int $code): bool {
         foreach (self::TARIFF_DATA as $tariff) {
-            if ($tariff['code'] == $code) {
-                if ($tariff['typeTo'] === self::STORE) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        }
-    }
-
-    public static function isTariffFromStoreByCode($code)
-    {
-        foreach (self::TARIFF_DATA as $tariff) {
-            if ($tariff['code'] == $code) {
-                if ($tariff['typeFrom'] === self::STORE) {
-                    return 1;
-                } else {
-                    return 0;
-                }
-            }
-        }
-    }
-
-    public static function isTariffFromDoorByCode($code)
-    {
-        foreach (self::TARIFF_DATA as $tariff) {
-            if ($tariff['code'] == (int) $code) {
-                if ($tariff['typeFrom'] === self::DOOR) {
-                    return true;
-                } else {
-                    return false;
-                }
+            if ($tariff['code'] === $code) {
+                return $tariff['typeTo'] === self::STORE;
             }
         }
         return false;
     }
 
-    public static function getTariffWeightByCode($code)
-    {
+    public static function isTariffFromStoreByCode(int $code): bool {
         foreach (self::TARIFF_DATA as $tariff) {
-            if ($tariff['code'] == $code) {
+            if ($tariff['code'] === $code) {
+                return $tariff['typeFrom'] === self::STORE;
+            }
+        }
+        return false;
+    }
+
+    public static function isTariffFromDoorByCode(int $code): bool {
+        foreach (self::TARIFF_DATA as $tariff) {
+            if ($tariff['code'] === $code) {
+                return $tariff['typeFrom'] === self::DOOR;
+            }
+        }
+
+        return false;
+    }
+
+    public static function getTariffWeightByCode($code): int {
+        foreach (self::TARIFF_DATA as $tariff) {
+            if ($tariff['code'] === $code) {
                 return $tariff['weight'];
             }
         }
@@ -374,14 +358,13 @@ class Tariff
         return 0;
     }
 
-    public static function getTariffNameByCode($code)
-    {
+    public static function getTariffNameByCode($code) {
         $tariffNameEdit = Helper::getActualShippingMethod()->get_option('tariff_name');
         if (!empty($tariffNameEdit)) {
             $tariffNameEditArray = explode(';', $tariffNameEdit);
-            $tariffEditList = [];
+            $tariffEditList      = [];
             foreach ($tariffNameEditArray as $tariffEdit) {
-                $tariffConcrete = explode('-', $tariffEdit);
+                $tariffConcrete                     = explode('-', $tariffEdit);
                 $tariffEditList[$tariffConcrete[0]] = $tariffConcrete[1];
             }
         } else {
@@ -391,7 +374,7 @@ class Tariff
         foreach (self::TARIFF_DATA as $tariff) {
             if ($tariff['code'] == $code) {
                 foreach ($tariffEditList as $codeTariff => $tariffEdit) {
-                    if ((int)$code === (int)$codeTariff && !empty($tariffEdit)) {
+                    if ((int) $code === (int) $codeTariff && !empty($tariffEdit)) {
                         return $tariffEdit;
                     }
                 }
@@ -399,25 +382,26 @@ class Tariff
                 return $tariff['name'];
             }
         }
+
         return '';
     }
 
-    public static function getTariffCodeType($code, $type)
-    {
+    public static function getTariffCodeType($code, $type) {
         foreach (self::TARIFF_DATA as $tariff) {
-            if ($tariff['code'] == $code && in_array($tariff['mode'], self::MODE_FROM[(int)$type])) {
+            if ($tariff['code'] == $code && in_array($tariff['mode'], self::MODE_FROM[(int) $type])) {
                 return $tariff['code'];
             }
         }
+
         return '';
     }
 
-    public static function getTariffList()
-    {
+    public static function getTariffList() {
         $tariffList = [];
         foreach (self::TARIFF_DATA as $tariff) {
-            $tariffList[$tariff['code']] = $tariff['name'] . ' (' . $tariff['code'] . ')';
+            $tariffList[$tariff['code']] = $tariff['name'].' ('.$tariff['code'].')';
         }
+
         return $tariffList;
     }
 }
