@@ -14,6 +14,7 @@ namespace Cdek {
     use Cdek\Controllers\OrderController;
     use Cdek\Controllers\RestController;
     use Cdek\UI\Admin;
+    use Cdek\UI\CdekWidget;
     use Cdek\UI\Frontend;
     use Cdek\UI\Leaflet;
     use Cdek\Validator\CheckoutProcessValidator;
@@ -62,14 +63,6 @@ namespace Cdek {
             }
         }
 
-        private static function declareCompatibility(): void {
-            add_action( 'before_woocommerce_init', static function() {
-                if ( class_exists( FeaturesUtil::class ) ) {
-                    FeaturesUtil::declare_compatibility( 'custom_order_tables', self::$pluginMainFile, true );
-                }
-            } );
-        }
-
         public function __invoke(string $pluginMainFile): void {
             self::$pluginMainFile = $pluginMainFile;
             add_action('activate_cdek/cdek.php', [__CLASS__, 'activate']);
@@ -97,9 +90,17 @@ namespace Cdek {
 
             add_action('woocommerce_checkout_process', new CheckoutProcessValidator);
 
+            (new CdekWidget)();
             (new Admin)();
-            (new Leaflet)();
             (new Frontend)();
+        }
+
+        private static function declareCompatibility(): void {
+            add_action('before_woocommerce_init', static function () {
+                if (class_exists(FeaturesUtil::class)) {
+                    FeaturesUtil::declare_compatibility('custom_order_tables', self::$pluginMainFile, true);
+                }
+            });
         }
 
     }

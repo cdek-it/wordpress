@@ -205,10 +205,6 @@ function get_package_items($items, $orderId, $currency) {
 function cdek_map_display($shippingMethodCurrent) {
     if (is_checkout() && isTariffTypeFromStore($shippingMethodCurrent)) {
         $cdekShippingMethod = Helper::getActualShippingMethod();
-        $layerMap           = $cdekShippingMethod->get_option('map_layer');
-        if ($cdekShippingMethod->get_option('yandex_map_api_key') === "") {
-            $layerMap = "0";
-        }
 
         $meta   = $shippingMethodCurrent->get_meta_data();
         $weight = $meta['total_weight_kg'];
@@ -218,7 +214,9 @@ function cdek_map_display($shippingMethodCurrent) {
         $city = $api->getCityCodeByCityName(CheckoutHelper::getValueFromCurrentSession('city'),
             CheckoutHelper::getValueFromCurrentSession('state'));
 
-        $points = $api->getPvz($city, $weight);
+        $points = $api->getOffices([
+                'city_code' => $city,
+        ]);
 
         include 'templates/public/open-map.php';
     }

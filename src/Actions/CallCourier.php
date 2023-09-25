@@ -107,7 +107,6 @@ class CallCourier
             ]
         ];
         $param['from_location'] = [
-            'code' => Helper::getActualShippingMethod()->get_option('city_code_value'),
             'address' => $data['address']
         ];
 

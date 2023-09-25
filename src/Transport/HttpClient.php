@@ -39,7 +39,7 @@ namespace Cdek\Transport {
             $resp = (new WP_Http())->request($url, array_merge($config, ['method' => $method, 'user-agent' => "wp/$pluginVersion"]));
 
             if ($plain || is_array($resp)) {
-                return $resp['body'];
+                return is_array($resp) ? $resp['body'] : $resp;
             }
 
             return json_encode(['status' => 'error']);

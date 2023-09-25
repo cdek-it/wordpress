@@ -22,56 +22,41 @@ class DeliveryCalc {
             return false;
         }
 
-        $cityName = $package["destination"]['city'];
-        if (!$cityName) {
-            return $this->plug();
-        }
-
-        $stateName                 = $this->getState($package["destination"]);
-        $deliveryParam['cityCode'] = $api->getCityCodeByCityName($cityName, $stateName);
-        if ($deliveryParam['cityCode'] === -1) {
-            return $this->plug();
-        }
+        $deliveryParam['address'] = sprintf('%s, %s', $package['destination']['city'],
+            $package['destination']['address']);
 
         $deliveryParam['package_data'] = $this->getPackagesData($package['contents']);
-        $pvz                           = $api->getPvz($deliveryParam['cityCode'],
-            $deliveryParam['package_data']['weight'] / 1000);
 
         $tariffList = $this->method->get_option('tariff_list');
         $weightInKg = $deliveryParam['package_data']['weight'] / 1000;
 
-        foreach ($tariffList as $tariff) {
-            $weightLimit = (int) Tariff::getTariffWeightByCode($tariff);
-            if ($weightInKg > $weightLimit) {
+        if ($this->method->get_option('insurance') === 'yes') {
+            $deliveryParam['selected_services'][0] = [
+                'code'      => 'INSURANCE',
+                'parameter' => (int) $package['cart_subtotal'],
+            ];
+        }
+
+        $calcResult = $api->calculate($deliveryParam);
+
+        if (empty($calcResult)) {
+            return false;
+        }
+
+        $delivery = json_decode($calcResult, true);
+
+        if (!$this->checkDeliveryResponse($delivery)) {
+            return false;
+        }
+
+        foreach ($delivery['tariff_codes'] as $tariff) {
+            if(!in_array((string)$tariff['tariff_code'], $tariffList, true)) {
                 continue;
             }
 
-            if (!$pvz['success'] && Tariff::isTariffToStoreByCode($tariff)) {
-                continue;
-            }
-
-            if ($this->method->get_option('insurance') === 'yes') {
-                $deliveryParam['selected_services'][0] = [
-                    'code'      => 'INSURANCE',
-                    'parameter' => (int) $package['cart_subtotal'],
-                ];
-            }
-
-            $calcResult = $api->calculate($deliveryParam, $tariff);
-
-            if (empty($calcResult)) {
-                continue;
-            }
-
-            $delivery = json_decode($calcResult);
-
-            if (!$this->checkDeliveryResponse($delivery)) {
-                continue;
-            }
-
-            $minDay = (int) $delivery->period_min + (int) $this->method->get_option('extra_day');
-            $maxDay = (int) $delivery->period_max + (int) $this->method->get_option('extra_day');
-            $cost   = (int) $delivery->total_sum + (int) $this->method->get_option('extra_cost');
+            $minDay = (int) $tariff['period_min'] + (int) $this->method->get_option('extra_day');
+            $maxDay = (int) $tariff['period_max'] + (int) $this->method->get_option('extra_day');
+            $cost   = (int) ($tariff['total_sum'] ?? $tariff['delivery_sum']) + (int) $this->method->get_option('extra_cost');
 
             if ($this->method->get_option('percentprice_toggle') === 'yes') {
                 $cost = (int) (($this->method->get_option('percentprice') / 100) * $cost);
@@ -92,37 +77,18 @@ class DeliveryCalc {
             }
 
             $this->rates[] = [
-                'id'        => $id.'_'.$tariff,
-                'label'     => sprintf("CDEK: %s, (%s-%s дней)", Tariff::getTariffNameByCode($tariff), $minDay,
+                'id'        => sprintf('%s_%s', $id, $tariff['tariff_code']),
+                'label'     => sprintf("CDEK: %s, (%s-%s дней)", Tariff::getTariffNameByCode($tariff['tariff_code']), $minDay,
                     $maxDay),
                 'cost'      => $cost,
                 'meta_data' => [
-                    'tariff_code'     => $tariff,
+                    'tariff_code'     => $tariff['tariff_code'],
                     'total_weight_kg' => $weightInKg,
                 ],
             ];
         }
 
         return true;
-    }
-
-    protected function plug(): bool {
-        $this->rates[] = [
-            'id'    => 'official_cdek_plug',
-            'label' => Helper::getTariffPlugName(),
-            'cost'  => 0,
-        ];
-
-        return true;
-    }
-
-    protected function getState($destination): string {
-        $state = '';
-        if (array_key_exists('state', $destination)) {
-            $state = $destination['state'];
-        }
-
-        return $state;
     }
 
     protected function getPackagesData($contents): array {
@@ -167,8 +133,7 @@ class DeliveryCalc {
         return ['length' => $length, 'width' => $width, 'height' => $height, 'weight' => $totalWeight];
     }
 
-    protected function checkDeliveryResponse($delivery): bool
-    {
-        return !property_exists($delivery, 'errors');
+    protected function checkDeliveryResponse($delivery): bool {
+        return !isset($delivery['errors']);
     }
 }

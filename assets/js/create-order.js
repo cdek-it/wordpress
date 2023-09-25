@@ -128,5 +128,155 @@
                 $('input[name=package_height]').val('');
             })
         }
+
+
+        $('#create-order-btn').click(function() {
+            $('#cdek-create-order-error').hide();
+            $.ajax({
+                method: 'POST',
+                url: window.cdek_rest_order_api_path.create_order,
+                data: {
+                    package_order_id: $('input[name=package_order_id]').val(),
+                    package_length: $('input[name=package_length]').val(),
+                    package_width: $('input[name=package_width]').val(),
+                    package_height: $('input[name=package_height]').val(),
+                },
+                beforeSend: function() {
+                    $('#cdek-loader').show();
+                },
+                complete: function() {
+                    $('#cdek-loader').hide();
+                },
+                success: function(response) {
+                    if (!response.state) {
+                        $('#cdek-create-order-error')
+                          .text(response.message)
+                          .show();
+                    } else {
+                        if (response.door) {
+                            $('#cdek-courier-result-block').hide();
+                            $('#cdek-order-courier').show();
+                        }
+                        $('#cdek-create-order-form').hide();
+                        $('#cdek-order-number')
+                          .html(`№ <b>${response.code}</b>`);
+                        $('#cdek-order-number-input').val(response.code);
+                        $('#cdek-info-order').show();
+                    }
+                },
+                error: function(error) {
+                    console.log({ error: error });
+                },
+            });
+        });
+
+        $('#delete-order-btn').click(function(event) {
+            $(event.target).addClass('clicked');
+            $('#cdek-create-order-error').hide();
+            $('#cdek-courier-error').hide();
+            $.ajax({
+                method: 'GET',
+                url: window.cdek_rest_order_api_path.delete_order,
+                data: {
+                    number: $('#cdek-order-number-input').val(),
+                    order_id: $('input[name=package_order_id]').val(),
+                },
+                beforeSend: function() {
+                    $('#cdek-loader').show();
+                },
+                complete: function() {
+                    $('#cdek-loader').hide();
+                },
+                success: function(response) {
+                    if (!response.state) {
+                        $('#cdek-delete-order-error')
+                          .text(response.message)
+                          .show();
+                        $('#delete-order-btn').hide();
+                    } else {
+                        alert(response.message);
+                        $(event.target).removeClass('clicked');
+                        $('#cdek-create-order-form').show();
+                        $('#cdek-info-order').hide();
+                    }
+                },
+                error: function(error) {
+                    console.log({ error: error });
+                },
+            });
+        });
+
+        $('#cdek-courier-send-call').click(function(event) {
+            $('#cdek-courier-error').hide();
+            $.ajax({
+                method: 'POST',
+                url: window.cdek_rest_order_api_path.call_courier,
+                data: {
+                    order_id: $('input[name=package_order_id]').val(),
+                    date: $('#cdek-courier-date').val(),
+                    starttime: $('#cdek-courier-startime').val(),
+                    endtime: $('#cdek-courier-endtime').val(),
+                    name: $('#cdek-courier-name').val(),
+                    phone: $('#cdek-courier-phone').val(),
+                    address: $('#cdek-courier-address').val(),
+                    desc: $('#cdek-courier-package-desc').val(),
+                    comment: $('#cdek-courier-comment').val(),
+                    weight: $('#cdek-courier-weight').val(),
+                    length: $('#cdek-courier-length').val(),
+                    width: $('#cdek-courier-width').val(),
+                    height: $('#cdek-courier-height').val(),
+                    need_call: $('#cdek-courier-call').prop('checked'),
+                },
+                beforeSend: function() {
+                    $('#cdek-loader').show();
+                },
+                complete: function() {
+                    $('#cdek-loader').hide();
+                },
+                success: function(response) {
+                    if (!response) {
+                        $('#cdek-courier-error').html(response.message).show();
+                    } else {
+                        $('#call-courier-form').hide();
+                        $('#cdek-order-courier').hide();
+                        $('#cdek-courier-info').text(response.message).show();
+                        $('#cdek-courier-result-block').show();
+                    }
+                },
+                error: function(error) {
+                    console.log({ error: error });
+                },
+            });
+        });
+
+        $('#cdek-order-courier').click(function(event) {
+            $('#call-courier-form').toggle();
+        });
+
+        $('#cdek-courier-delete').click(function(event) {
+            $.ajax({
+                method: 'GET',
+                url: window.cdek_rest_order_api_path.call_courier_delete,
+                data: {
+                    order_id: $('input[name=package_order_id]').val(),
+                },
+                beforeSend: function() {
+                    $('#cdek-loader').show();
+                },
+                complete: function() {
+                    $('#cdek-loader').hide();
+                },
+                success: function(response) {
+                    if (response) {
+                        $('#cdek-courier-result-block').hide();
+                        $('#cdek-order-courier').show();
+                    }
+                },
+                error: function(error) {
+                    console.log({ error: error });
+                },
+            });
+        });
+
     })
 })(jQuery);
