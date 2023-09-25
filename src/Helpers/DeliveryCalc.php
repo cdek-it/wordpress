@@ -136,14 +136,4 @@ class DeliveryCalc {
     protected function checkDeliveryResponse($delivery): bool {
         return !isset($delivery['errors']);
     }
-
-    protected function plug(): bool {
-        $this->rates[] = [
-            'id'    => 'official_cdek_plug',
-            'label' => Helper::getTariffPlugName(),
-            'cost'  => 0,
-        ];
-
-        return true;
-    }
 }
