@@ -51,6 +51,7 @@ jQuery(($) => {
         new window.CDEKWidget({
             apiKey: window.cdek.apiKey,
             sender: true,
+            debug: true,
             defaultLocation: 'Новосибирск',
             servicePath: window.cdek_admin_settings.api.offices,
             hideFilters: {
@@ -71,7 +72,6 @@ jQuery(($) => {
                     doorInput.val(target.formatted);
                     updateDoor();
                 }
-                console.log(type, target);
             },
         });
     };
