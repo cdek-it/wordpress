@@ -105,11 +105,11 @@ notify:
       curl -v -X POST -H "Content-Type: application/json" \
             -d '{"channel": "cms-support",
                 "username": "GitLab",
-                "text": "##### ${CI_PROJECT_NAME} :white_check_mark:\n
-                | Component | URL | Build | User |
-                |:----------|:--------|:------|:-----|
-                | ${CI_PROJECT_NAME} | [GitLab](https://gitlab.cdek.ru/${CI_PROJECT_PATH_SLUG}/-/releases/${CI_COMMIT_TAG}) | ${CI_COMMIT_TAG} | ${CI_COMMIT_AUTHOR} |
-                "}' ${WEBHOOK_URL}
+                "text": "##### '${CI_PROJECT_NAME}' :white_check_mark:\n
+        | Component | URL | Build | User |
+        |:----------|:--------|:------|:-----|
+        | '${CI_PROJECT_NAME}' | [GitLab](https://gitlab.cdek.ru/'${CI_PROJECT_PATH_SLUG}'/-/releases/'${CI_COMMIT_TAG}') | '${CI_COMMIT_TAG}' | '${CI_COMMIT_AUTHOR}' |
+      "}' ${WEBHOOK_URL}
 
 deploy_staging:
   stage: deploy
