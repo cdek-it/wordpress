@@ -102,7 +102,7 @@ notify:
     - tags
   script:
     - |
-      curl -X POST -H "Content-Type: application/json" \
+      curl -v -X POST -H "Content-Type: application/json" \
             -d '{"channel": "cms-support",
                 "username": "GitLab",
                 "text": "##### ${CI_PROJECT_NAME} :white_check_mark:\n
