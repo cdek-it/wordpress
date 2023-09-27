@@ -16,7 +16,6 @@ namespace Cdek {
     use Cdek\UI\Admin;
     use Cdek\UI\CdekWidget;
     use Cdek\UI\Frontend;
-    use Cdek\UI\Leaflet;
     use Cdek\UI\MetaBoxes;
     use Cdek\Validator\CheckoutProcessValidator;
     use RuntimeException;
