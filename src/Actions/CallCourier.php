@@ -31,7 +31,7 @@ class CallCourier
 
 
         $tariffFromDoor = false;
-        if (Tariff::isTariffFromDoorByCode($tariffId)) {
+        if (Tariff::isTariffFromDoor($tariffId)) {
             $tariffFromDoor = true;
             $orderNumber = $orderMetaData['order_number'];
             $param = $this->createRequestDataWithOrderNumber($data, $orderNumber);

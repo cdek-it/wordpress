@@ -23,8 +23,8 @@ class CdekApi {
     protected $clientSecret;
     protected WC_Shipping_Method $deliveryMethod;
 
-    public function __construct() {
-        $this->deliveryMethod = Helper::getActualShippingMethod();
+    public function __construct(?int $shippingInstanceId = null) {
+        $this->deliveryMethod = Helper::getActualShippingMethod($shippingInstanceId);
         $this->apiUrl         = $this->getApiUrl();
         $this->httpClient     = new HttpClient();
 
@@ -91,7 +91,7 @@ class CdekApi {
         $param['sender']['passport_date_of_birth'] = $this->deliveryMethod->get_option('passport_date_of_birth');
         $param['seller']                           = ['address' => $this->deliveryMethod->get_option('seller_address')];
 
-        if (Tariff::isTariffFromStoreByCode($param['tariff_code'])) {
+        if (Tariff::isTariffFromOffice($param['tariff_code'])) {
             $param['shipment_point'] = explode(' ',$this->deliveryMethod->get_option('pvz_code'))[1];
         } else {
             $param['from_location'] = [

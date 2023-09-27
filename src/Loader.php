@@ -16,7 +16,7 @@ namespace Cdek {
     use Cdek\UI\Admin;
     use Cdek\UI\CdekWidget;
     use Cdek\UI\Frontend;
-    use Cdek\UI\Leaflet;
+    use Cdek\UI\MetaBoxes;
     use Cdek\Validator\CheckoutProcessValidator;
     use RuntimeException;
     use function deactivate_plugins;
@@ -31,8 +31,14 @@ namespace Cdek {
         private static string $pluginVersion;
         private static string $pluginMainFile;
 
+        private static string $pluginName;
+
         public static function getPluginVersion(): string {
             return self::$pluginVersion;
+        }
+
+        public static function getPluginName(): string {
+            return self::$pluginName;
         }
 
         public static function getPluginUrl(): string {
@@ -77,6 +83,7 @@ namespace Cdek {
             }
 
             self::$pluginVersion = get_file_data(self::$pluginMainFile, ['Version'])[0];
+            self::$pluginName    = get_file_data(self::$pluginMainFile, ['Plugin Name'])[0];
 
             self::declareCompatibility();
 
@@ -93,6 +100,7 @@ namespace Cdek {
             (new CdekWidget)();
             (new Admin)();
             (new Frontend)();
+            (new MetaBoxes)();
         }
 
         private static function declareCompatibility(): void {

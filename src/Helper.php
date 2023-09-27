@@ -5,7 +5,11 @@ namespace Cdek;
 use WC_Shipping_Method;
 
 class Helper {
-    public static function getActualShippingMethod(): WC_Shipping_Method {
+    public static function getActualShippingMethod(?int $instanceId = null): WC_Shipping_Method {
+        if(!is_null($instanceId)) {
+            return new CdekShippingMethod($instanceId);
+        }
+
         if (isset(\WC()->cart)) {
             $methods = wc_get_shipping_zone(\WC()->cart->get_shipping_packages()[0])->get_shipping_methods(true);
 
