@@ -10,7 +10,7 @@ namespace Cdek\Enums {
 
     use RuntimeException;
 
-    class BarcodeFormat {
+    final class BarcodeFormat {
         private const AVAILABLE_VALUES = ['A4', 'A5', 'A6'];
 
         private string $value;

@@ -56,7 +56,7 @@ class CreateOrder {
         return [
             'state'   => true,
             'code'    => $cdekNumber,
-            'door'    => Tariff::isTariffFromDoorByCode($postOrderData['tariff_id']),
+            'door'    => Tariff::isTariffFromDoor($postOrderData['tariff_id']),
         ];
     }
 
@@ -68,7 +68,7 @@ class CreateOrder {
     }
 
     public function createRequestData($postOrderData, $order, $param) {
-        if ((int) Tariff::getTariffTypeToByCode($postOrderData['tariff_id'])) {
+        if (Tariff::isTariffToOffice($postOrderData['tariff_id'])) {
             $param['delivery_point'] = $postOrderData['pvz_code'];
         } else {
             $param['to_location'] = [

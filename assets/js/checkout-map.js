@@ -61,6 +61,9 @@ jQuery(($) => {
               widget.clearSelection();
           }
       })
+      .on('change', '.shipping_method', () => {
+          $(document.body).trigger('update_checkout');
+      })
       .on('click', '.open-pvz-btn', null, (e) => {
           el = $(e.target);
           closeMap(el);

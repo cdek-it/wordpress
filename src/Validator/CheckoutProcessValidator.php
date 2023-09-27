@@ -21,7 +21,7 @@ class CheckoutProcessValidator {
             }
 
             $tariffCode = self::getTariffCodeByShippingMethodId($shippingMethodIdSelected);
-            if (self::checkTariffFromStoreByTariffCode($tariffCode)) {
+            if (Tariff::isTariffFromOffice($tariffCode)) {
                 $pvzCode = CheckoutHelper::getValueFromCurrentSession('pvz_code') ?? WC()->session->get('pvz_code');
                 if (empty($pvzCode)) {
                     wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
@@ -34,9 +34,5 @@ class CheckoutProcessValidator {
 
     private static function getTariffCodeByShippingMethodId($shippingMethodId) {
         return explode('_', $shippingMethodId)[2];
-    }
-
-    private static function checkTariffFromStoreByTariffCode($tariffCode): bool {
-        return (bool) (int) Tariff::getTariffTypeToByCode($tariffCode);
     }
 }

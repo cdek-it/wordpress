@@ -78,7 +78,7 @@ class DeliveryCalc {
 
             $this->rates[] = [
                 'id'        => sprintf('%s_%s', $id, $tariff['tariff_code']),
-                'label'     => sprintf("CDEK: %s, (%s-%s дней)", Tariff::getTariffNameByCode($tariff['tariff_code']), $minDay,
+                'label'     => sprintf("CDEK: %s, (%s-%s дней)", Tariff::getTariffUserNameByCode($tariff['tariff_code']), $minDay,
                     $maxDay),
                 'cost'      => $cost,
                 'meta_data' => [

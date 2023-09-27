@@ -1,12 +1,12 @@
 <?php
 /**
- * Plugin Name:       CDEKDelivery
- * Plugin URI:        https://www.cdek.ru/ru/integration/modules/33
- * Description:       Интеграция доставки CDEK
- * Version:           dev
+ * Plugin Name: CDEKDelivery
+ * Plugin URI: https://www.cdek.ru/ru/integration/modules/33
+ * Description: Интеграция доставки CDEK
+ * Version: dev
  * Requires at least: 6.0
- * Requires PHP:      7.2
- * Author:            CDEK IT
+ * Requires PHP: 7.4
+ * Author: CDEK IT
  * WC requires at least: 6.9
  * WC tested up to: 8.0
  */
@@ -43,7 +43,6 @@ if (!class_exists(Loader::class)) {
 add_filter('woocommerce_new_order', 'cdek_woocommerce_new_order_action', 10, 2);
 add_action('woocommerce_after_shipping_rate', 'cdek_map_display', 10, 2);
 add_action('woocommerce_checkout_process', 'is_pvz_code');
-add_action('wp_footer', 'cdek_add_script_update_shipping_method');
 add_filter('woocommerce_checkout_fields', 'cdek_checkout_fields', 1090);
 add_action('woocommerce_checkout_create_order', 'cdek_save_custom_checkout_field_to_order', 10, 2);
 
@@ -203,7 +202,7 @@ function get_package_items($items, $orderId, $currency) {
 }
 
 function cdek_map_display($shippingMethodCurrent) {
-    if (is_checkout() && isTariffTypeFromStore($shippingMethodCurrent)) {
+    if (is_checkout() && isTariffDestinationCdekOffice($shippingMethodCurrent)) {
         $cdekShippingMethod = Helper::getActualShippingMethod();
 
         $meta   = $shippingMethodCurrent->get_meta_data();
@@ -215,14 +214,14 @@ function cdek_map_display($shippingMethodCurrent) {
             CheckoutHelper::getValueFromCurrentSession('state'));
 
         $points = $api->getOffices([
-                'city_code' => $city,
+            'city_code' => $city,
         ]);
 
         include 'templates/public/open-map.php';
     }
 }
 
-function isTariffTypeFromStore($shippingMethodCurrent) {
+function isTariffDestinationCdekOffice($shippingMethodCurrent): bool {
     if ($shippingMethodCurrent->get_method_id() !== 'official_cdek') {
         return false;
     }
@@ -235,60 +234,11 @@ function isTariffTypeFromStore($shippingMethodCurrent) {
 
     $tariffCode = explode('_', $shippingMethodIdSelected)[2];
 
-    return (bool) (int) Tariff::getTariffTypeToByCode($tariffCode);
-}
-
-function cdek_add_update_form_billing($fragments) {
-    $checkout = WC()->checkout();
-
-    parse_str($_POST['post_data'], $fields_values);
-
-    ob_start();
-
-    echo '<div class="woocommerce-billing-fields__field-wrapper">';
-
-    $fields = $checkout->get_checkout_fields('billing');
-
-    foreach ($fields as $key => $field) {
-        $value = $checkout->get_value($key);
-
-        if (!$value && !empty($fields_values[$key])) {
-            $value = $fields_values[$key];
-        }
-
-        woocommerce_form_field($key, $field, $value);
-    }
-
-    echo '</div>';
-
-    $fragments['.woocommerce-billing-fields__field-wrapper'] = ob_get_clean();
-
-    return $fragments;
-}
-
-function getShipToDestination() {
-    $shipToDestination = get_option('woocommerce_ship_to_destination');
-    if ($shipToDestination === 'billing_only') {
-        return 'billing';
-    }
-
-    return $shipToDestination;
-}
-
-function cdek_add_script_update_shipping_method() {
-    if (is_checkout()) {
-        ?>
-        <script>
-            jQuery(document).on('change', '.shipping_method', function() {
-                jQuery(document.body).trigger('update_checkout');
-            });
-        </script>
-        <?php
-    }
+    return Tariff::isTariffToOffice($tariffCode);
 }
 
 function cdek_woocommerce_new_order_action($order_id, $order) {
-    if (isCdekShippingMethod($order)) {
+    if (CheckoutHelper::isCdekShippingMethod($order)) {
         $pvzInfo  = CheckoutHelper::getValueFromCurrentSession('pvz_info');
         $pvzCode  = CheckoutHelper::getValueFromCurrentSession('pvz_code');
         $tariffId = getTariffCodeCdekShippingMethodByOrder($order);
@@ -301,7 +251,7 @@ function cdek_woocommerce_new_order_action($order_id, $order) {
             $pvzInfo  = $order->get_billing_address_1();
             $cityCode = $api->getCityCodeByCityName($order->get_billing_city(), $order->get_billing_city());
         }
-        if (empty($pvzInfo) && Tariff::isTariffToStoreByCode($tariffId)) {
+        if (empty($pvzInfo) && Tariff::isTariffToOffice($tariffId)) {
             $pvzInfo = $order->get_billing_address_1();
         }
         $cityData = $api->getCityByCode($cityCode);
@@ -310,7 +260,7 @@ function cdek_woocommerce_new_order_action($order_id, $order) {
         $order->set_shipping_state($cityData['region']);
         $order->save();
 
-        if (Tariff::isTariffToStoreByCode($tariffId)) {
+        if (Tariff::isTariffToOffice($tariffId)) {
             $shippingMethodArray = $order->get_items('shipping');
             $shippingMethod      = array_shift($shippingMethodArray);
             $shippingMethod->add_meta_data('pvz', $pvzCode.' ('.$pvzInfo.')');
@@ -331,176 +281,10 @@ function cdek_woocommerce_new_order_action($order_id, $order) {
     }
 }
 
-function add_custom_order_meta_box() {
-    global $post;
-    if ($post && OrderUtil::is_order($post->ID, wc_get_order_types())) {
-        $order_id = $post->ID;
-        $order    = wc_get_order($order_id);
-        if (isCdekShippingMethod($order)) {
-            $api = new CdekApi();
-            if ($api->checkAuth()) {
-                $createOrder = new CreateOrder();
-                $createOrder->deleteIfNotExist($order_id);
-
-                $callCourier = new CallCourier();
-                $callCourier->deleteIfNotExist($order_id);
-                CourierMetaData::getMetaByOrderId($order_id);
-                //Сбор данных
-                $orderWP       = $order->get_id();
-                $postOrderData = OrderMetaData::getMetaByOrderId($orderWP);
-
-                $orderNumber   = getOrderNumber($postOrderData);
-                $orderUuid     = getOrderUuid($postOrderData);
-                $items         = getItems($order);
-                $dateMin       = date('Y-m-d');
-                $dateMax       = getDateMax($dateMin);
-                $courierNumber = getCourierNumber($order_id);
-
-                add_meta_box('cdek_create_order_box', 'CDEKDelivery', 'render_cdek_create_order_box', 'shop_order',
-                    'side', 'core', [
-                        'status'        => true,
-                        'hasPackages'   => isHasPackages(),
-                        'orderNumber'   => $orderNumber,
-                        'orderIdWP'     => $orderWP,
-                        'orderUuid'     => $orderUuid,
-                        'dateMin'       => $dateMin,
-                        'dateMax'       => $dateMax,
-                        'items'         => $items,
-                        'courierNumber' => $courierNumber,
-                        'fromDoor'      => Tariff::isTariffFromDoorByCode($postOrderData['tariff_id']),
-                    ],);
-            } else {
-                add_meta_box('cdek_create_order_box', 'CDEKDelivery', 'render_cdek_create_order_box', 'shop_order',
-                    'side', 'core', [
-                        'status' => false,
-                    ],);
-
-            }
-        }
-    }
-
-
-}
-
-/**
- * @param $order
- *
- * @return array
- */
-function getItems($order): array {
-    $items = [];
-    foreach ($order->get_items() as $item) {
-        $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
-    }
-
-    return $items;
-}
-
-/**
- * @param $postOrderData
- *
- * @return mixed
- */
-function getOrderUuid($postOrderData) {
-    if (array_key_exists('cdek_order_waybill', $postOrderData)) {
-        $orderUuid = $postOrderData['cdek_order_waybill'];
-    } else {
-        $orderUuid = $postOrderData['order_uuid'];
-    }
-
-    return $orderUuid;
-}
-
-/**
- * @param $postOrderData
- *
- * @return mixed
- */
-function getOrderNumber($postOrderData) {
-    if (array_key_exists('cdek_order_uuid', $postOrderData)) {
-        $orderNumber = $postOrderData['cdek_order_uuid'];
-    } else {
-        $orderNumber = $postOrderData['order_number'];
-    }
-
-    return $orderNumber;
-}
-
-/**
- * @param int $order_id
- *
- * @return mixed|string
- */
-function getCourierNumber(int $order_id) {
-    $courierMeta   = CourierMetaData::getMetaByOrderId($order_id);
-    $courierNumber = '';
-    if (!empty($courierMeta)) {
-        $courierNumber = $courierMeta['courier_number'];
-    }
-
-    return $courierNumber;
-}
-
-/**
- * @param $dateMin
- *
- * @return false|string
- */
-function getDateMax($dateMin) {
-    $dateMaxUnix = strtotime($dateMin." +31 days");
-
-    return date('Y-m-d', $dateMaxUnix);
-}
-
-/**
- * @return bool
- */
-function isHasPackages(): bool {
-    return Helper::getActualShippingMethod()->get_option('has_packages_mode') === 'yes';
-}
-
-add_action('add_meta_boxes', 'add_custom_order_meta_box');
-
-function render_cdek_create_order_box($post, $metabox) {
-    $args = $metabox['args'];
-    if ($args['status']) {
-        $hasPackages   = $args['hasPackages'];
-        $orderNumber   = $args['orderNumber'];
-        $orderIdWP     = $args['orderIdWP'];
-        $orderUuid     = $args['orderUuid'];
-        $dateMin       = $args['dateMin'];
-        $dateMax       = $args['dateMax'];
-        $items         = $args['items'];
-        $courierNumber = $args['courierNumber'];
-        $fromDoor      = $args['fromDoor'];
-        ob_start();
-        include 'templates/admin/create-order.php';
-        $content = ob_get_clean();
-        echo $content;
-    } else {
-        $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section=official_cdek');
-        echo '<div class="cdek_create_order_box">';
-        echo '<h4>Авторизация не пройдена</h4>';
-        echo '<p>Введите корректные идентификатор и секретный ключ клиента в <a href="'.$settings_page_url.'">настройках</a> плагина CDEKDelivery</p>';
-        echo '</div>';
-    }
-}
-
 function getTariffCodeCdekShippingMethodByOrder($order) {
     $shippingMethodArray = $order->get_items('shipping');
 
     return array_shift($shippingMethodArray)->get_meta('tariff_code');
-}
-
-function isCdekShippingMethod($order) {
-    $shippingMethodArray = $order->get_items('shipping');
-    if (empty($shippingMethodArray)) {
-        return false;
-    }
-    $shippingMethod   = array_shift($shippingMethodArray);
-    $shippingMethodId = $shippingMethod->get_method_id();
-
-    return $shippingMethodId === 'official_cdek';
 }
 
 function cdek_checkout_fields($fields) {
@@ -583,23 +367,21 @@ function cdek_checkout_fields($fields) {
 }
 
 function cdek_save_custom_checkout_field_to_order($order, $data) {
-    if (isset($_POST['passport_series'])) {
-        $order->update_meta_data('_passport_series', sanitize_text_field($_POST['passport_series']));
-    }
-    if (isset($_POST['passport_number'])) {
-        $order->update_meta_data('_passport_number', sanitize_text_field($_POST['passport_number']));
-    }
-    if (isset($_POST['passport_date_of_issue'])) {
-        $order->update_meta_data('_passport_date_of_issue', sanitize_text_field($_POST['passport_date_of_issue']));
-    }
-    if (isset($_POST['passport_organization'])) {
-        $order->update_meta_data('_passport_organization', sanitize_text_field($_POST['passport_organization']));
-    }
-    if (isset($_POST['tin'])) {
-        $order->update_meta_data('_tin', sanitize_text_field($_POST['tin']));
-    }
-    if (isset($_POST['passport_date_of_birth'])) {
-        $order->update_meta_data('_passport_date_of_birth', sanitize_text_field($_POST['passport_date_of_birth']));
+    foreach (
+        [
+            'passport_series',
+            'passport_number',
+            'passport_date_of_issue',
+            'passport_organization',
+            'tin',
+            'passport_date_of_birth',
+        ] as $key
+    ) {
+        if (!isset($_POST[$key])) {
+            continue;
+        }
+
+        $order->update_meta_data("_$key", sanitize_text_field($_POST[$key]));
     }
 }
 
@@ -615,7 +397,7 @@ function is_pvz_code() {
         }
 
         $tariffCode = getTariffCodeByShippingMethodId($shippingMethodIdSelected);
-        if (checkTariffFromStoreByTariffCode($tariffCode)) {
+        if (Tariff::isTariffFromOffice($tariffCode)) {
             if (empty(CheckoutHelper::getValueFromCurrentSession('pvz_code'))) {
                 $pvzCodeTmp = WC()->session->get('pvz_code');
                 if (empty($pvzCodeTmp[0]['pvz_code'])) {
@@ -635,8 +417,4 @@ function is_pvz_code() {
 
 function getTariffCodeByShippingMethodId($shippingMethodId) {
     return explode('_', $shippingMethodId)[2];
-}
-
-function checkTariffFromStoreByTariffCode($tariffCode): bool {
-    return (bool) Tariff::getTariffTypeToByCode($tariffCode);
 }
