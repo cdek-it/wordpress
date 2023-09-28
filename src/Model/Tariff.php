@@ -153,6 +153,10 @@ class Tariff {
             'name' => 'E-com Standard склад-постамат',
             'mode' => self::OFFICE_PICKUP,
         ],
+        751 => [
+            'name' => 'Сборный груз склад-склад',
+            'mode' => self::OFFICE_OFFICE,
+        ],
     ];
 
     public static function isTariffToOffice(int $code): bool {
