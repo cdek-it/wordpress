@@ -16,8 +16,8 @@ jQuery(($) => {
         el.html('Выбрать ПВЗ');
         $('.cdek-office-code').val('');
 
-        if(widget !== null){
-            widget.clearSelection()
+        if (widget !== null) {
+            widget.clearSelection();
         }
 
         if (typeof errorMessage === 'string') {
@@ -34,13 +34,16 @@ jQuery(($) => {
     const onChoose = (_type, _tariff, address) => {
         $('.cdek-office-code').val(address.code);
         el.html('Повторно выбрать ПВЗ');
-        el.before(
-          `<div class="cdek-office-info">${address.name} - [${address.code}]</div>`);
+        const officeInfo = el.parent().children('.cdek-office-info');
+        if (officeInfo.length === 0) {
+            el.before(
+              `<div class="cdek-office-info">${address.name} - [${address.code}]</div>`);
+        } else {
+            officeInfo.html(`${address.name} - [${address.code}]`);
+        }
 
         $.ajax({
-            method: 'GET',
-            url: window.cdek_map.tmp_pvz_code,
-            data: {
+            method: 'GET', url: window.cdek_map.tmp_pvz_code, data: {
                 pvz_code: address.code,
             },
         });
