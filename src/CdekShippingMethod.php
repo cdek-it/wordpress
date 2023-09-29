@@ -135,20 +135,11 @@ class CdekShippingMethod extends WC_Shipping_Method {
             'passport_series'                => [
                 'title'             => 'Серия паспорта',
                 'type'              => 'text',
-                'desc_tip'          => true,
-                'description'       => 'ограничение 4 символа',
-                'custom_attributes' => [
-                    'maxlength' => 4,
-                    'pattern'   => '\d*',
-                ],
             ],
             'passport_number'                => [
                 'title'             => 'Номер паспорта',
                 'type'              => 'text',
-                'desc_tip'          => true,
-                'description'       => 'ограничение 6 символов',
                 'custom_attributes' => [
-                    'maxlength' => 6,
                     'pattern'   => '\d*',
                 ],
             ],
@@ -165,9 +156,7 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'title'             => 'ИНН',
                 'type'              => 'text',
                 'desc_tip'          => true,
-                'description'       => 'Ограничение 12 символов',
                 'custom_attributes' => [
-                    'maxlength' => 12,
                     'pattern'   => '\d*',
                 ],
             ],
