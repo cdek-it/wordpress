@@ -141,11 +141,11 @@ notify_test:
   when: manual
   script:
     - |
-      curl -X POST -H "Content-Type: application/json" \
-            -d '{"channel": "cms-support",
-                "username": "GitLab",
-                "text": "##### TEST_TEST_TEST '${CI_PROJECT_NAME}' :white_check_mark:\n
+      curl -v -H "Content-Type: application/json" \
+        -d '{"channel": "cms-support",
+        "username": "GitLab",
+        "text": "##### TEST_TEST_TEST '${CI_PROJECT_NAME}' :white_check_mark:\n
         | Component | URL | Build | User |
         |:----------|:--------|:------|:-----|
         | '${CI_PROJECT_NAME}' | [GitLab](https://gitlab.cdek.ru/'${CI_PROJECT_PATH_SLUG}'/-/releases/'${CI_COMMIT_TAG}') | '${CI_COMMIT_TAG}' | '${CI_COMMIT_AUTHOR}' |
-      "}' ${WEBHOOK_URL}
+        "}' '${WEBHOOK_URL}'
