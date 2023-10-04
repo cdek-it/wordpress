@@ -4,6 +4,7 @@ namespace Cdek\Actions;
 
 use Cdek\CdekApi;
 use Cdek\Helper;
+use Cdek\Helpers\CheckoutHelper;
 use Cdek\Helpers\UrlHelper;
 use Cdek\Model\CourierMetaData;
 use Cdek\Model\OrderMetaData;
@@ -34,6 +35,8 @@ class CreateOrder {
         $param         = setPackage($data, $orderId, $postOrderData['currency']); //data передается в сыром виде
         $order         = wc_get_order($orderId);
         $cityCode      = getCityCode($postOrderData['city_code'], $order);
+
+        $postOrderData['tariff_code'] = CheckoutHelper::getOrderShippingMethod($order)->get_meta('tariff_code');
 
         $validate = ValidateCityCode::validate($cityCode);
         if (!$validate->state) {
@@ -94,7 +97,7 @@ class CreateOrder {
             $param['recipient']['passport_date_of_birth'] = $order->get_meta('_passport_date_of_birth', true);
         }
 
-        $param['tariff_code'] = $postOrderData['tariff_id'];
+        $param['tariff_code'] = $postOrderData['tariff_code'];
         $param['print']       = 'waybill';
 
         $selectedPaymentMethodId = $order->get_payment_method();
