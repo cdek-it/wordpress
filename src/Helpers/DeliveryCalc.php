@@ -22,8 +22,7 @@ class DeliveryCalc {
             return false;
         }
 
-        $deliveryParam['address'] = sprintf('%s, %s', $package['destination']['city'],
-            $package['destination']['address']);
+        $deliveryParam['address'] = sprintf('%s', $package['destination']['city']);
 
         $deliveryParam['package_data'] = $this->getPackagesData($package['contents']);
 
@@ -82,6 +81,7 @@ class DeliveryCalc {
                     $maxDay),
                 'cost'      => $cost,
                 'meta_data' => [
+                    'address'         => sha1($deliveryParam['address']),
                     'tariff_code'     => $tariff['tariff_code'],
                     'total_weight_kg' => $weightInKg,
                 ],
