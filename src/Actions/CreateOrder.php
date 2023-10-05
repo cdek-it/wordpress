@@ -80,6 +80,8 @@ class CreateOrder {
             ];
         }
 
+        $param['type'] = Tariff::getTariffType($postOrderData['tariff_id']);
+
         $param['recipient'] = [
             'name'   => $order->get_billing_first_name().' '.$order->get_billing_last_name(),
             'email'  => $order->get_billing_email(),
@@ -98,7 +100,6 @@ class CreateOrder {
         }
 
         $param['tariff_code'] = $postOrderData['tariff_code'];
-        $param['print']       = 'waybill';
 
         $selectedPaymentMethodId = $order->get_payment_method();
         if ($selectedPaymentMethodId === 'cod') {
@@ -110,14 +111,6 @@ class CreateOrder {
                 ];
             }
         }
-
-
-//        if ($selectedPaymentMethodId === 'cod' && $codPriceThreshold > 0) {
-//            $param['delivery_recipient_cost_adv'] = [
-//                'sum' => $order->get_shipping_total(),
-//                'threshold' => $codPriceThreshold
-//            ];
-//        }
 
         return $param;
     }
