@@ -13,6 +13,7 @@ namespace Cdek {
     use Cdek\Controllers\LocationController;
     use Cdek\Controllers\OrderController;
     use Cdek\Controllers\RestController;
+    use Cdek\Helpers\DataWPScraber;
     use Cdek\UI\Admin;
     use Cdek\UI\CdekWidget;
     use Cdek\UI\Frontend;
@@ -91,6 +92,8 @@ namespace Cdek {
             add_action('rest_api_init', new OrderController);
             add_action('rest_api_init', new CourierController);
             add_action('rest_api_init', new LocationController);
+
+            add_filter('woocommerce_order_item_get_formatted_meta_data', [DataWPScraber::class, 'hideMeta']);
 
             add_action('woocommerce_shipping_methods',
                 static fn($methods) => array_merge($methods, ['official_cdek' => CdekShippingMethod::class]));

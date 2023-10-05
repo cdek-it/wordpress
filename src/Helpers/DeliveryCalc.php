@@ -3,6 +3,7 @@
 namespace Cdek\Helpers;
 
 use Cdek\CdekApi;
+use Cdek\Config;
 use Cdek\Helper;
 use Cdek\Model\Tariff;
 use WC_Shipping_Method;
@@ -49,13 +50,14 @@ class DeliveryCalc {
         }
 
         foreach ($delivery['tariff_codes'] as $tariff) {
-            if(!in_array((string)$tariff['tariff_code'], $tariffList, true)) {
+            if (!in_array((string) $tariff['tariff_code'], $tariffList, true)) {
                 continue;
             }
 
             $minDay = (int) $tariff['period_min'] + (int) $this->method->get_option('extra_day');
             $maxDay = (int) $tariff['period_max'] + (int) $this->method->get_option('extra_day');
-            $cost   = (int) ($tariff['total_sum'] ?? $tariff['delivery_sum']) + (int) $this->method->get_option('extra_cost');
+            $cost   = (int) ($tariff['total_sum'] ?? $tariff['delivery_sum']) +
+                      (int) $this->method->get_option('extra_cost');
 
             if ($this->method->get_option('percentprice_toggle') === 'yes') {
                 $cost = (int) (($this->method->get_option('percentprice') / 100) * $cost);
@@ -65,7 +67,8 @@ class DeliveryCalc {
                 $cost = (int) $this->method->get_option('fixprice');
             }
 
-            if (($this->method->get_option('stepprice_toggle') === 'yes') && (int) $package['cart_subtotal'] > (int) $this->method->get_option('stepprice')) {
+            if (($this->method->get_option('stepprice_toggle') === 'yes') &&
+                (int) $package['cart_subtotal'] > (int) $this->method->get_option('stepprice')) {
                 $cost = 0;
             }
 
@@ -77,13 +80,13 @@ class DeliveryCalc {
 
             $this->rates[] = [
                 'id'        => sprintf('%s_%s', $id, $tariff['tariff_code']),
-                'label'     => sprintf("CDEK: %s, (%s-%s дней)", Tariff::getTariffUserNameByCode($tariff['tariff_code']), $minDay,
-                    $maxDay),
+                'label'     => sprintf("CDEK: %s, (%s-%s дней)",
+                    Tariff::getTariffUserNameByCode($tariff['tariff_code']), $minDay, $maxDay),
                 'cost'      => $cost,
                 'meta_data' => [
-                    'address'         => sha1($deliveryParam['address']),
-                    'tariff_code'     => $tariff['tariff_code'],
-                    'total_weight_kg' => $weightInKg,
+                    Config::ADDRESS_HASH_META_KEY => sha1($deliveryParam['address']),
+                    'tariff_code'                 => $tariff['tariff_code'],
+                    'total_weight_kg'             => $weightInKg,
                 ],
             ];
         }
