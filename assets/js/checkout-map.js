@@ -92,6 +92,7 @@ jQuery(($) => {
               widget = new window.CDEKWidget({
                   apiKey: window.cdek.apiKey,
                   popup: true,
+                  debug: true,
                   defaultLocation: cityInput.val(),
                   officesRaw: points,
                   hideDeliveryOptions: {
@@ -100,7 +101,8 @@ jQuery(($) => {
                   onChoose,
               });
           } else {
-              widget.updateOffices(points);
+              widget.updateOfficesRaw(points);
+              widget.updateLocation(cityInput.val());
           }
 
           widget.open();
