@@ -45,7 +45,7 @@ class CdekShippingMethod extends WC_Shipping_Method {
             ],
         ];
 
-        $this->form_fields          = [
+        $this->form_fields = [
             'auth_block_name'                => [
                 'title' => '<h3 style="text-align: center;">Авторизация</h3>',
                 'type'  => 'title',
@@ -133,14 +133,14 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'description' => 'Адрес компании грузоотправителя для международных заказов',
             ],
             'passport_series'                => [
-                'title'             => 'Серия паспорта',
-                'type'              => 'text',
+                'title' => 'Серия паспорта',
+                'type'  => 'text',
             ],
             'passport_number'                => [
                 'title'             => 'Номер паспорта',
                 'type'              => 'text',
                 'custom_attributes' => [
-                    'pattern'   => '\d*',
+                    'pattern' => '\d*',
                 ],
             ],
             'passport_date_of_issue'         => [
@@ -157,7 +157,7 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'type'              => 'text',
                 'desc_tip'          => true,
                 'custom_attributes' => [
-                    'pattern'   => '\d*',
+                    'pattern' => '\d*',
                 ],
             ],
             'passport_date_of_birth'         => [
@@ -212,10 +212,10 @@ class CdekShippingMethod extends WC_Shipping_Method {
             'pvz_code'                       => [
                 'type' => 'hidden',
             ],
-            'address'                         => [
+            'address'                        => [
                 'type' => 'hidden',
             ],
-            'country'                         => [
+            'country'                        => [
                 'type' => 'hidden',
             ],
             'package_setting_block_name'     => [
@@ -401,11 +401,13 @@ class CdekShippingMethod extends WC_Shipping_Method {
     }
 
     public function calculate_shipping($package = []): void {
-            $deliveryCalc = new DeliveryCalc();
-            if ($deliveryCalc->calculate($package, $this->id)) {
-                foreach ($deliveryCalc->rates as $rate) {
-                    $this->add_rate($rate);
-                }
-            }
+        $deliveryCalc = new DeliveryCalc();
+        if (!$deliveryCalc->calculate($package, $this->id)) {
+            return;
+        }
+
+        foreach ($deliveryCalc->getRates() as $rate) {
+            $this->add_rate($rate);
+        }
     }
 }

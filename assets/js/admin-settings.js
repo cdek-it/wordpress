@@ -52,7 +52,7 @@ jQuery(($) => {
             apiKey: window.cdek.apiKey,
             sender: true,
             debug: true,
-            defaultLocation: 'Новосибирск',
+            defaultLocation: officeInput.val() ? officeInput.val().split(', ')[0] : 'Новосибирск',
             servicePath: window.cdek_admin_settings.api.offices,
             hideFilters: {
                 type: true,
@@ -61,12 +61,12 @@ jQuery(($) => {
                 is_dressing_room: true,
             },
             selected: {
-                office: officeInput.val() ? officeInput.val().split(' ')[1] : null,
+                office: officeInput.val() ? officeInput.val().split(', ')[1] : null,
                 door: doorInput.val() || null,
             },
             onChoose(type, tariff, target) {
                 if (type === 'office') {
-                    officeInput.val(`${target.city} ${target.code}`);
+                    officeInput.val(`${target.city}, ${target.code}`);
                     $('input#woocommerce_official_cdek_country').val(target.country_code);
                     updateOfficeCode();
                 } else if (type === 'door') {

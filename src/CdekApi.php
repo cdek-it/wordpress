@@ -28,7 +28,7 @@ class CdekApi {
         $this->apiUrl         = $this->getApiUrl();
         $this->httpClient     = new HttpClient();
 
-        if ($this->deliveryMethod->get_option('test_mode') === 'yes') {
+        if (!isset($_ENV['CDEK_REST_API']) && $this->deliveryMethod->get_option('test_mode') === 'yes') {
             $this->clientId     = Config::TEST_CLIENT_ID;
             $this->clientSecret = Config::TEST_CLIENT_SECRET;
         } else {
@@ -38,7 +38,11 @@ class CdekApi {
     }
 
     private function getApiUrl() {
-        return defined('CDEK_REST_API') ? CDEK_REST_API : ($this->deliveryMethod->get_option('test_mode') === 'yes' ? Config::TEST_API_URL : Config::API_URL);
+        if ($this->deliveryMethod->get_option('test_mode') === 'yes') {
+            return $_ENV['CDEK_REST_API'] ?? Config::TEST_API_URL;
+        }
+
+        return Config::API_URL;
     }
 
     public function checkAuth(): bool {
@@ -89,14 +93,17 @@ class CdekApi {
         $param['sender']['passport_organization']  = $this->deliveryMethod->get_option('passport_organization');
         $param['sender']['tin']                    = $this->deliveryMethod->get_option('tin');
         $param['sender']['passport_date_of_birth'] = $this->deliveryMethod->get_option('passport_date_of_birth');
+        $param['sender']['name']                   = $this->deliveryMethod->get_option('seller_name');
+        $param['sender']['company']                = $this->deliveryMethod->get_option('seller_name');
+        $param['sender']['phones']                 = ['number' => $this->deliveryMethod->get_option('seller_phone')];
         $param['seller']                           = ['address' => $this->deliveryMethod->get_option('seller_address')];
 
         if (Tariff::isTariffFromOffice($param['tariff_code'])) {
-            $param['shipment_point'] = explode(' ',$this->deliveryMethod->get_option('pvz_code'))[1];
+            $param['shipment_point'] = explode(', ', $this->deliveryMethod->get_option('pvz_code'))[1];
         } else {
             $param['from_location'] = [
-                'address' => $this->deliveryMethod->get_option('address'),
-                'city' => $this->deliveryMethod->get_option('address'),
+                'address'      => $this->deliveryMethod->get_option('address'),
+                'city'         => $this->deliveryMethod->get_option('address'),
                 'country_code' => $this->deliveryMethod->get_option('country') ?? 'RU',
             ];
         }
@@ -138,13 +145,15 @@ class CdekApi {
     public function calculate($deliveryParam) {
         $url = $this->apiUrl.self::CALC_PATH;
 
-        $senderCity = $this->deliveryMethod->get_option('pvz_code') ? explode(' ',
-            $this->deliveryMethod->get_option('pvz_code'))[0] : $this->deliveryMethod->get_option('address');
+        $senderCity = $this->deliveryMethod->get_option('pvz_code') ?
+            explode(', ', $this->deliveryMethod->get_option('pvz_code'))[0] :
+            $this->deliveryMethod->get_option('address');
 
         return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), [
+            'type'          => $deliveryParam['type'],
             'from_location' => [
-                'address' => $senderCity,
-                'city' => $senderCity,
+                'address'      => $senderCity,
+                'city'         => $senderCity,
                 'country_code' => $this->deliveryMethod->get_option('country') ?? 'RU',
             ],
             'to_location'   => [
@@ -156,8 +165,8 @@ class CdekApi {
                 'width'  => $deliveryParam['package_data']['width'],
                 'height' => $deliveryParam['package_data']['height'],
             ],
-            'services'      => array_key_exists('selected_services',
-                $deliveryParam) ? $deliveryParam['selected_services'] : [],
+            'services'      => array_key_exists('selected_services', $deliveryParam) ?
+                $deliveryParam['selected_services'] : [],
         ]);
     }
 
