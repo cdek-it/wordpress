@@ -13,6 +13,9 @@ namespace Cdek\UI {
 
     class Frontend {
         public static function registerScripts(): void {
+            if (!is_checkout()) {
+                return;
+            }
             wp_enqueue_script('cdek-map', Loader::getPluginUrl().'assets/js/checkout-map.js', ['jquery', 'cdek-widget'],
                 Loader::getPluginVersion(), true);
             wp_localize_script('cdek-map', 'cdek_map', [
@@ -21,6 +24,9 @@ namespace Cdek\UI {
         }
 
         public static function registerStyles(): void {
+            if (!is_checkout()) {
+                return;
+            }
             wp_enqueue_style('cdek-css', Loader::getPluginUrl().'assets/css/cdek-map.css', [],
                 Loader::getPluginVersion());
         }

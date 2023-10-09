@@ -3,6 +3,7 @@
 namespace Cdek\Helpers;
 
 use Cdek\CdekApi;
+use Cdek\Config;
 use Cdek\Helper;
 use Cdek\Model\Tariff;
 use WC_Shipping_Method;
@@ -23,8 +24,7 @@ class DeliveryCalc {
 
         foreach ([Tariff::SHOP_TYPE, Tariff::DELIVERY_TYPE] as $deliveryType) {
             $deliveryParam['type']    = $deliveryType;
-            $deliveryParam['address'] = sprintf('%s, %s', $package['destination']['city'],
-                $package['destination']['address']);
+            $deliveryParam['address'] = $package['destination']['city'];
 
             $deliveryParam['package_data'] = $this->getPackagesData($package['contents']);
 
@@ -86,6 +86,7 @@ class DeliveryCalc {
                         Tariff::getTariffUserNameByCode($tariff['tariff_code']), $minDay, $maxDay),
                     'cost'      => $cost,
                     'meta_data' => [
+                        Config::ADDRESS_HASH_META_KEY => sha1($deliveryParam['address']),
                         'tariff_code'     => $tariff['tariff_code'],
                         'total_weight_kg' => $weightInKg,
                     ],

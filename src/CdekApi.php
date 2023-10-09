@@ -96,6 +96,8 @@ class CdekApi {
         } else {
             $param['from_location'] = [
                 'address' => $this->deliveryMethod->get_option('address'),
+                'city' => $this->deliveryMethod->get_option('address'),
+                'country_code' => $this->deliveryMethod->get_option('country') ?? 'RU',
             ];
         }
 
@@ -136,10 +138,14 @@ class CdekApi {
     public function calculate($deliveryParam) {
         $url = $this->apiUrl.self::CALC_PATH;
 
+        $senderCity = $this->deliveryMethod->get_option('pvz_code') ? explode(' ',
+            $this->deliveryMethod->get_option('pvz_code'))[0] : $this->deliveryMethod->get_option('address');
+
         return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), [
             'from_location' => [
-                'address' => $this->deliveryMethod->get_option('pvz_code') ? explode(' ',
-                    $this->deliveryMethod->get_option('pvz_code'))[0] : $this->deliveryMethod->get_option('address'),
+                'address' => $senderCity,
+                'city' => $senderCity,
+                'country_code' => $this->deliveryMethod->get_option('country') ?? 'RU',
             ],
             'to_location'   => [
                 'address' => $deliveryParam['address'],

@@ -67,9 +67,11 @@ jQuery(($) => {
             onChoose(type, tariff, target) {
                 if (type === 'office') {
                     officeInput.val(`${target.city} ${target.code}`);
+                    $('input#woocommerce_official_cdek_country').val(target.country_code);
                     updateOfficeCode();
                 } else if (type === 'door') {
                     doorInput.val(target.formatted);
+                    $('input#woocommerce_official_cdek_country').val(target.country);
                     updateDoor();
                 }
             },
