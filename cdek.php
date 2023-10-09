@@ -56,7 +56,7 @@ function getCityCode($city_code, $order) {
     return $cityCode;
 }
 
-function setPackage($data, $orderId, $currency) {
+function setPackage($data, $orderId, $currency, $tariffType = Tariff::SHOP_TYPE) {
     $param = [];
     if (Helper::getActualShippingMethod()->get_option('has_packages_mode') === 'yes') {
         $packageData       = json_decode($data->get_param('package_data'));
@@ -106,13 +106,17 @@ function setPackage($data, $orderId, $currency) {
         }
 
         $param['packages'] = [
-            'number' => $orderId,
-            'length' => $length,
-            'width'  => $width,
-            'height' => $height,
-            'weight' => $totalWeight,
-            'items'  => $itemsData,
+            'number'  => $orderId,
+            'length'  => $length,
+            'width'   => $width,
+            'height'  => $height,
+            'weight'  => $totalWeight,
+            'comment' => 'приложена опись',
         ];
+
+        if ($tariffType === Tariff::SHOP_TYPE) {
+            $param['packages']['items'] = $itemsData;
+        }
     }
 
     return $param;

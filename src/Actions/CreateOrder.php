@@ -16,13 +16,11 @@ use Cdek\Validator\ValidateOrder;
 class CreateOrder {
     protected $api;
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->api = new CdekApi();
     }
 
-    public function createOrder($data)
-    {
+    public function createOrder($data) {
         if (Helper::getActualShippingMethod()->get_option('has_packages_mode') !== 'yes') {
             $validate = ValidateCreateOrderForm::validate($data);
             if (!$validate->state) {
@@ -30,13 +28,14 @@ class CreateOrder {
             }
         }
 
-        $orderId       = $data->get_param('package_order_id');
-        $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
-        $param         = setPackage($data, $orderId, $postOrderData['currency']); //data передается в сыром виде
-        $order         = wc_get_order($orderId);
-        $cityCode      = getCityCode($postOrderData['city_code'], $order);
-
+        $orderId                      = $data->get_param('package_order_id');
+        $order                        = wc_get_order($orderId);
+        $postOrderData                = OrderMetaData::getMetaByOrderId($orderId);
         $postOrderData['tariff_code'] = CheckoutHelper::getOrderShippingMethod($order)->get_meta('tariff_code');
+        $postOrderData['type']        = Tariff::getTariffType($postOrderData['tariff_code']);
+        $param                        = setPackage($data, $orderId, $postOrderData['currency'],
+            $postOrderData['type']); //data передается в сыром виде
+        $cityCode                     = getCityCode($postOrderData['city_code'], $order);
 
         $validate = ValidateCityCode::validate($cityCode);
         if (!$validate->state) {
@@ -57,9 +56,9 @@ class CreateOrder {
         OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
 
         return [
-            'state'   => true,
-            'code'    => $cdekNumber,
-            'door'    => Tariff::isTariffFromDoor($postOrderData['tariff_id']),
+            'state' => true,
+            'code'  => $cdekNumber,
+            'door'  => Tariff::isTariffFromDoor($postOrderData['tariff_id']),
         ];
     }
 
@@ -80,7 +79,7 @@ class CreateOrder {
             ];
         }
 
-        $param['type'] = Tariff::getTariffType($postOrderData['tariff_id']);
+        $param['type'] = $postOrderData['type'];
 
         $param['recipient'] = [
             'name'   => $order->get_billing_first_name().' '.$order->get_billing_last_name(),
@@ -91,8 +90,8 @@ class CreateOrder {
         ];
 
         if (Helper::getActualShippingMethod()->get_option('international_mode') === 'yes') {
-            $param['recipient']['passport_series'] = $order->get_meta('_passport_series', true);
-            $param['recipient']['passport_number'] = $order->get_meta('_passport_number', true);
+            $param['recipient']['passport_series']        = $order->get_meta('_passport_series', true);
+            $param['recipient']['passport_number']        = $order->get_meta('_passport_number', true);
             $param['recipient']['passport_date_of_issue'] = $order->get_meta('_passport_date_of_issue', true);
             $param['recipient']['passport_organization']  = $order->get_meta('_passport_organization', true);
             $param['recipient']['tin']                    = $order->get_meta('_tin', true);
@@ -103,8 +102,8 @@ class CreateOrder {
 
         $selectedPaymentMethodId = $order->get_payment_method();
         if ($selectedPaymentMethodId === 'cod') {
-            $codPriceThreshold = (int)Helper::getActualShippingMethod()->get_option('stepcodprice');
-            $total = $this->getOrderPrice($order);
+            $codPriceThreshold = (int) Helper::getActualShippingMethod()->get_option('stepcodprice');
+            $total             = $this->getOrderPrice($order);
             if ($codPriceThreshold === 0 || $codPriceThreshold > $total) {
                 $param['delivery_recipient_cost'] = [
                     'value' => $order->get_shipping_total(),
@@ -121,8 +120,10 @@ class CreateOrder {
      * @return string
      */
     protected function getOrderPrice($order): string {
-        $total = number_format((float) $order->get_total() - $order->get_total_tax() - $order->get_total_shipping() - $order->get_shipping_tax(),
-            wc_get_price_decimals(), '.', '');
+        $total = number_format((float) $order->get_total() -
+                               $order->get_total_tax() -
+                               $order->get_total_shipping() -
+                               $order->get_shipping_tax(), wc_get_price_decimals(), '.', '');
 
         return $total;
     }

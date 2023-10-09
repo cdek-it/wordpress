@@ -190,6 +190,11 @@ class Tariff {
             'mode' => self::OFFICE_PICKUP,
             'type' => self::SHOP_TYPE,
         ],
+        749 => [
+            'name' => 'Сборный груз дверь-склад',
+            'mode' => self::DOOR_OFFICE,
+            'type' => self::DELIVERY_TYPE,
+        ],
         751 => [
             'name' => 'Сборный груз склад-склад',
             'mode' => self::OFFICE_OFFICE,
@@ -197,13 +202,13 @@ class Tariff {
         ],
     ];
 
-    public static function getTariffType(int $code) : int
+    public static function getTariffType(int $code): int
     {
         if (!isset(self::TARIFF_DATA[$code])) {
             throw new RuntimeException('Unknown tariff');
         }
 
-        return self::TARIFF_DATA[$code]['code'];
+        return self::TARIFF_DATA[$code]['type'];
     }
 
     public static function isTariffToOffice(int $code): bool {
