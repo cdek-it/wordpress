@@ -108,7 +108,7 @@ notify:
         \"text\": \"Release $CI_PROJECT_NAME $CI_COMMIT_TAG :white_check_mark:\n
         | Component | URL | Build | User |
         |:----------|:--------|:------|:-----|
-        | $CI_PROJECT_NAME | [GitLab](https://gitlab.cdek.ru/$CI_PROJECT_PATH_SLUG/-/releases/$CI_COMMIT_TAG) | $CI_COMMIT_TAG | $CI_COMMIT_AUTHOR |
+        | $CI_PROJECT_NAME | [GitLab](https://gitlab.cdek.ru/$CI_PROJECT_PATH/-/releases/$CI_COMMIT_TAG) | $CI_COMMIT_TAG | $CI_COMMIT_AUTHOR |
         \"}" $WEBHOOK_URL
 
 deploy_staging:
