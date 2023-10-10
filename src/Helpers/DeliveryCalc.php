@@ -52,7 +52,7 @@ class DeliveryCalc {
 
             foreach ($delivery['tariff_codes'] as $tariff) {
                 if (isset($this->rates[$tariff['tariff_code']]) ||
-                    !in_array((string) $tariff['tariff_code'], $tariffList, true)) {
+                    !in_array((string) $tariff['tariff_code'], $tariffList ?: [], true)) {
                     continue;
                 }
 
