@@ -21,7 +21,7 @@ class CheckoutProcessValidator {
             }
 
             $tariffCode = self::getTariffCodeByShippingMethodId($shippingMethodIdSelected);
-            if (Tariff::isTariffFromOffice($tariffCode)) {
+            if (Tariff::isTariffToOffice($tariffCode)) {
                 $pvzCode = CheckoutHelper::getValueFromCurrentSession('pvz_code') ?? WC()->session->get('pvz_code');
                 if (empty($pvzCode)) {
                     wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');

@@ -42,7 +42,6 @@ if (!class_exists(Loader::class)) {
 
 add_filter('woocommerce_new_order', 'cdek_woocommerce_new_order_action', 10, 2);
 add_action('woocommerce_after_shipping_rate', 'cdek_map_display', 10, 2);
-add_action('woocommerce_checkout_process', 'is_pvz_code');
 add_filter('woocommerce_checkout_fields', 'cdek_checkout_fields', 1090);
 add_action('woocommerce_checkout_create_order', 'cdek_save_custom_checkout_field_to_order', 10, 2);
 
@@ -387,38 +386,4 @@ function cdek_save_custom_checkout_field_to_order($order, $data) {
 
         $order->update_meta_data("_$key", sanitize_text_field($_POST[$key]));
     }
-}
-
-function is_pvz_code() {
-    $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
-
-    if (strpos($shippingMethodIdSelected, Config::DELIVERY_NAME) !== false) {
-        $api      = new CdekApi();
-        $cityCode = $api->getCityCodeByCityName(CheckoutHelper::getValueFromCurrentSession('city'),
-            CheckoutHelper::getValueFromCurrentSession('state'));
-        if ($cityCode === -1) {
-            wc_add_notice(__('Не удалось определить населенный пункт.'), 'error');
-        }
-
-        $tariffCode = getTariffCodeByShippingMethodId($shippingMethodIdSelected);
-        if (Tariff::isTariffFromOffice($tariffCode)) {
-            if (empty(CheckoutHelper::getValueFromCurrentSession('pvz_code'))) {
-                $pvzCodeTmp = WC()->session->get('pvz_code');
-                if (empty($pvzCodeTmp[0]['pvz_code'])) {
-                    wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
-                } else {
-                    $_POST['pvz_code']    = $pvzCodeTmp[0]['pvz_code'];
-                    $_POST['pvz_address'] = $pvzCodeTmp[0]['pvz_address'];
-                    $_POST['city_code']   = $pvzCodeTmp[0]['city_code'];
-                    WC()->session->set('pvz_code', null);
-                }
-            }
-        } elseif (empty(CheckoutHelper::getValueFromCurrentSession('address_1'))) {
-            wc_add_notice(__('Нет адреса отправки.'), 'error');
-        }
-    }
-}
-
-function getTariffCodeByShippingMethodId($shippingMethodId) {
-    return explode('_', $shippingMethodId)[2];
 }
