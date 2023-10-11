@@ -93,7 +93,7 @@ class MetaBoxes {
     }
 
     public static function createOrderMetaBox(WP_Post $post, array $meta): void {
-        $order = wc_get_order($post);
+        $order     = wc_get_order($post);
         $orderData = OrderMetaData::getMetaByOrderId($post->ID);
 
         $items = [];
@@ -107,12 +107,16 @@ class MetaBoxes {
 
         $shipping = CheckoutHelper::getOrderShippingMethod($order);
 
-        $hasPackages   = Helper::getActualShippingMethod($shipping->get_data()['instance_id'])->get_option('has_packages_mode') === 'yes';
+        $hasPackages   = Helper::getActualShippingMethod($shipping->get_data()['instance_id'])
+                               ->get_option('has_packages_mode') === 'yes';
         $orderNumber   = $orderData['order_number'];
         $orderUuid     = $orderData['order_uuid'];
         $orderIdWP     = $post->ID;
         $courierNumber = CourierMetaData::getMetaByOrderId($post->ID)['courier_number'] ?? '';
         $fromDoor      = Tariff::isTariffFromDoor($shipping->get_meta('tariff_code'));
+        $length        = $shipping->get_meta('length');
+        $height        = $shipping->get_meta('height');
+        $width         = $shipping->get_meta('width');
 
         include __DIR__.'/../../templates/admin/create-order.php';
     }
