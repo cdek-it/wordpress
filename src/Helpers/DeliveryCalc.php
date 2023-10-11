@@ -52,7 +52,7 @@ class DeliveryCalc {
 
             foreach ($delivery['tariff_codes'] as $tariff) {
                 if (isset($this->rates[$tariff['tariff_code']]) ||
-                    !in_array((string) $tariff['tariff_code'], $tariffList, true)) {
+                    !in_array((string) $tariff['tariff_code'], $tariffList ?: [], true)) {
                     continue;
                 }
 
@@ -105,20 +105,36 @@ class DeliveryCalc {
         foreach ($contents as $productGroup) {
             $quantity  = $productGroup['quantity'];
             $weight    = $productGroup['data']->get_weight();
-            $dimension = get_option('woocommerce_dimension_unit');
-            if ($dimension === 'mm') {
-                $lengthList[] = (int) ((int) $productGroup['data']->get_length() / 10);
-                $widthList[]  = (int) ((int) $productGroup['data']->get_width() / 10);
-                $heightList[] = (int) ((int) $productGroup['data']->get_height() / 10);
-            } else {
-                $lengthList[] = (int) $productGroup['data']->get_length();
-                $widthList[]  = (int) $productGroup['data']->get_width();
-                $heightList[] = (int) $productGroup['data']->get_height();
+
+            $dimensions = get_option('woocommerce_dimension_unit') === 'mm' ? [
+                (int) ((int) $productGroup['data']->get_length() / 10),
+                (int) ((int) $productGroup['data']->get_width() / 10),
+                (int) ((int) $productGroup['data']->get_height() / 10)
+            ] : [
+                (int) $productGroup['data']->get_length(),
+                (int) $productGroup['data']->get_width(),
+                (int) $productGroup['data']->get_height(),
+            ];
+
+            sort($dimensions);
+
+            if($quantity > 1){
+                $dimensions[0] = $quantity * $dimensions[0];
+
+                sort($dimensions);
             }
+
+            $lengthList[] = $dimensions[0];
+            $heightList[] = $dimensions[1];
+            $widthList[] = $dimensions[2];
 
             $weightClass = new WeightCalc();
             $weight      = $weightClass->getWeight($weight);
             $totalWeight += $quantity * $weight;
+        }
+
+        foreach (['length', 'width', 'height'] as $dimension) {
+                ${$dimension . 'List'}[] = (int) $this->method->get_option("product_{$dimension}_default");
         }
 
         rsort($lengthList);
