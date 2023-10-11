@@ -101,22 +101,22 @@ class Tariff {
             'type' => self::SHOP_TYPE,
         ],
         291 => [
-            'name' => 'CDEK Express склад-склад',
+            'name' => 'E-com Express склад-склад',
             'mode' => self::OFFICE_OFFICE,
             'type' => self::SHOP_TYPE,
         ],
         293 => [
-            'name' => 'CDEK Express дверь-дверь',
+            'name' => 'E-com Express дверь-дверь',
             'mode' => self::DOOR_DOOR,
             'type' => self::SHOP_TYPE,
         ],
         294 => [
-            'name' => 'CDEK Express склад-дверь',
+            'name' => 'E-com Express склад-дверь',
             'mode' => self::OFFICE_DOOR,
             'type' => self::SHOP_TYPE,
         ],
         295 => [
-            'name' => 'CDEK Express дверь-склад',
+            'name' => 'E-com Express дверь-склад',
             'mode' => self::DOOR_OFFICE,
             'type' => self::SHOP_TYPE,
         ],
