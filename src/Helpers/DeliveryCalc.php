@@ -87,8 +87,11 @@ class DeliveryCalc {
                     'cost'      => $cost,
                     'meta_data' => [
                         Config::ADDRESS_HASH_META_KEY => sha1($deliveryParam['address']),
-                        'tariff_code'     => $tariff['tariff_code'],
-                        'total_weight_kg' => $weightInKg,
+                        'tariff_code'                 => $tariff['tariff_code'],
+                        'total_weight_kg'             => $weightInKg,
+                        'length'                      => $deliveryParam['package_data']['length'],
+                        'width'                       => $deliveryParam['package_data']['width'],
+                        'height'                      => $deliveryParam['package_data']['height'],
                     ],
                 ];
             }
@@ -103,13 +106,13 @@ class DeliveryCalc {
         $widthList   = [];
         $heightList  = [];
         foreach ($contents as $productGroup) {
-            $quantity  = $productGroup['quantity'];
-            $weight    = $productGroup['data']->get_weight();
+            $quantity = $productGroup['quantity'];
+            $weight   = $productGroup['data']->get_weight();
 
             $dimensions = get_option('woocommerce_dimension_unit') === 'mm' ? [
                 (int) ((int) $productGroup['data']->get_length() / 10),
                 (int) ((int) $productGroup['data']->get_width() / 10),
-                (int) ((int) $productGroup['data']->get_height() / 10)
+                (int) ((int) $productGroup['data']->get_height() / 10),
             ] : [
                 (int) $productGroup['data']->get_length(),
                 (int) $productGroup['data']->get_width(),
@@ -118,7 +121,7 @@ class DeliveryCalc {
 
             sort($dimensions);
 
-            if($quantity > 1){
+            if ($quantity > 1) {
                 $dimensions[0] = $quantity * $dimensions[0];
 
                 sort($dimensions);
@@ -126,7 +129,7 @@ class DeliveryCalc {
 
             $lengthList[] = $dimensions[0];
             $heightList[] = $dimensions[1];
-            $widthList[] = $dimensions[2];
+            $widthList[]  = $dimensions[2];
 
             $weightClass = new WeightCalc();
             $weight      = $weightClass->getWeight($weight);
@@ -134,7 +137,7 @@ class DeliveryCalc {
         }
 
         foreach (['length', 'width', 'height'] as $dimension) {
-                ${$dimension . 'List'}[] = (int) $this->method->get_option("product_{$dimension}_default");
+            ${$dimension.'List'}[] = (int) $this->method->get_option("product_{$dimension}_default");
         }
 
         rsort($lengthList);
