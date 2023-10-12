@@ -49,7 +49,7 @@ namespace Cdek\UI {
 
         public function __invoke(): void {
             add_action('load-woocommerce_page_wc-settings', [__CLASS__, 'registerAdminScripts']);
-            add_action('load-woocommerce_page_wc-settings', [__CLASS__, 'registerAdminStyles']);
+            add_action('admin_enqueue_scripts', [__CLASS__, 'registerAdminStyles']);
 
             add_action('admin_enqueue_scripts', [__CLASS__, 'registerOrderScripts']);
         }

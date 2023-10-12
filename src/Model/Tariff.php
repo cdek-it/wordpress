@@ -202,8 +202,7 @@ class Tariff {
         ],
     ];
 
-    public static function getTariffType(int $code): int
-    {
+    public static function getTariffType(int $code): int {
         if (!isset(self::TARIFF_DATA[$code])) {
             throw new RuntimeException('Unknown tariff');
         }
@@ -250,11 +249,13 @@ class Tariff {
         }
 
         $tariffNameEdit = Helper::getActualShippingMethod()->get_option('tariff_name');
+
         if (!empty($tariffNameEdit)) {
             $tariffNameEditArray = explode(';', $tariffNameEdit);
+
             foreach ($tariffNameEditArray as $tariffEdit) {
                 $tariffConcrete = explode('-', $tariffEdit);
-                if ($tariffConcrete[0] === $code) {
+                if ($tariffConcrete[0] === (string) $code) {
                     return $tariffConcrete[1];
                 }
             }
@@ -264,6 +265,8 @@ class Tariff {
     }
 
     public static function getTariffList(): array {
-        return array_map(static fn(array $el) => $el['name'], self::TARIFF_DATA);
+        return array_combine(array_keys(self::TARIFF_DATA),
+            array_map(static fn(int $code, array $el) => sprintf('%s (%s)', $el['name'], $code),
+                array_keys(self::TARIFF_DATA), self::TARIFF_DATA));
     }
 }
