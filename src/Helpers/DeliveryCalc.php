@@ -33,6 +33,10 @@ class DeliveryCalc {
             'country' => $officeData['country'] ?? $doorData['country'] ?? 'RU',
         ];
 
+        if(!isset($deliveryParam['from']['address'])) {
+            return false;
+        }
+
         $deliveryParam['address']      = $package['destination']['city'];
         $deliveryParam['package_data'] = $this->getPackagesData($package['contents']);
 
