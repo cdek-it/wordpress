@@ -26,21 +26,23 @@ namespace Cdek\Controllers {
             $order = json_decode($api->getOrderByCdekNumber($data->get_param('id')), true);
 
             if (!isset($order['entity'])) {
-                echo 'Не удалось создать квитанцию. 
+                echo 'Не удалось получить сведения о заказе. 
         Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
         и введите габариты упаковки повторно.';
                 exit();
             }
 
-            foreach ($order['related_entities'] as $entity) {
-                if ($entity['type'] === 'waybill' && isset($entity['url'])) {
-                    header("Content-type:application/pdf");
-                    echo $api->getFileByLink($entity['url']);
-                    exit();
+            if (isset($order['related_entities'])) {
+                foreach ($order['related_entities'] as $entity) {
+                    if ($entity['type'] === 'waybill' && isset($entity['url'])) {
+                        header("Content-type:application/pdf");
+                        echo $api->getFileByLink($entity['url']);
+                        exit();
+                    }
                 }
             }
 
-            $waybill = json_decode($api->createWaybill($data->get_param('id')), true);
+            $waybill = json_decode($api->createWaybill($order['entity']['uuid']), true);
 
             if (!isset($waybill['entity'])) {
                 echo 'Не удалось создать квитанцию. 
@@ -81,7 +83,7 @@ namespace Cdek\Controllers {
             $order = json_decode($api->getOrderByCdekNumber($request->get_param('id')), true);
 
             if (!isset($order['entity'])) {
-                echo 'Не удалось создать ШК. 
+                echo 'Не удалось получить сведения о заказе. 
         Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
         и введите габариты упаковки повторно.';
                 exit();
