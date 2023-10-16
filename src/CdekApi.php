@@ -149,7 +149,7 @@ class CdekApi {
             explode(', ', $this->deliveryMethod->get_option('pvz_code'))[0] :
             $this->deliveryMethod->get_option('address');
 
-        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), [
+        $request = [
             'type'          => $deliveryParam['type'],
             'from_location' => [
                 'address'      => $senderCity,
@@ -167,7 +167,9 @@ class CdekApi {
             ],
             'services'      => array_key_exists('selected_services', $deliveryParam) ?
                 $deliveryParam['selected_services'] : [],
-        ]);
+        ];
+
+        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), $request);
     }
 
     public function getRegion($city = null) {
