@@ -14,7 +14,8 @@ class DataWPScraber {
         return $result;
     }
 
-    public static function hideMeta(array $formatted_meta): array {
-        return array_filter($formatted_meta, static fn($el) => $el->key !== Config::ADDRESS_HASH_META_KEY);
+    public static function hideMeta(array $hiddenMeta): array {
+        $hiddenMeta[] = Config::ADDRESS_HASH_META_KEY;
+        return $hiddenMeta;
     }
 }

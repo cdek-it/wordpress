@@ -191,13 +191,13 @@ function get_package_items($items, $orderId, $currency) {
         }
 
         $itemsData[] = [
-            "ware_key"     => $product->get_id(),
-            "payment"      => ["value" => $paymentValue],
-            "name"         => $product->get_name(),
-            "cost"         => $cost,
-            "amount"       => $item[2],
-            "weight"       => $weight,
-            "weight_gross" => $weight + 1,
+            'ware_key'     => $product->get_id(),
+            'payment'      => ["value" => $paymentValue],
+            'name'         => $product->get_name(),
+            'cost'         => $cost,
+            'amount'       => $item[2],
+            'weight'       => $weight,
+            'weight_gross' => $weight + 1,
         ];
     }
 
