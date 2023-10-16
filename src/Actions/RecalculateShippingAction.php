@@ -23,7 +23,7 @@ class RecalculateShippingAction {
 
         try {
             foreach ($order->get_shipping_methods() as $shipping) {
-                $calculator = new DeliveryCalc();
+                $calculator = new DeliveryCalc($shipping->get_instance_id());
                 $calculator->calculate([
                     'contents'    => array_map(static fn($el) => [
                         'data'     => $el->get_product(),
@@ -32,7 +32,7 @@ class RecalculateShippingAction {
                     'destination' => [
                         'city' => $order->get_shipping_city(),
                     ],
-                ], $shipping->get_instance_id(), isset(OrderMetaData::getMetaByOrderId($order->get_id())['pvz_code']));
+                ], isset(OrderMetaData::getMetaByOrderId($order->get_id())['pvz_code']));
 
                 $rate = $calculator->getTariffRate($shipping->get_meta('tariff_code'));
                 $shipping->set_total($rate['cost']);

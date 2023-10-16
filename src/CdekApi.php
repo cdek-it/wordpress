@@ -145,17 +145,9 @@ class CdekApi {
     public function calculate($deliveryParam) {
         $url = $this->apiUrl.self::CALC_PATH;
 
-        $senderCity = $this->deliveryMethod->get_option('pvz_code') ?
-            explode(', ', $this->deliveryMethod->get_option('pvz_code'))[0] :
-            $this->deliveryMethod->get_option('address');
-
         $request = [
             'type'          => $deliveryParam['type'],
-            'from_location' => [
-                'address'      => $senderCity,
-                'city'         => $senderCity,
-                'country_code' => $this->deliveryMethod->get_option('country') ?? 'RU',
-            ],
+            'from_location' => $deliveryParam['from'],
             'to_location'   => [
                 'address' => $deliveryParam['address'],
             ],

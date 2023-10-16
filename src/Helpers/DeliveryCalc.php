@@ -14,31 +14,39 @@ class DeliveryCalc {
     protected WC_Shipping_Method $method;
     private array $rates = [];
 
-    public function __construct() {
-        $this->method = Helper::getActualShippingMethod();
+    public function __construct($instanceID = null) {
+        $this->method = Helper::getActualShippingMethod($instanceID);
     }
 
-    public function calculate($package, $id, $addTariffsToOffice = true): bool {
+    public function calculate($package, $addTariffsToOffice = true): bool {
         $api = new CdekApi();
         if (!$api->checkAuth()) {
             return false;
         }
 
+        $officeData = json_decode($this->method->get_option('pvz_code'), true);
+        $doorData   = json_decode($this->method->get_option('address'), true);
+
+        $deliveryParam['from'] = [
+            'address' => $officeData['city'] ?? $doorData['city'],
+            'city' => $officeData['city'] ?? $doorData['city'],
+            'country' => $officeData['country'] ?? $doorData['country'] ?? 'RU',
+        ];
+
+        $deliveryParam['address']      = $package['destination']['city'];
+        $deliveryParam['package_data'] = $this->getPackagesData($package['contents']);
+
+        if ($this->method->get_option('insurance') === 'yes') {
+            $deliveryParam['selected_services'][0] = [
+                'code'      => 'INSURANCE',
+                'parameter' => (int) $package['cart_subtotal'],
+            ];
+        }
+
+        $tariffList = $this->method->get_option('tariff_list');
+
         foreach ([Tariff::SHOP_TYPE, Tariff::DELIVERY_TYPE] as $deliveryType) {
-            $deliveryParam['type']    = $deliveryType;
-            $deliveryParam['address'] = $package['destination']['city'];
-
-            $deliveryParam['package_data'] = $this->getPackagesData($package['contents']);
-
-            $tariffList = $this->method->get_option('tariff_list');
-            $weightInKg = $deliveryParam['package_data']['weight'] / 1000;
-
-            if ($this->method->get_option('insurance') === 'yes') {
-                $deliveryParam['selected_services'][0] = [
-                    'code'      => 'INSURANCE',
-                    'parameter' => (int) $package['cart_subtotal'],
-                ];
-            }
+            $deliveryParam['type'] = $deliveryType;
 
             $calcResult = $api->calculate($deliveryParam);
 
@@ -87,14 +95,14 @@ class DeliveryCalc {
                 }
 
                 $this->rates[$tariff['tariff_code']] = [
-                    'id'        => sprintf('%s_%s', $id, $tariff['tariff_code']),
+                    'id'        => sprintf('%s_%s', Config::DELIVERY_NAME, $tariff['tariff_code']),
                     'label'     => sprintf("CDEK: %s, (%s-%s дней)",
                         Tariff::getTariffUserNameByCode($tariff['tariff_code']), $minDay, $maxDay),
                     'cost'      => $cost,
                     'meta_data' => [
                         Config::ADDRESS_HASH_META_KEY => sha1($deliveryParam['address']),
                         'tariff_code'                 => $tariff['tariff_code'],
-                        'total_weight_kg'             => $weightInKg,
+                        'weight'                      => $deliveryParam['package_data']['weight'] / 1000,
                         'length'                      => $deliveryParam['package_data']['length'],
                         'width'                       => $deliveryParam['package_data']['width'],
                         'height'                      => $deliveryParam['package_data']['height'],
