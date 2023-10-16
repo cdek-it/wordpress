@@ -14,7 +14,7 @@ namespace Cdek\UI {
         public static function registerScripts(): void {
             wp_register_script('cdek-widget',
                 isset($_ENV['CDEK_LOCAL_WIDGET']) ? Loader::getPluginUrl().'assets/js/cdek-widget.umd.js' :
-                    '//cdn.jsdelivr.net/gh/cdek-it/widget@3.3/dist/cdek-widget.umd.js');
+                    '//cdn.jsdelivr.net/gh/cdek-it/widget@3.4/dist/cdek-widget.umd.js');
             wp_localize_script('cdek-widget', 'cdek', [
                 'apiKey' => Helper::getActualShippingMethod()->get_option('yandex_map_api_key'),
             ]);
