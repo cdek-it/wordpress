@@ -206,11 +206,6 @@ function get_package_items($items, $orderId, $currency) {
 
 function cdek_map_display($shippingMethodCurrent) {
     if (is_checkout() && isTariffDestinationCdekOffice($shippingMethodCurrent)) {
-        $cdekShippingMethod = Helper::getActualShippingMethod();
-
-        $meta   = $shippingMethodCurrent->get_meta_data();
-        $weight = $meta['total_weight_kg'];
-
         $api = new CdekApi;
 
         $city = $api->getCityCodeByCityName(CheckoutHelper::getValueFromCurrentSession('city'),
@@ -225,7 +220,7 @@ function cdek_map_display($shippingMethodCurrent) {
 }
 
 function isTariffDestinationCdekOffice($shippingMethodCurrent): bool {
-    if ($shippingMethodCurrent->get_method_id() !== 'official_cdek') {
+    if ($shippingMethodCurrent->get_method_id() !== Config::DELIVERY_NAME) {
         return false;
     }
 
@@ -271,9 +266,7 @@ function cdek_woocommerce_new_order_action($order_id, $order) {
         }
 
         $data = [
-            'pvz_address'  => $pvzInfo,
             'pvz_code'     => $pvzCode,
-            'tariff_id'    => $tariffId,
             'city_code'    => $cityCode,
             'currency'     => $currency,
             'order_number' => '',

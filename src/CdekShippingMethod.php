@@ -215,9 +215,6 @@ class CdekShippingMethod extends WC_Shipping_Method {
             'address'                        => [
                 'type' => 'hidden',
             ],
-            'country'                        => [
-                'type' => 'hidden',
-            ],
             'package_setting_block_name'     => [
                 'title' => '<h3 style="text-align: center;">Габариты</h3>',
                 'type'  => 'title',
@@ -401,8 +398,8 @@ class CdekShippingMethod extends WC_Shipping_Method {
     }
 
     public function calculate_shipping($package = []): void {
-        $deliveryCalc = new DeliveryCalc();
-        if (!$deliveryCalc->calculate($package, $this->id)) {
+        $deliveryCalc = new DeliveryCalc($this->get_instance_id());
+        if (!$deliveryCalc->calculate($package)) {
             return;
         }
 

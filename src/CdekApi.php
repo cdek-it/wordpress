@@ -99,12 +99,15 @@ class CdekApi {
         $param['seller']                           = ['address' => $this->deliveryMethod->get_option('seller_address')];
 
         if (Tariff::isTariffFromOffice($param['tariff_code'])) {
-            $param['shipment_point'] = explode(', ', $this->deliveryMethod->get_option('pvz_code'))[1];
+            $office = json_decode($this->deliveryMethod->get_option('pvz_code'), true);
+            $param['shipment_point'] = $office['address'];
         } else {
+            $address = json_decode($this->deliveryMethod->get_option('address'), true);
+
             $param['from_location'] = [
-                'address'      => $this->deliveryMethod->get_option('address'),
-                'city'         => $this->deliveryMethod->get_option('address'),
-                'country_code' => $this->deliveryMethod->get_option('country') ?? 'RU',
+                'address'      => $address['address'],
+                'city'         => $address['city'],
+                'country_code' => $address['country'] ?? 'RU',
             ];
         }
 
@@ -145,17 +148,9 @@ class CdekApi {
     public function calculate($deliveryParam) {
         $url = $this->apiUrl.self::CALC_PATH;
 
-        $senderCity = $this->deliveryMethod->get_option('pvz_code') ?
-            explode(', ', $this->deliveryMethod->get_option('pvz_code'))[0] :
-            $this->deliveryMethod->get_option('address');
-
-        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), [
+        $request = [
             'type'          => $deliveryParam['type'],
-            'from_location' => [
-                'address'      => $senderCity,
-                'city'         => $senderCity,
-                'country_code' => $this->deliveryMethod->get_option('country') ?? 'RU',
-            ],
+            'from_location' => $deliveryParam['from'],
             'to_location'   => [
                 'address' => $deliveryParam['address'],
             ],
@@ -167,7 +162,9 @@ class CdekApi {
             ],
             'services'      => array_key_exists('selected_services', $deliveryParam) ?
                 $deliveryParam['selected_services'] : [],
-        ]);
+        ];
+
+        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), $request);
     }
 
     public function getRegion($city = null) {

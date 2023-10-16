@@ -13,36 +13,61 @@ jQuery(($) => {
 
         const officeInput = $('input[name=woocommerce_official_cdek_pvz_code]');
         const doorInput = $('input[name=woocommerce_official_cdek_address]');
+
+        let openedCity = '';
+        let openedOffice = '';
+        let openedDoor = '';
+
         const updateOfficeCode = () => {
             const officeCode = officeInput.val();
+            const selectedOfficeDiv = $('#selected_office');
 
             if (officeCode) {
-                $('#selected_office')
-                  .addClass('selected')
-                  .find('.result')
-                  .html(officeCode);
-            } else {
-                $('#selected_office')
-                  .removeClass('selected')
-                  .find('.result')
-                  .html('Не выбран');
+                try {
+                    const parsedOffice = JSON.parse(officeCode);
+                    selectedOfficeDiv
+                      .addClass('selected')
+                      .find('.result')
+                      .html(
+                        `${parsedOffice.country}, ${parsedOffice.city}, ${parsedOffice.address}`);
+
+                    openedCity = parsedOffice.city;
+                    openedOffice = parsedOffice.address;
+                    return;
+                } catch (e) {}
             }
+
+            selectedOfficeDiv
+              .removeClass('selected')
+              .find('.result')
+              .html('Не выбран');
+
         };
 
         const updateDoor = () => {
             const address = doorInput.val();
+            const selectedAddressDiv = $('#selected_address');
 
             if (address) {
-                $('#selected_address')
-                  .addClass('selected')
-                  .find('.result')
-                  .html(address);
-            } else {
-                $('#selected_address')
-                  .removeClass('selected')
-                  .find('.result')
-                  .html('Не выбран');
+                try {
+                    const parsedAddress = JSON.parse(address);
+
+                    selectedAddressDiv
+                      .addClass('selected')
+                      .find('.result')
+                      .html(
+                        `${parsedAddress.country}, ${parsedAddress.city}, ${parsedAddress.address}`);
+
+                    openedCity = parsedAddress.city;
+                    openedDoor = parsedAddress.address;
+                    return;
+                } catch (e) {}
             }
+
+            selectedAddressDiv
+              .removeClass('selected')
+              .find('.result')
+              .html('Не выбран');
         };
 
         updateOfficeCode();
@@ -52,7 +77,7 @@ jQuery(($) => {
             apiKey: window.cdek.apiKey,
             sender: true,
             debug: true,
-            defaultLocation: officeInput.val() ? officeInput.val().split(', ')[0] : 'Новосибирск',
+            defaultLocation: openedCity || 'Новосибирск',
             servicePath: window.cdek_admin_settings.api.offices,
             hideFilters: {
                 type: true,
@@ -61,17 +86,22 @@ jQuery(($) => {
                 is_dressing_room: true,
             },
             selected: {
-                office: officeInput.val() ? officeInput.val().split(', ')[1] : null,
-                door: doorInput.val() || null,
+                office: openedOffice || null, door: openedDoor || null,
             },
             onChoose(type, tariff, target) {
                 if (type === 'office') {
-                    officeInput.val(`${target.city}, ${target.code}`);
-                    $('input#woocommerce_official_cdek_country').val(target.country_code);
+                    officeInput.val(JSON.stringify({
+                        country: target.country_code,
+                        city: target.city,
+                        address: target.code,
+                    }));
                     updateOfficeCode();
                 } else if (type === 'door') {
-                    doorInput.val(target.formatted);
-                    $('input#woocommerce_official_cdek_country').val(target.country);
+                    doorInput.val(JSON.stringify({
+                        country: target.country,
+                        city: target.city,
+                        address: target.formatted,
+                    }));
                     updateDoor();
                 }
             },

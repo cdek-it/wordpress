@@ -31,7 +31,8 @@ class CreateOrder {
         $orderId                      = $data->get_param('package_order_id');
         $order                        = wc_get_order($orderId);
         $postOrderData                = OrderMetaData::getMetaByOrderId($orderId);
-        $postOrderData['tariff_code'] = CheckoutHelper::getOrderShippingMethod($order)->get_meta('tariff_code');
+        $postOrderData['tariff_code'] = CheckoutHelper::getOrderShippingMethod($order)->get_meta('tariff_code') ?:
+            $postOrderData['tariff_id'];
         $postOrderData['type']        = Tariff::getTariffType($postOrderData['tariff_code']);
         $param                        = setPackage($data, $orderId, $postOrderData['currency'],
             $postOrderData['type']); //data передается в сыром виде
@@ -58,7 +59,7 @@ class CreateOrder {
         return [
             'state' => true,
             'code'  => $cdekNumber,
-            'door'  => Tariff::isTariffFromDoor($postOrderData['tariff_id']),
+            'door'  => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
         ];
     }
 
@@ -70,7 +71,7 @@ class CreateOrder {
     }
 
     public function createRequestData($postOrderData, $order, $param) {
-        if (Tariff::isTariffToOffice($postOrderData['tariff_id'])) {
+        if (Tariff::isTariffToOffice($postOrderData['tariff_code'])) {
             $param['delivery_point'] = $postOrderData['pvz_code'];
         } else {
             $param['to_location'] = [

@@ -40,14 +40,18 @@ class MetaBoxes {
 
         $settings = Helper::getActualShippingMethod($cdekTariff->get_data()['instance_id']);
 
-        if (empty($settings->get_option('address')) && Tariff::isTariffFromDoor($cdekTariff->get_meta('tariff_code'))) {
+        $address = $settings->get_option('address');
+
+        if ((empty($address) || !isset(json_decode($address, true)['country'])) && Tariff::isTariffFromDoor($cdekTariff->get_meta('tariff_code'))) {
             add_meta_box(Config::ORDER_META_BOX_KEY, Loader::getPluginName(), [__CLASS__, 'noAddressMetaBox'],
                 'shop_order', 'side', 'core');
 
             return;
         }
 
-        if (empty($settings->get_option('pvz_code')) &&
+        $office = $settings->get_option('pvz_code');
+
+        if ((empty($office) || !isset(json_decode($office, true)['country'])) &&
             Tariff::isTariffFromOffice($cdekTariff->get_meta('tariff_code'))) {
             add_meta_box(Config::ORDER_META_BOX_KEY, Loader::getPluginName(), [__CLASS__, 'noOfficeMetaBox'],
                 'shop_order', 'side', 'core');
