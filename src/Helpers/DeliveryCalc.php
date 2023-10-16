@@ -4,8 +4,10 @@ namespace Cdek\Helpers;
 
 use Cdek\CdekApi;
 use Cdek\Config;
+use Cdek\Exceptions\TariffNotAvailableException;
 use Cdek\Helper;
 use Cdek\Model\Tariff;
+use RuntimeException;
 use WC_Shipping_Method;
 
 class DeliveryCalc {
@@ -16,7 +18,7 @@ class DeliveryCalc {
         $this->method = Helper::getActualShippingMethod();
     }
 
-    public function calculate($package, $id): bool {
+    public function calculate($package, $id, $addTariffsToOffice = true): bool {
         $api = new CdekApi();
         if (!$api->checkAuth()) {
             return false;
@@ -53,6 +55,10 @@ class DeliveryCalc {
             foreach ($delivery['tariff_codes'] as $tariff) {
                 if (isset($this->rates[$tariff['tariff_code']]) ||
                     !in_array((string) $tariff['tariff_code'], $tariffList ?: [], true)) {
+                    continue;
+                }
+
+                if (!$addTariffsToOffice && Tariff::isTariffToOffice($tariff['tariff_code'])) {
                     continue;
                 }
 
@@ -164,5 +170,13 @@ class DeliveryCalc {
 
     public function getRates(): array {
         return array_values($this->rates);
+    }
+
+    public function getTariffRate(int $code): array {
+        if (!isset($this->rates[$code])) {
+            throw new TariffNotAvailableException(array_keys($this->rates));
+        }
+
+        return $this->rates[$code];
     }
 }

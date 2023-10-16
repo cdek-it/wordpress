@@ -175,3 +175,8 @@ body h1, body h2, body h3, body h4, body h5, body h6 {
     opacity: 50%;
     background: rgba(255, 255, 255, 0.8) url(../img/preloader.gif) center center no-repeat;
 }
+
+.cdek-error {
+    padding: 5px;
+    background: #E58787;
+}

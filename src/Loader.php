@@ -9,6 +9,7 @@ namespace {
 namespace Cdek {
 
     use Automattic\WooCommerce\Utilities\FeaturesUtil;
+    use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Controllers\CourierController;
     use Cdek\Controllers\LocationController;
     use Cdek\Controllers\OrderController;
@@ -93,12 +94,13 @@ namespace Cdek {
             add_action('rest_api_init', new CourierController);
             add_action('rest_api_init', new LocationController);
 
-            add_filter('woocommerce_order_item_get_formatted_meta_data', [DataWPScraber::class, 'hideMeta']);
+            add_filter('woocommerce_hidden_order_itemmeta', [DataWPScraber::class, 'hideMeta']);
 
             add_action('woocommerce_shipping_methods',
                 static fn($methods) => array_merge($methods, ['official_cdek' => CdekShippingMethod::class]));
 
             add_action('woocommerce_checkout_process', new CheckoutProcessValidator);
+            add_action('woocommerce_order_before_calculate_totals', new RecalculateShippingAction, 10, 2);
 
             (new CdekWidget)();
             (new Admin)();
