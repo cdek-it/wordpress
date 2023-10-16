@@ -9,7 +9,8 @@ class WeightCalc {
     public function getWeight($weight): int {
         $weight      = (float) $weight;
         $measurement = get_option('woocommerce_weight_unit');
-        if (empty($weight)) {
+        if (empty($weight) ||
+            Helper::getActualShippingMethod()->get_option('product_package_default_toggle') === 'yes') {
             $defaultWeight = (float) str_replace(',', '.',
                 Helper::getActualShippingMethod()->get_option('product_weight_default'));
             if ($measurement === 'g') {
