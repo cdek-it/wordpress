@@ -5,6 +5,7 @@ namespace Cdek;
 use Cdek\Enums\BarcodeFormat;
 use Cdek\Helpers\DeliveryCalc;
 use Cdek\Model\Tariff;
+use WC_Settings_API;
 use WC_Shipping_Method;
 
 class CdekShippingMethod extends WC_Shipping_Method {
@@ -32,14 +33,14 @@ class CdekShippingMethod extends WC_Shipping_Method {
 
     public function init_form_fields(): void {
         $this->instance_form_fields = [
-            'extra_cost' => [
+            'extra_cost'           => [
                 'title'             => 'Доп. цена к доставке',
                 'type'              => 'number',
                 'description'       => "стоимость доставки в рублях которая будет добавлена к расчетной стоимости доставки",
                 'desc_tip'          => true,
-                'default'           => 0,
+                'default'           => '',
                 'custom_attributes' => [
-                    'min'  => 1,
+                    'min'  => 0,
                     'step' => 1,
                 ],
             ],
@@ -395,6 +396,23 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'options' => BarcodeFormat::getAll(),
             ],
         ];
+    }
+
+    public function get_option($key, $empty_value = null) {
+        // Instance options take priority over global options.
+        if ($this->instance_id && array_key_exists($key, $this->get_instance_form_fields())) {
+            $instanceValue = $this->get_instance_option($key, $empty_value);
+
+            if (!empty($instanceValue)) {
+                return $instanceValue;
+            }
+        }
+
+        // Return global option.
+        $option = apply_filters('woocommerce_shipping_'.$this->id.'_option', WC_Settings_API::get_option($key, $empty_value),
+            $key, $this);
+
+        return $option;
     }
 
     public function calculate_shipping($package = []): void {
