@@ -28,13 +28,11 @@ class CallCourier
         }
 
         $orderMetaData = OrderMetaData::getMetaByOrderId($data['order_id']);
-        $tariffId = CheckoutHelper::getOrderShippingMethod(wc_get_order($data['order_id']))->get_meta('tariff_code') ?:
-            $orderMetaData['tariff_id'];
+        $shippingMethod = CheckoutHelper::getOrderShippingMethod(wc_get_order($data['order_id']));
 
+        $tariffId = $shippingMethod->get_meta('tariff_code') ?: $orderMetaData['tariff_id'];
 
-        $tariffFromDoor = false;
         if (Tariff::isTariffFromDoor($tariffId)) {
-            $tariffFromDoor = true;
             $orderNumber = $orderMetaData['order_number'];
             $param = $this->createRequestDataWithOrderNumber($data, $orderNumber);
         } else {
@@ -78,7 +76,7 @@ class CallCourier
 
         $intakeNumber = $courierInfo->entity->intake_number;
 
-        CourierMetaData::addMetaByOrderId($data['order_id'], ['courier_number' => $intakeNumber, 'courier_uuid' => $courierObj->entity->uuid, 'not_cons' => $tariffFromDoor]);
+        CourierMetaData::addMetaByOrderId($data['order_id'], ['courier_number' => $intakeNumber, 'courier_uuid' => $courierObj->entity->uuid, 'not_cons' => Tariff::isTariffFromDoor($tariffId)]);
 
         $message = 'Создана заявка на вызов курьера: Номер: ' . $intakeNumber . ' | Uuid: ' . $courierObj->entity->uuid;
         Note::send($data['order_id'], $message);
