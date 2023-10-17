@@ -3,6 +3,7 @@
 namespace Cdek\Actions;
 use Cdek\CdekApi;
 use Cdek\Helper;
+use Cdek\Helpers\CheckoutHelper;
 use Cdek\Model\CourierMetaData;
 use Cdek\Model\OrderMetaData;
 use Cdek\Model\Tariff;
@@ -27,7 +28,8 @@ class CallCourier
         }
 
         $orderMetaData = OrderMetaData::getMetaByOrderId($data['order_id']);
-        $tariffId = $orderMetaData['tariff_id'];
+        $tariffId = CheckoutHelper::getOrderShippingMethod(wc_get_order($data['order_id']))->get_meta('tariff_code') ?:
+            $orderMetaData['tariff_id'];
 
 
         $tariffFromDoor = false;

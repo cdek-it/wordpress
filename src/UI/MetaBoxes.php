@@ -117,7 +117,7 @@ class MetaBoxes {
         $orderUuid     = $orderData['order_uuid'];
         $orderIdWP     = $post->ID;
         $courierNumber = CourierMetaData::getMetaByOrderId($post->ID)['courier_number'] ?? '';
-        $fromDoor      = Tariff::isTariffFromDoor($shipping->get_meta('tariff_code'));
+        $fromDoor      = Tariff::isTariffFromDoor($shipping->get_meta('tariff_code') ?: $orderData['tariff_id']);
         $length        = $shipping->get_meta('length');
         $height        = $shipping->get_meta('height');
         $width         = $shipping->get_meta('width');

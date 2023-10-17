@@ -11,9 +11,6 @@
  * WC tested up to: 8.0
  */
 
-use Automattic\WooCommerce\Utilities\OrderUtil;
-use Cdek\Actions\CallCourier;
-use Cdek\Actions\CreateOrder;
 use Cdek\CdekApi;
 use Cdek\Config;
 use Cdek\Helper;
@@ -21,7 +18,6 @@ use Cdek\Helpers\CheckoutHelper;
 use Cdek\Helpers\StringHelper;
 use Cdek\Helpers\WeightCalc;
 use Cdek\Loader;
-use Cdek\Model\CourierMetaData;
 use Cdek\Model\OrderMetaData;
 use Cdek\Model\Tariff;
 
