@@ -14,17 +14,8 @@ class WeightCalc {
             $defaultWeight = (float) str_replace(',', '.',
                 Helper::getActualShippingMethod()->get_option('product_weight_default'));
             $weight = $this->getWeightInGrams($defaultWeight);
-            if ($measurement === 'g') {
-                $weight = $defaultWeight * 1000;
-            } else {
-                $weight = $defaultWeight;
-            }
         }
 
-        if ($measurement === 'kg') {
-            $weight *= 1000;
-        }
-        //kg g lbs oz
         return (int) $weight;
     }
 
