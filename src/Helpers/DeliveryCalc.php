@@ -109,7 +109,13 @@ class DeliveryCalc {
         $percentPrice = $this->method->get_option('percentprice_toggle') === 'yes' ?
             ($this->method->get_option('percentprice') / 100) : null;
 
-        $this->rates = array_map(static function ($tariff) use ($fixedPrice, $extraCost, $api, $deliveryParam, $percentPrice) {
+        $this->rates = array_map(static function ($tariff) use (
+            $fixedPrice,
+            $extraCost,
+            $api,
+            $deliveryParam,
+            $percentPrice
+        ) {
             if ($fixedPrice !== null) {
                 $tariff['cost'] = $fixedPrice;
 
