@@ -114,6 +114,11 @@ class CdekApi {
         return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), $param);
     }
 
+    public function getOrderStatus(string $orderUuid)
+    {
+        $order = HttpClient::sendCdekRequest($this->apiUrl.self::ORDERS_PATH.$orderUuid, 'GET', $this->getToken());
+    }
+
     public function getFileByLink($link) {
         return HttpClient::sendCdekRequest($link, 'GET', $this->getToken(), null, true);
     }

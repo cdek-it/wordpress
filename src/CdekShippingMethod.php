@@ -171,6 +171,11 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'type'  => 'title',
                 'class' => 'cdek_delivery_block_name',
             ],
+            'automate_orders' => [
+                'title' => 'Автоматически создавать заказы в СДЭК',
+                'type' => 'checkbox',
+                'description' => 'При наличии информации о габаритах и корректно заполненных адреса отправки накладная СДЭК будет создана автоматически',
+            ],
             'tariff_list'                    => [
                 'title'       => 'Тарифы',
                 'type'        => 'multiselect',
