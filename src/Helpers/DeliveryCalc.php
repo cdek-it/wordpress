@@ -28,12 +28,12 @@ class DeliveryCalc {
         $doorData   = json_decode($this->method->get_option('address'), true);
 
         $deliveryParam['from'] = [
-            'address' => $officeData['city'] ?? $doorData['city'],
-            'city' => $officeData['city'] ?? $doorData['city'],
-            'country' => $officeData['country'] ?? $doorData['country'] ?? 'RU',
+            'address'      => $officeData['city'] ?? $doorData['city'],
+            'city'         => $officeData['city'] ?? $doorData['city'],
+            'country_code' => $officeData['country'] ?? $doorData['country'] ?? 'RU',
         ];
 
-        if(!isset($deliveryParam['from']['address'])) {
+        if (!isset($deliveryParam['from']['address'])) {
             return false;
         }
 
@@ -52,7 +52,7 @@ class DeliveryCalc {
         foreach ([Tariff::SHOP_TYPE, Tariff::DELIVERY_TYPE] as $deliveryType) {
             $deliveryParam['type'] = $deliveryType;
 
-            $calcResult = $api->calculate($deliveryParam);
+            $calcResult = $api->calculateTariffList($deliveryParam);
 
             if (empty($calcResult)) {
                 continue;
@@ -76,27 +76,7 @@ class DeliveryCalc {
 
                 $minDay = (int) $tariff['period_min'] + (int) $this->method->get_option('extra_day');
                 $maxDay = (int) $tariff['period_max'] + (int) $this->method->get_option('extra_day');
-                $cost   = (int) ($tariff['total_sum'] ?? $tariff['delivery_sum']) +
-                          (int) $this->method->get_option('extra_cost');
-
-                if ($this->method->get_option('percentprice_toggle') === 'yes') {
-                    $cost = (int) (($this->method->get_option('percentprice') / 100) * $cost);
-                }
-
-                if ($this->method->get_option('fixprice_toggle') === 'yes') {
-                    $cost = (int) $this->method->get_option('fixprice');
-                }
-
-                if (($this->method->get_option('stepprice_toggle') === 'yes') &&
-                    (int) $package['cart_subtotal'] > (int) $this->method->get_option('stepprice')) {
-                    $cost = 0;
-                }
-
-                if (function_exists('wcml_get_woocommerce_currency_option')) {
-                    $costTMP = apply_filters('wcml_raw_price_amount', $cost, 'RUB');
-                    $coef    = $costTMP / $cost;
-                    $cost    /= $coef;
-                }
+                $cost   = (int) $tariff['delivery_sum'];
 
                 $this->rates[$tariff['tariff_code']] = [
                     'id'        => sprintf('%s_%s', Config::DELIVERY_NAME, $tariff['tariff_code']),
@@ -106,6 +86,7 @@ class DeliveryCalc {
                     'meta_data' => [
                         Config::ADDRESS_HASH_META_KEY => sha1($deliveryParam['address']),
                         'tariff_code'                 => $tariff['tariff_code'],
+                        'tariff_type'                 => $deliveryType,
                         'weight'                      => $deliveryParam['package_data']['weight'] / 1000,
                         'length'                      => $deliveryParam['package_data']['length'],
                         'width'                       => $deliveryParam['package_data']['width'],
@@ -114,6 +95,62 @@ class DeliveryCalc {
                 ];
             }
         }
+
+        $fixedPrice = ($this->method->get_option('fixprice_toggle') === 'yes') ?
+            (int) $this->method->get_option('fixprice') : null;
+
+        if (($this->method->get_option('stepprice_toggle') === 'yes') &&
+            (int) $package['cart_subtotal'] > (int) $this->method->get_option('stepprice')) {
+            $fixedPrice = 0;
+        }
+
+        $extraCost = (int) $this->method->get_option('extra_cost');
+
+        $percentPrice = $this->method->get_option('percentprice_toggle') === 'yes' ?
+            ($this->method->get_option('percentprice') / 100) : null;
+
+        $this->rates = array_map(static function ($tariff) use (
+            $fixedPrice,
+            $extraCost,
+            $api,
+            $deliveryParam,
+            $percentPrice
+        ) {
+            if ($fixedPrice !== null) {
+                $tariff['cost'] = $fixedPrice;
+
+                return $tariff;
+            }
+
+            $deliveryParam['type']        = $tariff['meta_data']['tariff_type'];
+            $deliveryParam['tariff_code'] = $tariff['meta_data']['tariff_code'];
+
+            $tariffInfo = $api->calculateTariff($deliveryParam);
+
+            if (empty($tariffInfo)) {
+                return $tariff;
+            }
+
+            $delivery = json_decode($tariffInfo, true);
+
+            $cost = $delivery['total_sum'];
+
+            $cost += $extraCost;
+
+            if ($percentPrice !== null) {
+                $cost *= $percentPrice;
+            }
+
+            if (function_exists('wcml_get_woocommerce_currency_option')) {
+                $costTMP = apply_filters('wcml_raw_price_amount', $cost, 'RUB');
+                $coef    = $costTMP / $cost;
+                $cost    /= $coef;
+            }
+
+            $tariff['cost'] = ceil($cost);
+
+            return $tariff;
+        }, $this->rates);
 
         return !empty($this->rates);
     }

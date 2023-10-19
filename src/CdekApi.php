@@ -12,7 +12,8 @@ class CdekApi {
     protected const REGION_PATH = "location/cities";
     protected const ORDERS_PATH = "orders/";
     protected const PVZ_PATH = "deliverypoints";
-    protected const CALC_PATH = "calculator/tarifflist";
+    protected const CALC_LIST_PATH = "calculator/tarifflist";
+    protected const CALC_PATH = "calculator/tariff";
     protected const WAYBILL_PATH = "print/orders/";
     protected const BARCODE_PATH = "print/barcodes/";
     protected const CALL_COURIER = "intakes";
@@ -99,7 +100,7 @@ class CdekApi {
         $param['seller']                           = ['address' => $this->deliveryMethod->get_option('seller_address')];
 
         if (Tariff::isTariffFromOffice($param['tariff_code'])) {
-            $office = json_decode($this->deliveryMethod->get_option('pvz_code'), true);
+            $office                  = json_decode($this->deliveryMethod->get_option('pvz_code'), true);
             $param['shipment_point'] = $office['address'];
         } else {
             $address = json_decode($this->deliveryMethod->get_option('address'), true);
@@ -145,12 +146,33 @@ class CdekApi {
         return HttpClient::sendCdekRequest($url, 'DELETE', $this->getToken());
     }
 
-    public function calculate($deliveryParam) {
+    public function calculateTariffList($deliveryParam) {
+        $url = $this->apiUrl.self::CALC_LIST_PATH;
+
+        $request = [
+            'type'          => $deliveryParam['type'],
+            'from_location' => $deliveryParam['from'],
+            'to_location'   => [
+                'address' => $deliveryParam['address'],
+            ],
+            'packages'      => [
+                'weight' => $deliveryParam['package_data']['weight'],
+                'length' => $deliveryParam['package_data']['length'],
+                'width'  => $deliveryParam['package_data']['width'],
+                'height' => $deliveryParam['package_data']['height'],
+            ],
+        ];
+
+        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), $request);
+    }
+
+    public function calculateTariff($deliveryParam) {
         $url = $this->apiUrl.self::CALC_PATH;
 
         $request = [
             'type'          => $deliveryParam['type'],
             'from_location' => $deliveryParam['from'],
+            'tariff_code'   => $deliveryParam['tariff_code'],
             'to_location'   => [
                 'address' => $deliveryParam['address'],
             ],
