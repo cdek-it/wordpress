@@ -98,6 +98,8 @@ class DeliveryCalc {
                     $cost    /= $coef;
                 }
 
+                $weightCalc = new WeightCalc();
+                $measurement = get_option('woocommerce_weight_unit');
                 $this->rates[$tariff['tariff_code']] = [
                     'id'        => sprintf('%s_%s', Config::DELIVERY_NAME, $tariff['tariff_code']),
                     'label'     => sprintf("CDEK: %s, (%s-%s дней)",
@@ -106,7 +108,7 @@ class DeliveryCalc {
                     'meta_data' => [
                         Config::ADDRESS_HASH_META_KEY => sha1($deliveryParam['address']),
                         'tariff_code'                 => $tariff['tariff_code'],
-                        'weight'                      => $deliveryParam['package_data']['weight'] / 1000,
+                        "weight($measurement)"        => $weightCalc->getWeightToMeasurementFromGram($deliveryParam['package_data']['weight'], $measurement),
                         'length'                      => $deliveryParam['package_data']['length'],
                         'width'                       => $deliveryParam['package_data']['width'],
                         'height'                      => $deliveryParam['package_data']['height'],

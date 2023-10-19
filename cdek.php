@@ -376,3 +376,16 @@ function cdek_save_custom_checkout_field_to_order($order, $data) {
         $order->update_meta_data("_$key", sanitize_text_field($_POST[$key]));
     }
 }
+
+add_action('admin_notices', 'cdek_display_admin_notices');
+function cdek_display_admin_notices() {
+    $measurement = get_option('woocommerce_weight_unit');
+    if (!in_array($measurement, ['g', 'kg', 'lbs', 'oz'])) {
+        echo "<div class='notice notice-info is-dismissible'><p>
+            Выбранная единица измерения веса ($measurement) не поддерживается данным плагином.
+            Вы можете использовать значение для габаритов товара по умолчанию.
+            Также вы можете обратиться в поддержку плагина для дополнительной информации.
+            В противном случае, единица измерения будет автоматически обрабатываться как граммы.
+            </p></div>";
+    }
+}
