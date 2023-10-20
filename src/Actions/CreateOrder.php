@@ -5,22 +5,21 @@ namespace Cdek\Actions;
 use Cdek\CdekApi;
 use Cdek\Helper;
 use Cdek\Helpers\CheckoutHelper;
-use Cdek\Helpers\UrlHelper;
-use Cdek\Model\CourierMetaData;
 use Cdek\Model\OrderMetaData;
 use Cdek\Model\Tariff;
-use Cdek\Validator\ValidateCityCode;
 use Cdek\Validator\ValidateCreateOrderForm;
-use Cdek\Validator\ValidateOrder;
 
 class CreateOrder {
-    protected $api;
+    protected CdekApi $api;
 
     public function __construct() {
-        $this->api = new CdekApi();
+        $this->api = new CdekApi;
     }
 
-    public function createOrder($data) {
+    /**
+     * @throws \JsonException
+     */
+    public function __invoke($data): array {
         if (Helper::getActualShippingMethod()->get_option('has_packages_mode') !== 'yes') {
             $validate = ValidateCreateOrderForm::validate($data);
             if (!$validate->state) {
@@ -36,20 +35,12 @@ class CreateOrder {
         $postOrderData['type']        = Tariff::getTariffType($postOrderData['tariff_code']);
         $param                        = setPackage($data, $orderId, $postOrderData['currency'],
             $postOrderData['type']); //data передается в сыром виде
-        $cityCode                     = getCityCode($postOrderData['city_code'], $order);
 
-        $validate = ValidateCityCode::validate($cityCode);
-        if (!$validate->state) {
-            return $validate->response();
-        }
+        $param = $this->createRequestData($postOrderData, $order, $param);
 
-        $orderData = $this->create($postOrderData, $order, $param);
+        $orderData = json_decode($this->api->createOrder($param), true, 512, JSON_THROW_ON_ERROR);
 
         sleep(5);
-
-        if (!$validate->state) {
-            return $validate->response();
-        }
 
         $cdekNumber                    = $this->getCdekOrderNumber($orderData->entity->uuid);
         $postOrderData['order_number'] = $cdekNumber;
@@ -63,14 +54,7 @@ class CreateOrder {
         ];
     }
 
-    public function create($postOrderData, $order, $param) {
-        $param         = $this->createRequestData($postOrderData, $order, $param);
-        $orderDataJson = $this->api->createOrder($param);
-
-        return json_decode($orderDataJson);
-    }
-
-    public function createRequestData($postOrderData, $order, $param) {
+    private function createRequestData($postOrderData, $order, $param): array {
         if (Tariff::isTariffToOffice($postOrderData['tariff_code'])) {
             $param['delivery_point'] = $postOrderData['pvz_code'];
         } else {
@@ -129,7 +113,7 @@ class CreateOrder {
         return $total;
     }
 
-    public function getCdekOrderNumber($orderUuid, $iteration = 1) {
+    private function getCdekOrderNumber($orderUuid, $iteration = 1) {
         if ($iteration === 5) {
             return $orderUuid;
         }
@@ -137,29 +121,5 @@ class CreateOrder {
         $orderInfo     = json_decode($orderInfoJson, true);
 
         return $orderInfo['entity']['cdek_number'] ?? $this->getCdekOrderNumber($orderUuid, $iteration + 1);
-    }
-
-    public function deleteIfNotExist(int $order_id) {
-        $meta = OrderMetaData::getMetaByOrderId($order_id);
-
-        if ($meta['order_uuid'] === '') {
-            return true;
-        }
-
-        $orderJson = $this->api->getOrder($meta['order_uuid']);
-        $order     = json_decode($orderJson);
-
-        $validate = ValidateOrder::validate($order);
-        if (!$validate->state()) {
-            OrderMetaData::cleanMetaByOrderId($order_id);
-
-            $courierCallMeta = CourierMetaData::getMetaByOrderId($order_id);
-            if (array_key_exists('not_cons', $courierCallMeta) && $courierCallMeta['not_cons']) {
-                $courierCall = new CallCourier();
-                $courierCall->delete($order_id);
-            }
-        }
-
-        return $validate->state();
     }
 }

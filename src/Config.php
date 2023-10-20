@@ -12,6 +12,8 @@ namespace Cdek {
         public const DELIVERY_NAME = 'official_cdek';
         public const META_KEY = 'order_data';
         public const ORDER_META_BOX_KEY = 'official_cdek_order';
+
+        public const ORDER_AUTOMATION_HOOK_NAME = 'official_cdek_automation';
         public const ADDRESS_HASH_META_KEY = '_official_cdek_address_hash';
         public const API_URL = 'https://api.cdek.ru/v2/';
         public const TEST_API_URL = 'https://api.edu.cdek.ru/v2/';

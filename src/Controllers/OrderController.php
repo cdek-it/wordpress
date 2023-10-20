@@ -15,8 +15,11 @@ namespace Cdek\Controllers {
     use WP_REST_Server;
 
     class OrderController {
+        /**
+         * @throws \JsonException
+         */
         public static function createOrder(WP_REST_Request $data): WP_REST_Response {
-            return new WP_REST_Response((new CreateOrder)->createOrder($data), 200);
+            return new WP_REST_Response((new CreateOrder)($data), 200);
         }
 
         public static function deleteOrder(WP_REST_Request $data): WP_REST_Response {

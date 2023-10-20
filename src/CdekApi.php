@@ -178,7 +178,7 @@ class CdekApi {
         return json_decode(HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['city' => $city]), true);
     }
 
-    public function getCityCodeByCityName($city, $state): int {
+    public function getCityCodeByCityName(string $city, string $state): int {
         $url = $this->apiUrl.self::REGION_PATH;
 
         //по запросу к api v2 климовск записан как "климовск микрорайон" поэтому добавляем "микрорайон"

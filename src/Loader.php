@@ -17,6 +17,7 @@ namespace Cdek {
     use Cdek\Helpers\DataWPScraber;
     use Cdek\UI\Admin;
     use Cdek\UI\CdekWidget;
+    use Cdek\UI\CheckoutMap;
     use Cdek\UI\Frontend;
     use Cdek\UI\MetaBoxes;
     use Cdek\Validator\CheckoutProcessValidator;
@@ -101,6 +102,8 @@ namespace Cdek {
 
             add_action('woocommerce_checkout_process', new CheckoutProcessValidator);
             add_action('woocommerce_order_before_calculate_totals', new RecalculateShippingAction, 10, 2);
+
+            add_action('woocommerce_after_shipping_rate', new CheckoutMap, 10, 2);
 
             (new CdekWidget)();
             (new Admin)();

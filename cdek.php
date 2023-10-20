@@ -11,6 +11,8 @@
  * WC tested up to: 8.0
  */
 
+defined('ABSPATH') or exit;
+
 use Cdek\CdekApi;
 use Cdek\Config;
 use Cdek\Helper;
@@ -20,10 +22,6 @@ use Cdek\Helpers\WeightCalc;
 use Cdek\Loader;
 use Cdek\Model\OrderMetaData;
 use Cdek\Model\Tariff;
-
-function_exists('add_action') or exit();
-
-defined('ABSPATH') or exit;
 
 if (file_exists(__DIR__.'/vendor/autoload.php')) {
     require __DIR__.'/vendor/autoload.php';
@@ -37,19 +35,8 @@ if (!class_exists(Loader::class)) {
 (new Loader)(__FILE__);
 
 add_filter('woocommerce_new_order', 'cdek_woocommerce_new_order_action', 10, 2);
-add_action('woocommerce_after_shipping_rate', 'cdek_map_display', 10, 2);
 add_filter('woocommerce_checkout_fields', 'cdek_checkout_fields', 1090);
 add_action('woocommerce_checkout_create_order', 'cdek_save_custom_checkout_field_to_order', 10, 2);
-
-function getCityCode($city_code, $order) {
-    $api      = new CdekApi();
-    $cityCode = $city_code;
-    if (empty($cityCode)) {
-        $cityCode = $api->getCityCodeByCityName($order->get_shipping_city(), $order->get_shipping_state());
-    }
-
-    return $cityCode;
-}
 
 function setPackage($data, $orderId, $currency, $tariffType = Tariff::SHOP_TYPE) {
     $param = [];
@@ -64,7 +51,7 @@ function setPackage($data, $orderId, $currency, $tariffType = Tariff::SHOP_TYPE)
         $items       = $order->get_items();
         $itemsData   = [];
         $totalWeight = 0;
-        foreach ($items as $key => $item) {
+        foreach ($items as $item) {
             $product     = $item->get_product();
             $weight      = $product->get_weight();
             $weightClass = new WeightCalc();
@@ -200,42 +187,13 @@ function get_package_items($items, $orderId, $currency) {
     return ['items' => $itemsData, 'weight' => $totalWeight];
 }
 
-function cdek_map_display($shippingMethodCurrent) {
-    if (is_checkout() && isTariffDestinationCdekOffice($shippingMethodCurrent)) {
-        $api = new CdekApi;
-
-        $city = $api->getCityCodeByCityName(CheckoutHelper::getValueFromCurrentSession('city'),
-            CheckoutHelper::getValueFromCurrentSession('state'));
-
-        $points = $api->getOffices([
-            'city_code' => $city,
-        ]);
-
-        include 'templates/public/open-map.php';
-    }
-}
-
-function isTariffDestinationCdekOffice($shippingMethodCurrent): bool {
-    if ($shippingMethodCurrent->get_method_id() !== Config::DELIVERY_NAME) {
-        return false;
-    }
-
-    $shippingMethodIdSelected = wc_get_chosen_shipping_method_ids()[0];
-
-    if ($shippingMethodCurrent->get_id() !== $shippingMethodIdSelected) {
-        return false;
-    }
-
-    $tariffCode = explode('_', $shippingMethodIdSelected)[2];
-
-    return Tariff::isTariffToOffice($tariffCode);
-}
-
 function cdek_woocommerce_new_order_action($order_id, $order) {
     if (CheckoutHelper::isCdekShippingMethod($order)) {
+        $shippingMethod = array_shift($order->get_items('shipping'));
+
         $pvzInfo  = CheckoutHelper::getValueFromCurrentSession('pvz_info');
         $pvzCode  = CheckoutHelper::getValueFromCurrentSession('pvz_code');
-        $tariffId = getTariffCodeCdekShippingMethodByOrder($order);
+        $tariffId = $shippingMethod->get_meta('tariff_code');
         $cityCode = CheckoutHelper::getValueFromCurrentSession('city_code');
 
         $currency = function_exists('wcml_get_woocommerce_currency_option') ? get_woocommerce_currency() : 'RUB';
@@ -255,8 +213,6 @@ function cdek_woocommerce_new_order_action($order_id, $order) {
         $order->save();
 
         if (Tariff::isTariffToOffice($tariffId)) {
-            $shippingMethodArray = $order->get_items('shipping');
-            $shippingMethod      = array_shift($shippingMethodArray);
             $shippingMethod->add_meta_data('pvz', $pvzCode.' ('.$pvzInfo.')');
             $shippingMethod->save_meta_data();
         }
@@ -270,13 +226,11 @@ function cdek_woocommerce_new_order_action($order_id, $order) {
         ];
 
         OrderMetaData::addMetaByOrderId($order_id, $data);
+
+        if ($shippingMethod->get_meta('automate_orders') === 'yes') {
+            wp_schedule_single_event(time() + 1, Config::ORDER_AUTOMATION_HOOK_NAME, [$order_id]);
+        }
     }
-}
-
-function getTariffCodeCdekShippingMethodByOrder($order) {
-    $shippingMethodArray = $order->get_items('shipping');
-
-    return array_shift($shippingMethodArray)->get_meta('tariff_code');
 }
 
 function cdek_checkout_fields($fields) {
