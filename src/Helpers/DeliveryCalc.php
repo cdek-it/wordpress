@@ -39,6 +39,8 @@ class DeliveryCalc {
 
         $deliveryParam['address']      = $package['destination']['city'];
         $deliveryParam['package_data'] = $this->getPackagesData($package['contents']);
+        $weightOrigUnit = $deliveryParam['package_data']['weight_orig_unit'];
+        unset($deliveryParam['package_data']['weight_orig_unit']);
 
         if ($this->method->get_option('insurance') === 'yes') {
             $deliveryParam['selected_services'][0] = [
@@ -78,7 +80,6 @@ class DeliveryCalc {
                 $maxDay = (int) $tariff['period_max'] + (int) $this->method->get_option('extra_day');
                 $cost   = (int) $tariff['delivery_sum'];
 
-                $weightCalc = new WeightCalc();
                 $measurement = get_option('woocommerce_weight_unit');
                 $this->rates[$tariff['tariff_code']] = [
                     'id'        => sprintf('%s_%s', Config::DELIVERY_NAME, $tariff['tariff_code']),
@@ -88,7 +89,7 @@ class DeliveryCalc {
                     'meta_data' => [
                         Config::ADDRESS_HASH_META_KEY => sha1($deliveryParam['address']),
                         'tariff_code'                 => $tariff['tariff_code'],
-                        "weight($measurement)"        => $weightCalc->getWeightToMeasurementFromGram($deliveryParam['package_data']['weight'], $measurement),
+                        "weight($measurement)"        => $weightOrigUnit,
                         'tariff_type'                 => $deliveryType,
                         'length'                      => $deliveryParam['package_data']['length'],
                         'width'                       => $deliveryParam['package_data']['width'],
@@ -162,6 +163,7 @@ class DeliveryCalc {
         $lengthList  = [];
         $widthList   = [];
         $heightList  = [];
+        $weightClass = new WeightCalc();
         foreach ($contents as $productGroup) {
             $quantity = $productGroup['quantity'];
             $weight   = $productGroup['data']->get_weight();
@@ -188,7 +190,6 @@ class DeliveryCalc {
             $heightList[] = $dimensions[1];
             $widthList[]  = $dimensions[2];
 
-            $weightClass = new WeightCalc();
             $weight      = $weightClass->getWeight($weight);
             $totalWeight += $quantity * $weight;
         }
@@ -212,7 +213,7 @@ class DeliveryCalc {
             }
         }
 
-        return ['length' => $length, 'width' => $width, 'height' => $height, 'weight' => $totalWeight];
+        return ['length' => $length, 'width' => $width, 'height' => $height, 'weight' => $weightClass->getWeightInGrams($totalWeight), 'weight_orig_unit' => $totalWeight];
     }
 
     protected function checkDeliveryResponse($delivery): bool {

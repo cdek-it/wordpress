@@ -64,10 +64,10 @@ function setPackage($data, $orderId, $currency, $tariffType = Tariff::SHOP_TYPE)
         $items       = $order->get_items();
         $itemsData   = [];
         $totalWeight = 0;
+        $weightClass = new WeightCalc();
         foreach ($items as $key => $item) {
             $product     = $item->get_product();
             $weight      = $product->get_weight();
-            $weightClass = new WeightCalc();
             $weight      = $weightClass->getWeight($weight);
             $quantity    = (int) $item->get_quantity();
             $totalWeight += $quantity * $weight;
@@ -89,14 +89,15 @@ function setPackage($data, $orderId, $currency, $tariffType = Tariff::SHOP_TYPE)
                 $paymentValue = 0;
             }
 
+            $weightInG = $weightClass->getWeightInGrams($weight);
             $itemsData[] = [
                 'ware_key'     => $product->get_id(),
                 'payment'      => ['value' => $paymentValue],
                 'name'         => $product->get_name(),
                 'cost'         => $cost,
                 'amount'       => $item->get_quantity(),
-                'weight'       => $weight,
-                'weight_gross' => $weight + 1,
+                'weight'       => $weightInG,
+                'weight_gross' => $weightInG + 1,
             ];
         }
 
@@ -105,7 +106,7 @@ function setPackage($data, $orderId, $currency, $tariffType = Tariff::SHOP_TYPE)
             'length'  => $length,
             'width'   => $width,
             'height'  => $height,
-            'weight'  => $totalWeight,
+            'weight'  => $weightClass->getWeightInGrams($totalWeight),
             'comment' => 'приложена опись',
         ];
 
@@ -165,10 +166,10 @@ function get_packages($orderId, $packageData, $currency) {
 function get_package_items($items, $orderId, $currency) {
     $itemsData   = [];
     $totalWeight = 0;
+    $weightClass = new WeightCalc();
     foreach ($items as $item) {
         $product     = wc_get_product($item[0]);
         $weight      = $product->get_weight();
-        $weightClass = new WeightCalc();
         $weight      = $weightClass->getWeight($weight);
         $totalWeight += (int) $item[2] * $weight;
 
@@ -186,18 +187,19 @@ function get_package_items($items, $orderId, $currency) {
             $cost = convert_currency_cost_to_rub($cost, $currency);
         }
 
+        $weightInG = $weightClass->getWeightInGrams($weight);
         $itemsData[] = [
             'ware_key'     => $product->get_id(),
             'payment'      => ["value" => $paymentValue],
             'name'         => $product->get_name(),
             'cost'         => $cost,
             'amount'       => $item[2],
-            'weight'       => $weight,
-            'weight_gross' => $weight + 1,
+            'weight'       => $weightInG,
+            'weight_gross' => $weightInG + 1,
         ];
     }
 
-    return ['items' => $itemsData, 'weight' => $totalWeight];
+    return ['items' => $itemsData, 'weight' => $weightClass->getWeightInGrams($totalWeight)];
 }
 
 function cdek_map_display($shippingMethodCurrent) {
@@ -379,13 +381,15 @@ function cdek_save_custom_checkout_field_to_order($order, $data) {
 
 add_action('admin_notices', 'cdek_display_admin_notices');
 function cdek_display_admin_notices() {
-    $measurement = get_option('woocommerce_weight_unit');
-    if (!in_array($measurement, ['g', 'kg', 'lbs', 'oz'])) {
-        echo "<div class='notice notice-info is-dismissible'><p>
-            Выбранная единица измерения веса ($measurement) не поддерживается данным плагином.
+    if ((isset($_GET['section']) && $_GET['section'] === Config::DELIVERY_NAME) || ((isset($_GET['tab']) && $_GET['tab'] === 'products'))) {
+        $measurement = get_option('woocommerce_weight_unit');
+        if (!in_array($measurement, ['g', 'kg', 'lbs', 'oz'])) {
+            echo "<div class='notice notice-info is-dismissible'><p>
+            CDEKDelivery: Выбранная единица измерения веса ($measurement) не поддерживается данным плагином.
             Вы можете использовать значение для габаритов товара по умолчанию.
             Также вы можете обратиться в поддержку плагина для дополнительной информации.
             В противном случае, единица измерения будет автоматически обрабатываться как граммы.
             </p></div>";
+        }
     }
 }

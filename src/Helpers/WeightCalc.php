@@ -3,50 +3,41 @@
 namespace Cdek\Helpers;
 
 use Cdek\Helper;
+use RuntimeException;
 
 class WeightCalc {
 
-    public function getWeight($weight): int {
-        $weight      = $this->getWeightInGrams((float) $weight);
+    private const G_INTO_KG = 1000;
+    private const G_INTO_LBS = 453.6;
+    private const G_INTO_OZ = 28.35;
 
+    public function getWeight($weight): float {
         if (empty($weight) ||
             Helper::getActualShippingMethod()->get_option('product_package_default_toggle') === 'yes') {
             $defaultWeight = (float) str_replace(',', '.',
                 Helper::getActualShippingMethod()->get_option('product_weight_default'));
-            $weight = $this->getWeightInGrams($defaultWeight, 'kg');
+            $weight = $defaultWeight;
         }
 
-        return (int) $weight;
+        return (float) $weight;
     }
 
-    protected function getWeightInGrams(float $weight, string $measurement = ''): float {
-        $measurement = empty($measurement) ? get_option('woocommerce_weight_unit') : $measurement;
+    public function getWeightInGrams(float $weight): int {
+        $measurement = get_option('woocommerce_weight_unit');
         switch ($measurement) {
             case 'g':
-                return $weight;
+                return (int) $weight;
             case 'kg':
-                return $weight * 1000;
+                return $this->convertToG($weight, self::G_INTO_KG);
             case 'lbs':
-                return $weight * 453.6;
+                return $this->convertToG($weight, self::G_INTO_LBS);
             case 'oz':
-                return $weight * 28.35;
+                return $this->convertToG($weight, self::G_INTO_OZ);
         }
-
-        return $weight;
+        throw new RuntimeException('CDEKDelivery: The selected unit of measure is not found');
     }
 
-    public function getWeightToMeasurementFromGram(float $weight, string $measurement = ''): float {
-        $measurement = empty($measurement) ? get_option('woocommerce_weight_unit') : $measurement;
-        switch ($measurement) {
-            case 'g':
-                return $weight;
-            case 'kg':
-                return round($weight / 1000, 3);
-            case 'lbs':
-                return round($weight / 453.6, 3);
-            case 'oz':
-                return round($weight / 28.35, 3);
-        }
-        return $weight;
+    protected function convertToG(float $weight, $coefficient): int {
+        return (int) ($weight * $coefficient);
     }
 }
