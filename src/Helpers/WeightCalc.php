@@ -37,7 +37,7 @@ class WeightCalc {
         throw new RuntimeException('CDEKDelivery: The selected unit of measure is not found');
     }
 
-    protected function convertToG(float $weight, $coefficient): int {
+    private function convertToG(float $weight, float $coefficient): int {
         return (int) ($weight * $coefficient);
     }
 }
