@@ -4,7 +4,9 @@ namespace Cdek;
 
 use Cdek\Enums\BarcodeFormat;
 use Cdek\Model\Tariff;
+use Cdek\Token\Token;
 use Cdek\Transport\HttpClient;
+use RuntimeException;
 use WC_Shipping_Method;
 
 class CdekApi {
@@ -52,17 +54,20 @@ class CdekApi {
         return (bool) $token;
     }
 
-    public function getToken() {
-        $body = json_decode(HttpClient::sendRequest($this->getAuthUrl(), 'POST'));
-
-        if ($body === null || property_exists($body, 'error')) {
-            return false;
-        }
-
-        return sprintf('Bearer %s', $body->access_token);
+    public function getToken(): string {
+        $token = new Token();
+        return $token->getToken();
     }
 
-    protected function getAuthUrl(): string {
+    public function fetchToken() {
+        $body = json_decode(HttpClient::sendRequest($this->getAuthUrl(), 'POST'));
+        if ($body === null || property_exists($body, 'error')) {
+            throw new RuntimeException('Failed to get the token');
+        }
+        return $body->access_token;
+    }
+
+    public function getAuthUrl(): string {
         return sprintf('%s?%s', $this->apiUrl.self::TOKEN_PATH, http_build_query([
             'grant_type'    => 'client_credentials',
             'client_id'     => $this->clientId,
