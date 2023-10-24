@@ -228,16 +228,16 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'class' => 'cdek_package_setting_block_name',
             ],
             'product_weight_default'         => [
-                'title'             => 'Вес одной единицы товара по умолчанию в кг',
+                'title'             => 'Вес одной единицы товара по умолчанию в (' . get_option('woocommerce_weight_unit').')',
                 'desc_tip'          => true,
                 'description'       => "У всех товаров должен быть указан вес,
                             если есть товары без указанного <br> веса то для таких товаров будет подставляться значение из этого поля. <br>
-                            Это повлияет на точность расчета доставки. Значение по умолчанию 1 кг.",
+                            Это повлияет на точность расчета доставки. Значение по умолчанию 1 единица измерения веса заданная в настройках.",
                 'type'              => 'number',
                 'default'           => 1,
                 'custom_attributes' => [
-                    'min'  => 1,
-                    'step' => 1,
+                    'min'  => 0,
+                    'step' => 0.01
                 ],
             ],
             'product_length_default'         => [

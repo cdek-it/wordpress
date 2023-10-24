@@ -3,27 +3,41 @@
 namespace Cdek\Helpers;
 
 use Cdek\Helper;
+use RuntimeException;
 
 class WeightCalc {
 
-    public function getWeight($weight): int {
-        $weight      = (float) $weight;
-        $measurement = get_option('woocommerce_weight_unit');
+    private const G_INTO_KG = 1000;
+    private const G_INTO_LBS = 453.6;
+    private const G_INTO_OZ = 28.35;
+
+    public function getWeight($weight): float {
         if (empty($weight) ||
             Helper::getActualShippingMethod()->get_option('product_package_default_toggle') === 'yes') {
             $defaultWeight = (float) str_replace(',', '.',
                 Helper::getActualShippingMethod()->get_option('product_weight_default'));
-            if ($measurement === 'g') {
-                $weight = $defaultWeight * 1000;
-            } else {
-                $weight = $defaultWeight;
-            }
+            $weight = $defaultWeight;
         }
 
-        if ($measurement === 'kg') {
-            $weight *= 1000;
-        }
+        return (float) $weight;
+    }
 
-        return (int) $weight;
+    public function getWeightInGrams(float $weight): int {
+        $measurement = get_option('woocommerce_weight_unit');
+        switch ($measurement) {
+            case 'g':
+                return (int) $weight;
+            case 'kg':
+                return $this->convertToG($weight, self::G_INTO_KG);
+            case 'lbs':
+                return $this->convertToG($weight, self::G_INTO_LBS);
+            case 'oz':
+                return $this->convertToG($weight, self::G_INTO_OZ);
+        }
+        throw new RuntimeException('CDEKDelivery: The selected unit of measure is not found');
+    }
+
+    private function convertToG(float $weight, float $coefficient): int {
+        return (int) ($weight * $coefficient);
     }
 }
