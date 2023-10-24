@@ -56,6 +56,7 @@ class CdekApi {
 
     public function getToken(): string {
         $token = new Token();
+
         return $token->getToken();
     }
 
@@ -64,6 +65,7 @@ class CdekApi {
         if ($body === null || property_exists($body, 'error')) {
             throw new RuntimeException('Failed to get the token');
         }
+
         return $body->access_token;
     }
 
