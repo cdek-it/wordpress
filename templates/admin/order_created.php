@@ -4,7 +4,7 @@
 /** @var $dateMin */
 /** @var $dateMax */
 /** @var $courierNumber */
-
+/** @var $orderIdWP */
 /** @var $fromDoor */
 
 use Cdek\Helpers\UrlHelper;
@@ -23,10 +23,10 @@ use Cdek\Helpers\UrlHelper;
                     <a id="cdek-order-barcode">ШК будет доступна позже</a>
                 <?php else: ?>
                     <a id="cdek-order-waybill" target="_blank"
-                       href="<?= UrlHelper::buildRest("order/$orderNumber/waybill") ?>">Получить
+                       href="<?= UrlHelper::buildRest("order/$orderIdWP/waybill") ?>">Получить
                         квитанцию</a>
                     <a id="cdek-order-barcode" target="_blank"
-                       href="<?= UrlHelper::buildRest("order/$orderNumber/barcode") ?>">Получить ШК</a>
+                       href="<?= UrlHelper::buildRest("order/$orderIdWP/barcode") ?>">Получить ШК</a>
                     <p id="cdek-order-courier">
                         Вызвать курьера</p>
                 <?php endif; ?>

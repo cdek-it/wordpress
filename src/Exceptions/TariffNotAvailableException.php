@@ -1,14 +1,18 @@
 <?php
 
-namespace Cdek\Exceptions;
+namespace {
 
-use RuntimeException;
+    defined('ABSPATH') or exit;
+}
 
-class TariffNotAvailableException extends RuntimeException {
-    public array $availableTariffs;
+namespace Cdek\Exceptions {
 
-    public function __construct(array $availableTariffs) {
-        $this->availableTariffs = $availableTariffs;
-        parent::__construct('Tariff not available');
+    class TariffNotAvailableException extends CdekException
+    {
+
+        public function __construct(array $availableTariffs)
+        {
+            parent::__construct('Tariff not available', 'cdek_error.calc.tariff', $availableTariffs, false);
+        }
     }
 }

@@ -6,11 +6,13 @@ namespace {
 }
 
 namespace Cdek\Helpers {
-    class StringHelper {
-        public static function generateRandom($length = 10): string {
-            $characters       = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    class StringHelper
+    {
+        public static function generateRandom(int $length = 10): string
+        {
+            $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
             $charactersLength = strlen($characters);
-            $randomString     = '';
+            $randomString = '';
             for ($i = 0; $i < $length; $i++) {
                 $randomString .= $characters[rand(0, $charactersLength - 1)];
             }

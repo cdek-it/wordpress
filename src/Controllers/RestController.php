@@ -7,139 +7,38 @@ namespace {
 
 namespace Cdek\Controllers {
 
+    use Cdek\Actions\GenerateBarcodeAction;
+    use Cdek\Actions\GenerateWaybillAction;
     use Cdek\CdekApi;
     use Cdek\Config;
-    use Cdek\Enums\BarcodeFormat;
-    use Cdek\Helper;
+    use Cdek\Model\OrderMetaData;
     use WP_REST_Request;
     use WP_REST_Response;
     use WP_REST_Server;
 
-    class RestController {
-        public static function checkAuth(): WP_REST_Response {
+    class RestController
+    {
+        public static function checkAuth(): WP_REST_Response
+        {
             return new WP_REST_Response(['state' => (new CdekApi)->checkAuth()], 200);
         }
 
-        public static function getWaybill(WP_REST_Request $data): void {
-            ini_set('max_execution_time', 30 + Config::GRAPHICS_FIRST_SLEEP + Config::GRAPHICS_TIMEOUT_SEC * Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS);
-            $api   = new CdekApi;
-            $order = json_decode($api->getOrderByCdekNumber($data->get_param('id')), true);
-
-            if (!isset($order['entity'])) {
-                echo 'Не удалось получить сведения о заказе. 
-        Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
-        и введите габариты упаковки повторно.';
-                exit();
-            }
-
-            if (isset($order['related_entities'])) {
-                foreach ($order['related_entities'] as $entity) {
-                    if ($entity['type'] === 'waybill' && isset($entity['url'])) {
-                        header("Content-type:application/pdf");
-                        echo $api->getFileByLink($entity['url']);
-                        exit();
-                    }
-                }
-            }
-
-            $waybill = json_decode($api->createWaybill($order['entity']['uuid']), true);
-
-            if (!isset($waybill['entity'])) {
-                echo 'Не удалось создать квитанцию. 
-        Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
-        и введите габариты упаковки повторно.';
-                exit();
-            }
-
-            sleep(Config::GRAPHICS_FIRST_SLEEP);
-
-            for ($i = 0; $i < Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS; $i++) {
-                $waybillInfo = json_decode($api->getWaybill($waybill['entity']['uuid']), true);
-
-                if (isset($waybillInfo['entity']['url'])) {
-                    header('Content-type: application/pdf');
-                    echo $api->getFileByLink($waybillInfo['entity']['url']);
-                    exit();
-                }
-
-                if (!isset($waybillInfo['entity']) || end($waybillInfo['entity']['statuses'])['code'] === 'INVALID') {
-                    echo 'Не удалось создать квитанцию. 
-        Для решения проблемы, попробуй повторно запросить квитанцию.';
-                    exit();
-                }
-
-                sleep(Config::GRAPHICS_TIMEOUT_SEC);
-            }
-
-            echo 'Запрос на квитанцию был отправлен, но ответ по нему не пришел.
-        Для решения проблемы, попробуй подождать 1 час и попробуй запросить квитанцию еще раз.';
-            exit();
+        public static function getWaybill(WP_REST_Request $request): void
+        {
+            (new GenerateWaybillAction)(OrderMetaData::getMetaByOrderId($request->get_param('id'))['cdek_number']
+                                        ??
+                                        '');
         }
 
-        public static function getBarcode(WP_REST_Request $request): void {
-            ini_set('max_execution_time', 30 + Config::GRAPHICS_FIRST_SLEEP + Config::GRAPHICS_TIMEOUT_SEC * Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS);
-            $api = new CdekApi;
-
-            $order = json_decode($api->getOrderByCdekNumber($request->get_param('id')), true);
-
-            if (!isset($order['entity'])) {
-                echo 'Не удалось получить сведения о заказе. 
-        Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
-        и введите габариты упаковки повторно.';
-                exit();
-            }
-
-            if (isset($order['related_entities'])) {
-                foreach ($order['related_entities'] as $entity) {
-                    if ($entity['type'] === 'barcode' && isset($entity['url'])) {
-                        $barcodeInfo = json_decode($api->getBarcode($entity['uuid']), true);
-
-                        if ($barcodeInfo['entity']['format'] !== BarcodeFormat::getByIndex(Helper::getActualShippingMethod()->get_option('barcode_format', 0))) {
-                            continue;
-                        }
-
-                        header('Content-type: application/pdf');
-                        echo $api->getFileByLink($entity['url']);
-                        exit();
-                    }
-                }
-            }
-
-            $barcode = json_decode($api->createBarcode($order['entity']['uuid']), true);
-
-            if (!isset($barcode['entity'])) {
-                echo 'Не удалось создать ШК. 
-        Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
-        и введите габариты упаковки повторно.';
-                exit();
-            }
-
-            sleep(Config::GRAPHICS_FIRST_SLEEP);
-
-            for ($i = 0; $i < Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS; $i++) {
-                $barcodeInfo = json_decode($api->getBarcode($barcode['entity']['uuid']), true);
-
-                if (isset($barcodeInfo['entity']['url'])) {
-                    header('Content-type: application/pdf');
-                    echo $api->getFileByLink($barcodeInfo['entity']['url']);
-                    exit();
-                }
-
-                if (!isset($barcodeInfo['entity']) || end($barcodeInfo['entity']['statuses'])['code'] === 'INVALID') {
-                    echo 'Не удалось создать ШК. 
-        Для решения проблемы, попробуй повторно запросить ШК.';
-                    exit();
-                }
-
-                sleep(Config::GRAPHICS_TIMEOUT_SEC);
-            }
-
-            echo 'Запрос на ШК был отправлен, но ответ по нему не пришел.
-        Для решения проблемы, попробуй подождать 1 час и попробуй запросить ШК еще раз.';
-            exit();
+        public static function getBarcode(WP_REST_Request $request): void
+        {
+            (new GenerateBarcodeAction)(OrderMetaData::getMetaByOrderId($request->get_param('id'))['cdek_number']
+                                        ??
+                                        '');
         }
 
-        public function __invoke() {
+        public function __invoke(): void
+        {
             register_rest_route(Config::DELIVERY_NAME, '/check-auth', [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [__CLASS__, 'checkAuth'],
@@ -149,7 +48,7 @@ namespace Cdek\Controllers {
             register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/waybill', [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [__CLASS__, 'getWaybill'],
-                'permission_callback' => static fn() => current_user_can('manage_woocommerce'),
+                'permission_callback' => static fn() => current_user_can('edit_posts'),
                 'show_in_index'       => true,
                 'args'                => [
                     'id' => [
@@ -163,7 +62,7 @@ namespace Cdek\Controllers {
             register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/barcode', [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [__CLASS__, 'getBarcode'],
-                'permission_callback' => static fn() => current_user_can('manage_woocommerce'),
+                'permission_callback' => static fn() => current_user_can('edit_posts'),
                 'show_in_index'       => true,
                 'args'                => [
                     'id' => [
