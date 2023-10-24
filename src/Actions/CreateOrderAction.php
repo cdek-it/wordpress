@@ -65,12 +65,12 @@ namespace Cdek\Actions {
                                                               ->get_data()['instance_id']);
 
             $param = [
-                'type' => $postOrderData['type'],
-                'tariff_code' => $postOrderData['tariff_code'],
-                'date_invoice' => date('Y-m-d'),
-                'shipper_name' => $deliveryMethod->get_option('shipper_name'),
+                'type'            => $postOrderData['type'],
+                'tariff_code'     => $postOrderData['tariff_code'],
+                'date_invoice'    => date('Y-m-d'),
+                'shipper_name'    => $deliveryMethod->get_option('shipper_name'),
                 'shipper_address' => $deliveryMethod->get_option('shipper_address'),
-                'sender' => [
+                'sender'          => [
                     'passport_series'        => $deliveryMethod->get_option('passport_series'),
                     'passport_number'        => $deliveryMethod->get_option('passport_number'),
                     'passport_date_of_issue' => $deliveryMethod->get_option('passport_date_of_issue'),
@@ -78,18 +78,19 @@ namespace Cdek\Actions {
                     'passport_date_of_birth' => $deliveryMethod->get_option('passport_date_of_birth'),
                     'tin'                    => $deliveryMethod->get_option('tin'),
                     'name'                   => $deliveryMethod->get_option('seller_name'),
-                    'company'                => $deliveryMethod->get_option('seller_name'),
+                    'company'                => $deliveryMethod->get_option('seller_company'),
+                    'email'                  => $deliveryMethod->get_option('seller_email'),
                     'phones'                 => [
                         'number' => $deliveryMethod->get_option('seller_phone'),
                     ],
                 ],
-                'seller' => [
+                'seller'          => [
                     'address' => $deliveryMethod->get_option('seller_address'),
                     'phones'  => [
                         'number' => $deliveryMethod->get_option('seller_phone'),
                     ],
                 ],
-                'recipient' => [
+                'recipient'       => [
                     'name'   => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
                     'email'  => $order->get_billing_email(),
                     'phones' => [
