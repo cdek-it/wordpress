@@ -24,6 +24,7 @@ namespace Cdek\Transport {
                     'Content-Type'  => 'application/json',
                     'Authorization' => $token,
                 ],
+                'timeout' => 20,
             ];
 
             if (!empty($data)) {

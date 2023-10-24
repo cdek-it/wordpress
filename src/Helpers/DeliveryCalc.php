@@ -11,16 +11,17 @@ use RuntimeException;
 use WC_Shipping_Method;
 
 class DeliveryCalc {
-    protected WC_Shipping_Method $method;
+    private WC_Shipping_Method $method;
     private array $rates = [];
+    private CdekApi $api;
 
-    public function __construct($instanceID = null) {
+    public function __construct(int $instanceID = null) {
         $this->method = Helper::getActualShippingMethod($instanceID);
+        $this->api = new CdekApi;
     }
 
-    public function calculate($package, $addTariffsToOffice = true): bool {
-        $api = new CdekApi();
-        if (!$api->checkAuth()) {
+    final public function calculate(array $package, bool $addTariffsToOffice = true): bool {
+        if (!$this->api->checkAuth()) {
             return false;
         }
 
@@ -30,7 +31,7 @@ class DeliveryCalc {
         $deliveryParam['from'] = [
             'address' => $officeData['city'] ?? $doorData['city'],
             'city' => $officeData['city'] ?? $doorData['city'],
-            'country' => $officeData['country'] ?? $doorData['country'] ?? 'RU',
+            'country_code' => $officeData['country'] ?? $doorData['country'] ?? 'RU',
         ];
 
         if(!isset($deliveryParam['from']['address'])) {
@@ -52,7 +53,7 @@ class DeliveryCalc {
         foreach ([Tariff::SHOP_TYPE, Tariff::DELIVERY_TYPE] as $deliveryType) {
             $deliveryParam['type'] = $deliveryType;
 
-            $calcResult = $api->calculate($deliveryParam);
+            $calcResult = $this->api->calculate($deliveryParam);
 
             if (empty($calcResult)) {
                 continue;
@@ -118,7 +119,7 @@ class DeliveryCalc {
         return !empty($this->rates);
     }
 
-    protected function getPackagesData($contents): array {
+    private function getPackagesData(array $contents): array {
         $totalWeight = 0;
         $lengthList  = [];
         $widthList   = [];
@@ -176,15 +177,18 @@ class DeliveryCalc {
         return ['length' => $length, 'width' => $width, 'height' => $height, 'weight' => $totalWeight];
     }
 
-    protected function checkDeliveryResponse($delivery): bool {
+    private function checkDeliveryResponse(array $delivery): bool {
         return !isset($delivery['errors']);
     }
 
-    public function getRates(): array {
+    final public function getRates(): array {
         return array_values($this->rates);
     }
 
-    public function getTariffRate(int $code): array {
+    /**
+     * @throws \Cdek\Exceptions\TariffNotAvailableException
+     */
+    final public function getTariffRate(int $code): array {
         if (!isset($this->rates[$code])) {
             throw new TariffNotAvailableException(array_keys($this->rates));
         }

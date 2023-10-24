@@ -4,6 +4,7 @@
 /** @var $length */
 /** @var $width */
 /** @var $orderIdWP */
+
 ?>
 <div>
     <div id="cdek-create-order-form" <?php if ($orderNumber) { ?>style="display: none" <?php } ?>>

@@ -8,17 +8,17 @@ use Cdek\Model\Validate;
 use Cdek\Validator\ValidateDeleteOrder;
 use Cdek\Validator\ValidateGetOrder;
 
-class DeleteOrder
+class DeleteOrderAction
 {
-
-    protected $api;
+    private CdekApi $api;
 
     public function __construct()
     {
-        $this->api = new CdekApi();
+        $this->api = new CdekApi;
     }
+    public function __invoke(int $orderId): array {
+        $orderNumber = OrderMetaData::getMetaByOrderId($orderId)['cdek_number'];
 
-    public function delete($orderId, $orderNumber): array {
         OrderMetaData::cleanMetaByOrderId($orderId);
 
         $order = $this->api->getOrderByCdekNumber($orderNumber);
@@ -42,14 +42,5 @@ class DeleteOrder
 
         $validate = new Validate(true, 'Заказ удален.');
         return $validate->response();
-    }
-
-    /**
-     * @param $orderId
-     * @return void
-     */
-    protected function cleanMeta($orderId): void
-    {
-        OrderMetaData::cleanMetaByOrderId($orderId);
     }
 }

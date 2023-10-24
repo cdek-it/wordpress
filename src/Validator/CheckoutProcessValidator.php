@@ -8,7 +8,7 @@ use Cdek\Model\Tariff;
 
 class CheckoutProcessValidator {
 
-    public function __invoke() {
+    public function __invoke(): void {
         $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
 
         if (strpos($shippingMethodIdSelected, 'official_cdek') === false) {
@@ -21,7 +21,6 @@ class CheckoutProcessValidator {
         $cityCode = $api->getCityCodeByCityName($city, $state);
         if ($cityCode === -1) {
             wc_add_notice(__('Не удалось определить населенный пункт.'), 'error');
-            return;
         }
 
         $tariffCode = explode('_', $shippingMethodIdSelected)[2];

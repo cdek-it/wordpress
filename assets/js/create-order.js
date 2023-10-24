@@ -175,7 +175,7 @@
             $('#cdek-create-order-error').hide();
             $('#cdek-courier-error').hide();
             $.ajax({
-                method: 'GET',
+                method: 'POST',
                 url: window.cdek_rest_order_api_path.delete_order,
                 data: {
                     number: $('#cdek-order-number-input').val(),

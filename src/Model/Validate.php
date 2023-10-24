@@ -4,21 +4,21 @@ namespace Cdek\Model;
 
 class Validate
 {
-    public $state;
-    public $message;
+    public bool $state;
+    public string $message;
 
-    public function __construct($state, $message = '')
+    public function __construct(bool $state, string $message = '')
     {
         $this->state = $state;
         $this->message = $message;
     }
 
-    public function response()
+    final public function response(): array
     {
         return ['state' => $this->state, 'message' => $this->message];
     }
 
-    public function state()
+    final public function state(): bool
     {
         return $this->state;
     }
