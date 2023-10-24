@@ -6,11 +6,11 @@ abstract class TokenProcess
 {
     const CIPHER = 'AES-256-CBC';
 
-    protected abstract function getToken();
+    abstract function getToken();
 
-    protected abstract function updateToken();
+    abstract function updateToken();
 
-    protected abstract function fetchTokenFromApi();
+    abstract function fetchTokenFromApi();
 
     protected function encryptToken($token, $clientId) {
         return openssl_encrypt($token, self::CIPHER, $clientId);

@@ -3,7 +3,6 @@
 namespace Cdek;
 
 use Cdek\Enums\BarcodeFormat;
-use Cdek\Exceptions\ValidationException;
 use Cdek\Token\Token;
 use Cdek\Transport\HttpClient;
 use WC_Shipping_Method;

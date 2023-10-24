@@ -24,21 +24,34 @@ class Token extends TokenProcess
         if ($this->tokenFromSetting === '' || $tokenExp < time()) {
             $this->tokenFromSetting = $this->updateToken();
         }
-        return 'Bearer ' . $this->decryptToken($this->tokenFromSetting, $this->clientIdFromSetting);
+
+        $token = $this->decryptToken($this->tokenFromSetting, $this->clientIdFromSetting);
+        if ($token === false) {
+            $this->tokenFromSetting = $this->updateToken();
+        }
+        return 'Bearer ' . $token;
     }
 
-    protected function updateToken(): string {
-        $token = $this->fetchTokenFromApi();
-        $tokenEncrypt = $this->encryptToken($token, $this->clientIdFromSetting);
-        Helper::getActualShippingMethod()->update_option('token', $tokenEncrypt);
-        Helper::getActualShippingMethod()->update_option('token_exp', time() + self::TOKEN_EXP);
-        return $tokenEncrypt;
+    public function updateToken(): string {
+        try {
+            $token = $this->fetchTokenFromApi();
+            $tokenEncrypt = $this->encryptToken($token, $this->clientIdFromSetting);
+            Helper::getActualShippingMethod()->update_option('token', $tokenEncrypt);
+            Helper::getActualShippingMethod()->update_option('token_exp', time() + self::TOKEN_EXP);
+            return $tokenEncrypt;
+        } catch (ValidationException $exception) {
+//
+        }
+        return '';
     }
 
-    protected function fetchTokenFromApi() {
+    /**
+     * @throws \Cdek\Exceptions\ValidationException
+     */
+    public function fetchTokenFromApi() {
         $body = $this->cdekApi->fetchToken();
         if ($body === null || property_exists($body, 'error')) {
-            throw new ValidationException('Failed to get the token');
+            throw new ValidationException('Failed to get the token. ' . $body->error_description, 'cdek_error.token.auth', [], false);
         }
         return $body->access_token;
     }
