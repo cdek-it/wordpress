@@ -64,6 +64,40 @@ namespace Cdek\Actions {
                 Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
                                                               ->get_data()['instance_id']);
 
+            $param = [
+                'type' => $postOrderData['type'],
+                'tariff_code' => $postOrderData['tariff_code'],
+                'date_invoice' => date('Y-m-d'),
+                'shipper_name' => $deliveryMethod->get_option('shipper_name'),
+                'shipper_address' => $deliveryMethod->get_option('shipper_address'),
+                'sender' => [
+                    'passport_series'        => $deliveryMethod->get_option('passport_series'),
+                    'passport_number'        => $deliveryMethod->get_option('passport_number'),
+                    'passport_date_of_issue' => $deliveryMethod->get_option('passport_date_of_issue'),
+                    'passport_organization'  => $deliveryMethod->get_option('passport_organization'),
+                    'passport_date_of_birth' => $deliveryMethod->get_option('passport_date_of_birth'),
+                    'tin'                    => $deliveryMethod->get_option('tin'),
+                    'name'                   => $deliveryMethod->get_option('seller_name'),
+                    'company'                => $deliveryMethod->get_option('seller_name'),
+                    'phones'                 => [
+                        'number' => $deliveryMethod->get_option('seller_phone'),
+                    ],
+                ],
+                'seller' => [
+                    'address' => $deliveryMethod->get_option('seller_address'),
+                    'phones'  => [
+                        'number' => $deliveryMethod->get_option('seller_phone'),
+                    ],
+                ],
+                'recipient' => [
+                    'name'   => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
+                    'email'  => $order->get_billing_email(),
+                    'phones' => [
+                        'number' => $order->get_billing_phone(),
+                    ],
+                ],
+            ];
+
             if (Tariff::isTariffToOffice($postOrderData['tariff_code'])) {
                 $param['delivery_point'] = $postOrderData['pvz_code'];
             } else {
@@ -85,14 +119,6 @@ namespace Cdek\Actions {
                     'country_code' => $address['country'] ?? 'RU',
                 ];
             }
-
-            $param['recipient'] = [
-                'name'   => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
-                'email'  => $order->get_billing_email(),
-                'phones' => [
-                    'number' => $order->get_billing_phone(),
-                ],
-            ];
 
             if ($deliveryMethod->get_option('international_mode') === 'yes') {
                 $param['recipient'] = array_merge($param['recipient'], [
@@ -117,31 +143,6 @@ namespace Cdek\Actions {
                     ];
                 }
             }
-
-            $param['type'] = $postOrderData['type'];
-            $param['tariff_code'] = $postOrderData['tariff_code'];
-            $param['date_invoice'] = date('Y-m-d');
-            $param['shipper_name'] = $deliveryMethod->get_option('shipper_name');
-            $param['shipper_address'] = $deliveryMethod->get_option('shipper_address');
-            $param['sender'] = [
-                'passport_series'        => $deliveryMethod->get_option('passport_series'),
-                'passport_number'        => $deliveryMethod->get_option('passport_number'),
-                'passport_date_of_issue' => $deliveryMethod->get_option('passport_date_of_issue'),
-                'passport_organization'  => $deliveryMethod->get_option('passport_organization'),
-                'passport_date_of_birth' => $deliveryMethod->get_option('passport_date_of_birth'),
-                'tin'                    => $deliveryMethod->get_option('tin'),
-                'name'                   => $deliveryMethod->get_option('seller_name'),
-                'company'                => $deliveryMethod->get_option('seller_name'),
-                'phones'                 => [
-                    'number' => $deliveryMethod->get_option('seller_phone'),
-                ],
-            ];
-            $param['seller'] = [
-                'address' => $deliveryMethod->get_option('seller_address'),
-                'phones'  => [
-                    'number' => $deliveryMethod->get_option('seller_phone'),
-                ],
-            ];
 
             return $param;
         }
