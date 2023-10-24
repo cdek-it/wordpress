@@ -66,7 +66,7 @@ class CdekApi
         return sprintf('Bearer %s', $body->access_token);
     }
 
-    final private function getAuthUrl(): string
+    private function getAuthUrl(): string
     {
         return sprintf('%s%s?%s',
                        $this->apiUrl, self::TOKEN_PATH,

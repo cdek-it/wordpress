@@ -16,13 +16,6 @@ namespace Cdek\Actions {
 
     class ProcessWoocommerceOrderAction
     {
-        private CdekApi $api;
-
-        public function __construct()
-        {
-            $this->api = new CdekApi;
-        }
-
         /**
          * @throws \WC_Data_Exception
          */
@@ -31,6 +24,8 @@ namespace Cdek\Actions {
             if (!CheckoutHelper::isCdekShippingMethod($order)) {
                 return;
             }
+
+            $api = new CdekApi;
 
             $shippingMethod = CheckoutHelper::getOrderShippingMethod($order);
 
@@ -43,12 +38,12 @@ namespace Cdek\Actions {
 
             if (empty($cityCode)) {
                 $pvzInfo = $order->get_billing_address_1();
-                $cityCode = $this->api->getCityCodeByCityName($order->get_billing_city(), $order->get_billing_city());
+                $cityCode = $api->getCityCodeByCityName($order->get_billing_city(), $order->get_billing_city());
             }
             if (empty($pvzInfo) && Tariff::isTariffToOffice($tariffId)) {
                 $pvzInfo = $order->get_billing_address_1();
             }
-            $cityData = $this->api->getCityByCode($cityCode);
+            $cityData = $api->getCityByCode($cityCode);
             $order->set_shipping_address_1($pvzInfo);
             $order->set_shipping_city($cityData['city']);
             $order->set_shipping_state($cityData['region']);

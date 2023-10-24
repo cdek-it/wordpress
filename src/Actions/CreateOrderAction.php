@@ -14,6 +14,7 @@ namespace Cdek\Actions {
     use Cdek\Helpers\WeightCalc;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
+    use Cdek\Note;
     use WC_Order;
 
     class CreateOrderAction
@@ -41,7 +42,10 @@ namespace Cdek\Actions {
             $param = $this->buildRequestData($order);
             $param['packages'] = $this->buildPackagesData($order, $packages);
 
-            $orderData = json_decode($this->api->createOrder($param), true, 512, JSON_THROW_ON_ERROR);
+            $orderData = json_decode($this->api->createOrder($param), false, 512, JSON_THROW_ON_ERROR);
+
+            $requestId = $orderData['requests'][0];
+            Note::send($orderId, "Отправлен запрос №$requestId на создание заказа в CDEK");
 
             sleep(5);
 
@@ -163,6 +167,13 @@ namespace Cdek\Actions {
                                           $items),
                 ];
             }
+
+            return array_map(static fn(array $package) => $this->buildItemsData($order,
+                                                                                $package['length'],
+                                                                                $package['width'],
+                                                                                $package['height'],
+                                                                                $package['items'] ?: $items),
+                $packages);
         }
 
         private function buildItemsData(WC_Order $order,

@@ -13,15 +13,11 @@ namespace Cdek\Validator {
 
     class CheckoutProcessValidator
     {
-        private CdekApi $api;
-
-        public function __construct()
-        {
-            $this->api = new CdekApi;
-        }
 
         public function __invoke(): void
         {
+            $api = new CdekApi;
+
             $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
 
             if (strpos($shippingMethodIdSelected, 'official_cdek') === false) {
@@ -31,7 +27,7 @@ namespace Cdek\Validator {
             $city = CheckoutHelper::getValueFromCurrentSession('city');
             $state = CheckoutHelper::getValueFromCurrentSession('state');
 
-            $cityCode = $this->api->getCityCodeByCityName($city, $state);
+            $cityCode = $api->getCityCodeByCityName($city, $state);
             if ($cityCode === -1) {
                 wc_add_notice(__('Не удалось определить населенный пункт.'), 'error');
             }
