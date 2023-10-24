@@ -1,14 +1,22 @@
 <?php
 
-namespace Cdek;
+namespace {
 
-class Note {
+    defined('ABSPATH') or exit;
+}
 
-    public static function send($orderId, $message): void {
-        $note  = '[CDEKDelivery] '.$message;
-        $order = wc_get_order($orderId);
-        $order->add_order_note($note);
-        $order->save();
+namespace Cdek {
+
+    class Note
+    {
+
+        public static function send(int $orderId, string $message): void
+        {
+            $note = '[CDEKDelivery] ' . $message;
+            $order = wc_get_order($orderId);
+            $order->add_order_note($note);
+            $order->save();
+        }
+
     }
-
 }

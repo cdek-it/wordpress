@@ -3,6 +3,7 @@
 namespace Cdek\Token;
 
 use Cdek\CdekApi;
+use Cdek\Exceptions\ValidationException;
 use Cdek\Helper;
 
 class Token extends TokenProcess
@@ -35,6 +36,10 @@ class Token extends TokenProcess
     }
 
     protected function fetchTokenFromApi() {
-        return $this->cdekApi->fetchToken();
+        $body = $this->cdekApi->fetchToken();
+        if ($body === null || property_exists($body, 'error')) {
+            throw new ValidationException('Failed to get the token');
+        }
+        return $body->access_token;
     }
 }

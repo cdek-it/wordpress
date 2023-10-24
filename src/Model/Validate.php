@@ -1,25 +1,30 @@
 <?php
 
-namespace Cdek\Model;
+namespace {
 
-class Validate
-{
-    public $state;
-    public $message;
+    defined('ABSPATH') or exit;
+}
 
-    public function __construct($state, $message = '')
+namespace Cdek\Model {
+    class Validate
     {
-        $this->state = $state;
-        $this->message = $message;
-    }
+        public bool $state;
+        public string $message;
 
-    public function response()
-    {
-        return ['state' => $this->state, 'message' => $this->message];
-    }
+        public function __construct(bool $state, string $message = '')
+        {
+            $this->state = $state;
+            $this->message = $message;
+        }
 
-    public function state()
-    {
-        return $this->state;
+        final public function response(): array
+        {
+            return ['state' => $this->state, 'message' => $this->message];
+        }
+
+        final public function state(): bool
+        {
+            return $this->state;
+        }
     }
 }

@@ -8,32 +8,36 @@ use Cdek\Model\Tariff;
 use WC_Settings_API;
 use WC_Shipping_Method;
 
-class CdekShippingMethod extends WC_Shipping_Method {
-    public function __construct($instance_id = 0) {
+class CdekShippingMethod extends WC_Shipping_Method
+{
+    public function __construct($instance_id = 0)
+    {
         parent::__construct($instance_id);
-        $this->id                 = Config::DELIVERY_NAME;
-        $this->instance_id        = absint($instance_id);
-        $this->method_title       = 'Cdek Shipping';
+        $this->id = Config::DELIVERY_NAME;
+        $this->instance_id = absint($instance_id);
+        $this->method_title = 'Cdek Shipping';
         $this->method_description = 'Custom Shipping Method for Cdek';
-        $this->supports           = [
+        $this->supports = [
             'settings',
             'shipping-zones',
             'instance-settings',
         ];
-        $this->enabled            = 'yes';
+        $this->enabled = 'yes';
         $this->init();
     }
 
-    public function init(): void {
+    final public function init(): void
+    {
         $this->title = 'CDEK Shipping';
         $this->init_settings();
-        add_action('woocommerce_update_options_shipping_'.$this->id, [$this, 'process_admin_options']);
+        add_action('woocommerce_update_options_shipping_' . $this->id, [$this, 'process_admin_options']);
         $this->init_form_fields();
     }
 
-    public function init_form_fields(): void {
+    final public function init_form_fields(): void
+    {
         $this->instance_form_fields = [
-            'extra_cost'           => [
+            'extra_cost' => [
                 'title'             => 'Доп. цена к доставке',
                 'type'              => 'number',
                 'description'       => "стоимость доставки в рублях которая будет добавлена к расчетной стоимости доставки",
@@ -86,6 +90,13 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'type'  => 'title',
                 'class' => 'cdek_setting_block_name',
             ],
+            'seller_company'                 => [
+                'title'             => 'Название компании',
+                'type'              => 'text',
+                'custom_attributes' => [
+                    'required' => true,
+                ],
+            ],
             'seller_name'                    => [
                 'title'             => 'ФИО',
                 'type'              => 'text',
@@ -100,6 +111,14 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'description'       => 'Должен передаваться в международном формате: код страны (для России +7) и сам номер (10 и более цифр)',
                 'custom_attributes' => [
                     'required' => true,
+                ],
+            ],
+            'seller_email'                   => [
+                'title'             => 'Электронный адрес почты компании',
+                'type'              => 'text',
+                'custom_attributes' => [
+                    'required' => true,
+                    'type' => 'email',
                 ],
             ],
             'international_title'            => [
@@ -171,6 +190,11 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'type'  => 'title',
                 'class' => 'cdek_delivery_block_name',
             ],
+            'automate_orders'                => [
+                'title'       => 'Автоматически создавать заказы в СДЭК',
+                'type'        => 'checkbox',
+                'description' => 'При наличии информации о габаритах и корректно заполненных адреса отправки накладная СДЭК будет создана автоматически',
+            ],
             'tariff_list'                    => [
                 'title'       => 'Тарифы',
                 'type'        => 'multiselect',
@@ -228,7 +252,9 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'class' => 'cdek_package_setting_block_name',
             ],
             'product_weight_default'         => [
-                'title'             => 'Вес одной единицы товара по умолчанию в (' . get_option('woocommerce_weight_unit').')',
+                'title'             => 'Вес одной единицы товара по умолчанию в (' .
+                                       get_option('woocommerce_weight_unit') .
+                                       ')',
                 'desc_tip'          => true,
                 'description'       => "У всех товаров должен быть указан вес,
                             если есть товары без указанного <br> веса то для таких товаров будет подставляться значение из этого поля. <br>
@@ -237,7 +263,7 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'default'           => 1,
                 'custom_attributes' => [
                     'min'  => 0,
-                    'step' => 0.01
+                    'step' => 0.01,
                 ],
             ],
             'product_length_default'         => [
@@ -404,7 +430,8 @@ class CdekShippingMethod extends WC_Shipping_Method {
         ];
     }
 
-    public function get_option($key, $empty_value = null) {
+    public function get_option($key, $empty_value = null)
+    {
         // Instance options take priority over global options.
         if ($this->instance_id && array_key_exists($key, $this->get_instance_form_fields())) {
             $instanceValue = $this->get_instance_option($key, $empty_value);
@@ -415,13 +442,16 @@ class CdekShippingMethod extends WC_Shipping_Method {
         }
 
         // Return global option.
-        $option = apply_filters('woocommerce_shipping_'.$this->id.'_option', WC_Settings_API::get_option($key, $empty_value),
-            $key, $this);
+        $option = apply_filters('woocommerce_shipping_' . $this->id . '_option',
+                                WC_Settings_API::get_option($key, $empty_value),
+                                $key,
+                                $this);
 
         return $option;
     }
 
-    public function calculate_shipping($package = []): void {
+    public function calculate_shipping($package = []): void
+    {
         $deliveryCalc = new DeliveryCalc($this->get_instance_id());
         if (!$deliveryCalc->calculate($package)) {
             return;

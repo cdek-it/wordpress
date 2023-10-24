@@ -13,23 +13,28 @@ namespace Cdek\Controllers {
     use WP_REST_Response;
     use WP_REST_Server;
 
-    class LocationController {
+    class LocationController
+    {
 
-        public static function getRegion(WP_REST_Request $data): WP_REST_Response {
+        public static function getRegion(WP_REST_Request $data): WP_REST_Response
+        {
             return new WP_REST_Response((new CdekApi)->getRegion($data->get_param('city')), 200);
         }
 
-        public static function getPoints(WP_REST_Request $data): WP_REST_Response {
+        public static function getPoints(WP_REST_Request $data): WP_REST_Response
+        {
             return new WP_REST_Response((new CdekApi)->getOffices($data->get_params()), 200);
         }
 
-        public static function setTmpPointCode(WP_REST_Request $data): WP_REST_Response {
+        public static function setTmpPointCode(WP_REST_Request $data): WP_REST_Response
+        {
             WC()->session->set('pvz_code', $data->get_param('pvz_code'));
 
             return new WP_REST_Response('', 204);
         }
 
-        public function __invoke() {
+        public function __invoke(): void
+        {
             register_rest_route(Config::DELIVERY_NAME, '/get-region', [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [__CLASS__, 'getRegion'],

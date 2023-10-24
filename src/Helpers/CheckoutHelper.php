@@ -8,11 +8,15 @@ namespace {
 namespace Cdek\Helpers {
 
     use Cdek\Config;
+    use Cdek\Helper;
     use RuntimeException;
     use WC_Order;
+    use WC_Order_Item;
 
-    class CheckoutHelper {
-        public static function getValueFromCurrentSession(string $valueName, $defaultValue = null) {
+    class CheckoutHelper
+    {
+        public static function getValueFromCurrentSession(string $valueName, string $defaultValue = null): string
+        {
             $shippingValue = WC()->checkout()->get_value("shipping_$valueName");
             if (isset($shippingValue)) {
                 return $shippingValue;
@@ -29,7 +33,8 @@ namespace Cdek\Helpers {
             return $rawValue ?? $defaultValue;
         }
 
-        public static function isCdekShippingMethod(WC_Order $order): bool {
+        public static function isCdekShippingMethod(WC_Order $order): bool
+        {
             try {
                 return self::getOrderShippingMethod($order)->get_method_id() === Config::DELIVERY_NAME;
             } catch (RuntimeException $e) {
@@ -37,13 +42,92 @@ namespace Cdek\Helpers {
             }
         }
 
-        public static function getOrderShippingMethod(WC_Order $order) {
+        public static function getOrderShippingMethod(WC_Order $order): WC_Order_Item
+        {
             $shippingMethodArray = $order->get_items('shipping');
             if (empty($shippingMethodArray)) {
                 throw new RuntimeException('Order don\'t have shipping methods');
             }
 
             return array_shift($shippingMethodArray);
+        }
+
+        public static function restoreCheckoutFields(array $fields): array
+        {
+            $checkout = WC()->checkout();
+
+            $originalFields = $checkout->get_checkout_fields('billing');
+
+            //Восстанавливаем требуемые поля для чекаута
+            foreach ([
+                         'billing_first_name',
+                         'billing_last_name',
+                         'billing_city',
+                         'billing_state',
+                         'billing_phone',
+                         'billing_address_1',
+                     ] as $requiredField) {
+                $fields['billing'][$requiredField] =
+                    $fields['billing'][$requiredField] ?? $originalFields[$requiredField];
+            }
+
+            foreach (['billing_address_1', 'billing_address_2'] as $field) {
+                if (isset($fields['billing'][$field])) {
+                    $fields['billing'][$field]['required'] = false;
+                }
+            }
+
+            if (Helper::getActualShippingMethod()->get_option('international_mode') === 'yes') {
+                $fields['billing']['passport_series'] = [
+                    'label'             => __('Серия паспорта', 'woocommerce'),
+                    'required'          => true,
+                    'class'             => ['form-row-wide'],
+                    'clear'             => true,
+                    'custom_attributes' => [
+                        'maxlength' => 4,
+                    ],
+                ];
+                $fields['billing']['passport_number'] = [
+                    'label'             => __('Номер паспорта', 'woocommerce'),
+                    'required'          => true,
+                    'class'             => ['form-row-wide'],
+                    'clear'             => true,
+                    'custom_attributes' => [
+                        'maxlength' => 6,
+                    ],
+                ];
+                $fields['billing']['passport_date_of_issue'] = [
+                    'type'     => 'date',
+                    'label'    => __('Дата выдачи паспорта', 'woocommerce'),
+                    'required' => true,
+                    'class'    => ['form-row-wide'],
+                    'clear'    => true,
+                ];
+                $fields['billing']['passport_organization'] = [
+                    'label'    => __('Орган выдачи паспорта', 'woocommerce'),
+                    'required' => true,
+                    'class'    => ['form-row-wide'],
+                    'clear'    => true,
+                ];
+                $fields['billing']['tin'] = [
+                    'label'             => __('ИНН', 'woocommerce'),
+                    'required'          => true,
+                    'class'             => ['form-row-wide'],
+                    'clear'             => true,
+                    'custom_attributes' => [
+                        'maxlength' => 12,
+                    ],
+                ];
+                $fields['billing']['passport_date_of_birth'] = [
+                    'type'     => 'date',
+                    'label'    => __('Дата рождения', 'woocommerce'),
+                    'required' => true,
+                    'class'    => ['form-row-wide'],
+                    'clear'    => true,
+                ];
+            }
+
+            return $fields;
         }
     }
 }
