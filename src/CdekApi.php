@@ -3,7 +3,6 @@
 namespace Cdek;
 
 use Cdek\Enums\BarcodeFormat;
-use Cdek\Model\Tariff;
 use Cdek\Transport\HttpClient;
 use WC_Shipping_Method;
 
@@ -13,6 +12,7 @@ class CdekApi
     private const REGION_PATH = 'location/cities';
     private const ORDERS_PATH = 'orders/';
     private const PVZ_PATH = 'deliverypoints';
+    private const CALC_LIST_PATH = 'calculator/tarifflist';
     private const CALC_PATH = 'calculator/tarifflist';
     private const WAYBILL_PATH = 'print/orders/';
     private const BARCODE_PATH = 'print/barcodes/';
@@ -141,13 +141,33 @@ class CdekApi
         return HttpClient::sendCdekRequest($url, 'DELETE', $this->getToken());
     }
 
-    public function calculate($deliveryParam)
-    {
-        $url = $this->apiUrl . self::CALC_PATH;
+    public function calculateTariffList($deliveryParam) {
+        $url = $this->apiUrl.self::CALC_LIST_PATH;
 
         $request = [
             'type'          => $deliveryParam['type'],
             'from_location' => $deliveryParam['from'],
+            'to_location'   => [
+                'address' => $deliveryParam['address'],
+            ],
+            'packages'      => [
+                'weight' => $deliveryParam['package_data']['weight'],
+                'length' => $deliveryParam['package_data']['length'],
+                'width'  => $deliveryParam['package_data']['width'],
+                'height' => $deliveryParam['package_data']['height'],
+            ],
+        ];
+
+        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), $request);
+    }
+
+    public function calculateTariff($deliveryParam) {
+        $url = $this->apiUrl.self::CALC_PATH;
+
+        $request = [
+            'type'          => $deliveryParam['type'],
+            'from_location' => $deliveryParam['from'],
+            'tariff_code'   => $deliveryParam['tariff_code'],
             'to_location'   => [
                 'address' => $deliveryParam['address'],
             ],

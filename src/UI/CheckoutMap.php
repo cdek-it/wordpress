@@ -1,43 +1,52 @@
 <?php
 
-namespace Cdek\UI;
+namespace {
 
-use Cdek\CdekApi;
-use Cdek\Config;
-use Cdek\Helpers\CheckoutHelper;
-use Cdek\Model\Tariff;
+    defined('ABSPATH') or exit;
+}
 
-class CheckoutMap {
-    public function __invoke($shippingMethodCurrent) {
-        if (!is_checkout() || !$this->isTariffDestinationCdekOffice($shippingMethodCurrent)) {
-            return;
+namespace Cdek\UI {
+
+    use Cdek\CdekApi;
+    use Cdek\Config;
+    use Cdek\Helpers\CheckoutHelper;
+    use Cdek\Model\Tariff;
+
+    class CheckoutMap
+    {
+        public function __invoke($shippingMethodCurrent): void
+        {
+            if (!is_checkout() || !$this->isTariffDestinationCdekOffice($shippingMethodCurrent)) {
+                return;
+            }
+
+            $api = new CdekApi;
+
+            $city = $api->getCityCodeByCityName(CheckoutHelper::getValueFromCurrentSession('city'),
+                                                CheckoutHelper::getValueFromCurrentSession('state'));
+
+            $points = $api->getOffices([
+                                           'city_code' => $city,
+                                       ]);
+
+            include __DIR__ . '/../../templates/public/open-map.php';
         }
 
-        $api = new CdekApi;
+        private function isTariffDestinationCdekOffice($shippingMethodCurrent): bool
+        {
+            if ($shippingMethodCurrent->get_method_id() !== Config::DELIVERY_NAME) {
+                return false;
+            }
 
-        $city = $api->getCityCodeByCityName(CheckoutHelper::getValueFromCurrentSession('city'),
-            CheckoutHelper::getValueFromCurrentSession('state'));
+            $shippingMethodIdSelected = wc_get_chosen_shipping_method_ids()[0];
 
-        $points = $api->getOffices([
-            'city_code' => $city,
-        ]);
+            if ($shippingMethodCurrent->get_id() !== $shippingMethodIdSelected) {
+                return false;
+            }
 
-        include __DIR__.'/../../templates/public/open-map.php';
-    }
+            $tariffCode = explode('_', $shippingMethodIdSelected)[2];
 
-    private function isTariffDestinationCdekOffice($shippingMethodCurrent): bool {
-        if ($shippingMethodCurrent->get_method_id() !== Config::DELIVERY_NAME) {
-            return false;
+            return Tariff::isTariffToOffice($tariffCode);
         }
-
-        $shippingMethodIdSelected = wc_get_chosen_shipping_method_ids()[0];
-
-        if ($shippingMethodCurrent->get_id() !== $shippingMethodIdSelected) {
-            return false;
-        }
-
-        $tariffCode = explode('_', $shippingMethodIdSelected)[2];
-
-        return Tariff::isTariffToOffice($tariffCode);
     }
 }

@@ -24,14 +24,14 @@ class CdekShippingMethod extends WC_Shipping_Method {
         $this->init();
     }
 
-    public function init(): void {
+    final public function init(): void {
         $this->title = 'CDEK Shipping';
         $this->init_settings();
         add_action('woocommerce_update_options_shipping_'.$this->id, [$this, 'process_admin_options']);
         $this->init_form_fields();
     }
 
-    public function init_form_fields(): void {
+    final public function init_form_fields(): void {
         $this->instance_form_fields = [
             'extra_cost'           => [
                 'title'             => 'Доп. цена к доставке',
@@ -118,7 +118,7 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'title'       => 'Адрес истинного продавца',
                 'type'        => 'text',
                 'desc_tip'    => true,
-                'description' => 'Адрес истинного продавца. Используется при печати инвойсов для отображения адреса настоящего 
+                'description' => 'Адрес истинного продавца. Используется при печати инвойсов для отображения адреса настоящего
                 продавца товара, либо торгового названия. Для международных заказов',
             ],
             'shipper_name'                   => [
@@ -227,16 +227,16 @@ class CdekShippingMethod extends WC_Shipping_Method {
                 'class' => 'cdek_package_setting_block_name',
             ],
             'product_weight_default'         => [
-                'title'             => 'Вес одной единицы товара по умолчанию в кг',
+                'title'             => 'Вес одной единицы товара по умолчанию в (' . get_option('woocommerce_weight_unit').')',
                 'desc_tip'          => true,
-                'description'       => "У всех товаров должен быть указан вес, 
+                'description'       => "У всех товаров должен быть указан вес,
                             если есть товары без указанного <br> веса то для таких товаров будет подставляться значение из этого поля. <br>
-                            Это повлияет на точность расчета доставки. Значение по умолчанию 1 кг.",
+                            Это повлияет на точность расчета доставки. Значение по умолчанию 1 единица измерения веса заданная в настройках.",
                 'type'              => 'number',
                 'default'           => 1,
                 'custom_attributes' => [
-                    'min'  => 1,
-                    'step' => 1,
+                    'min'  => 0,
+                    'step' => 0.01
                 ],
             ],
             'product_length_default'         => [
@@ -360,7 +360,7 @@ class CdekShippingMethod extends WC_Shipping_Method {
             'stepcodprice_title'             => [
                 'title'       => 'Настройки наложенного платежа',
                 'type'        => 'title',
-                'description' => 'Настройки для наложенного платежа применяются только во время отправки заказа из админ 
+                'description' => 'Настройки для наложенного платежа применяются только во время отправки заказа из админ
                 панели и для пользователя на странице чекаута не отображаются',
             ],
             'stepcodprice'                   => [
@@ -377,7 +377,7 @@ class CdekShippingMethod extends WC_Shipping_Method {
             'percentcod'                     => [
                 'title'             => 'Наценка к заказу в процентах',
                 'type'              => 'number',
-                'description'       => "Расчитывается от стоимости заказа. 
+                'description'       => "Расчитывается от стоимости заказа.
                 Меняет итоговую сумму в квитанции.
                 <br> <b>Наценка отобразится только в квитанции.</b> Поэтому рекомендуется на странице чекаута проинформировать пользователя
                 о наценки при отправки наложенным платежем.",

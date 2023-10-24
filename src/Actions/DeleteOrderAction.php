@@ -1,46 +1,54 @@
 <?php
 
-namespace Cdek\Actions;
+namespace {
 
-use Cdek\CdekApi;
-use Cdek\Model\OrderMetaData;
-use Cdek\Model\Validate;
-use Cdek\Validator\ValidateDeleteOrder;
-use Cdek\Validator\ValidateGetOrder;
+    defined('ABSPATH') or exit;
+}
 
-class DeleteOrderAction
-{
-    private CdekApi $api;
+namespace Cdek\Actions {
 
-    public function __construct()
+    use Cdek\CdekApi;
+    use Cdek\Model\OrderMetaData;
+    use Cdek\Model\Validate;
+    use Cdek\Validator\ValidateDeleteOrder;
+    use Cdek\Validator\ValidateGetOrder;
+
+    class DeleteOrderAction
     {
-        $this->api = new CdekApi;
-    }
-    public function __invoke(int $orderId): array {
-        $orderNumber = OrderMetaData::getMetaByOrderId($orderId)['cdek_number'];
+        private CdekApi $api;
 
-        OrderMetaData::cleanMetaByOrderId($orderId);
-
-        $order = $this->api->getOrderByCdekNumber($orderNumber);
-        $orderObj = json_decode($order);
-
-        $validate = ValidateGetOrder::validate($orderObj, $orderNumber, $orderId);
-        if (!$validate->state) {
-            return $validate->response();
+        public function __construct()
+        {
+            $this->api = new CdekApi;
         }
 
-        $delete = $this->api->deleteOrder($orderObj->entity->uuid);
-        $delete = json_decode($delete);
+        public function __invoke(int $orderId): array
+        {
+            $orderNumber = OrderMetaData::getMetaByOrderId($orderId)['cdek_number'];
 
-        $validate = ValidateDeleteOrder::validate($delete, $orderNumber, $orderId);
-        if (!$validate->state) {
+            OrderMetaData::cleanMetaByOrderId($orderId);
+
+            $order = $this->api->getOrderByCdekNumber($orderNumber);
+            $orderObj = json_decode($order);
+
+            $validate = ValidateGetOrder::validate($orderObj, $orderNumber, $orderId);
+            if (!$validate->state) {
+                return $validate->response();
+            }
+
+            $delete = $this->api->deleteOrder($orderObj->entity->uuid);
+            $delete = json_decode($delete);
+
+            $validate = ValidateDeleteOrder::validate($delete, $orderNumber, $orderId);
+            if (!$validate->state) {
+                return $validate->response();
+            }
+
+            $callCourier = new CallCourier();
+            $callCourier->delete($orderId);
+
+            $validate = new Validate(true, 'Заказ удален.');
             return $validate->response();
         }
-
-        $callCourier = new CallCourier();
-        $callCourier->delete($orderId);
-
-        $validate = new Validate(true, 'Заказ удален.');
-        return $validate->response();
     }
 }

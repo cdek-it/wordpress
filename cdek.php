@@ -23,4 +23,3 @@ if (!class_exists(\Cdek\Loader::class)) {
 }
 
 (new \Cdek\Loader)(__FILE__);
-

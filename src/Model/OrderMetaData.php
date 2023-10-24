@@ -1,37 +1,48 @@
 <?php
 
-namespace Cdek\Model;
+namespace {
 
-use Cdek\Config;
+    defined('ABSPATH') or exit;
+}
 
-class OrderMetaData {
-    public static function addMetaByOrderId($orderId, $data): void {
-        $order = wc_get_order($orderId);
-        $order->add_meta_data(Config::META_KEY, $data, true);
-        $order->save();
-    }
+namespace Cdek\Model {
 
-    public static function updateMetaByOrderId($orderId, $data): void {
-        $order = wc_get_order($orderId);
-        $order->update_meta_data(Config::META_KEY, $data);
-        $order->save();
-    }
+    use Cdek\Config;
 
-    public static function cleanMetaByOrderId(int $orderId): void {
-        $order = wc_get_order($orderId);
+    class OrderMetaData
+    {
+        public static function addMetaByOrderId(int $orderId, array $data): void
+        {
+            $order = wc_get_order($orderId);
+            $order->add_meta_data(Config::META_KEY, $data, true);
+            $order->save();
+        }
 
-        $meta = $order->get_meta(Config::META_KEY) ?: [];
+        public static function updateMetaByOrderId(int $orderId, array $data): void
+        {
+            $order = wc_get_order($orderId);
+            $order->update_meta_data(Config::META_KEY, $data);
+            $order->save();
+        }
 
-        $meta['order_number'] = '';
-        $meta['order_uuid']   = '';
+        public static function cleanMetaByOrderId(int $orderId): void
+        {
+            $order = wc_get_order($orderId);
 
-        unset($meta['cdek_order_uuid'], $meta['cdek_order_waybill']);
+            $meta = $order->get_meta(Config::META_KEY) ?: [];
 
-        $order->update_meta_data(Config::META_KEY, $meta);
-        $order->save();
-    }
+            $meta['order_number'] = '';
+            $meta['order_uuid'] = '';
 
-    public static function getMetaByOrderId($orderId) {
-        return wc_get_order($orderId)->get_meta(Config::META_KEY) ?: [];
+            unset($meta['cdek_order_uuid'], $meta['cdek_order_waybill']);
+
+            $order->update_meta_data(Config::META_KEY, $meta);
+            $order->save();
+        }
+
+        public static function getMetaByOrderId(int $orderId): array
+        {
+            return wc_get_order($orderId)->get_meta(Config::META_KEY) ?: [];
+        }
     }
 }

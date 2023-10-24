@@ -7,7 +7,8 @@ namespace {
 
 namespace Cdek {
 
-    class Config {
+    class Config
+    {
         public const TRANSLATION_DOMAIN = 'official_cdek';
         public const DELIVERY_NAME = 'official_cdek';
         public const META_KEY = 'order_data';

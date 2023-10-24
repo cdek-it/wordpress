@@ -15,10 +15,12 @@ namespace Cdek\Controllers {
     use WP_REST_Response;
     use WP_REST_Server;
 
-    class CourierController {
-        public static function callCourier(WP_REST_Request $data): WP_REST_Response {
+    class CourierController
+    {
+        public static function callCourier(WP_REST_Request $data): WP_REST_Response
+        {
             $callCourier = new CallCourier();
-            $param       = DataWPScraber::getData($data, [
+            $param = DataWPScraber::getData($data, [
                 'order_id',
                 'date',
                 'starttime',
@@ -38,11 +40,13 @@ namespace Cdek\Controllers {
             return new WP_REST_Response($callCourier->call($param), 200);
         }
 
-        public static function deleteCourierCall(WP_REST_Request $data): WP_REST_Response {
+        public static function deleteCourierCall(WP_REST_Request $data): WP_REST_Response
+        {
             return new WP_REST_Response((new CallCourier())->delete($data->get_param('order_id')), 200);
         }
 
-        public function __invoke() {
+        public function __invoke(): void
+        {
             register_rest_route(Config::DELIVERY_NAME, '/call-courier', [
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [__CLASS__, 'callCourier'],

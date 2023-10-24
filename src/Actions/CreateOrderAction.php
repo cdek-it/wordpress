@@ -1,263 +1,271 @@
 <?php
 
-namespace Cdek\Actions;
+namespace {
 
-use Cdek\CdekApi;
-use Cdek\Helper;
-use Cdek\Helpers\CheckoutHelper;
-use Cdek\Helpers\StringHelper;
-use Cdek\Helpers\WeightCalc;
-use Cdek\Model\OrderMetaData;
-use Cdek\Model\Tariff;
-use WC_Order;
+    defined('ABSPATH') or exit;
+}
 
-class CreateOrderAction
-{
-    private CdekApi $api;
-    private WeightCalc $weightCalc;
+namespace Cdek\Actions {
 
-    public function __construct()
+    use Cdek\CdekApi;
+    use Cdek\Helper;
+    use Cdek\Helpers\CheckoutHelper;
+    use Cdek\Helpers\StringHelper;
+    use Cdek\Helpers\WeightCalc;
+    use Cdek\Model\OrderMetaData;
+    use Cdek\Model\Tariff;
+    use WC_Order;
+
+    class CreateOrderAction
     {
-        $this->api = new CdekApi;
-        $this->weightCalc = new WeightCalc();
-    }
+        private CdekApi $api;
+        private WeightCalc $weightCalc;
 
-    /**
-     * @throws \JsonException
-     */
-    public function __invoke(int $orderId, int $attempt, array $packages = null): array
-    {
-        $order = wc_get_order($orderId);
-        $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
-        $postOrderData['tariff_code'] =
-            CheckoutHelper::getOrderShippingMethod($order)->get_meta('tariff_code') ?: $postOrderData['tariff_id'];
-        $postOrderData['type'] = Tariff::getTariffType($postOrderData['tariff_code']);
+        public function __construct()
+        {
+            $this->api = new CdekApi;
+            $this->weightCalc = new WeightCalc();
+        }
 
-        $param = $this->buildRequestData($order);
-        $param['packages'] = $this->buildPackagesData($order, $packages);
+        /**
+         * @throws \JsonException
+         */
+        public function __invoke(int $orderId, int $attempt, array $packages = null): array
+        {
+            $order = wc_get_order($orderId);
+            $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
+            $postOrderData['tariff_code'] =
+                CheckoutHelper::getOrderShippingMethod($order)->get_meta('tariff_code') ?: $postOrderData['tariff_id'];
+            $postOrderData['type'] = Tariff::getTariffType($postOrderData['tariff_code']);
 
-        $orderData = json_decode($this->api->createOrder($param), true, 512, JSON_THROW_ON_ERROR);
+            $param = $this->buildRequestData($order);
+            $param['packages'] = $this->buildPackagesData($order, $packages);
 
-        sleep(5);
+            $orderData = json_decode($this->api->createOrder($param), true, 512, JSON_THROW_ON_ERROR);
 
-        $cdekNumber = $this->getCdekOrderNumber($orderData->entity->uuid);
-        $postOrderData['order_number'] = $cdekNumber;
-        $postOrderData['order_uuid'] = $orderData->entity->uuid;
-        OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
+            sleep(5);
 
-        return [
-            'state' => true,
-            'code'  => $cdekNumber,
-            'door'  => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
-        ];
-    }
+            $cdekNumber = $this->getCdekOrderNumber($orderData->entity->uuid);
+            $postOrderData['order_number'] = $cdekNumber;
+            $postOrderData['order_uuid'] = $orderData->entity->uuid;
+            OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
 
-    private function buildRequestData(WC_Order $order): array
-    {
-        $postOrderData = OrderMetaData::getMetaByOrderId($order->get_id());
-        $deliveryMethod =
-            Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)->get_data()['instance_id']);
-
-        if (Tariff::isTariffToOffice($postOrderData['tariff_code'])) {
-            $param['delivery_point'] = $postOrderData['pvz_code'];
-        } else {
-            $param['to_location'] = [
-                'code'    => $postOrderData['city_code'],
-                'address' => $order->get_shipping_address_1(),
+            return [
+                'state' => true,
+                'code'  => $cdekNumber,
+                'door'  => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
             ];
         }
 
-        if (Tariff::isTariffFromOffice($param['tariff_code'])) {
-            $office = json_decode($deliveryMethod->get_option('pvz_code'), true);
-            $param['shipment_point'] = $office['address'];
-        } else {
-            $address = json_decode($deliveryMethod->get_option('address'), true);
+        private function buildRequestData(WC_Order $order): array
+        {
+            $postOrderData = OrderMetaData::getMetaByOrderId($order->get_id());
+            $deliveryMethod =
+                Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
+                                                              ->get_data()['instance_id']);
 
-            $param['from_location'] = [
-                'address'      => $address['address'],
-                'city'         => $address['city'],
-                'country_code' => $address['country'] ?? 'RU',
+            if (Tariff::isTariffToOffice($postOrderData['tariff_code'])) {
+                $param['delivery_point'] = $postOrderData['pvz_code'];
+            } else {
+                $param['to_location'] = [
+                    'code'    => $postOrderData['city_code'],
+                    'address' => $order->get_shipping_address_1(),
+                ];
+            }
+
+            if (Tariff::isTariffFromOffice($param['tariff_code'])) {
+                $office = json_decode($deliveryMethod->get_option('pvz_code'), true);
+                $param['shipment_point'] = $office['address'];
+            } else {
+                $address = json_decode($deliveryMethod->get_option('address'), true);
+
+                $param['from_location'] = [
+                    'address'      => $address['address'],
+                    'city'         => $address['city'],
+                    'country_code' => $address['country'] ?? 'RU',
+                ];
+            }
+
+            $param['recipient'] = [
+                'name'   => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
+                'email'  => $order->get_billing_email(),
+                'phones' => [
+                    'number' => $order->get_billing_phone(),
+                ],
             ];
+
+            if ($deliveryMethod->get_option('international_mode') === 'yes') {
+                $param['recipient'] = array_merge($param['recipient'], [
+                    'passport_date_of_birth' => $order->get_meta('_passport_date_of_birth'),
+                    'tin'                    => $order->get_meta('_tin'),
+                    'passport_organization'  => $order->get_meta('_passport_organization'),
+                    'passport_date_of_issue' => $order->get_meta('_passport_date_of_issue'),
+                    'passport_number'        => $order->get_meta('_passport_number'),
+                    'passport_series'        => $order->get_meta('_passport_series'),
+                ]);
+            }
+
+            if ($order->get_payment_method() === 'cod') {
+                $codPriceThreshold = (int)$deliveryMethod->get_option('stepcodprice');
+                $total = number_format($order->get_subtotal(),
+                                       wc_get_price_decimals(),
+                                       '.',
+                                       '');
+                if ($codPriceThreshold === 0 || $codPriceThreshold > $total) {
+                    $param['delivery_recipient_cost'] = [
+                        'value' => $order->get_shipping_total(),
+                    ];
+                }
+            }
+
+            $param['type'] = $postOrderData['type'];
+            $param['tariff_code'] = $postOrderData['tariff_code'];
+            $param['date_invoice'] = date('Y-m-d');
+            $param['shipper_name'] = $deliveryMethod->get_option('shipper_name');
+            $param['shipper_address'] = $deliveryMethod->get_option('shipper_address');
+            $param['sender'] = [
+                'passport_series'        => $deliveryMethod->get_option('passport_series'),
+                'passport_number'        => $deliveryMethod->get_option('passport_number'),
+                'passport_date_of_issue' => $deliveryMethod->get_option('passport_date_of_issue'),
+                'passport_organization'  => $deliveryMethod->get_option('passport_organization'),
+                'passport_date_of_birth' => $deliveryMethod->get_option('passport_date_of_birth'),
+                'tin'                    => $deliveryMethod->get_option('tin'),
+                'name'                   => $deliveryMethod->get_option('seller_name'),
+                'company'                => $deliveryMethod->get_option('seller_name'),
+                'phones'                 => [
+                    'number' => $deliveryMethod->get_option('seller_phone'),
+                ],
+            ];
+            $param['seller'] = [
+                'address' => $deliveryMethod->get_option('seller_address'),
+                'phones'  => [
+                    'number' => $deliveryMethod->get_option('seller_phone'),
+                ],
+            ];
+
+            return $param;
         }
 
-        $param['recipient'] = [
-            'name'   => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
-            'email'  => $order->get_billing_email(),
-            'phones' => [
-                'number' => $order->get_billing_phone(),
-            ],
-        ];
+        private function buildPackagesData(WC_Order $order, array $packages = null): array
+        {
+            $items = $order->get_items();
 
-        if ($deliveryMethod->get_option('international_mode') === 'yes') {
-            $param['recipient'] = array_merge($param['recipient'], [
-                'passport_date_of_birth' => $order->get_meta('_passport_date_of_birth'),
-                'tin'                    => $order->get_meta('_tin'),
-                'passport_organization'  => $order->get_meta('_passport_organization'),
-                'passport_date_of_issue' => $order->get_meta('_passport_date_of_issue'),
-                'passport_number'        => $order->get_meta('_passport_number'),
-                'passport_series'        => $order->get_meta('_passport_series'),
-            ]);
-        }
+            if ($packages === null) {
+                $deliveryMethod = CheckoutHelper::getOrderShippingMethod($order);
 
-        if ($order->get_payment_method() === 'cod') {
-            $codPriceThreshold = (int)$deliveryMethod->get_option('stepcodprice');
-            $total = number_format($order->get_subtotal(),
-                                   wc_get_price_decimals(),
-                                   '.',
-                                   '');
-            if ($codPriceThreshold === 0 || $codPriceThreshold > $total) {
-                $param['delivery_recipient_cost'] = [
-                    'value' => $order->get_shipping_total(),
+                return [
+                    $this->buildItemsData($order,
+                                          $deliveryMethod->get_meta('length'),
+                                          $deliveryMethod->get_meta('width'),
+                                          $deliveryMethod->get_meta('height'),
+                                          $items),
                 ];
             }
         }
 
-        $param['type'] = $postOrderData['type'];
-        $param['tariff_code'] = $postOrderData['tariff_code'];
-        $param['date_invoice'] = date('Y-m-d');
-        $param['shipper_name'] = $deliveryMethod->get_option('shipper_name');
-        $param['shipper_address'] = $deliveryMethod->get_option('shipper_address');
-        $param['sender'] = [
-            'passport_series'        => $deliveryMethod->get_option('passport_series'),
-            'passport_number'        => $deliveryMethod->get_option('passport_number'),
-            'passport_date_of_issue' => $deliveryMethod->get_option('passport_date_of_issue'),
-            'passport_organization'  => $deliveryMethod->get_option('passport_organization'),
-            'passport_date_of_birth' => $deliveryMethod->get_option('passport_date_of_birth'),
-            'tin'                    => $deliveryMethod->get_option('tin'),
-            'name'                   => $deliveryMethod->get_option('seller_name'),
-            'company'                => $deliveryMethod->get_option('seller_name'),
-            'phones'                 => [
-                'number' => $deliveryMethod->get_option('seller_phone'),
-            ],
-        ];
-        $param['seller'] = [
-            'address' => $deliveryMethod->get_option('seller_address'),
-            'phones'  => [
-                'number' => $deliveryMethod->get_option('seller_phone'),
-            ],
-        ];
+        private function buildItemsData(WC_Order $order,
+                                        int      $length,
+                                        int      $width,
+                                        int      $height,
+                                        array    $items): array
+        {
+            $postOrderData = OrderMetaData::getMetaByOrderId($order->get_id());
+            $deliveryMethod =
+                Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
+                                                              ->get_data()['instance_id']);
 
-        return $param;
-    }
+            $totalWeight = 0;
+            $itemsData = [];
 
-    private function buildPackagesData(WC_Order $order, array $packages = null): array
-    {
-        $items = $order->get_items();
+            foreach ($items as $item) {
+                $product = $item->get_product();
+                $weight = $product->get_weight();
+                $weight = $this->weightCalc->getWeight($weight);
+                $quantity = (int)$item->get_quantity();
+                $totalWeight += $quantity * $weight;
+                $cost = $product->get_price();
 
-        if ($packages === null) {
-            $deliveryMethod = CheckoutHelper::getOrderShippingMethod($order);
-
-            return [
-                $this->buildItemsData($order,
-                                      $deliveryMethod->get_meta('length'),
-                                      $deliveryMethod->get_meta('width'),
-                                      $deliveryMethod->get_meta('height'),
-                                      $items),
-            ];
-        }
-    }
-
-    private function buildItemsData(WC_Order $order,
-                                    int      $length,
-                                    int      $width,
-                                    int      $height,
-                                    array    $items): array
-    {
-        $postOrderData = OrderMetaData::getMetaByOrderId($order->get_id());
-        $deliveryMethod =
-            Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)->get_data()['instance_id']);
-
-        $totalWeight = 0;
-        $itemsData = [];
-
-        foreach ($items as $item) {
-            $product = $item->get_product();
-            $weight = $product->get_weight();
-            $weight = $this->weightCalc->getWeight($weight);
-            $quantity = (int)$item->get_quantity();
-            $totalWeight += $quantity * $weight;
-            $cost = $product->get_price();
-
-            if ($postOrderData['currency'] !== 'RUB' && function_exists('wcml_get_woocommerce_currency_option')) {
-                $cost = $this->convertCurrencyToRub($cost, $postOrderData['currency']);
-            }
-
-            $selectedPaymentMethodId = $order->get_payment_method();
-            $percentCod = (int)$deliveryMethod->get_option('percentcod');
-            if ($selectedPaymentMethodId === 'cod') {
-                if ($percentCod !== 0) {
-                    $paymentValue = (int)(($percentCod / 100) * $cost);
-                } else {
-                    $paymentValue = $cost;
+                if ($postOrderData['currency'] !== 'RUB' && function_exists('wcml_get_woocommerce_currency_option')) {
+                    $cost = $this->convertCurrencyToRub($cost, $postOrderData['currency']);
                 }
-            } else {
-                $paymentValue = 0;
+
+                $selectedPaymentMethodId = $order->get_payment_method();
+                $percentCod = (int)$deliveryMethod->get_option('percentcod');
+                if ($selectedPaymentMethodId === 'cod') {
+                    if ($percentCod !== 0) {
+                        $paymentValue = (int)(($percentCod / 100) * $cost);
+                    } else {
+                        $paymentValue = $cost;
+                    }
+                } else {
+                    $paymentValue = 0;
+                }
+
+                $itemsData[] = [
+                    'ware_key'     => $product->get_id(),
+                    'payment'      => ['value' => $paymentValue],
+                    'name'         => $product->get_name(),
+                    'cost'         => $cost,
+                    'amount'       => $item->get_quantity(),
+                    'weight'       => $weight,
+                    'weight_gross' => $weight + 1,
+                ];
             }
 
-            $itemsData[] = [
-                'ware_key'     => $product->get_id(),
-                'payment'      => ['value' => $paymentValue],
-                'name'         => $product->get_name(),
-                'cost'         => $cost,
-                'amount'       => $item->get_quantity(),
-                'weight'       => $weight,
-                'weight_gross' => $weight + 1,
+            $package = [
+                'number'  => sprintf('%n_%s', $order->get_id(), StringHelper::generateRandom(5)),
+                'length'  => $length,
+                'width'   => $width,
+                'height'  => $height,
+                'weight'  => $totalWeight,
+                'comment' => 'приложена опись',
             ];
+
+            if ($postOrderData['type'] === Tariff::SHOP_TYPE) {
+                $package['items'] = $itemsData;
+            }
+
+            return $package;
         }
 
-        $package = [
-            'number'  => sprintf('%n_%s', $order->get_id(), StringHelper::generateRandom(5)),
-            'length'  => $length,
-            'width'   => $width,
-            'height'  => $height,
-            'weight'  => $totalWeight,
-            'comment' => 'приложена опись',
-        ];
+        private function convertCurrencyToRub(float $cost, string $currency): float
+        {
+            global $woocommerce_wpml;
 
-        if ($postOrderData['type'] === Tariff::SHOP_TYPE) {
-            $package['items'] = $itemsData;
-        }
+            $multiCurrency = $woocommerce_wpml->get_multi_currency();
+            $rates = $multiCurrency->get_exchange_rates();
 
-        return $package;
-    }
+            if (!array_key_exists('RUB', $rates)) {
+                return $cost;
+            }
 
-    private function convertCurrencyToRub(float $cost, string $currency): float
-    {
-        global $woocommerce_wpml;
+            $defaultCurrency = '';
+            foreach ($rates as $key => $rate) {
+                if ($rate === 1) {
+                    $defaultCurrency = $key;
+                    break;
+                }
+            }
 
-        $multiCurrency = $woocommerce_wpml->get_multi_currency();
-        $rates = $multiCurrency->get_exchange_rates();
+            if ($currency === $defaultCurrency) {
+                $cost = round($cost * (float)$rates['RUB'], 2);
+            } else {
+                $costConvertToDefault = round($cost / (float)$rates[$currency], 2);
+                $cost = round($costConvertToDefault * (float)$rates['RUB'], 2);
+            }
 
-        if (!array_key_exists('RUB', $rates)) {
             return $cost;
         }
 
-        $defaultCurrency = '';
-        foreach ($rates as $key => $rate) {
-            if ($rate === 1) {
-                $defaultCurrency = $key;
-                break;
+        private function getCdekOrderNumber(string $orderUuid, int $iteration = 1): string
+        {
+            if ($iteration === 5) {
+                return $orderUuid;
             }
+            $orderInfoJson = $this->api->getOrder($orderUuid);
+            $orderInfo = json_decode($orderInfoJson, true);
+
+            return $orderInfo['entity']['cdek_number'] ?? $this->getCdekOrderNumber($orderUuid, $iteration + 1);
         }
-
-        if ($currency === $defaultCurrency) {
-            $cost = round($cost * (float)$rates['RUB'], 2);
-        } else {
-            $costConvertToDefault = round($cost / (float)$rates[$currency], 2);
-            $cost = round($costConvertToDefault * (float)$rates['RUB'], 2);
-        }
-
-        return $cost;
-    }
-
-    private function getCdekOrderNumber(string $orderUuid, int $iteration = 1): string
-    {
-        if ($iteration === 5) {
-            return $orderUuid;
-        }
-        $orderInfoJson = $this->api->getOrder($orderUuid);
-        $orderInfo = json_decode($orderInfoJson, true);
-
-        return $orderInfo['entity']['cdek_number'] ?? $this->getCdekOrderNumber($orderUuid, $iteration + 1);
     }
 }
