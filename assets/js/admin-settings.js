@@ -1,6 +1,24 @@
 'use strict';
 
 jQuery(($) => {
+
+    console.log();
+    $.ajax({
+               method: 'GET',
+               url: window.cdek_rest_admin_setting_path.check_auth,
+               data: {
+               },
+               success: function (response) {
+                   $(".token-wrong").remove();
+               },
+               error: function (error) {
+                   let header = $("p:contains('Custom Shipping Method for Cdek')");
+                   let errorMessage = $("<div class='cdek-error token-wrong'>[CDEKDelivery] Failed to get the token. No such account secure</div>");
+                   header.after(errorMessage);
+                   console.log({error: error.responseText});
+               }
+           });
+
     const showMap = () => {
         $('input#woocommerce_official_cdek_map')
           .after('<div id="cdek-map-results"></div><div id="cdek-map"></div>');

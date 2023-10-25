@@ -40,6 +40,9 @@ namespace Cdek\UI {
                              Loader::getPluginUrl() . 'assets/css/admin-settings.css',
                              [],
                              Loader::getPluginVersion());
+            wp_localize_script('cdek-admin-settings', 'cdek_rest_admin_setting_path', [
+                'check_auth'        => UrlHelper::buildRest('/check-auth'),
+            ]);
         }
 
         public static function registerOrderScripts(): void

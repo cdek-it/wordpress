@@ -22,6 +22,7 @@ namespace Cdek\Exceptions {
         {
             $this->code = $code;
             $this->data = $data;
+            $this->message = $message;
 
             if ($stopPropagation) {
                 wp_die($this->getWpError());

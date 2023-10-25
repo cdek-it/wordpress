@@ -74,7 +74,7 @@ class Token extends TokenProcess
         $cdekApi = new CdekApi();
         $body = $cdekApi->fetchToken();
         if ($body === null || property_exists($body, 'error')) {
-            throw new CdekApiException('Failed to get the token. ' . $body->error_description, 'cdek_error.token.auth', [], true);
+            throw new CdekApiException('[CDEKDelivery] Failed to get the token. ' . $body->error_description, 'cdek_error.token.auth', [], true);
         }
         return $body->access_token;
     }
