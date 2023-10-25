@@ -49,13 +49,6 @@ namespace Cdek\UI {
                               ['jquery'],
                               Loader::getPluginVersion(),
                               true);
-            wp_localize_script('cdek-admin-create-order', 'cdek_rest_order_api_path', [
-                'create_order'        => UrlHelper::buildRest('/create-order'),
-                'delete_order'        => UrlHelper::buildRest('/delete-order'),
-                'get_region'          => UrlHelper::buildRest('/get-region'),
-                'call_courier'        => UrlHelper::buildRest('/call-courier'),
-                'call_courier_delete' => UrlHelper::buildRest('/call-courier-delete'),
-            ]);
         }
 
         public function __invoke(): void

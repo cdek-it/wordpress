@@ -37,13 +37,12 @@
             }
         })
 
-        $('#send_package').click(function () {
+        $('#send_package').click(function (e) {
             $.ajax({
                 method: 'POST',
-                url: window.cdek_rest_order_api_path.create_order,
+                url: e.target.dataset.action,
                 data: {
-                    package_order_id: $('input[name=package_order_id]').val(),
-                    package_data: JSON.stringify(packageList),
+                    packages: JSON.stringify(packageList),
                 },
                 beforeSend: function() {
                     $('#cdek-loader').show();
@@ -130,16 +129,19 @@
         }
 
 
-        $('#create-order-btn').click(function() {
+        $('#create-order-btn').click(function(e) {
             $('#cdek-create-order-error').hide();
             $.ajax({
                 method: 'POST',
-                url: window.cdek_rest_order_api_path.create_order,
+                url: e.target.dataset.action,
                 data: {
-                    package_order_id: $('input[name=package_order_id]').val(),
-                    package_length: $('input[name=package_length]').val(),
-                    package_width: $('input[name=package_width]').val(),
-                    package_height: $('input[name=package_height]').val(),
+                    packages: [
+                        {
+                            length: $('input[name=package_length]').val(),
+                            width: $('input[name=package_width]').val(),
+                            height: $('input[name=package_height]').val(),
+                        }
+                    ],
                 },
                 beforeSend: function() {
                     $('#cdek-loader').show();
@@ -171,16 +173,13 @@
         });
 
         $('#delete-order-btn').click(function(event) {
+            event.preventDefault();
             $(event.target).addClass('clicked');
             $('#cdek-create-order-error').hide();
             $('#cdek-courier-error').hide();
             $.ajax({
                 method: 'POST',
-                url: window.cdek_rest_order_api_path.delete_order,
-                data: {
-                    number: $('#cdek-order-number-input').val(),
-                    order_id: $('input[name=package_order_id]').val(),
-                },
+                url: event.target.href,
                 beforeSend: function() {
                     $('#cdek-loader').show();
                 },
@@ -210,7 +209,7 @@
             $('#cdek-courier-error').hide();
             $.ajax({
                 method: 'POST',
-                url: window.cdek_rest_order_api_path.call_courier,
+                url: event.target.dataset.action,
                 data: {
                     order_id: $('input[name=package_order_id]').val(),
                     date: $('#cdek-courier-date').val(),
@@ -255,8 +254,8 @@
 
         $('#cdek-courier-delete').click(function(event) {
             $.ajax({
-                method: 'GET',
-                url: window.cdek_rest_order_api_path.call_courier_delete,
+                method: 'POST',
+                url: event.target.dataset.action,
                 data: {
                     order_id: $('input[name=package_order_id]').val(),
                 },

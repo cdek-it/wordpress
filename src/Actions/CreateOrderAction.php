@@ -14,7 +14,6 @@ namespace Cdek\Actions {
     use Cdek\Helpers\WeightCalc;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
-    use Cdek\Note;
     use WC_Order;
 
     class CreateOrderAction
@@ -30,6 +29,7 @@ namespace Cdek\Actions {
 
         /**
          * @throws \JsonException
+         * @throws \Cdek\Exceptions\RestApiInvalidRequestException
          */
         public function __invoke(int $orderId, int $attempt, array $packages = null): array
         {
@@ -39,19 +39,18 @@ namespace Cdek\Actions {
                 CheckoutHelper::getOrderShippingMethod($order)->get_meta('tariff_code') ?: $postOrderData['tariff_id'];
             $postOrderData['type'] = Tariff::getTariffType($postOrderData['tariff_code']);
 
+            OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
+
             $param = $this->buildRequestData($order);
             $param['packages'] = $this->buildPackagesData($order, $packages);
 
-            $orderData = json_decode($this->api->createOrder($param), false, 512, JSON_THROW_ON_ERROR);
+            $orderData = $this->api->createOrder($param);
 
-            $requestId = $orderData['requests'][0];
-            Note::send($orderId, "Отправлен запрос №$requestId на создание заказа в CDEK");
+            sleep(1);
 
-            sleep(5);
-
-            $cdekNumber = $this->getCdekOrderNumber($orderData->entity->uuid);
+            $cdekNumber = $this->getCdekOrderNumber($orderData['entity']['uuid']);
             $postOrderData['order_number'] = $cdekNumber;
-            $postOrderData['order_uuid'] = $orderData->entity->uuid;
+            $postOrderData['order_uuid'] = $orderData['entity']['uuid'];
             OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
 
             return [
@@ -72,6 +71,7 @@ namespace Cdek\Actions {
                 'type'            => $postOrderData['type'],
                 'tariff_code'     => $postOrderData['tariff_code'],
                 'date_invoice'    => date('Y-m-d'),
+                'number'          => $order->get_id(),
                 'shipper_name'    => $deliveryMethod->get_option('shipper_name'),
                 'shipper_address' => $deliveryMethod->get_option('shipper_address'),
                 'sender'          => [
@@ -168,12 +168,17 @@ namespace Cdek\Actions {
                 ];
             }
 
-            return array_map(static fn(array $package) => $this->buildItemsData($order,
-                                                                                $package['length'],
-                                                                                $package['width'],
-                                                                                $package['height'],
-                                                                                $package['items'] ?: $items),
-                $packages);
+            $output = [];
+
+            foreach ($packages as $package) {
+                $output[] = $this->buildItemsData($order,
+                                                  $package['length'],
+                                                  $package['width'],
+                                                  $package['height'],
+                                                  $package['items'] ?: $items);
+            }
+
+            return $output;
         }
 
         private function buildItemsData(WC_Order $order,
@@ -226,7 +231,7 @@ namespace Cdek\Actions {
             }
 
             $package = [
-                'number'  => sprintf('%n_%s', $order->get_id(), StringHelper::generateRandom(5)),
+                'number'  => sprintf('%s_%s', $order->get_id(), StringHelper::generateRandom(5)),
                 'length'  => $length,
                 'width'   => $width,
                 'height'  => $height,
@@ -272,9 +277,12 @@ namespace Cdek\Actions {
 
         private function getCdekOrderNumber(string $orderUuid, int $iteration = 1): string
         {
+            sleep(1);
+
             if ($iteration === 5) {
                 return $orderUuid;
             }
+
             $orderInfoJson = $this->api->getOrder($orderUuid);
             $orderInfo = json_decode($orderInfoJson, true);
 

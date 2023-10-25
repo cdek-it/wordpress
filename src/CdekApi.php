@@ -3,6 +3,7 @@
 namespace Cdek;
 
 use Cdek\Enums\BarcodeFormat;
+use Cdek\Exceptions\RestApiInvalidRequestException;
 use Cdek\Transport\HttpClient;
 use WC_Shipping_Method;
 
@@ -91,17 +92,22 @@ class CdekApi
         return HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['cdek_number' => $number]);
     }
 
+    /**
+     * @throws \Cdek\Exceptions\RestApiInvalidRequestException
+     */
     public function createOrder(array $params)
     {
         $url = $this->apiUrl . self::ORDERS_PATH;
         $params['developer_key'] = Config::DEV_KEY;
 
-        return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), $params);
-    }
+        $result = json_decode(HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), $params), true);
 
-    final public function getOrderStatus(string $orderUuid)
-    {
-        $order = HttpClient::sendCdekRequest($this->apiUrl . self::ORDERS_PATH . $orderUuid, 'GET', $this->getToken());
+        $request = $result['requests'][0];
+
+        if($request['state'] === 'INVALID')
+            throw new RestApiInvalidRequestException(self::ORDERS_PATH, $request['errors']);
+
+        return $result;
     }
 
     public function getFileByLink($link)

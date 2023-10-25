@@ -18,6 +18,7 @@ namespace Cdek\Controllers {
     {
         /**
          * @throws \JsonException
+         * @throws \Cdek\Exceptions\RestApiInvalidRequestException
          */
         public static function createOrder(WP_REST_Request $request): WP_REST_Response
         {

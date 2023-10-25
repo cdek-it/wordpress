@@ -25,14 +25,14 @@ namespace Cdek\Controllers {
 
         public static function getWaybill(WP_REST_Request $request): void
         {
-            (new GenerateWaybillAction)(OrderMetaData::getMetaByOrderId($request->get_param('id'))['cdek_number']
+            (new GenerateWaybillAction)(OrderMetaData::getMetaByOrderId($request->get_param('id'))['order_uuid']
                                         ??
                                         '');
         }
 
         public static function getBarcode(WP_REST_Request $request): void
         {
-            (new GenerateBarcodeAction)(OrderMetaData::getMetaByOrderId($request->get_param('id'))['cdek_number']
+            (new GenerateBarcodeAction)(OrderMetaData::getMetaByOrderId($request->get_param('id'))['order_uuid']
                                         ??
                                         '');
         }

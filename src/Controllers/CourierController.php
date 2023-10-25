@@ -17,11 +17,10 @@ namespace Cdek\Controllers {
 
     class CourierController
     {
-        public static function callCourier(WP_REST_Request $data): WP_REST_Response
+        public static function callCourier(WP_REST_Request $request): WP_REST_Response
         {
             $callCourier = new CallCourier();
-            $param = DataWPScraber::getData($data, [
-                'order_id',
+            $param = DataWPScraber::getData($request, [
                 'date',
                 'starttime',
                 'endtime',
@@ -37,26 +36,42 @@ namespace Cdek\Controllers {
                 'need_call',
             ]);
 
-            return new WP_REST_Response($callCourier->call($param), 200);
+            return new WP_REST_Response($callCourier->call($request->get_param('id'),$param), 200);
         }
 
         public static function deleteCourierCall(WP_REST_Request $data): WP_REST_Response
         {
-            return new WP_REST_Response((new CallCourier())->delete($data->get_param('order_id')), 200);
+            return new WP_REST_Response((new CallCourier())->delete($data->get_param('id')), 200);
         }
 
         public function __invoke(): void
         {
-            register_rest_route(Config::DELIVERY_NAME, '/call-courier', [
+            register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/courier', [
                 'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [__CLASS__, 'callCourier'],
-                'permission_callback' => '__return_true',
+                'permission_callback' => static fn() => current_user_can('edit_posts'),
+                'show_in_index'       => true,
+                'args'                => [
+                    'id' => [
+                        'description' => 'Номер заказа',
+                        'required'    => true,
+                        'type'        => 'integer',
+                    ],
+                ],
             ]);
 
-            register_rest_route(Config::DELIVERY_NAME, '/call-courier-delete', [
-                'methods'             => WP_REST_Server::READABLE,
+            register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/courier/delete', [
+                'methods'             => WP_REST_Server::CREATABLE,
                 'callback'            => [__CLASS__, 'deleteCourierCall'],
-                'permission_callback' => '__return_true',
+                'permission_callback' => static fn() => current_user_can('edit_posts'),
+                'show_in_index'       => true,
+                'args'                => [
+                    'id' => [
+                        'description' => 'Номер заказа',
+                        'required'    => true,
+                        'type'        => 'integer',
+                    ],
+                ],
             ]);
         }
     }

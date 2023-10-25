@@ -17,7 +17,7 @@ namespace Cdek\Helpers {
         private const G_INTO_LBS = 453.6;
         private const G_INTO_OZ = 28.35;
 
-        final public function getWeight(float $weight): float
+        final public function getWeight(string $weight): float
         {
             if (empty($weight) ||
                 Helper::getActualShippingMethod()->get_option('product_package_default_toggle') === 'yes') {
@@ -28,7 +28,7 @@ namespace Cdek\Helpers {
                 $weight = $defaultWeight;
             }
 
-            return $weight;
+            return (float)$weight;
         }
 
         final public function getWeightInGrams(float $weight): int

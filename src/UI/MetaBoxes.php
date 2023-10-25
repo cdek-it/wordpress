@@ -16,14 +16,11 @@ namespace Cdek\UI {
     use Cdek\Model\CourierMetaData;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
-    use WP_Post;
 
     class MetaBoxes
     {
-        public static function registerMetaBoxes(): void
+        public static function registerMetaBoxes(string $post_type, $post): void
         {
-            global $post;
-
             if (!$post || !OrderUtil::is_order($post->ID, wc_get_order_types())) {
                 return;
             }
@@ -40,7 +37,7 @@ namespace Cdek\UI {
                 add_meta_box(Config::ORDER_META_BOX_KEY,
                              Loader::getPluginName(),
                              [__CLASS__, 'noAuthMetaBox'],
-                             'shop_order',
+                             ['woocommerce_page_wc-orders', 'shop_order'],
                              'side',
                              'core');
 
@@ -56,7 +53,7 @@ namespace Cdek\UI {
                 add_meta_box(Config::ORDER_META_BOX_KEY,
                              Loader::getPluginName(),
                              [__CLASS__, 'noAddressMetaBox'],
-                             'shop_order',
+                             ['woocommerce_page_wc-orders', 'shop_order'],
                              'side',
                              'core');
 
@@ -70,7 +67,7 @@ namespace Cdek\UI {
                 add_meta_box(Config::ORDER_META_BOX_KEY,
                              Loader::getPluginName(),
                              [__CLASS__, 'noOfficeMetaBox'],
-                             'shop_order',
+                             ['woocommerce_page_wc-orders', 'shop_order'],
                              'side',
                              'core');
 
@@ -80,7 +77,7 @@ namespace Cdek\UI {
             add_meta_box(Config::ORDER_META_BOX_KEY,
                          Loader::getPluginName(),
                          [__CLASS__, 'createOrderMetaBox'],
-                         'shop_order',
+                         ['woocommerce_page_wc-orders', 'shop_order'],
                          'side',
                          'core');
         }
@@ -121,7 +118,7 @@ namespace Cdek\UI {
         PAGE;
         }
 
-        public static function createOrderMetaBox(WP_Post $post, array $meta): void
+        public static function createOrderMetaBox($post): void
         {
             $order = wc_get_order($post);
             $orderData = OrderMetaData::getMetaByOrderId($post->ID);
@@ -154,7 +151,7 @@ namespace Cdek\UI {
 
         public function __invoke(): void
         {
-            add_action('add_meta_boxes', [__CLASS__, 'registerMetaBoxes']);
+            add_action('add_meta_boxes', [__CLASS__, 'registerMetaBoxes'], 100, 2);
         }
     }
 }

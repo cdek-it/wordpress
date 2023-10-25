@@ -9,6 +9,7 @@ namespace Cdek\Actions {
 
     use Cdek\CdekApi;
     use Cdek\Config;
+    use Cdek\Model\OrderMetaData;
 
     class GenerateWaybillAction
     {
@@ -19,14 +20,14 @@ namespace Cdek\Actions {
             $this->api = new CdekApi;
         }
 
-        public function __invoke(int $cdekNumber): void
+        public function __invoke(string $orderUuid): void
         {
             ini_set('max_execution_time',
                     30 +
                     Config::GRAPHICS_FIRST_SLEEP +
                     Config::GRAPHICS_TIMEOUT_SEC * Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS);
 
-            $order = json_decode($this->api->getOrderByCdekNumber($cdekNumber), true);
+            $order = json_decode($this->api->getOrder($orderUuid), true);
 
             if (!isset($order['entity'])) {
                 echo 'Не удалось получить сведения о заказе. 
