@@ -80,6 +80,8 @@ namespace Cdek {
                     throw new RuntimeException("$plugin plugin is not activated, but required.");
                 }
             }
+
+            ////
         }
 
         public function __invoke(string $pluginMainFile): void

@@ -24,12 +24,14 @@ class CdekApi
     private string $clientId;
     private string $clientSecret;
     private WC_Shipping_Method $deliveryMethod;
+    private Token $tokenProcess;
 
 
     public function __construct(?int $shippingInstanceId = null)
     {
         $this->deliveryMethod = Helper::getActualShippingMethod($shippingInstanceId);
         $this->apiUrl = $this->getApiUrl();
+        $this->tokenProcess = new Token();
 
         if (!isset($_ENV['CDEK_REST_API']) && $this->deliveryMethod->get_option('test_mode') === 'yes') {
             $this->clientId = Config::TEST_CLIENT_ID;
@@ -57,9 +59,7 @@ class CdekApi
     }
 
     public function getToken(): string {
-        $token = new Token();
-
-        return $token->getToken();
+        return $this->tokenProcess->getToken();
     }
 
     public function fetchToken() {

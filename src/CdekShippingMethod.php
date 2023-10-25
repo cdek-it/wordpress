@@ -243,9 +243,6 @@ class CdekShippingMethod extends WC_Shipping_Method
             'token'                         => [
                 'type' => 'hidden',
             ],
-            'token_exp'                     => [
-                'type' => 'hidden',
-            ],
             'package_setting_block_name'     => [
                 'title' => '<h3 style="text-align: center;">Габариты</h3>',
                 'type'  => 'title',
