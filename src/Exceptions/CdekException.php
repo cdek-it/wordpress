@@ -17,7 +17,7 @@ namespace Cdek\Exceptions {
 
         public function __construct(string $message = "",
                                     string $code = 'cdek_error',
-                                    array  $data = null,
+                                    ?array  $data = null,
                                     bool   $stopPropagation = true)
         {
             $this->code = $code;
