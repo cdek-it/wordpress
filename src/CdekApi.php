@@ -13,7 +13,7 @@ class CdekApi
     private const ORDERS_PATH = 'orders/';
     private const PVZ_PATH = 'deliverypoints';
     private const CALC_LIST_PATH = 'calculator/tarifflist';
-    private const CALC_PATH = 'calculator/tarifflist';
+    private const CALC_PATH = 'calculator/tariff';
     private const WAYBILL_PATH = 'print/orders/';
     private const BARCODE_PATH = 'print/barcodes/';
     private const CALL_COURIER = 'intakes';
