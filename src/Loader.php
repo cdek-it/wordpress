@@ -81,8 +81,11 @@ namespace Cdek {
                 }
             }
 
-            if (!extension_loaded('openssl')) {
-                throw new RuntimeException("Plugin is not activated, openssl is not enabled, but required.");
+            $extensions = ['openssl', 'curl'];
+            foreach ($extensions as $extension) {
+                if (!extension_loaded($extension)) {
+                    throw new RuntimeException("$extension is not enabled, but required.");
+                }
             }
 
         }

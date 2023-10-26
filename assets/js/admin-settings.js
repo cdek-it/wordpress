@@ -5,15 +5,17 @@ jQuery(($) => {
     console.log();
     $.ajax({
                method: 'GET',
-               url: window.cdek_rest_admin_setting_path.check_auth,
+               url: window.cdek_admin_settings.check_auth,
                data: {
                },
                success: function (response) {
+                   console.log(response)
                    $(".token-wrong").remove();
                },
                error: function (error) {
+                   console.log(error)
                    let header = $("p:contains('Custom Shipping Method for Cdek')");
-                   let errorMessage = $("<div class='cdek-error token-wrong'>[CDEKDelivery] Failed to get the token. No such account secure</div>");
+                   let errorMessage = $("<div class='cdek-error token-wrong'>[CDEKDelivery] Ошибка при получении токена. Убедитесь, что ключи интеграции верны</div>");
                    header.after(errorMessage);
                    console.log({error: error.responseText});
                }

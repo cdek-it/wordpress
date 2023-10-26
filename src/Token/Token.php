@@ -3,7 +3,6 @@
 namespace Cdek\Token;
 
 use Cdek\CdekApi;
-use Cdek\Exceptions\CdekApiException;
 use Cdek\Helper;
 
 class Token extends TokenProcess
@@ -25,46 +24,38 @@ class Token extends TokenProcess
         return 'Bearer ' . $token;
     }
 
-    private function getTokenFromCache(): string
+    private function getTokenFromCache(): ?string
     {
-        if (!empty(self::$tokenStatic) && self::$tokenExpStatic > time()) {
-            return self::$tokenStatic;
-        }
-        return '';
+        return !empty(self::$tokenStatic) && self::$tokenExpStatic > time() ? self::$tokenStatic : null;
     }
 
-    private function getTokenFromSettings(): string
+    private function getTokenFromSettings(): ?string
     {
         $tokenSetting = Helper::getActualShippingMethod()->get_option('token');
-        if (!empty($tokenSetting)) {
-            $decryptToken =
-                $this->decryptToken($tokenSetting, Helper::getActualShippingMethod()->get_option('client_id'));
-            if ($decryptToken !== false) {
-                $tokenExpSetting = $this->getTokenExp($decryptToken);
-                if ($tokenExpSetting > time()) {
-                    self::$tokenStatic = $decryptToken;
-                    self::$tokenExpStatic = $tokenExpSetting;
-                    return $decryptToken;
-                }
-            }
+        if (empty($tokenSetting)) {
+            return null;
         }
-        return '';
+        $decryptToken = $this->decryptToken($tokenSetting, Helper::getActualShippingMethod()->get_option('client_id'));
+        if (empty($decryptToken)) {
+            return null;
+        }
+        $tokenExpSetting = $this->getTokenExp($decryptToken);
+        if ($tokenExpSetting < time()) {
+            return null;
+        }
+        self::$tokenStatic = $decryptToken;
+        self::$tokenExpStatic = $tokenExpSetting;
+        return $decryptToken;
     }
 
     public function updateToken(): string {
-        try {
-            $tokenApi = $this->fetchTokenFromApi();
-            $clientId = Helper::getActualShippingMethod()->get_option('client_id');
-            $tokenEncrypt = $this->encryptToken($tokenApi, $clientId);
-            Helper::getActualShippingMethod()->update_option('token', $tokenEncrypt);
-            self::$tokenStatic = $tokenApi;
-            self::$tokenExpStatic = $this->getTokenExp($tokenApi);
-            return $tokenApi;
-        } catch (CdekApiException $exception) {
-            //
-        }
-
-        return '';
+        $tokenApi = $this->fetchTokenFromApi();
+        $clientId = Helper::getActualShippingMethod()->get_option('client_id');
+        $tokenEncrypt = $this->encryptToken($tokenApi, $clientId);
+        Helper::getActualShippingMethod()->update_option('token', $tokenEncrypt);
+        self::$tokenStatic = $tokenApi;
+        self::$tokenExpStatic = $this->getTokenExp($tokenApi);
+        return $tokenApi;
     }
 
     /**
@@ -72,11 +63,7 @@ class Token extends TokenProcess
      */
     public function fetchTokenFromApi() {
         $cdekApi = new CdekApi();
-        $body = $cdekApi->fetchToken();
-        if ($body === null || property_exists($body, 'error')) {
-            throw new CdekApiException('[CDEKDelivery] Failed to get the token. ' . $body->error_description, 'cdek_error.token.auth', [], true);
-        }
-        return $body->access_token;
+        return $cdekApi->fetchToken();
     }
 
     private function getTokenExp($token)
