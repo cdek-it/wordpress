@@ -5,7 +5,7 @@ jQuery(($) => {
     console.log();
     $.ajax({
                method: 'GET',
-               url: window.cdek_admin_settings.check_auth,
+               url: window.cdek_admin_settings.api.check_auth,
                data: {
                },
                success: function (response) {

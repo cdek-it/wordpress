@@ -36,6 +36,10 @@ namespace Cdek {
                 'version' => '7.0.0',
             ],
         ];
+        public const EXTENSIONS = [
+            'openssl',
+            'curl'
+        ];
         private static string $pluginVersion;
         private static string $pluginMainFile;
 
@@ -81,8 +85,7 @@ namespace Cdek {
                 }
             }
 
-            $extensions = ['openssl', 'curl'];
-            foreach ($extensions as $extension) {
+            foreach (self::EXTENSIONS as $extension) {
                 if (!extension_loaded($extension)) {
                     throw new RuntimeException("$extension is not enabled, but required.");
                 }
