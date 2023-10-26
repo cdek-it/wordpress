@@ -11,6 +11,7 @@ namespace Cdek\Actions {
     use Cdek\Config;
     use Cdek\Enums\BarcodeFormat;
     use Cdek\Helper;
+    use Cdek\Model\OrderMetaData;
 
     class GenerateBarcodeAction
     {
@@ -21,14 +22,15 @@ namespace Cdek\Actions {
             $this->api = new CdekApi;
         }
 
-        public function __invoke(int $cdekNumber): void
+        public function __invoke(string $cdekUuid): void
         {
             ini_set('max_execution_time',
                     30 +
                     Config::GRAPHICS_FIRST_SLEEP +
                     Config::GRAPHICS_TIMEOUT_SEC * Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS);
 
-            $order = json_decode($this->api->getOrderByCdekNumber($cdekNumber), true);
+
+            $order = json_decode($this->api->getOrder($cdekUuid), true);
 
             if (!isset($order['entity'])) {
                 echo 'Не удалось получить сведения о заказе. 

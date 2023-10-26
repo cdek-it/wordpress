@@ -58,8 +58,6 @@ namespace Cdek\Actions {
                 'pvz_code'     => $pvzCode,
                 'city_code'    => $cityCode,
                 'currency'     => $currency,
-                'order_number' => '',
-                'order_uuid'   => '',
             ];
 
             OrderMetaData::addMetaByOrderId($order->get_id(), $data);

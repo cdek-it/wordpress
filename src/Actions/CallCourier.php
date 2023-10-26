@@ -26,15 +26,15 @@ namespace Cdek\Actions {
             $this->api = new CdekApi();
         }
 
-        public function call($data)
+        public function call(int $orderId, $data)
         {
             $validate = ValidateCourierFormData::validate($data);
             if (!$validate->state) {
                 return $validate->response();
             }
 
-            $orderMetaData = OrderMetaData::getMetaByOrderId($data['order_id']);
-            $shippingMethod = CheckoutHelper::getOrderShippingMethod(wc_get_order($data['order_id']));
+            $orderMetaData = OrderMetaData::getMetaByOrderId($orderId);
+            $shippingMethod = CheckoutHelper::getOrderShippingMethod(wc_get_order($orderId));
 
             $tariffId = $shippingMethod->get_meta('tariff_code') ?: $orderMetaData['tariff_id'];
 
@@ -88,7 +88,7 @@ namespace Cdek\Actions {
 
             $intakeNumber = $courierInfo->entity->intake_number;
 
-            CourierMetaData::addMetaByOrderId($data['order_id'],
+            CourierMetaData::addMetaByOrderId($orderId,
                                               [
                                                   'courier_number' => $intakeNumber,
                                                   'courier_uuid'   => $courierObj->entity->uuid,
@@ -97,7 +97,7 @@ namespace Cdek\Actions {
 
             $message =
                 'Создана заявка на вызов курьера: Номер: ' . $intakeNumber . ' | Uuid: ' . $courierObj->entity->uuid;
-            Note::send($data['order_id'], $message);
+            Note::send($orderId, $message);
 
             $validate = new Validate(true, "Номер заявки: " . $intakeNumber);
             return $validate->response();

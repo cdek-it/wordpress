@@ -24,11 +24,11 @@ namespace Cdek\Actions {
 
         public function __invoke(int $orderId): array
         {
-            $orderNumber = OrderMetaData::getMetaByOrderId($orderId)['cdek_number'];
+            $orderNumber = OrderMetaData::getMetaByOrderId($orderId)['order_uuid'];
 
             OrderMetaData::cleanMetaByOrderId($orderId);
 
-            $order = $this->api->getOrderByCdekNumber($orderNumber);
+            $order = $this->api->getOrder($orderNumber);
             $orderObj = json_decode($order);
 
             $validate = ValidateGetOrder::validate($orderObj, $orderNumber, $orderId);
@@ -36,7 +36,7 @@ namespace Cdek\Actions {
                 return $validate->response();
             }
 
-            $delete = $this->api->deleteOrder($orderObj->entity->uuid);
+            $delete = $this->api->deleteOrder($orderNumber);
             $delete = json_decode($delete);
 
             $validate = ValidateDeleteOrder::validate($delete, $orderNumber, $orderId);

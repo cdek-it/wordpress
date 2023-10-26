@@ -5,6 +5,9 @@
 /** @var $orderUuid */
 /** @var $items */
 /** @var $hasPackages */
+
+use Cdek\Helpers\UrlHelper;
+
 ?>
 <div id="cdek-create-order-form" <?php if ($orderNumber) { ?>style="display: none" <?php } ?> >
     <div id="setting_block">
@@ -31,9 +34,6 @@
             <?php } ?>
         </div>
         <div id="package_parameters">
-            <p class="form-field form-field-wide wc-order-status" style="display: none">
-                <input name="package_order_id" type="text" value="<?php echo $orderIdWP?>">
-            </p>
             <p class="form-field form-field-wide wc-order-status">
                 <label for="package_length">Длина см</label>
                 <input name="package_length" type="text">
@@ -61,7 +61,9 @@
 
     <div id="send_package_btn_block" style="display: none">
         <p class="form-field form-field-wide wc-order-status">
-            <button id="send_package" type="button" class="button refund-items">Создать заказ</button>
+            <button id="send_package" type="button" class="button refund-items" data-action="<?= UrlHelper::buildRest
+            ("/order/$orderIdWP/create")?>">Создать
+                заказ</button>
         </p>
     </div>
 </div>

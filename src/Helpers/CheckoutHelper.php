@@ -15,7 +15,7 @@ namespace Cdek\Helpers {
 
     class CheckoutHelper
     {
-        public static function getValueFromCurrentSession(string $valueName, string $defaultValue = null): string
+        public static function getValueFromCurrentSession(string $valueName, string $defaultValue = null): ?string
         {
             $shippingValue = WC()->checkout()->get_value("shipping_$valueName");
             if (isset($shippingValue)) {

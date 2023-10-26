@@ -1,17 +1,21 @@
 <?php
 /** @var $orderNumber */
+/** @var $orderIdWP */
 /** @var $orderUuid */
 /** @var $dateMin */
 /** @var $dateMax */
 /** @var $courierNumber */
 /** @var $fromDoor */
+
+use Cdek\Helpers\UrlHelper;
+
 ?>
 
 <div id="cdek-courier-block">
     <div>
         <div>
             <p>Дата ожидания курьера:</p>
-            <input id="cdek-courier-date" type="date" min='<?php echo $dateMin; ?>' max='<?php echo $dateMax; ?>'>
+            <input id="cdek-courier-date" type="date" min='<?= $dateMin ?>' max='<?= $dateMax ?>'>
         </div>
         <div>
             <p>Время ожидания курьера:</p>
@@ -66,5 +70,6 @@
         <input id="cdek-courier-call" type="checkbox">
     </div>
     <p id="cdek-courier-error" style="display: none"></p>
-    <input id="cdek-courier-send-call" class="button save_order button-primary" type="button" value="Отправить">
+    <input id="cdek-courier-send-call" class="button save_order button-primary" type="button" value="Отправить"
+           data-action="<?= UrlHelper::buildRest("order/$orderIdWP/courier") ?>">
 </div>

@@ -15,12 +15,6 @@ namespace Cdek\Controllers {
 
     class LocationController
     {
-
-        public static function getRegion(WP_REST_Request $data): WP_REST_Response
-        {
-            return new WP_REST_Response((new CdekApi)->getRegion($data->get_param('city')), 200);
-        }
-
         public static function getPoints(WP_REST_Request $data): WP_REST_Response
         {
             return new WP_REST_Response((new CdekApi)->getOffices($data->get_params()), 200);
@@ -35,12 +29,6 @@ namespace Cdek\Controllers {
 
         public function __invoke(): void
         {
-            register_rest_route(Config::DELIVERY_NAME, '/get-region', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [__CLASS__, 'getRegion'],
-                'permission_callback' => '__return_true',
-            ]);
-
             register_rest_route(Config::DELIVERY_NAME, '/get-offices', [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [__CLASS__, 'getPoints'],
