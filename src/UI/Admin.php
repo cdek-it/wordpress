@@ -26,6 +26,7 @@ namespace Cdek\UI {
             wp_localize_script('cdek-admin-settings', 'cdek_admin_settings', [
                 'api'   => [
                     'offices' => UrlHelper::buildRest('/get-offices'),
+                    'check_auth' => UrlHelper::buildRest('/check-auth'),
                 ],
                 'icons' => [
                     'door'   => Loader::getPluginUrl() . 'assets/img/door-enter.svg',

@@ -3,6 +3,8 @@
 namespace Cdek;
 
 use Cdek\Enums\BarcodeFormat;
+use Cdek\Exceptions\CdekApiException;
+use Cdek\Token\Token;
 use Cdek\Exceptions\RestApiInvalidRequestException;
 use Cdek\Transport\HttpClient;
 use WC_Shipping_Method;
@@ -52,19 +54,22 @@ class CdekApi
     final public function checkAuth(): bool
     {
         $token = $this->getToken();
-
         return (bool)$token;
     }
 
-    final public function getToken(): string
+    public function getToken(): string
+    {
+        $tokenProcess = new Token();
+        return $tokenProcess->getToken();
+    }
+
+    public function fetchToken(): string
     {
         $body = json_decode(HttpClient::sendRequest($this->getAuthUrl(), 'POST'));
-
-        if ($body === null || property_exists($body, 'error')) {
-            return false;
+        if ($body === null || property_exists($body, 'error_description')) {
+            throw new CdekApiException('[CDEKDelivery] Failed to get the token. ' . $body->error_description, 'cdek_error.token.auth', [], true);
         }
-
-        return sprintf('Bearer %s', $body->access_token);
+        return $body->access_token;
     }
 
     private function getAuthUrl(): string
