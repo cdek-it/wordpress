@@ -8,12 +8,14 @@ namespace {
 namespace Cdek\Actions {
 
     use Cdek\CdekApi;
+    use Cdek\Config;
     use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\StringHelper;
     use Cdek\Helpers\WeightCalc;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
+    use Throwable;
     use WC_Order;
 
     class CreateOrderAction
@@ -28,10 +30,9 @@ namespace Cdek\Actions {
         }
 
         /**
-         * @throws \JsonException
-         * @throws \Cdek\Exceptions\RestApiInvalidRequestException
+         * @throws \Cdek\Exceptions\RestApiInvalidRequestException|\Throwable|\JsonException
          */
-        public function __invoke(int $orderId, int $attempt, array $packages = null): array
+        public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
         {
             $order = wc_get_order($orderId);
             $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
@@ -44,20 +45,28 @@ namespace Cdek\Actions {
             $param = $this->buildRequestData($order);
             $param['packages'] = $this->buildPackagesData($order, $packages);
 
-            $orderData = $this->api->createOrder($param);
+            try {
+                $orderData = $this->api->createOrder($param);
 
-            sleep(1);
+                sleep(1);
 
-            $cdekNumber = $this->getCdekOrderNumber($orderData['entity']['uuid']);
-            $postOrderData['order_number'] = $cdekNumber;
-            $postOrderData['order_uuid'] = $orderData['entity']['uuid'];
-            OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
+                $cdekNumber = $this->getCdekOrderNumber($orderData['entity']['uuid']);
+                $postOrderData['order_number'] = $cdekNumber ?? $orderData['entity']['uuid'];
+                $postOrderData['order_uuid'] = $orderData['entity']['uuid'];
+                OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
 
-            return [
-                'state' => true,
-                'code'  => $cdekNumber,
-                'door'  => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
-            ];
+                return [
+                    'state' => true,
+                    'code'  => $cdekNumber,
+                    'door'  => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
+                ];
+            } catch (Throwable $e) {
+                if ($attempt < 1 || $attempt > 5) {
+                    throw $e;
+                }
+
+                wp_schedule_single_event(time() + 60, Config::ORDER_AUTOMATION_HOOK_NAME, [$orderId, $attempt + 1]);
+            }
         }
 
         private function buildRequestData(WC_Order $order): array
@@ -275,12 +284,12 @@ namespace Cdek\Actions {
             return $cost;
         }
 
-        private function getCdekOrderNumber(string $orderUuid, int $iteration = 1): string
+        private function getCdekOrderNumber(string $orderUuid, int $iteration = 1): ?string
         {
             sleep(1);
 
             if ($iteration === 5) {
-                return $orderUuid;
+                return null;
             }
 
             $orderInfoJson = $this->api->getOrder($orderUuid);

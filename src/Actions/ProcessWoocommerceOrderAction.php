@@ -63,7 +63,7 @@ namespace Cdek\Actions {
             OrderMetaData::addMetaByOrderId($order->get_id(), $data);
 
             if ($shippingMethod->get_meta('automate_orders') === 'yes') {
-                wp_schedule_single_event(time() + 1, Config::ORDER_AUTOMATION_HOOK_NAME, [$order->get_id(), 0]);
+                wp_schedule_single_event(time() + 1, Config::ORDER_AUTOMATION_HOOK_NAME, [$order->get_id(), 1]);
             }
         }
     }

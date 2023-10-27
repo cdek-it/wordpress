@@ -9,6 +9,7 @@ namespace {
 namespace Cdek {
 
     use Automattic\WooCommerce\Utilities\FeaturesUtil;
+    use Cdek\Actions\CreateOrderAction;
     use Cdek\Actions\ProcessWoocommerceOrderAction;
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
@@ -128,6 +129,8 @@ namespace Cdek {
             add_action('woocommerce_after_shipping_rate', new CheckoutMap, 10, 2);
             add_filter('woocommerce_new_order', new ProcessWoocommerceOrderAction, 10, 2);
             add_action('woocommerce_checkout_create_order', new SaveCustomCheckoutFieldsAction, 10, 2);
+
+            add_action(Config::ORDER_AUTOMATION_HOOK_NAME, new CreateOrderAction, 10, 2);
 
             (new CdekWidget)();
             (new Admin)();
