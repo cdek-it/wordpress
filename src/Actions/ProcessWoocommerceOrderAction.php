@@ -29,7 +29,7 @@ namespace Cdek\Actions {
 
             $shippingMethod = CheckoutHelper::getOrderShippingMethod($order);
 
-            $pvzInfo = CheckoutHelper::getValueFromCurrentSession('pvz_info');
+            $pvzInfo = CheckoutHelper::getValueFromCurrentSession('pvz_code_address');
             $pvzCode = CheckoutHelper::getValueFromCurrentSession('pvz_code');
             $tariffId = $shippingMethod->get_meta('tariff_code');
             $cityCode = CheckoutHelper::getValueFromCurrentSession('city_code');
@@ -37,14 +37,10 @@ namespace Cdek\Actions {
             $currency = function_exists('wcml_get_woocommerce_currency_option') ? get_woocommerce_currency() : 'RUB';
 
             if (empty($cityCode)) {
-                $pvzInfo = $order->get_billing_address_1();
                 $cityCode = $api->getCityCodeByCityName($order->get_billing_city(), $order->get_billing_city());
             }
-            if (empty($pvzInfo) && Tariff::isTariffToOffice($tariffId)) {
-                $pvzInfo = $order->get_billing_address_1();
-            }
+
             $cityData = $api->getCityByCode($cityCode);
-            $order->set_shipping_address_1($pvzInfo);
             $order->set_shipping_city($cityData['city']);
             $order->set_shipping_state($cityData['region']);
             $order->save();
