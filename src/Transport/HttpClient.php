@@ -47,7 +47,7 @@ namespace Cdek\Transport {
                 return is_array($resp) ? $resp['body'] : $resp;
             }
 
-            return json_encode(['status' => 'error']);
+            return json_encode(['status' => 'error', 'ip' => @file_get_contents('https://ipecho.net/plain')]);
         }
     }
 }
