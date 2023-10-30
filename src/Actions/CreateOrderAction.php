@@ -25,8 +25,7 @@ namespace Cdek\Actions {
 
         public function __construct()
         {
-            $this->api = new CdekApi;
-            $this->weightCalc = new WeightCalc();
+            $this->weightCalc = new WeightCalc;
         }
 
         /**
@@ -34,6 +33,7 @@ namespace Cdek\Actions {
          */
         public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
         {
+            $this->api = new CdekApi;
             $order = wc_get_order($orderId);
             $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
             $postOrderData['tariff_code'] =
@@ -184,7 +184,7 @@ namespace Cdek\Actions {
                                                   $package['length'],
                                                   $package['width'],
                                                   $package['height'],
-                                                  $package['items'] ?: $items);
+                                                  $package['items'] ?? $items);
             }
 
             return $output;

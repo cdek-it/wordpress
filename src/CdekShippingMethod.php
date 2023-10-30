@@ -118,7 +118,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'type'              => 'text',
                 'custom_attributes' => [
                     'required' => true,
-                    'type' => 'email',
+                    'type'     => 'email',
                 ],
             ],
             'international_title'            => [
@@ -240,7 +240,7 @@ class CdekShippingMethod extends WC_Shipping_Method
             'address'                        => [
                 'type' => 'hidden',
             ],
-            'token'                         => [
+            'token'                          => [
                 'type' => 'hidden',
             ],
             'package_setting_block_name'     => [
@@ -333,15 +333,16 @@ class CdekShippingMethod extends WC_Shipping_Method
             'percentprice_toggle'            => [
                 'title' => '',
                 'type'  => 'checkbox',
-                'label' => 'Добавить процентное увеличение к стоимости доставки',
+                'label' => 'Добавить процентное изменение к стоимости доставки',
             ],
             'percentprice'                   => [
                 'title'             => '',
                 'type'              => 'number',
-                'description'       => "Введите процентное значение для добавления к стоимости доставки",
+                'description'       => 'Значение больше 100 -> увеличение стоимости доставки, значение меньше 100 -> уменьшение стоимости',
+                'desc_tip'          => true,
                 'default'           => 100,
                 'custom_attributes' => [
-                    'min'  => 100,
+                    'min'  => 1,
                     'step' => 1,
                 ],
             ],
