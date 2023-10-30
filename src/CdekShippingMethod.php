@@ -327,13 +327,13 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'description' => "Расчитывается по сумме товаров в заказе",
             ],
             'percentprice_title'             => [
-                'title' => 'Увеличение стоимости доставки в процентах',
+                'title' => 'Отображение суммы доставки',
                 'type'  => 'title',
             ],
             'percentprice_toggle'            => [
                 'title' => '',
                 'type'  => 'checkbox',
-                'label' => 'Добавить процентное изменение к стоимости доставки',
+                'label' => 'Изменить отображение суммы доставки (в процентах от тарифа)',
             ],
             'percentprice'                   => [
                 'title'             => '',
