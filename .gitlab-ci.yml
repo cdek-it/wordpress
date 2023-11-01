@@ -118,7 +118,7 @@ deploy_staging:
   stage: deploy
   script:
     - rsync -avz -e "ssh -o StrictHostKeyChecking=no" --delete ./cdek.zip ${DEPLOY_USERNAME}@${DEPLOY_NODE}:${DEPLOY_DEST_DIR}/plugins
-    - ssh ${DEPLOY_USERNAME}@${DEPLOY_NODE} "cd ${DEPLOY_DEST_DIR}/core && docker compose restart app && rm ${DEPLOY_DEST_DIR}/plugins/cdek.zip"
+    - ssh ${DEPLOY_USERNAME}@${DEPLOY_NODE} "cd ${DEPLOY_DEST_DIR}/core && docker compose restart app"
   tags:
     - docker
   rules:
