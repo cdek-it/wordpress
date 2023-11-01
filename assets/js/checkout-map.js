@@ -103,7 +103,7 @@ jQuery(($) => {
               });
           } else {
               widget.updateOfficesRaw(points);
-              widget.updateLocation(cityInput.val());
+              widget.updateLocation($('#ship-to-different-address-checkbox').is(':checked') ? shippingCityInput.val() : billingCityInput.val());
           }
 
           widget.open();
