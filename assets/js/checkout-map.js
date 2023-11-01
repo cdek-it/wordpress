@@ -1,10 +1,11 @@
 'use strict';
 
 jQuery(($) => {
-    const cityInput = $('#billing_city');
+    const billingCityInput = $('#billing_city');
+    const shippingCityInput = $('#shipping_city');
     let widget = null;
 
-    if (cityInput.val() !== '') {
+    if (billingCityInput.val() !== '' || shippingCityInput.val() !== '') {
         console.debug('[CDEK-MAP] City has value, initiating checkout update');
         $(document.body).trigger('update_checkout');
     }
@@ -93,7 +94,7 @@ jQuery(($) => {
                   apiKey: window.cdek.apiKey,
                   popup: true,
                   debug: true,
-                  defaultLocation: cityInput.val(),
+                  defaultLocation: $('#ship-to-different-address-checkbox').is(':checked') ? shippingCityInput.val() : billingCityInput.val(),
                   officesRaw: points,
                   hideDeliveryOptions: {
                       door: true,
