@@ -17,12 +17,14 @@ namespace Cdek\Actions {
 
         private static bool $addedError = false;
 
-        public function __invoke(bool $and_taxes, WC_Order $order): void
+        public function __invoke(bool $and_taxes, $order): void
         {
             if (!isset($_POST['action']) ||
                 $_POST['action'] !== 'woocommerce_calc_line_taxes' ||
+                !($order instanceof WC_Order) ||
                 !is_ajax() ||
-                !is_admin()) {
+                !is_admin()
+            ) {
                 return;
             }
 
