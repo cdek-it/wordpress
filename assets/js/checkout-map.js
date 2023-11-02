@@ -90,6 +90,7 @@ jQuery(($) => {
                                                    apiKey: window.cdek.apiKey,
                                                    popup: true,
                                                    debug: true,
+                                                   requirePostcode: true,
                                                    defaultLocation: $('#ship-to-different-address-checkbox').is(':checked') ? shippingCityInput.val() : billingCityInput.val(),
                                                    officesRaw: points,
                                                    hideDeliveryOptions: {
