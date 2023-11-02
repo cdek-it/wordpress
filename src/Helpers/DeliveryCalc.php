@@ -36,8 +36,9 @@ namespace Cdek\Helpers {
             $doorData = json_decode($this->method->get_option('address'), true);
 
             $deliveryParam['from'] = [
-                'postal_code'  => $officeData['postal'] ?? $doorData['postal'],
+                'postal_code'  => $officeData['postal'] ?? $doorData['postal'] ?? '',
                 'city'         => $officeData['city'] ?? $doorData['city'],
+                'address'         => $officeData['city'] ?? $doorData['city'],
                 'country_code' => $officeData['country'] ?? $doorData['country'] ?? 'RU',
             ];
 

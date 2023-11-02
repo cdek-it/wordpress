@@ -134,8 +134,9 @@ namespace Cdek\Actions {
                 $address = json_decode($deliveryMethod->get_option('address'), true);
 
                 $param['from_location'] = [
-                    'postal_code'  => $address['postal'],
+                    'postal_code'  => $address['postal'] ?? '',
                     'city'         => $address['city'],
+                    'address'         => $address['city'],
                     'country_code' => $address['country'] ?? 'RU',
                 ];
             }
