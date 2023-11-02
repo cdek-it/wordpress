@@ -10,6 +10,7 @@ namespace Cdek\Actions {
     use Cdek\Exceptions\TariffNotAvailableException;
     use Cdek\Helpers\DeliveryCalc;
     use Cdek\Model\OrderMetaData;
+    use WC_Abstract_Order;
     use WC_Order;
 
     class RecalculateShippingAction
@@ -17,7 +18,7 @@ namespace Cdek\Actions {
 
         private static bool $addedError = false;
 
-        public function __invoke(bool $and_taxes, $order): void
+        public function __invoke(bool $and_taxes, WC_Abstract_Order $order): void
         {
             if (!isset($_POST['action']) ||
                 $_POST['action'] !== 'woocommerce_calc_line_taxes' ||
