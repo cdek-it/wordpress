@@ -88,6 +88,7 @@ jQuery(($) => {
                                   apiKey: window.cdek.apiKey,
                                   sender: true,
                                   debug: true,
+                                  requirePostcode: true,
                                   defaultLocation: openedCity || 'Новосибирск',
                                   servicePath: window.cdek_admin_settings.api.offices,
                                   hideFilters: {
