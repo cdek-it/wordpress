@@ -68,7 +68,7 @@ namespace Cdek\Actions {
                 wp_schedule_single_event(time() + 60, Config::ORDER_AUTOMATION_HOOK_NAME, [$orderId, $attempt + 1]);
 
                 return [
-                    'state' => false,
+                    'state'   => false,
                     'message' => $e->getMessage(),
                 ];
             }
@@ -134,9 +134,9 @@ namespace Cdek\Actions {
                 $address = json_decode($deliveryMethod->get_option('address'), true);
 
                 $param['from_location'] = [
-                    'postal_code'  => $address['postal'] ?? '',
+                    'postal_code'  => $address['postal'] ?? null,
                     'city'         => $address['city'],
-                    'address'         => $address['city'],
+                    'address'      => $address['city'],
                     'country_code' => $address['country'] ?? 'RU',
                 ];
             }
