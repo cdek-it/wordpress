@@ -59,15 +59,17 @@ class CdekApi
 
     public function getToken(): string
     {
-        $tokenProcess = new Token();
-        return $tokenProcess->getToken();
+        return (new Token)->getToken();
     }
 
     public function fetchToken(): string
     {
         $body = json_decode(HttpClient::sendRequest($this->getAuthUrl(), 'POST'));
         if ($body === null || property_exists($body, 'error_description')) {
-            throw new CdekApiException('[CDEKDelivery] Failed to get the token. ' . $body->error_description, 'cdek_error.token.auth', [], true);
+            throw new CdekApiException('[CDEKDelivery] Failed to get the token. ' . $body->error_description,
+                                       'cdek_error.token.auth',
+                                       [],
+                                       true);
         }
         return $body->access_token;
     }
@@ -75,7 +77,8 @@ class CdekApi
     private function getAuthUrl(): string
     {
         return sprintf('%s%s?%s',
-                       $this->apiUrl, self::TOKEN_PATH,
+                       $this->apiUrl,
+                       self::TOKEN_PATH,
                        http_build_query([
                                             'grant_type'    => 'client_credentials',
                                             'client_id'     => $this->clientId,
@@ -109,8 +112,9 @@ class CdekApi
 
         $request = $result['requests'][0];
 
-        if($request['state'] === 'INVALID')
+        if ($request['state'] === 'INVALID') {
             throw new RestApiInvalidRequestException(self::ORDERS_PATH, $request['errors']);
+        }
 
         return $result;
     }
@@ -152,42 +156,30 @@ class CdekApi
         return HttpClient::sendCdekRequest($url, 'DELETE', $this->getToken());
     }
 
-    public function calculateTariffList($deliveryParam) {
-        $url = $this->apiUrl.self::CALC_LIST_PATH;
+    public function calculateTariffList($deliveryParam)
+    {
+        $url = $this->apiUrl . self::CALC_LIST_PATH;
 
         $request = [
             'type'          => $deliveryParam['type'],
             'from_location' => $deliveryParam['from'],
-            'to_location'   => [
-                'address' => $deliveryParam['address'],
-            ],
-            'packages'      => [
-                'weight' => $deliveryParam['package_data']['weight'],
-                'length' => $deliveryParam['package_data']['length'],
-                'width'  => $deliveryParam['package_data']['width'],
-                'height' => $deliveryParam['package_data']['height'],
-            ],
+            'to_location'   => $deliveryParam['to'],
+            'packages'      => $deliveryParam['packages'],
         ];
 
         return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), $request);
     }
 
-    public function calculateTariff($deliveryParam) {
-        $url = $this->apiUrl.self::CALC_PATH;
+    public function calculateTariff($deliveryParam)
+    {
+        $url = $this->apiUrl . self::CALC_PATH;
 
         $request = [
             'type'          => $deliveryParam['type'],
             'from_location' => $deliveryParam['from'],
             'tariff_code'   => $deliveryParam['tariff_code'],
-            'to_location'   => [
-                'address' => $deliveryParam['address'],
-            ],
-            'packages'      => [
-                'weight' => $deliveryParam['package_data']['weight'],
-                'length' => $deliveryParam['package_data']['length'],
-                'width'  => $deliveryParam['package_data']['width'],
-                'height' => $deliveryParam['package_data']['height'],
-            ],
+            'to_location'   => $deliveryParam['to'],
+            'packages'      => $deliveryParam['packages'],
             'services'      => array_key_exists('selected_services',
                                                 $deliveryParam) ? $deliveryParam['selected_services'] : [],
         ];
