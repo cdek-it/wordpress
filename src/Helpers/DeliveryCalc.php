@@ -94,6 +94,12 @@ namespace Cdek\Helpers {
                     $cost = (int)$tariff['delivery_sum'];
 
                     $measurement = get_option('woocommerce_weight_unit');
+
+                    if ((!isset($officeData['city']) && Tariff::isTariffFromOffice($tariff['tariff_code'])) ||
+                        (!isset($doorData['city']) && Tariff::isTariffFromDoor($tariff['tariff_code']))) {
+                        continue;
+                    }
+
                     $this->rates[$tariff['tariff_code']] = [
                         'id'        => sprintf('%s_%s', Config::DELIVERY_NAME, $tariff['tariff_code']),
                         'label'     => sprintf("CDEK: %s, (%s-%s дней)",
