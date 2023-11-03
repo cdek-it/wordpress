@@ -21,7 +21,7 @@ namespace Cdek\UI {
     {
         public static function registerMetaBoxes(string $post_type, $post): void
         {
-            if (!$post || !OrderUtil::is_order($post->ID, wc_get_order_types())) {
+            if (!$post || !OrderUtil::is_order($post, wc_get_order_types())) {
                 return;
             }
 
@@ -121,7 +121,8 @@ namespace Cdek\UI {
         public static function createOrderMetaBox($post): void
         {
             $order = wc_get_order($post);
-            $orderData = OrderMetaData::getMetaByOrderId($post->ID);
+            $orderIdWP = $order->get_id();
+            $orderData = OrderMetaData::getMetaByOrderId($orderIdWP);
 
             $items = [];
             foreach ($order->get_items() as $item) {
@@ -137,10 +138,9 @@ namespace Cdek\UI {
             $hasPackages =
                 Helper::getActualShippingMethod($shipping->get_data()['instance_id'])
                       ->get_option('has_packages_mode') === 'yes';
-            $orderNumber = $orderData['order_number'];
-            $orderUuid = $orderData['order_uuid'];
-            $orderIdWP = $post->ID;
-            $courierNumber = CourierMetaData::getMetaByOrderId($post->ID)['courier_number'] ?? '';
+            $orderNumber = $orderData['order_number'] ?? null;
+            $orderUuid = $orderData['order_uuid'] ?? null;
+            $courierNumber = CourierMetaData::getMetaByOrderId($orderIdWP)['courier_number'] ?? '';
             $fromDoor = Tariff::isTariffFromDoor($shipping->get_meta('tariff_code') ?: $orderData['tariff_id']);
             $length = $shipping->get_meta('length');
             $height = $shipping->get_meta('height');

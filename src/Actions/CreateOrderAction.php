@@ -66,6 +66,11 @@ namespace Cdek\Actions {
                 }
 
                 wp_schedule_single_event(time() + 60, Config::ORDER_AUTOMATION_HOOK_NAME, [$orderId, $attempt + 1]);
+
+                return [
+                    'state'   => false,
+                    'message' => $e->getMessage(),
+                ];
             }
         }
 
@@ -116,8 +121,9 @@ namespace Cdek\Actions {
                 $param['delivery_point'] = $postOrderData['pvz_code'];
             } else {
                 $param['to_location'] = [
-                    'code'    => $postOrderData['city_code'],
-                    'address' => $order->get_shipping_address_1(),
+                    'postal_code'  => $order->get_shipping_postcode(),
+                    'country_code' => $order->get_shipping_country() ?? 'RU',
+                    'address'      => $order->get_shipping_address_1(),
                 ];
             }
 
@@ -128,8 +134,9 @@ namespace Cdek\Actions {
                 $address = json_decode($deliveryMethod->get_option('address'), true);
 
                 $param['from_location'] = [
-                    'address'      => $address['address'],
+                    'postal_code'  => $address['postal'] ?? null,
                     'city'         => $address['city'],
+                    'address'      => $address['city'],
                     'country_code' => $address['country'] ?? 'RU',
                 ];
             }

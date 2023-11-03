@@ -4,32 +4,25 @@ jQuery(($) => {
 
     console.log();
     $.ajax({
-               method: 'GET',
-               url: window.cdek_admin_settings.api.check_auth,
-               data: {
-               },
-               success: function (response) {
-                   console.log(response)
-                   $(".token-wrong").remove();
-               },
-               error: function (error) {
-                   console.log(error)
-                   let header = $("p:contains('Custom Shipping Method for Cdek')");
-                   let errorMessage = $("<div class='cdek-error token-wrong'>[CDEKDelivery] Ошибка при получении токена. Убедитесь, что ключи интеграции верны</div>");
-                   header.after(errorMessage);
-                   console.log({error: error.responseText});
-               }
+               method: 'GET', url: window.cdek_admin_settings.api.check_auth, data: {}, success: function (response) {
+            console.log(response);
+            $('.token-wrong').remove();
+        }, error: function (error) {
+            console.log(error);
+            let header = $('p:contains(\'Custom Shipping Method for Cdek\')');
+            let errorMessage = $('<div class=\'cdek-error token-wrong\'>[CDEKDelivery] Ошибка при получении токена. Убедитесь, что ключи интеграции верны</div>');
+            header.after(errorMessage);
+            console.log({error: error.responseText});
+        },
            });
 
     const showMap = () => {
         $('input#woocommerce_official_cdek_map')
-          .after('<div id="cdek-map-results"></div><div id="cdek-map"></div>');
+            .after('<div id="cdek-map-results"></div><div id="cdek-map"></div>');
 
         $('#cdek-map-results')
-          .append(
-            `<div id="selected_office"><img src="${window.cdek_admin_settings.icons.office}" alt="Office icon"><div><h5>Выбранный ПВЗ</h5><div class="result"></div></div></div>`)
-          .append(
-            `<div id="selected_address"><div><h5>Выбранный адрес</h5><div class="result">Не выбран</div></div><img src="${window.cdek_admin_settings.icons.door}" alt="Door icon"></div>`);
+            .append(`<div id="selected_office"><img src="${window.cdek_admin_settings.icons.office}" alt="Office icon"><div><h5>Выбранный ПВЗ</h5><div class="result"></div></div></div>`)
+            .append(`<div id="selected_address"><div><h5>Выбранный адрес</h5><div class="result">Не выбран</div></div><img src="${window.cdek_admin_settings.icons.door}" alt="Door icon"></div>`);
 
         const officeInput = $('input[name=woocommerce_official_cdek_pvz_code]');
         const doorInput = $('input[name=woocommerce_official_cdek_address]');
@@ -46,10 +39,9 @@ jQuery(($) => {
                 try {
                     const parsedOffice = JSON.parse(officeCode);
                     selectedOfficeDiv
-                      .addClass('selected')
-                      .find('.result')
-                      .html(
-                        `${parsedOffice.country}, ${parsedOffice.city}, ${parsedOffice.address}`);
+                        .addClass('selected')
+                        .find('.result')
+                        .html(`${parsedOffice.country}; ${parsedOffice.postal}; ${parsedOffice.city}; ${parsedOffice.address}`);
 
                     openedCity = parsedOffice.city;
                     openedOffice = parsedOffice.address;
@@ -58,9 +50,9 @@ jQuery(($) => {
             }
 
             selectedOfficeDiv
-              .removeClass('selected')
-              .find('.result')
-              .html('Не выбран');
+                .removeClass('selected')
+                .find('.result')
+                .html('Не выбран');
 
         };
 
@@ -73,10 +65,9 @@ jQuery(($) => {
                     const parsedAddress = JSON.parse(address);
 
                     selectedAddressDiv
-                      .addClass('selected')
-                      .find('.result')
-                      .html(
-                        `${parsedAddress.country}, ${parsedAddress.city}, ${parsedAddress.address}`);
+                        .addClass('selected')
+                        .find('.result')
+                        .html(`${parsedAddress.country}; ${parsedAddress.postal}; ${parsedAddress.city}; ${parsedAddress.address}`);
 
                     openedCity = parsedAddress.city;
                     openedDoor = parsedAddress.address;
@@ -85,47 +76,47 @@ jQuery(($) => {
             }
 
             selectedAddressDiv
-              .removeClass('selected')
-              .find('.result')
-              .html('Не выбран');
+                .removeClass('selected')
+                .find('.result')
+                .html('Не выбран');
         };
 
         updateOfficeCode();
         updateDoor();
 
         new window.CDEKWidget({
-            apiKey: window.cdek.apiKey,
-            sender: true,
-            debug: true,
-            defaultLocation: openedCity || 'Новосибирск',
-            servicePath: window.cdek_admin_settings.api.offices,
-            hideFilters: {
-                type: true,
-                have_cash: true,
-                have_cashless: true,
-                is_dressing_room: true,
-            },
-            selected: {
-                office: openedOffice || null, door: openedDoor || null,
-            },
-            onChoose(type, tariff, target) {
-                if (type === 'office') {
-                    officeInput.val(JSON.stringify({
-                        country: target.country_code,
-                        city: target.city,
-                        address: target.code,
-                    }));
-                    updateOfficeCode();
-                } else if (type === 'door') {
-                    doorInput.val(JSON.stringify({
-                        country: target.country,
-                        city: target.city,
-                        address: target.formatted,
-                    }));
-                    updateDoor();
-                }
-            },
-        });
+                                  apiKey: window.cdek.apiKey,
+                                  sender: true,
+                                  debug: true,
+                                  requirePostcode: true,
+                                  defaultLocation: openedCity || 'Новосибирск',
+                                  servicePath: window.cdek_admin_settings.api.offices,
+                                  hideFilters: {
+                                      type: true, have_cash: true, have_cashless: true, is_dressing_room: true,
+                                  },
+                                  selected: {
+                                      office: openedOffice || null, door: openedDoor || null,
+                                  },
+                                  onChoose(type, tariff, target) {
+                                      if (type === 'office') {
+                                          officeInput.val(JSON.stringify({
+                                                                             country: target.country_code,
+                                                                             postal: target.postal_code,
+                                                                             city: target.city,
+                                                                             address: target.code,
+                                                                         }));
+                                          updateOfficeCode();
+                                      } else if (type === 'door') {
+                                          doorInput.val(JSON.stringify({
+                                                                           country: target.country_code,
+                                                                           postal: target.postal_code,
+                                                                           city: target.city,
+                                                                           address: target.formatted,
+                                                                       }));
+                                          updateDoor();
+                                      }
+                                  },
+                              });
     };
 
     if ($('input#woocommerce_official_cdek_map').length) {

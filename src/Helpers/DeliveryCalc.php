@@ -36,19 +36,24 @@ namespace Cdek\Helpers {
             $doorData = json_decode($this->method->get_option('address'), true);
 
             $deliveryParam['from'] = [
-                'address'      => $officeData['city'] ?? $doorData['city'],
+                'postal_code'  => $officeData['postal'] ?? $doorData['postal'] ?? '',
                 'city'         => $officeData['city'] ?? $doorData['city'],
+                'address'         => $officeData['city'] ?? $doorData['city'],
                 'country_code' => $officeData['country'] ?? $doorData['country'] ?? 'RU',
             ];
 
-            if (!isset($deliveryParam['from']['address'])) {
+            if (!isset($deliveryParam['from']['postal_code'])) {
                 return false;
             }
 
-            $deliveryParam['address'] = $package['destination']['city'];
-            $deliveryParam['package_data'] = $this->getPackagesData($package['contents']);
-            $weightOrigUnit = $deliveryParam['package_data']['weight_orig_unit'];
-            unset($deliveryParam['package_data']['weight_orig_unit']);
+            $deliveryParam['to'] = [
+                'postal_code'  => $package['destination']['postcode'],
+                'city'         => $package['destination']['city'],
+                'country_code' => $package['destination']['country'],
+            ];
+            $deliveryParam['packages'] = $this->getPackagesData($package['contents']);
+            $weightOrigUnit = $deliveryParam['packages']['weight_orig_unit'];
+            unset($deliveryParam['packages']['weight_orig_unit']);
 
             if ($this->method->get_option('insurance') === 'yes') {
                 $deliveryParam['selected_services'][0] = [
@@ -97,13 +102,15 @@ namespace Cdek\Helpers {
                                                $maxDay),
                         'cost'      => $cost,
                         'meta_data' => [
-                            Config::ADDRESS_HASH_META_KEY => sha1($deliveryParam['address']),
+                            Config::ADDRESS_HASH_META_KEY => sha1($deliveryParam['to']['postal_code'] .
+                                                                  $deliveryParam['to']['city'] .
+                                                                  $deliveryParam['to']['country_code']),
                             'tariff_code'                 => $tariff['tariff_code'],
-                            "weight($measurement)"        => $weightOrigUnit,
+                            "weight ($measurement)"       => $weightOrigUnit,
                             'tariff_type'                 => $deliveryType,
-                            'length'                      => $deliveryParam['package_data']['length'],
-                            'width'                       => $deliveryParam['package_data']['width'],
-                            'height'                      => $deliveryParam['package_data']['height'],
+                            'length'                      => $deliveryParam['packages']['length'],
+                            'width'                       => $deliveryParam['packages']['width'],
+                            'height'                      => $deliveryParam['packages']['height'],
                         ],
                     ];
                 }

@@ -57,7 +57,6 @@ namespace Cdek\Actions {
 
             $data = [
                 'pvz_code'  => $pvzCode,
-                'city_code' => $cityCode,
                 'currency'  => $currency,
             ];
 

@@ -63,7 +63,7 @@ namespace Cdek\Helpers {
                          'billing_first_name',
                          'billing_last_name',
                          'billing_city',
-                         'billing_state',
+                         'billing_postcode',
                          'billing_phone',
                          'billing_address_1',
                      ] as $requiredField) {
