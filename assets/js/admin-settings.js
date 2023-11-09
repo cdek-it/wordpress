@@ -2,10 +2,7 @@
 
 jQuery(($) => {
     $.getJSON(window.cdek_admin_settings.api.check_auth)
-     .done((response) => {
-         console.debug(response);
-         $('.token-wrong').remove();
-     })
+     .done(() => $('.token-wrong').remove())
      .fail((jqxhr) => {
          console.error(jqxhr);
          $('p:contains(\'Custom Shipping Method for Cdek\')').after('<div class="cdek-error token-wrong">[CDEKDelivery] Ошибка при получении токена. Убедитесь, что ключи интеграции верны</div>');

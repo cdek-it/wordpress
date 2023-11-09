@@ -61,6 +61,11 @@ namespace Cdek {
             return plugin_dir_url(self::$pluginMainFile);
         }
 
+        public static function getPluginPath(): string
+        {
+            return plugin_dir_path(self::$pluginMainFile);
+        }
+
         /**
          * @throws RuntimeException
          */
