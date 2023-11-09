@@ -14,8 +14,7 @@ namespace Cdek\UI {
     {
         public static function registerScripts(): void
         {
-            if (isset($_ENV['CDEK_LOCAL_WIDGET']) &&
-                file_exists(Loader::getPluginPath() . 'assets/js/cdek-widget.umd.js')) {
+            if (file_exists(Loader::getPluginPath() . 'assets/js/cdek-widget.umd.js')) {
                 wp_register_script('cdek-widget',
                                    Loader::getPluginUrl() . 'assets/js/cdek-widget.umd.js');
             } else {
