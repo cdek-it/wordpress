@@ -1,20 +1,15 @@
 'use strict';
 
 jQuery(($) => {
-
-    console.log();
-    $.ajax({
-               method: 'GET', url: window.cdek_admin_settings.api.check_auth, data: {}, success: function (response) {
-            console.log(response);
-            $('.token-wrong').remove();
-        }, error: function (error) {
-            console.log(error);
-            let header = $('p:contains(\'Custom Shipping Method for Cdek\')');
-            let errorMessage = $('<div class=\'cdek-error token-wrong\'>[CDEKDelivery] Ошибка при получении токена. Убедитесь, что ключи интеграции верны</div>');
-            header.after(errorMessage);
-            console.log({error: error.responseText});
-        },
-           });
+    $.getJSON(window.cdek_admin_settings.api.check_auth)
+     .done((response) => {
+         console.debug(response);
+         $('.token-wrong').remove();
+     })
+     .fail((jqxhr) => {
+         console.error(jqxhr);
+         $('p:contains(\'Custom Shipping Method for Cdek\')').after('<div class="cdek-error token-wrong">[CDEKDelivery] Ошибка при получении токена. Убедитесь, что ключи интеграции верны</div>');
+     });
 
     const showMap = () => {
         $('input#woocommerce_official_cdek_map')

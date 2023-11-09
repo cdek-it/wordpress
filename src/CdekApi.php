@@ -53,8 +53,7 @@ class CdekApi
 
     final public function checkAuth(): bool
     {
-        $token = $this->getToken();
-        return (bool)$token;
+        return (bool)$this->getToken();
     }
 
     public function getToken(): string
@@ -62,6 +61,9 @@ class CdekApi
         return (new Token)->getToken();
     }
 
+    /**
+     * @throws \Cdek\Exceptions\CdekApiException
+     */
     public function fetchToken(): string
     {
         $body = json_decode(HttpClient::sendRequest($this->getAuthUrl(), 'POST'), true);
