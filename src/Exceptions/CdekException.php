@@ -33,7 +33,9 @@ namespace Cdek\Exceptions {
 
         private function getWpError(): WP_Error
         {
-            return new WP_Error($this->code, $this->message, $this->data);
+            $error = new WP_Error('cdek_error', 'Error happened at CDEKDelivery');
+            $error->add($this->code, $this->message, $this->data);
+            return $error;
         }
 
         final public function getData(): array
