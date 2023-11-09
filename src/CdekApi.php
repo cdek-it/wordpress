@@ -64,14 +64,14 @@ class CdekApi
 
     public function fetchToken(): string
     {
-        $body = json_decode(HttpClient::sendRequest($this->getAuthUrl(), 'POST'));
-        if ($body === null || property_exists($body, 'error_description')) {
-            throw new CdekApiException('[CDEKDelivery] Failed to get the token. ' . $body->error_description,
+        $body = json_decode(HttpClient::sendRequest($this->getAuthUrl(), 'POST'), true);
+        if ($body === null || isset($body['error_description']) || isset($body['error'])) {
+            throw new CdekApiException('[CDEKDelivery] Failed to get the token',
                                        'cdek_error.token.auth',
-                                       [],
+                                       $body,
                                        true);
         }
-        return $body->access_token;
+        return $body['access_token'];
     }
 
     private function getAuthUrl(): string

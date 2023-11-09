@@ -47,7 +47,13 @@ namespace Cdek\Transport {
                 return is_array($resp) ? $resp['body'] : $resp;
             }
 
-            return json_encode(['status' => 'error', 'ip' => @file_get_contents('https://ipecho.net/plain')]);
+            $ip = @file_get_contents('https://ipecho.net/plain');
+
+            if(!headers_sent()) {
+                header( "X-Requester-IP: $ip" );
+            }
+
+            return json_encode(['error' => true, 'ip' => $ip]);
         }
     }
 }
