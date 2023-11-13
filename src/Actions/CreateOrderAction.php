@@ -121,6 +121,7 @@ namespace Cdek\Actions {
                 $param['delivery_point'] = $postOrderData['pvz_code'];
             } else {
                 $param['to_location'] = [
+                    'city'         => $order->get_shipping_city(),
                     'postal_code'  => $order->get_shipping_postcode(),
                     'country_code' => $order->get_shipping_country() ?? 'RU',
                     'address'      => $order->get_shipping_address_1(),
