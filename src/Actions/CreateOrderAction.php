@@ -213,8 +213,7 @@ namespace Cdek\Actions {
 
             foreach ($items as $item) {
                 $product = $item->get_product();
-                $weight = $product->get_weight();
-                $weight = $this->weightCalc->getWeight($weight);
+                $weight = $this->weightCalc->getWeight($product->get_weight());
                 $quantity = (int)$item->get_quantity();
                 $totalWeight += $quantity * $weight;
                 $cost = $product->get_price();
