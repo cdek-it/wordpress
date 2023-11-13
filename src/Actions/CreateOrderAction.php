@@ -8,12 +8,14 @@ namespace {
 namespace Cdek\Actions {
 
     use Cdek\CdekApi;
+    use Cdek\Config;
     use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\StringHelper;
     use Cdek\Helpers\WeightCalc;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
+    use Throwable;
     use WC_Order;
 
     class CreateOrderAction
@@ -23,16 +25,15 @@ namespace Cdek\Actions {
 
         public function __construct()
         {
-            $this->api = new CdekApi;
-            $this->weightCalc = new WeightCalc();
+            $this->weightCalc = new WeightCalc;
         }
 
         /**
-         * @throws \JsonException
-         * @throws \Cdek\Exceptions\RestApiInvalidRequestException
+         * @throws \Cdek\Exceptions\RestApiInvalidRequestException|\Throwable|\JsonException
          */
-        public function __invoke(int $orderId, int $attempt, array $packages = null): array
+        public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
         {
+            $this->api = new CdekApi;
             $order = wc_get_order($orderId);
             $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
             $postOrderData['tariff_code'] =
@@ -44,20 +45,33 @@ namespace Cdek\Actions {
             $param = $this->buildRequestData($order);
             $param['packages'] = $this->buildPackagesData($order, $packages);
 
-            $orderData = $this->api->createOrder($param);
+            try {
+                $orderData = $this->api->createOrder($param);
 
-            sleep(1);
+                sleep(1);
 
-            $cdekNumber = $this->getCdekOrderNumber($orderData['entity']['uuid']);
-            $postOrderData['order_number'] = $cdekNumber;
-            $postOrderData['order_uuid'] = $orderData['entity']['uuid'];
-            OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
+                $cdekNumber = $this->getCdekOrderNumber($orderData['entity']['uuid']);
+                $postOrderData['order_number'] = $cdekNumber ?? $orderData['entity']['uuid'];
+                $postOrderData['order_uuid'] = $orderData['entity']['uuid'];
+                OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
 
-            return [
-                'state' => true,
-                'code'  => $cdekNumber,
-                'door'  => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
-            ];
+                return [
+                    'state' => true,
+                    'code'  => $cdekNumber,
+                    'door'  => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
+                ];
+            } catch (Throwable $e) {
+                if ($attempt < 1 || $attempt > 5) {
+                    throw $e;
+                }
+
+                wp_schedule_single_event(time() + 60, Config::ORDER_AUTOMATION_HOOK_NAME, [$orderId, $attempt + 1]);
+
+                return [
+                    'state'   => false,
+                    'message' => $e->getMessage(),
+                ];
+            }
         }
 
         private function buildRequestData(WC_Order $order): array
@@ -107,8 +121,9 @@ namespace Cdek\Actions {
                 $param['delivery_point'] = $postOrderData['pvz_code'];
             } else {
                 $param['to_location'] = [
-                    'code'    => $postOrderData['city_code'],
-                    'address' => $order->get_shipping_address_1(),
+                    'postal_code'  => $order->get_shipping_postcode(),
+                    'country_code' => $order->get_shipping_country() ?? 'RU',
+                    'address'      => $order->get_shipping_address_1(),
                 ];
             }
 
@@ -119,8 +134,9 @@ namespace Cdek\Actions {
                 $address = json_decode($deliveryMethod->get_option('address'), true);
 
                 $param['from_location'] = [
-                    'address'      => $address['address'],
+                    'postal_code'  => $address['postal'] ?? null,
                     'city'         => $address['city'],
+                    'address'      => $address['city'],
                     'country_code' => $address['country'] ?? 'RU',
                 ];
             }
@@ -175,7 +191,7 @@ namespace Cdek\Actions {
                                                   $package['length'],
                                                   $package['width'],
                                                   $package['height'],
-                                                  $package['items'] ?: $items);
+                                                  $package['items'] ?? $items);
             }
 
             return $output;
@@ -197,8 +213,7 @@ namespace Cdek\Actions {
 
             foreach ($items as $item) {
                 $product = $item->get_product();
-                $weight = $product->get_weight();
-                $weight = $this->weightCalc->getWeight($weight);
+                $weight = $this->weightCalc->getWeight($product->get_weight());
                 $quantity = (int)$item->get_quantity();
                 $totalWeight += $quantity * $weight;
                 $cost = $product->get_price();
@@ -275,12 +290,12 @@ namespace Cdek\Actions {
             return $cost;
         }
 
-        private function getCdekOrderNumber(string $orderUuid, int $iteration = 1): string
+        private function getCdekOrderNumber(string $orderUuid, int $iteration = 1): ?string
         {
             sleep(1);
 
             if ($iteration === 5) {
-                return $orderUuid;
+                return null;
             }
 
             $orderInfoJson = $this->api->getOrder($orderUuid);

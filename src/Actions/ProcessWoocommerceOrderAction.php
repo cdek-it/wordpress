@@ -9,6 +9,7 @@ namespace Cdek\Actions {
 
     use Cdek\CdekApi;
     use Cdek\Config;
+    use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
@@ -51,15 +52,16 @@ namespace Cdek\Actions {
             }
 
             $data = [
-                'pvz_code'     => $pvzCode,
-                'city_code'    => $cityCode,
-                'currency'     => $currency,
+                'pvz_code'  => $pvzCode,
+                'currency'  => $currency,
             ];
 
             OrderMetaData::addMetaByOrderId($order->get_id(), $data);
 
-            if ($shippingMethod->get_meta('automate_orders') === 'yes') {
-                wp_schedule_single_event(time() + 1, Config::ORDER_AUTOMATION_HOOK_NAME, [$order->get_id(), 0]);
+            if (Helper::getActualShippingMethod($shippingMethod->get_data()['instance_id'])
+                      ->get_option('automate_orders') === 'yes') {
+                wp_schedule_single_event(time() + 1, Config::ORDER_AUTOMATION_HOOK_NAME, [$order->get_id(),
+                                                                                                   1]);
             }
         }
     }

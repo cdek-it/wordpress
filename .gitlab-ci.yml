@@ -35,7 +35,10 @@ build_tag:
       - cdek
 
 build_custom:
-  when: manual
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      when: always
+    - when: manual
   image: php:7.4-cli-alpine
   stage: build
   tags:
@@ -114,17 +117,21 @@ notify:
 deploy_staging:
   stage: deploy
   script:
-    - rsync -avz -e "ssh -o StrictHostKeyChecking=no" --delete ./ ${DEPLOY_USERNAME}@${DEPLOY_NODE}:${DEPLOY_DEST_DIR}
+    - rsync -avz -e "ssh -o StrictHostKeyChecking=no" --delete ./cdek.zip ${DEPLOY_USERNAME}@${DEPLOY_NODE}:${DEPLOY_DEST_DIR}/plugins
+    - ssh ${DEPLOY_USERNAME}@${DEPLOY_NODE} "cd ${DEPLOY_DEST_DIR}/core && docker compose restart app"
   tags:
     - docker
   rules:
-    - if: $CI_COMMIT_TITLE =~ /-draft$/
-      when: never
-    - if: $CI_PIPELINE_SOURCE == "push" && $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: always
     - when: never
+  needs:
+    - job: build_custom
+      artifacts: true
+  environment:
+    name: dev2
+    url: https://wordpress-cms.dev2.cdek.ru
   before_script:
-    - echo "$CI_COMMIT_REF_SLUG"
     - test -r ~/.ssh || mkdir -p ~/.ssh
     - 'command -v ssh-agent >/dev/null || ( apk update && apk add openssh-client )'
     - 'command -v rsync >/dev/null || ( apk update && apk add rsync )'
@@ -132,3 +139,5 @@ deploy_staging:
     - chmod 600 ~/.ssh/id_rsa
     - eval $(ssh-agent -s)
     - ssh-add ~/.ssh/id_rsa
+    - apk add curl zip
+    - zip -r cdek.zip cdek

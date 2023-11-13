@@ -1,5 +1,6 @@
 #cdek-map {
-    width: 800px;
+    max-width: 800px;
+    min-width: 300px;
     height: 600px;
     position: relative;
     outline: none;
@@ -9,7 +10,7 @@
 #cdek-map-results {
     display: flex;
     width: 800px;
-    height: 80px;
+    height: 40px;
     gap: 20px;
     position: absolute;
     text-align: center;
@@ -36,6 +37,7 @@
 
 #cdek-map-results div h5 {
     font-weight: bold;
+    margin: 0;
 }
 
 #cdek-map-results img {

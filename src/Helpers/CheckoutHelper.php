@@ -63,7 +63,7 @@ namespace Cdek\Helpers {
                          'billing_first_name',
                          'billing_last_name',
                          'billing_city',
-                         'billing_state',
+                         'billing_postcode',
                          'billing_phone',
                          'billing_address_1',
                      ] as $requiredField) {
@@ -83,6 +83,7 @@ namespace Cdek\Helpers {
                     'required'          => true,
                     'class'             => ['form-row-wide'],
                     'clear'             => true,
+                    'priority'          => 120,
                     'custom_attributes' => [
                         'maxlength' => 4,
                     ],
@@ -92,6 +93,7 @@ namespace Cdek\Helpers {
                     'required'          => true,
                     'class'             => ['form-row-wide'],
                     'clear'             => true,
+                    'priority'          => 120,
                     'custom_attributes' => [
                         'maxlength' => 6,
                     ],
@@ -100,18 +102,21 @@ namespace Cdek\Helpers {
                     'type'     => 'date',
                     'label'    => __('Дата выдачи паспорта', 'woocommerce'),
                     'required' => true,
+                    'priority' => 120,
                     'class'    => ['form-row-wide'],
                     'clear'    => true,
                 ];
                 $fields['billing']['passport_organization'] = [
                     'label'    => __('Орган выдачи паспорта', 'woocommerce'),
                     'required' => true,
+                    'priority' => 120,
                     'class'    => ['form-row-wide'],
                     'clear'    => true,
                 ];
                 $fields['billing']['tin'] = [
                     'label'             => __('ИНН', 'woocommerce'),
                     'required'          => true,
+                    'priority'          => 120,
                     'class'             => ['form-row-wide'],
                     'clear'             => true,
                     'custom_attributes' => [
@@ -120,6 +125,7 @@ namespace Cdek\Helpers {
                 ];
                 $fields['billing']['passport_date_of_birth'] = [
                     'type'     => 'date',
+                    'priority' => 120,
                     'label'    => __('Дата рождения', 'woocommerce'),
                     'required' => true,
                     'class'    => ['form-row-wide'],
