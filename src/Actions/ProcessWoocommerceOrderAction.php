@@ -13,6 +13,7 @@ namespace Cdek\Actions {
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
+    use Google\Exception;
     use WC_Order;
 
     class ProcessWoocommerceOrderAction
@@ -26,33 +27,21 @@ namespace Cdek\Actions {
                 return;
             }
 
-            $api = new CdekApi;
-
             $shippingMethod = CheckoutHelper::getOrderShippingMethod($order);
-
-            $pvzInfo = CheckoutHelper::getValueFromCurrentSession('pvz_info');
             $pvzCode = CheckoutHelper::getValueFromCurrentSession('pvz_code');
             $tariffId = $shippingMethod->get_meta('tariff_code');
-            $cityCode = CheckoutHelper::getValueFromCurrentSession('city_code');
-
             $currency = function_exists('wcml_get_woocommerce_currency_option') ? get_woocommerce_currency() : 'RUB';
 
-            if (empty($cityCode)) {
-                $pvzInfo = $order->get_billing_address_1();
-                $cityCode = $api->getCityCodeByCityName($order->get_billing_city(), $order->get_billing_city());
-            }
-            if (empty($pvzInfo) && Tariff::isTariffToOffice($tariffId)) {
-                $pvzInfo = $order->get_billing_address_1();
-            }
-            $cityData = $api->getCityByCode($cityCode);
-            $order->set_shipping_address_1($pvzInfo);
-            $order->set_shipping_city($cityData['city']);
-            $order->set_shipping_state($cityData['region']);
-            $order->save();
-
             if (Tariff::isTariffToOffice($tariffId)) {
-                $shippingMethod->add_meta_data('pvz', $pvzCode . ' (' . $pvzInfo . ')');
-                $shippingMethod->save_meta_data();
+                $api = new CdekApi;
+                $pvzAddress = $api->getOffices(['code' => $pvzCode]);
+                try {
+                    $pvzArray = json_decode($pvzAddress, true);
+                    if (isset($pvzArray[0]['location']['address'])) {
+                        $shippingMethod->add_meta_data('pvz', $pvzCode . ' (' . $pvzArray[0]['location']['address'] . ')');
+                        $shippingMethod->save_meta_data();
+                    }
+                } catch (Exception $exception) {}
             }
 
             $data = [
@@ -62,7 +51,10 @@ namespace Cdek\Actions {
 
             OrderMetaData::addMetaByOrderId($order->get_id(), $data);
 
-            if (Helper::getActualShippingMethod($shippingMethod->get_data()['instance_id'])
+            $instance = $shippingMethod->get_data()['instance_id'];
+            $instance = empty($instance) ? null : $instance;
+
+            if (Helper::getActualShippingMethod($instance)
                       ->get_option('automate_orders') === 'yes') {
                 wp_schedule_single_event(time() + 1, Config::ORDER_AUTOMATION_HOOK_NAME, [$order->get_id(),
                                                                                                    1]);

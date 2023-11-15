@@ -34,6 +34,7 @@ jQuery(($) => {
 
     const onChoose = (_type, _tariff, address) => {
         $('.cdek-office-code').val(address.code);
+        $('.cdek-office-code-address').val(address.address);
         el.html('Повторно выбрать ПВЗ');
         const officeInfo = el.parent().children('.cdek-office-info');
         if (officeInfo.length === 0) {
