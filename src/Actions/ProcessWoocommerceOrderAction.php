@@ -13,6 +13,7 @@ namespace Cdek\Actions {
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
+    use Google\Exception;
     use WC_Order;
 
     class ProcessWoocommerceOrderAction
@@ -34,8 +35,13 @@ namespace Cdek\Actions {
             if (Tariff::isTariffToOffice($tariffId)) {
                 $api = new CdekApi;
                 $pvzAddress = $api->getOffices(['code' => $pvzCode]);
-                $shippingMethod->add_meta_data('pvz', $pvzCode . ' (' . json_decode($pvzAddress)[0]->location->address . ')');
-                $shippingMethod->save_meta_data();
+                try {
+                    $pvzArray = json_decode($pvzAddress, true);
+                    if (isset($pvzArray[0]['location']['address'])) {
+                        $shippingMethod->add_meta_data('pvz', $pvzCode . ' (' . $pvzArray[0]['location']['address'] . ')');
+                        $shippingMethod->save_meta_data();
+                    }
+                } catch (Exception $exception) {}
             }
 
             $data = [
@@ -46,9 +52,7 @@ namespace Cdek\Actions {
             OrderMetaData::addMetaByOrderId($order->get_id(), $data);
 
             $instance = $shippingMethod->get_data()['instance_id'];
-            if (empty($instance)) {
-                $instance = null;
-            }
+            $instance = empty($instance) ? null : $instance;
 
             if (Helper::getActualShippingMethod($instance)
                       ->get_option('automate_orders') === 'yes') {
