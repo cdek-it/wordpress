@@ -31,3 +31,5 @@ fabric.properties
 *.log
 /vendor
 assets/js/cdek-widget.umd.js
+/build/
+/node_modules/

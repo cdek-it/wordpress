@@ -39,7 +39,7 @@ namespace Cdek\Actions {
 
             if (empty($cityCode)) {
                 $pvzInfo = $order->get_billing_address_1();
-                $cityCode = $api->getCityCodeByCityName($order->get_billing_city(), $order->get_billing_city());
+                $cityCode = $api->getCityCodeByCityName($order->get_billing_city(), $order->get_billing_postcode());
             }
             if (empty($pvzInfo) && Tariff::isTariffToOffice($tariffId)) {
                 $pvzInfo = $order->get_billing_address_1();

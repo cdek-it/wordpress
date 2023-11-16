@@ -12,15 +12,15 @@ namespace Cdek\Model {
 
     class Tariff
     {
-        private const DOOR_DOOR = 'дверь-дверь (Д-Д)';
-        private const DOOR_OFFICE = 'дверь-склад (Д-С)';
-        private const OFFICE_DOOR = 'склад-дверь (С-Д)';
-        private const OFFICE_OFFICE = 'склад-склад (С-С)';
-        private const DOOR_PICKUP = 'дверь-постамат (Д-П)';
-        private const OFFICE_PICKUP = 'склад-постамат (С-П)';
-        private const PICKUP_DOOR = 'постамат-дверь (П-Д)';
-        private const PICKUP_OFFICE = 'постамат-склад (П-С)';
-        private const PICKUP_PICKUP = 'постамат-постамат (П-П)';
+        private const DOOR_DOOR = 1;
+        private const DOOR_OFFICE = 2;
+        private const OFFICE_DOOR = 3;
+        private const OFFICE_OFFICE = 4;
+        private const DOOR_PICKUP = 6;
+        private const OFFICE_PICKUP = 7;
+        private const PICKUP_DOOR = 8;
+        private const PICKUP_OFFICE = 9;
+        private const PICKUP_PICKUP = 10;
 
         public const DELIVERY_TYPE = 2;
         public const SHOP_TYPE = 1;
@@ -281,6 +281,18 @@ namespace Cdek\Model {
                                  array_map(static fn(int $code, array $el) => sprintf('%s (%s)', $el['name'], $code),
                                      array_keys(self::TARIFF_DATA),
                                      self::TARIFF_DATA));
+        }
+
+        public static function getDeliveryModesToOffice(): array
+        {
+            return [
+                self::OFFICE_OFFICE,
+                self::DOOR_OFFICE,
+                self::DOOR_PICKUP,
+                self::PICKUP_OFFICE,
+                self::PICKUP_PICKUP,
+                self::OFFICE_PICKUP,
+            ];
         }
     }
 }
