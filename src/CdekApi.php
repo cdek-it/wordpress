@@ -189,14 +189,7 @@ class CdekApi
         return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), $request);
     }
 
-    public function getRegion($city = null)
-    {
-        $url = $this->apiUrl . self::REGION_PATH;
-
-        return json_decode(HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['city' => $city]), true);
-    }
-
-    public function getCityCodeByCityName(string $city, string $state): int
+    public function getCityCodeByCityName(string $city, string $postcode): int
     {
         $url = $this->apiUrl . self::REGION_PATH;
 
@@ -205,25 +198,10 @@ class CdekApi
             $city = $city . ' микрорайон';
         }
 
-        $cityData = json_decode(HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['city' => $city]));
-
-        if ($state === 'false') {
-            return $cityData[0]->code;
-        }
+        $cityData = json_decode(HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['city' => $city, 'postal_code' => $postcode]));
 
         if (empty($cityData)) {
             return -1;
-        }
-
-        if (count($cityData) > 1) {
-            foreach ($cityData as $data) {
-                if ($this->getFormatState($data->region) === $this->getFormatState($state)) {
-                    return $data->code;
-                }
-                if ($this->getFormatState($data->region) === $this->getFormatState($city)) {
-                    return $data->code;
-                }
-            }
         }
 
         return $cityData[0]->code;

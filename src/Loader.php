@@ -8,11 +8,13 @@ namespace {
 
 namespace Cdek {
 
+    use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
     use Automattic\WooCommerce\Utilities\FeaturesUtil;
     use Cdek\Actions\CreateOrderAction;
     use Cdek\Actions\ProcessWoocommerceOrderAction;
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
+    use Cdek\Blocks\CheckoutMapBlock;
     use Cdek\Controllers\CourierController;
     use Cdek\Controllers\LocationController;
     use Cdek\Controllers\OrderController;
@@ -29,8 +31,7 @@ namespace Cdek {
     use RuntimeException;
     use function deactivate_plugins;
 
-    class Loader
-    {
+    class Loader {
         public const REQUIRED_PLUGINS = [
             'WooCommerce' => [
                 'entry'   => 'woocommerce/woocommerce.php',
@@ -39,38 +40,33 @@ namespace Cdek {
         ];
         public const EXTENSIONS = [
             'openssl',
-            'curl'
+            'curl',
         ];
         private static string $pluginVersion;
         private static string $pluginMainFile;
 
         private static string $pluginName;
 
-        public static function getPluginVersion(): string
-        {
+        public static function getPluginVersion(): string {
             return self::$pluginVersion;
         }
 
-        public static function getPluginName(): string
-        {
+        public static function getPluginName(): string {
             return self::$pluginName;
         }
 
-        public static function getPluginUrl(): string
-        {
+        public static function getPluginUrl(): string {
             return plugin_dir_url(self::$pluginMainFile);
         }
 
-        public static function getPluginPath(): string
-        {
+        public static function getPluginPath(): string {
             return plugin_dir_path(self::$pluginMainFile);
         }
 
         /**
          * @throws RuntimeException
          */
-        public static function activate(): void
-        {
+        public static function activate(): void {
             if (!current_user_can('activate_plugins')) {
                 return;
             }
@@ -81,8 +77,7 @@ namespace Cdek {
         /**
          * @throws RuntimeException
          */
-        private static function checkRequirements(): void
-        {
+        private static function checkRequirements(): void {
             $activePlugins = get_option('active_plugins');
 
             foreach (self::REQUIRED_PLUGINS as $plugin => $checkFields) {
@@ -99,22 +94,21 @@ namespace Cdek {
 
         }
 
-        public function __invoke(string $pluginMainFile): void
-        {
+        public function __invoke(string $pluginMainFile): void {
             self::$pluginMainFile = $pluginMainFile;
             add_action('activate_cdek/cdek.php', [__CLASS__, 'activate']);
 
             try {
                 self::checkRequirements();
             } catch (RuntimeException $e) {
-                require_once(ABSPATH . 'wp-admin/includes/plugin.php');
+                require_once(ABSPATH.'wp-admin/includes/plugin.php');
                 deactivate_plugins(self::$pluginMainFile);
 
                 return;
             }
 
             self::$pluginVersion = get_file_data(self::$pluginMainFile, ['Version'])[0];
-            self::$pluginName = get_file_data(self::$pluginMainFile, ['Plugin Name'])[0];
+            self::$pluginName    = get_file_data(self::$pluginMainFile, ['Plugin Name'])[0];
 
             self::declareCompatibility();
 
@@ -135,6 +129,12 @@ namespace Cdek {
             add_filter('woocommerce_new_order', new ProcessWoocommerceOrderAction, 10, 2);
             add_action('woocommerce_checkout_create_order', new SaveCustomCheckoutFieldsAction, 10, 2);
 
+            add_action('woocommerce_blocks_loaded',
+                static fn() => add_action('woocommerce_blocks_checkout_block_registration',
+                    static fn(IntegrationRegistry $registry) => $registry->register(new CheckoutMapBlock)));
+
+            add_action('woocommerce_blocks_loaded', [CheckoutMapBlock::class, 'addStoreApiData']);
+
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, new CreateOrderAction, 10, 2);
 
             (new CdekWidget)();
@@ -144,11 +144,11 @@ namespace Cdek {
             (new AdminNotices)();
         }
 
-        private static function declareCompatibility(): void
-        {
+        private static function declareCompatibility(): void {
             add_action('before_woocommerce_init', static function () {
                 if (class_exists(FeaturesUtil::class)) {
                     FeaturesUtil::declare_compatibility('custom_order_tables', self::$pluginMainFile, true);
+                    FeaturesUtil::declare_compatibility('cart_checkout_blocks', self::$pluginMainFile, true);
                 }
             });
         }

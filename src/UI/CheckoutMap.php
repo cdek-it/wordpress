@@ -23,11 +23,11 @@ namespace Cdek\UI {
             $api = new CdekApi;
 
             $city = $api->getCityCodeByCityName(CheckoutHelper::getValueFromCurrentSession('city'),
-                                                CheckoutHelper::getValueFromCurrentSession('state'));
+                                                CheckoutHelper::getValueFromCurrentSession('postcode'));
 
-            $points = $api->getOffices([
+            $points = $city !== -1 ? $api->getOffices([
                                            'city_code' => $city,
-                                       ]);
+                                       ]) : '[]';
 
             include __DIR__ . '/../../templates/public/open-map.php';
         }

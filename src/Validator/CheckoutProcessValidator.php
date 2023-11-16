@@ -25,7 +25,7 @@ namespace Cdek\Validator {
             }
 
             $city = CheckoutHelper::getValueFromCurrentSession('city');
-            $state = CheckoutHelper::getValueFromCurrentSession('state');
+            $state = CheckoutHelper::getValueFromCurrentSession('postcode');
 
             $cityCode = $api->getCityCodeByCityName($city, $state);
             if ($cityCode === -1) {
