@@ -95,13 +95,6 @@ class CdekApi
         return HttpClient::sendCdekRequest($url, 'GET', $this->getToken());
     }
 
-    public function getOrderByCdekNumber($number)
-    {
-        $url = $this->apiUrl . self::ORDERS_PATH;
-
-        return HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['cdek_number' => $number]);
-    }
-
     /**
      * @throws \Cdek\Exceptions\RestApiInvalidRequestException
      */
@@ -189,7 +182,7 @@ class CdekApi
         return HttpClient::sendCdekRequest($url, 'POST', $this->getToken(), $request);
     }
 
-    public function getCityCodeByCityName(string $city, string $postcode): int
+    public function getCityCode(string $city, ?string $postcode): int
     {
         $url = $this->apiUrl . self::REGION_PATH;
 
@@ -205,35 +198,6 @@ class CdekApi
         }
 
         return $cityData[0]->code;
-    }
-
-    protected function getFormatState($state)
-    {
-        $state = mb_strtolower($state);
-        $regionType = [
-            'автономная область',
-            'область',
-            'республика',
-            'респ.',
-            'автономный округ',
-            'округ',
-            'край',
-            'обл.',
-            'обл',
-        ];
-        foreach ($regionType as $type) {
-            $state = str_replace($type, '', $state);
-        }
-
-        return trim($state);
-    }
-
-    public function getCityByCode($code): array
-    {
-        $url = $this->apiUrl . self::REGION_PATH;
-        $cityData = json_decode(HttpClient::sendCdekRequest($url, 'GET', $this->getToken(), ['code' => $code]));
-
-        return ['city' => $cityData[0]->city, 'region' => $cityData[0]->region];
     }
 
     public function getOffices($filter)

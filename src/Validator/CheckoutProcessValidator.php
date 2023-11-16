@@ -27,7 +27,7 @@ namespace Cdek\Validator {
             $city = CheckoutHelper::getValueFromCurrentSession('city');
             $state = CheckoutHelper::getValueFromCurrentSession('postcode');
 
-            $cityCode = $api->getCityCodeByCityName($city, $state);
+            $cityCode = $api->getCityCode($city, $state);
             if ($cityCode === -1) {
                 wc_add_notice(__('Не удалось определить населенный пункт.'), 'error');
             }
