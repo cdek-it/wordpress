@@ -121,6 +121,7 @@ namespace Cdek\Actions {
                 $param['delivery_point'] = $postOrderData['pvz_code'];
             } else {
                 $param['to_location'] = [
+                    'city'         => $order->get_shipping_city(),
                     'postal_code'  => $order->get_shipping_postcode(),
                     'country_code' => $order->get_shipping_country() ?? 'RU',
                     'address'      => $order->get_shipping_address_1(),
@@ -213,8 +214,7 @@ namespace Cdek\Actions {
 
             foreach ($items as $item) {
                 $product = $item->get_product();
-                $weight = $product->get_weight();
-                $weight = $this->weightCalc->getWeight($weight);
+                $weight = $this->weightCalc->getWeight($product->get_weight());
                 $quantity = (int)$item->get_quantity();
                 $totalWeight += $quantity * $weight;
                 $cost = $product->get_price();
