@@ -22,7 +22,7 @@ namespace Cdek\UI {
 
             $api = new CdekApi;
 
-            $city = $api->getCityCodeByCityName(CheckoutHelper::getValueFromCurrentSession('city'),
+            $city = $api->getCityCode(CheckoutHelper::getValueFromCurrentSession('city'),
                                                 CheckoutHelper::getValueFromCurrentSession('postcode'));
 
             $points = $city !== -1 ? $api->getOffices([

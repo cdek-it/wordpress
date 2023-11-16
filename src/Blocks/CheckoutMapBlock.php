@@ -41,7 +41,7 @@ namespace Cdek\Blocks {
         public static function extend_cart_data(): array {
             $api = new CdekApi;
 
-            $city = $api->getCityCodeByCityName(CheckoutHelper::getValueFromCurrentSession('city'),
+            $city = $api->getCityCode(CheckoutHelper::getValueFromCurrentSession('city'),
                 CheckoutHelper::getValueFromCurrentSession('postcode'));
 
             return [
