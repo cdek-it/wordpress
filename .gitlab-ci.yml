@@ -11,15 +11,18 @@ variables:
   PACKAGE_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/archive/"
 
 build_tag:
-  image:
-    name: docker.cdek.ru/phnodenx-dev-rocky9-7.4:latest
-    entrypoint: "/bin/bash"
+  image: php:8.2-alpine
   stage: build
   tags:
     - docker
   only:
     - tags
   before_script:
+    - yarn add nodejs-current yarn
+    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    - php composer-setup.php
+    - php -r "unlink('composer-setup.php');"
+    - mv composer.phar /usr/local/bin/composer
     - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
   script:
     - sed -i "s/\(Version:\)\( *\).*/\1\2${RELEASE_VERSION}/" cdek.php
@@ -40,9 +43,7 @@ build_custom:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: always
     - when: manual
-  image:
-    name: docker.cdek.ru/phnodenx-dev-rocky9-7.4:latest
-    entrypoint: "/bin/bash"
+  image: php:8.2-alpine
   stage: build
   tags:
     - docker
@@ -51,6 +52,11 @@ build_custom:
     paths:
       - cdek
   before_script:
+    - yarn add nodejs-current yarn
+    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+    - php composer-setup.php
+    - php -r "unlink('composer-setup.php');"
+    - mv composer.phar /usr/local/bin/composer
     - export RELEASE_VERSION="${CI_COMMIT_REF_NAME}#${CI_COMMIT_SHORT_SHA}"
   script:
     - sed -i "s/\(Version:\)\( *\).*/\1\2${RELEASE_VERSION}/" cdek.php
