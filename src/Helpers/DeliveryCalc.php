@@ -215,8 +215,13 @@ namespace Cdek\Helpers {
             }
 
             foreach (['length', 'width', 'height'] as $dimension) {
-                ${$dimension.'List'}[] = (int) $this->method->get_option("product_{$dimension}_default");
+                $predefinedDimensions[] = (int) $this->method->get_option("product_{$dimension}_default");
             }
+
+            sort($predefinedDimensions);
+            $lengthList[] = $predefinedDimensions[0];
+            $heightList[] = $predefinedDimensions[1];
+            $widthList[]  = $predefinedDimensions[2];
 
             rsort($lengthList);
             rsort($widthList);
