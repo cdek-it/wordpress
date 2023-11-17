@@ -28,6 +28,7 @@ build_tag:
     - sed -i "s/\(Version:\)\( *\).*/\1\2${RELEASE_VERSION}/" cdek.php
     - sed -i "s/\(Stable tag:\)\( *\).*/\1\2${RELEASE_VERSION}/" readme.txt
     - composer i -a
+    - yarn set version berry
     - yarn
     - yarn build
     - mkdir /cdek
@@ -62,6 +63,7 @@ build_custom:
     - sed -i "s/\(Version:\)\( *\).*/\1\2${RELEASE_VERSION}/" cdek.php
     - sed -i "s/\(Stable tag:\)\( *\).*/\1\2${RELEASE_VERSION}/" readme.txt
     - composer i -a
+    - yarn set version berry
     - yarn
     - yarn build
     - mkdir /cdek
