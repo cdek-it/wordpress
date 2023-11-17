@@ -13,7 +13,7 @@ variables:
 build_tag:
   image:
     name: docker.cdek.ru/phnodenx-dev-rocky9-7.4:latest
-    entrypoint: ["/bin/sh"]
+    entrypoint: ["/bin/bash"]
   stage: build
   tags:
     - docker
@@ -42,7 +42,7 @@ build_custom:
     - when: manual
   image:
     name: docker.cdek.ru/phnodenx-dev-rocky9-7.4:latest
-    entrypoint: ["/bin/sh"]
+    entrypoint: ["/bin/bash"]
   stage: build
   tags:
     - docker
