@@ -11,7 +11,9 @@ variables:
   PACKAGE_URL: "${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/generic/archive/"
 
 build_tag:
-  image: docker.cdek.ru/phnodenx-dev-rocky9-7.4:latest
+  image:
+    name: docker.cdek.ru/phnodenx-dev-rocky9-7.4:latest
+    entrypoint: ["/bin/sh"]
   stage: build
   tags:
     - docker
@@ -38,7 +40,9 @@ build_custom:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: always
     - when: manual
-  image: docker.cdek.ru/phnodenx-dev-rocky9-7.4:latest
+  image:
+    name: docker.cdek.ru/phnodenx-dev-rocky9-7.4:latest
+    entrypoint: ["/bin/sh"]
   stage: build
   tags:
     - docker
