@@ -18,7 +18,7 @@ build_tag:
   only:
     - tags
   before_script:
-    - yarn add nodejs-current yarn
+    - apk add nodejs-current yarn
     - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     - php composer-setup.php
     - php -r "unlink('composer-setup.php');"
@@ -52,7 +52,7 @@ build_custom:
     paths:
       - cdek
   before_script:
-    - yarn add nodejs-current yarn
+    - apk add nodejs-current yarn
     - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
     - php composer-setup.php
     - php -r "unlink('composer-setup.php');"
