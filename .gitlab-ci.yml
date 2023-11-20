@@ -31,6 +31,7 @@ build_tag:
     - yarn set version berry
     - yarn
     - yarn build
+    - rm -rf node_modules
     - mkdir /cdek
     - cp -r * /cdek
     - mv /cdek .
@@ -66,6 +67,7 @@ build_custom:
     - yarn set version berry
     - yarn
     - yarn build
+    - rm -rf node_modules
     - mkdir /cdek
     - cp -r * /cdek
     - mv /cdek .
