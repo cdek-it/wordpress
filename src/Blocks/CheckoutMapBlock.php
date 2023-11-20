@@ -66,7 +66,7 @@ namespace Cdek\Blocks {
             return [
                 'office' => [
                     'description' => 'Code of selected CDEK office for delivery',
-                    'type'        => 'string',
+                    'type'        => ['string', 'null'],
                     'readonly'    => true,
                     'context'     => ['view', 'edit'],
                 ],

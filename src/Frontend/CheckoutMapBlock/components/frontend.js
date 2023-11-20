@@ -27,6 +27,7 @@ export const Block = ({
 
     const debouncedMapRender = useCallback(debounce((shippingRates, points) => {
         if (points === '') {
+            debouncedSetExtensionData('official_cdek', 'office', null);
             clearValidationError('official_cdek_office');
             return;
         }
@@ -36,12 +37,14 @@ export const Block = ({
           .find((rate) => rate.selected);
 
         if (selectedRate.method_id !== 'official_cdek') {
+            debouncedSetExtensionData('official_cdek', 'office', null);
             clearValidationError('official_cdek_office');
             return;
         }
 
         if (officeDeliveryModes.indexOf(parseInt(selectedRate.meta_data.find(
           (meta) => meta.key === 'tariff_mode').value)) === -1) {
+            debouncedSetExtensionData('official_cdek', 'office', null);
             clearValidationError('official_cdek_office');
             return;
         }
@@ -86,7 +89,7 @@ export const Block = ({
         }
 
         debouncedMapRender(cart.shippingRates, extensions.official_cdek.points);
-    }, [cart.shippingRates, extensions.official_cdek]);
+    }, [cart.isLoading, cart.isLoadingRates, cart.shippingRates, extensions.official_cdek]);
 
     useEffect(() => {
         setValidationError(getValidationError('official_cdek_office'));
