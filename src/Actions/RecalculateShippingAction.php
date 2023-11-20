@@ -42,7 +42,7 @@ namespace Cdek\Actions {
                                                ],
                                            ], isset(OrderMetaData::getMetaByOrderId($order->get_id())['pvz_code']));
 
-                    $rate = $calculator->getTariffRate($shipping->get_meta('tariff_code'));
+                    $rate = $calculator->getTariffRate((int)$shipping->get_meta('tariff_code'));
                     $shipping->set_total($rate['cost']);
                     $shipping->set_name($rate['label']);
                     $shipping->set_meta_data([

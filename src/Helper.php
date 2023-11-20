@@ -7,6 +7,7 @@ namespace {
 
 namespace Cdek {
 
+    use Throwable;
     use WC_Shipping_Method;
     use function WC;
 
@@ -33,12 +34,15 @@ namespace Cdek {
             }
 
             if (isset(WC()->cart)) {
-                $methods = wc_get_shipping_zone(WC()->cart->get_shipping_packages()[0])->get_shipping_methods(true);
+                try{
+                    $methods = wc_get_shipping_zone(WC()->cart->get_shipping_packages()[0])->get_shipping_methods(true);
 
-                foreach ($methods as $method) {
-                    if ($method instanceof CdekShippingMethod) {
-                        return $method;
+                    foreach ($methods as $method) {
+                        if ($method instanceof CdekShippingMethod) {
+                            return $method;
+                        }
                     }
+                } catch (Throwable $e) {
                 }
             }
 
