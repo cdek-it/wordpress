@@ -64,7 +64,7 @@ namespace Cdek\Blocks {
 
         public static function extend_checkout_schema(): array {
             return [
-                'office' => [
+                'pvz_code' => [
                     'description' => 'Code of selected CDEK office for delivery',
                     'type'        => ['string', 'null'],
                     'readonly'    => true,
@@ -77,17 +77,17 @@ namespace Cdek\Blocks {
             OrderMetaData::addMetaByOrderId($order->get_id(), [
                 'currency' => function_exists('wcml_get_woocommerce_currency_option') ? get_woocommerce_currency() :
                     'RUB',
-                'pvz_code' => $request['extensions'][Config::DELIVERY_NAME]['office'],
+                'pvz_code' => $request['extensions'][Config::DELIVERY_NAME]['pvz_code'],
             ]);
 
             $shippingMethod = CheckoutHelper::getOrderShippingMethod($order);
 
             if (Tariff::isTariffToOffice($shippingMethod->get_meta('tariff_code'))) {
-                $pvzAddress = (new CdekApi)->getOffices(['code' => $request['extensions'][Config::DELIVERY_NAME]['office']]);
+                $pvzAddress = (new CdekApi)->getOffices(['code' => $request['extensions'][Config::DELIVERY_NAME]['pvz_code']]);
                 try {
                     $pvzArray = json_decode($pvzAddress, true, 512, JSON_THROW_ON_ERROR);
                     if (isset($pvzArray[0]['location']['address'])) {
-                        $shippingMethod->add_meta_data('pvz', sprintf('%s (%s)', $request['extensions'][Config::DELIVERY_NAME]['office'], $pvzArray[0]['location']['address']));
+                        $shippingMethod->add_meta_data('pvz', sprintf('%s (%s)', $request['extensions'][Config::DELIVERY_NAME]['pvz_code'], $pvzArray[0]['location']['address']), true);
                         $shippingMethod->save_meta_data();
                     }
                 } catch (Exception $exception) {
@@ -102,8 +102,6 @@ namespace Cdek\Blocks {
         public function initialize(): void {
             Helper::enqueueScript('cdek-checkout-map-block-frontend', 'cdek-checkout-map-block-frontend');
             Helper::enqueueScript('cdek-checkout-map-block-editor', 'cdek-checkout-map-block', true);
-
-            add_action('woocommerce_store_api_checkout_update_order_from_request', [__CLASS__, 'saveOrderData'], 10, 2);
         }
 
         public function get_script_handles(): array {

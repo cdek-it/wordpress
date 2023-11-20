@@ -13,10 +13,8 @@ namespace Cdek\Helpers {
     use WC_Order;
     use WC_Order_Item;
 
-    class CheckoutHelper
-    {
-        public static function getValueFromCurrentSession(string $valueName, string $defaultValue = null): ?string
-        {
+    class CheckoutHelper {
+        public static function getValueFromCurrentSession(string $valueName, string $defaultValue = null): ?string {
             $shippingValue = WC()->checkout()->get_value("shipping_$valueName");
             if (isset($shippingValue)) {
                 return $shippingValue;
@@ -28,13 +26,14 @@ namespace Cdek\Helpers {
                 return $billingValue;
             }
 
-            $rawValue = WC()->checkout()->get_value($valueName);
-
-            return $rawValue ?? $defaultValue;
+            return $_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName]
+                   ??
+                   WC()->checkout()->get_value($valueName)
+                   ??
+                   $defaultValue;
         }
 
-        public static function isCdekShippingMethod(WC_Order $order): bool
-        {
+        public static function isCdekShippingMethod(WC_Order $order): bool {
             try {
                 return self::getOrderShippingMethod($order)->get_method_id() === Config::DELIVERY_NAME;
             } catch (RuntimeException $e) {
@@ -42,8 +41,7 @@ namespace Cdek\Helpers {
             }
         }
 
-        public static function getOrderShippingMethod(WC_Order $order): WC_Order_Item
-        {
+        public static function getOrderShippingMethod(WC_Order $order): WC_Order_Item {
             $shippingMethodArray = $order->get_items('shipping');
             if (empty($shippingMethodArray)) {
                 throw new RuntimeException('Order don\'t have shipping methods');
@@ -52,23 +50,25 @@ namespace Cdek\Helpers {
             return array_shift($shippingMethodArray);
         }
 
-        public static function restoreCheckoutFields(array $fields): array
-        {
+        public static function restoreCheckoutFields(array $fields): array {
             $checkout = WC()->checkout();
 
             $originalFields = $checkout->get_checkout_fields('billing');
 
             //Восстанавливаем требуемые поля для чекаута
-            foreach ([
-                         'billing_first_name',
-                         'billing_last_name',
-                         'billing_city',
-                         'billing_postcode',
-                         'billing_phone',
-                         'billing_address_1',
-                     ] as $requiredField) {
-                $fields['billing'][$requiredField] =
-                    $fields['billing'][$requiredField] ?? $originalFields[$requiredField];
+            foreach (
+                [
+                    'billing_first_name',
+                    'billing_last_name',
+                    'billing_city',
+                    'billing_postcode',
+                    'billing_phone',
+                    'billing_address_1',
+                ] as $requiredField
+            ) {
+                $fields['billing'][$requiredField] = $fields['billing'][$requiredField]
+                                                     ??
+                                                     $originalFields[$requiredField];
             }
 
             foreach (['billing_address_1', 'billing_address_2'] as $field) {
@@ -78,7 +78,7 @@ namespace Cdek\Helpers {
             }
 
             if (Helper::getActualShippingMethod()->get_option('international_mode') === 'yes') {
-                $fields['billing']['passport_series'] = [
+                $fields['billing']['passport_series']        = [
                     'label'             => __('Серия паспорта', 'woocommerce'),
                     'required'          => true,
                     'class'             => ['form-row-wide'],
@@ -88,7 +88,7 @@ namespace Cdek\Helpers {
                         'maxlength' => 4,
                     ],
                 ];
-                $fields['billing']['passport_number'] = [
+                $fields['billing']['passport_number']        = [
                     'label'             => __('Номер паспорта', 'woocommerce'),
                     'required'          => true,
                     'class'             => ['form-row-wide'],
@@ -106,14 +106,14 @@ namespace Cdek\Helpers {
                     'class'    => ['form-row-wide'],
                     'clear'    => true,
                 ];
-                $fields['billing']['passport_organization'] = [
+                $fields['billing']['passport_organization']  = [
                     'label'    => __('Орган выдачи паспорта', 'woocommerce'),
                     'required' => true,
                     'priority' => 120,
                     'class'    => ['form-row-wide'],
                     'clear'    => true,
                 ];
-                $fields['billing']['tin'] = [
+                $fields['billing']['tin']                    = [
                     'label'             => __('ИНН', 'woocommerce'),
                     'required'          => true,
                     'priority'          => 120,

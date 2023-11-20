@@ -135,6 +135,8 @@ namespace Cdek {
 
             add_action('woocommerce_blocks_loaded', [CheckoutMapBlock::class, 'addStoreApiData']);
 
+            add_action('woocommerce_store_api_checkout_update_order_from_request', [CheckoutMapBlock::class, 'saveOrderData'], 10, 2);
+
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, new CreateOrderAction, 10, 2);
 
             (new CdekWidget)();

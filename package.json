@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.39.0",
+    "@wordpress/api-fetch": "^6.43.0",
     "mini-css-extract-plugin": "^2.7.6",
     "prettier": "^3.1.0",
     "webpack": "^5.89.0"

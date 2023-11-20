@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import './styles/main.scss';
+import apiFetch from '@wordpress/api-fetch';
 
 $(document).ready(function() {
     let packageList = [];
@@ -43,30 +44,29 @@ $(document).ready(function() {
     });
 
     $('#send_package').click(function(e) {
-        $.ajax({
+        $('#cdek-loader').show();
+
+        apiFetch({
             method: 'POST', url: e.target.dataset.action, data: {
                 packages: JSON.stringify(packageList),
-            }, beforeSend: function() {
-                $('#cdek-loader').show();
-            }, complete: function() {
-                $('#cdek-loader').hide();
-            }, success: function(response) {
-                if (!response.state) {
-                    $('#cdek-create-order-error').text(response.message).show();
-                } else {
-                    if (response.door) {
-                        $('#cdek-courier-result-block').hide();
-                        $('#cdek-order-courier').show();
-                    }
-                    $('#cdek-create-order-form').hide();
-                    $('#cdek-order-number').html(`№ <b>${response.code}</b>`);
-                    $('#cdek-order-number-input').val(response.code);
-                    $('#cdek-info-order').show();
-                }
-            }, error: function(error) {
-                console.log({ error: error });
             },
-        });
+        })
+          .then(resp => {
+              if (!resp.state) {
+                  $('#cdek-create-order-error').text(resp.message).show();
+              } else {
+                  if (resp.door) {
+                      $('#cdek-courier-result-block').hide();
+                      $('#cdek-order-courier').show();
+                  }
+                  $('#cdek-create-order-form').hide();
+                  $('#cdek-order-number').html(`№ <b>${resp.code}</b>`);
+                  $('#cdek-order-number-input').val(resp.code);
+                  $('#cdek-info-order').show();
+              }
+          })
+          .catch(e => console.error(e))
+          .finally(() => $('#cdek-loader').hide());
     });
 
     function checkFullPackage() {
@@ -130,7 +130,8 @@ $(document).ready(function() {
 
     $('#create-order-btn').click(function(e) {
         $('#cdek-create-order-error').hide();
-        $.ajax({
+        $('#cdek-loader').show();
+        apiFetch({
             method: 'POST', url: e.target.dataset.action, data: {
                 packages: [
                     {
@@ -138,30 +139,27 @@ $(document).ready(function() {
                         width: $('input[name=package_width]').val(),
                         height: $('input[name=package_height]').val(),
                     }],
-            }, beforeSend: function() {
-                $('#cdek-loader').show();
-            }, complete: function() {
-                $('#cdek-loader').hide();
-            }, success: function(response) {
-                if (!response.state) {
-                    $('#cdek-create-order-error')
-                      .text(response.message)
-                      .show();
-                } else {
-                    if (response.door) {
-                        $('#cdek-courier-result-block').hide();
-                        $('#cdek-order-courier').show();
-                    }
-                    $('#cdek-create-order-form').hide();
-                    $('#cdek-order-number')
-                      .html(`№ <b>${response.code}</b>`);
-                    $('#cdek-order-number-input').val(response.code);
-                    $('#cdek-info-order').show();
-                }
-            }, error: function(error) {
-                console.log({ error: error });
             },
-        });
+        })
+          .then(resp => {
+              if (!resp.state) {
+                  $('#cdek-create-order-error')
+                    .text(resp.message)
+                    .show();
+              } else {
+                  if (resp.door) {
+                      $('#cdek-courier-result-block').hide();
+                      $('#cdek-order-courier').show();
+                  }
+                  $('#cdek-create-order-form').hide();
+                  $('#cdek-order-number')
+                    .html(`№ <b>${resp.code}</b>`);
+                  $('#cdek-order-number-input').val(resp.code);
+                  $('#cdek-info-order').show();
+              }
+          })
+          .catch(e => console.log(e))
+          .finally(() => $('#cdek-loader').hide());
     });
 
     $('#delete-order-btn').click(function(event) {
@@ -169,32 +167,28 @@ $(document).ready(function() {
         $(event.target).addClass('clicked');
         $('#cdek-create-order-error').hide();
         $('#cdek-courier-error').hide();
-        $.ajax({
-            method: 'POST', url: event.target.href, beforeSend: function() {
-                $('#cdek-loader').show();
-            }, complete: function() {
-                $('#cdek-loader').hide();
-            }, success: function(response) {
-                if (!response.state) {
-                    $('#cdek-delete-order-error')
-                      .text(response.message)
-                      .show();
-                    $('#delete-order-btn').hide();
-                } else {
-                    alert(response.message);
-                    $(event.target).removeClass('clicked');
-                    $('#cdek-create-order-form').show();
-                    $('#cdek-info-order').hide();
-                }
-            }, error: function(error) {
-                console.log({ error: error });
-            },
-        });
+        $('#cdek-loader').show();
+        apiFetch({
+            method: 'POST', url: event.target.href,
+        }).then(resp => {
+            if (!resp.state) {
+                $('#cdek-delete-order-error')
+                  .text(resp.message)
+                  .show();
+                $('#delete-order-btn').hide();
+            } else {
+                alert(resp.message);
+                $(event.target).removeClass('clicked');
+                $('#cdek-create-order-form').show();
+                $('#cdek-info-order').hide();
+            }
+        }).catch(e => console.error(e)).finally(() => $('#cdek-loader').hide());
     });
 
     $('#cdek-courier-send-call').click(function(event) {
         $('#cdek-courier-error').hide();
-        $.ajax({
+        $('#cdek-loader').show();
+        apiFetch({
             method: 'POST', url: event.target.dataset.action, data: {
                 order_id: $('input[name=package_order_id]').val(),
                 date: $('#cdek-courier-date').val(),
@@ -210,23 +204,17 @@ $(document).ready(function() {
                 width: $('#cdek-courier-width').val(),
                 height: $('#cdek-courier-height').val(),
                 need_call: $('#cdek-courier-call').prop('checked'),
-            }, beforeSend: function() {
-                $('#cdek-loader').show();
-            }, complete: function() {
-                $('#cdek-loader').hide();
-            }, success: function(response) {
-                if (!response) {
-                    $('#cdek-courier-error').html(response.message).show();
-                } else {
-                    $('#call-courier-form').hide();
-                    $('#cdek-order-courier').hide();
-                    $('#cdek-courier-info').text(response.message).show();
-                    $('#cdek-courier-result-block').show();
-                }
-            }, error: function(error) {
-                console.log({ error: error });
             },
-        });
+        }).then(resp => {
+            if (!resp) {
+                $('#cdek-courier-error').html(resp.message).show();
+            } else {
+                $('#call-courier-form').hide();
+                $('#cdek-order-courier').hide();
+                $('#cdek-courier-info').text(resp.message).show();
+                $('#cdek-courier-result-block').show();
+            }
+        }).catch(e => console.error(e)).finally(() => $('#cdek-loader').hide());
     });
 
     $('#cdek-order-courier').click(function() {
@@ -234,22 +222,17 @@ $(document).ready(function() {
     });
 
     $('#cdek-courier-delete').click(function(event) {
-        $.ajax({
+        $('#cdek-loader').show();
+        apiFetch({
             method: 'POST', url: event.target.dataset.action, data: {
                 order_id: $('input[name=package_order_id]').val(),
-            }, beforeSend: function() {
-                $('#cdek-loader').show();
-            }, complete: function() {
-                $('#cdek-loader').hide();
-            }, success: function(response) {
-                if (response) {
-                    $('#cdek-courier-result-block').hide();
-                    $('#cdek-order-courier').show();
-                }
-            }, error: function(error) {
-                console.log({ error: error });
             },
-        });
+        }).then(resp => {
+            if (resp) {
+                $('#cdek-courier-result-block').hide();
+                $('#cdek-order-courier').show();
+            }
+        }).catch(e => console.error(e)).finally(() => $('#cdek-loader').hide());
     });
 
 });

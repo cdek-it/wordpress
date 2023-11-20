@@ -27,7 +27,7 @@ export const Block = ({
 
     const debouncedMapRender = useCallback(debounce((shippingRates, points) => {
         if (points === '') {
-            debouncedSetExtensionData('official_cdek', 'office', null);
+            debouncedSetExtensionData('official_cdek', 'pvz_code', null);
             clearValidationError('official_cdek_office');
             return;
         }
@@ -37,14 +37,14 @@ export const Block = ({
           .find((rate) => rate.selected);
 
         if (selectedRate.method_id !== 'official_cdek') {
-            debouncedSetExtensionData('official_cdek', 'office', null);
+            debouncedSetExtensionData('official_cdek', 'pvz_code', null);
             clearValidationError('official_cdek_office');
             return;
         }
 
         if (officeDeliveryModes.indexOf(parseInt(selectedRate.meta_data.find(
           (meta) => meta.key === 'tariff_mode').value)) === -1) {
-            debouncedSetExtensionData('official_cdek', 'office', null);
+            debouncedSetExtensionData('official_cdek', 'pvz_code', null);
             clearValidationError('official_cdek_office');
             return;
         }
@@ -66,7 +66,7 @@ export const Block = ({
                     door: true,
                 },
                 onChoose(_type, _tariff, address) {
-                    debouncedSetExtensionData('official_cdek', 'office',
+                    debouncedSetExtensionData('official_cdek', 'pvz_code',
                       address.code);
                     clearValidationError('official_cdek_office');
                 },

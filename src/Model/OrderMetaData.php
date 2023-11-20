@@ -21,7 +21,7 @@ namespace Cdek\Model {
         public static function updateMetaByOrderId(int $orderId, array $data): void
         {
             $order = wc_get_order($orderId);
-            $order->update_meta_data(Config::META_KEY, $data);
+            $order->update_meta_data(Config::META_KEY, array_merge($order->get_meta(Config::META_KEY) ?: [], $data));
             $order->save();
         }
 

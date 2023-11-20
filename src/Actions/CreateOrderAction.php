@@ -18,31 +18,28 @@ namespace Cdek\Actions {
     use Throwable;
     use WC_Order;
 
-    class CreateOrderAction
-    {
+    class CreateOrderAction {
         private CdekApi $api;
         private WeightCalc $weightCalc;
 
-        public function __construct()
-        {
+        public function __construct() {
             $this->weightCalc = new WeightCalc;
         }
 
         /**
          * @throws \Cdek\Exceptions\RestApiInvalidRequestException|\Throwable|\JsonException
          */
-        public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
-        {
-            $this->api = new CdekApi;
-            $order = wc_get_order($orderId);
-            $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
-            $postOrderData['tariff_code'] =
-                CheckoutHelper::getOrderShippingMethod($order)->get_meta('tariff_code') ?: $postOrderData['tariff_id'];
-            $postOrderData['type'] = Tariff::getTariffType($postOrderData['tariff_code']);
+        public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array {
+            $this->api                    = new CdekApi;
+            $order                        = wc_get_order($orderId);
+            $postOrderData                = OrderMetaData::getMetaByOrderId($orderId);
+            $postOrderData['tariff_code'] = CheckoutHelper::getOrderShippingMethod($order)->get_meta('tariff_code') ?:
+                $postOrderData['tariff_id'];
+            $postOrderData['type']        = Tariff::getTariffType($postOrderData['tariff_code']);
 
             OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
 
-            $param = $this->buildRequestData($order);
+            $param             = $this->buildRequestData($order);
             $param['packages'] = $this->buildPackagesData($order, $packages);
 
             try {
@@ -50,9 +47,9 @@ namespace Cdek\Actions {
 
                 sleep(1);
 
-                $cdekNumber = $this->getCdekOrderNumber($orderData['entity']['uuid']);
+                $cdekNumber                    = $this->getCdekOrderNumber($orderData['entity']['uuid']);
                 $postOrderData['order_number'] = $cdekNumber ?? $orderData['entity']['uuid'];
-                $postOrderData['order_uuid'] = $orderData['entity']['uuid'];
+                $postOrderData['order_uuid']   = $orderData['entity']['uuid'];
                 OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
 
                 return [
@@ -74,12 +71,10 @@ namespace Cdek\Actions {
             }
         }
 
-        private function buildRequestData(WC_Order $order): array
-        {
-            $postOrderData = OrderMetaData::getMetaByOrderId($order->get_id());
-            $deliveryMethod =
-                Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
-                                                              ->get_data()['instance_id']);
+        private function buildRequestData(WC_Order $order): array {
+            $postOrderData  = OrderMetaData::getMetaByOrderId($order->get_id());
+            $deliveryMethod = Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
+                                                                            ->get_data()['instance_id']);
 
             $param = [
                 'type'            => $postOrderData['type'],
@@ -109,10 +104,14 @@ namespace Cdek\Actions {
                     ],
                 ],
                 'recipient'       => [
-                    'name'   => $order->get_billing_first_name() . ' ' . $order->get_billing_last_name(),
+                    'name'   => $order->get_shipping_first_name()
+                                ?:
+                                $order->get_billing_first_name().' '.$order->get_shipping_last_name()
+                                ?:
+                                $order->get_billing_last_name(),
                     'email'  => $order->get_billing_email(),
                     'phones' => [
-                        'number' => $order->get_billing_phone(),
+                        'number' => $order->get_shipping_phone() ?: $order->get_billing_phone(),
                     ],
                 ],
             ];
@@ -129,7 +128,7 @@ namespace Cdek\Actions {
             }
 
             if (Tariff::isTariffFromOffice($param['tariff_code'])) {
-                $office = json_decode($deliveryMethod->get_option('pvz_code'), true);
+                $office                  = json_decode($deliveryMethod->get_option('pvz_code'), true);
                 $param['shipment_point'] = $office['address'];
             } else {
                 $address = json_decode($deliveryMethod->get_option('address'), true);
@@ -154,11 +153,8 @@ namespace Cdek\Actions {
             }
 
             if ($order->get_payment_method() === 'cod') {
-                $codPriceThreshold = (int)$deliveryMethod->get_option('stepcodprice');
-                $total = number_format($order->get_subtotal(),
-                                       wc_get_price_decimals(),
-                                       '.',
-                                       '');
+                $codPriceThreshold = (int) $deliveryMethod->get_option('stepcodprice');
+                $total             = number_format($order->get_subtotal(), wc_get_price_decimals(), '.', '');
                 if ($codPriceThreshold === 0 || $codPriceThreshold > $total) {
                     $param['delivery_recipient_cost'] = [
                         'value' => $order->get_shipping_total(),
@@ -169,65 +165,58 @@ namespace Cdek\Actions {
             return $param;
         }
 
-        private function buildPackagesData(WC_Order $order, array $packages = null): array
-        {
+        private function buildPackagesData(WC_Order $order, array $packages = null): array {
             $items = $order->get_items();
 
             if ($packages === null) {
                 $deliveryMethod = CheckoutHelper::getOrderShippingMethod($order);
 
                 return [
-                    $this->buildItemsData($order,
-                                          $deliveryMethod->get_meta('length'),
-                                          $deliveryMethod->get_meta('width'),
-                                          $deliveryMethod->get_meta('height'),
-                                          $items),
+                    $this->buildItemsData($order, $deliveryMethod->get_meta('length'),
+                        $deliveryMethod->get_meta('width'), $deliveryMethod->get_meta('height'), $items),
                 ];
             }
 
             $output = [];
 
             foreach ($packages as $package) {
-                $output[] = $this->buildItemsData($order,
-                                                  $package['length'],
-                                                  $package['width'],
-                                                  $package['height'],
-                                                  $package['items'] ?? $items);
+                $output[] = $this->buildItemsData($order, $package['length'], $package['width'], $package['height'],
+                    $package['items'] ?? $items);
             }
 
             return $output;
         }
 
-        private function buildItemsData(WC_Order $order,
-                                        int      $length,
-                                        int      $width,
-                                        int      $height,
-                                        array    $items): array
-        {
-            $postOrderData = OrderMetaData::getMetaByOrderId($order->get_id());
-            $deliveryMethod =
-                Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
-                                                              ->get_data()['instance_id']);
+        private function buildItemsData(
+            WC_Order $order,
+            int $length,
+            int $width,
+            int $height,
+            array $items
+        ): array {
+            $postOrderData  = OrderMetaData::getMetaByOrderId($order->get_id());
+            $deliveryMethod = Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
+                                                                            ->get_data()['instance_id']);
 
             $totalWeight = 0;
-            $itemsData = [];
+            $itemsData   = [];
 
             foreach ($items as $item) {
-                $product = $item->get_product();
-                $weight = $this->weightCalc->getWeight($product->get_weight());
-                $quantity = (int)$item->get_quantity();
+                $product     = $item->get_product();
+                $weight      = $this->weightCalc->getWeight($product->get_weight());
+                $quantity    = (int) $item->get_quantity();
                 $totalWeight += $quantity * $weight;
-                $cost = $product->get_price();
+                $cost        = $product->get_price();
 
                 if ($postOrderData['currency'] !== 'RUB' && function_exists('wcml_get_woocommerce_currency_option')) {
                     $cost = $this->convertCurrencyToRub($cost, $postOrderData['currency']);
                 }
 
                 $selectedPaymentMethodId = $order->get_payment_method();
-                $percentCod = (int)$deliveryMethod->get_option('percentcod');
+                $percentCod              = (int) $deliveryMethod->get_option('percentcod');
                 if ($selectedPaymentMethodId === 'cod') {
                     if ($percentCod !== 0) {
-                        $paymentValue = (int)(($percentCod / 100) * $cost);
+                        $paymentValue = (int) (($percentCod / 100) * $cost);
                     } else {
                         $paymentValue = $cost;
                     }
@@ -262,12 +251,11 @@ namespace Cdek\Actions {
             return $package;
         }
 
-        private function convertCurrencyToRub(float $cost, string $currency): float
-        {
+        private function convertCurrencyToRub(float $cost, string $currency): float {
             global $woocommerce_wpml;
 
             $multiCurrency = $woocommerce_wpml->get_multi_currency();
-            $rates = $multiCurrency->get_exchange_rates();
+            $rates         = $multiCurrency->get_exchange_rates();
 
             if (!array_key_exists('RUB', $rates)) {
                 return $cost;
@@ -282,17 +270,16 @@ namespace Cdek\Actions {
             }
 
             if ($currency === $defaultCurrency) {
-                $cost = round($cost * (float)$rates['RUB'], 2);
+                $cost = round($cost * (float) $rates['RUB'], 2);
             } else {
-                $costConvertToDefault = round($cost / (float)$rates[$currency], 2);
-                $cost = round($costConvertToDefault * (float)$rates['RUB'], 2);
+                $costConvertToDefault = round($cost / (float) $rates[$currency], 2);
+                $cost                 = round($costConvertToDefault * (float) $rates['RUB'], 2);
             }
 
             return $cost;
         }
 
-        private function getCdekOrderNumber(string $orderUuid, int $iteration = 1): ?string
-        {
+        private function getCdekOrderNumber(string $orderUuid, int $iteration = 1): ?string {
             sleep(1);
 
             if ($iteration === 5) {
@@ -300,7 +287,7 @@ namespace Cdek\Actions {
             }
 
             $orderInfoJson = $this->api->getOrder($orderUuid);
-            $orderInfo = json_decode($orderInfoJson, true);
+            $orderInfo     = json_decode($orderInfoJson, true);
 
             return $orderInfo['entity']['cdek_number'] ?? $this->getCdekOrderNumber($orderUuid, $iteration + 1);
         }
