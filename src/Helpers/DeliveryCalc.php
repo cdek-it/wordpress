@@ -14,17 +14,20 @@ namespace Cdek\Helpers {
     use Cdek\Model\Tariff;
     use WC_Shipping_Method;
 
-    class DeliveryCalc {
+    class DeliveryCalc
+    {
         private WC_Shipping_Method $method;
         private array $rates = [];
         private CdekApi $api;
 
-        public function __construct(int $instanceID = null) {
+        public function __construct(int $instanceID = null)
+        {
             $this->method = Helper::getActualShippingMethod($instanceID);
             $this->api    = new CdekApi;
         }
 
-        final public function calculate(array $package, bool $addTariffsToOffice = true): bool {
+        final public function calculate(array $package, bool $addTariffsToOffice = true): bool
+        {
             if (!$this->api->checkAuth()) {
                 return false;
             }
@@ -60,6 +63,26 @@ namespace Cdek\Helpers {
             }
 
             $tariffList = $this->method->get_option('tariff_list');
+
+            $priceRules = json_decode($this->method->get_option('delivery_price_rules')) ?? [
+                'office' => ['type' => 'percentage', 'to' => null, 'value' => 100],
+                'door'   => ['type' => 'percentage', 'to' => null, 'value' => 100],
+            ];
+
+            foreach (['office', 'door'] as $ruleType) {
+                $priceRules[$ruleType] = array_reduce($priceRules[$ruleType] ?? [],
+                    static function ($carry, $item) use ($package) {
+                        if ($carry !== null) {
+                            return $carry;
+                        }
+
+                        if ($item['to'] >= $package['cart_subtotal']) {
+                            return $item;
+                        }
+
+                        return null;
+                    });
+            }
 
             foreach ([Tariff::SHOP_TYPE, Tariff::DELIVERY_TYPE] as $deliveryType) {
                 $deliveryParam['type'] = $deliveryType;
@@ -100,7 +123,8 @@ namespace Cdek\Helpers {
                     $this->rates[$tariff['tariff_code']] = [
                         'id'        => sprintf('%s_%s', Config::DELIVERY_NAME, $tariff['tariff_code']),
                         'label'     => sprintf("CDEK: %s, (%s-%s дней)",
-                            Tariff::getTariffUserNameByCode($tariff['tariff_code']), $minDay, $maxDay),
+                                               Tariff::getTariffUserNameByCode($tariff['tariff_code']), $minDay,
+                                               $maxDay),
                         'cost'      => $cost,
                         'meta_data' => [
                             Config::ADDRESS_HASH_META_KEY => sha1($deliveryParam['to']['postal_code'].
@@ -118,29 +142,23 @@ namespace Cdek\Helpers {
                 }
             }
 
-            $fixedPrice = ($this->method->get_option('fixprice_toggle') === 'yes') ?
-                (int) $this->method->get_option('fixprice') : null;
-
-            if (($this->method->get_option('stepprice_toggle') === 'yes') &&
-                (int) $package['cart_subtotal'] > (int) $this->method->get_option('stepprice')) {
-                $fixedPrice = 0;
-            }
-
-            $extraCost = (int) $this->method->get_option('extra_cost');
-
-            $percentPrice = $this->method->get_option('percentprice_toggle') === 'yes' ?
-                ($this->method->get_option('percentprice') / 100) : null;
-
             $api         = $this->api;
             $this->rates = array_map(static function ($tariff) use (
-                $fixedPrice,
-                $extraCost,
+                $priceRules,
                 $api,
-                $deliveryParam,
-                $percentPrice
+                $deliveryParam
             ) {
-                if ($fixedPrice !== null) {
-                    $tariff['cost'] = $fixedPrice;
+                $rule = Tariff::isTariffToOffice($deliveryParam['tariff_code']) ? $priceRules['office'] :
+                    $priceRules['door'];
+                if ($rule['type'] === 'free') {
+                    $tariff['cost'] = 0;
+
+                    return $tariff;
+                }
+
+                if ($rule['type'] === 'fixed') {
+                    $tariff['cost'] = function_exists('wcml_get_woocommerce_currency_option') ?
+                        apply_filters('wcml_raw_price_amount', $rule['value'], 'RUB') : $rule['value'];
 
                     return $tariff;
                 }
@@ -158,10 +176,10 @@ namespace Cdek\Helpers {
 
                 $cost = $delivery['total_sum'];
 
-                $cost += $extraCost;
-
-                if ($percentPrice !== null) {
-                    $cost *= $percentPrice;
+                if ($rule['type'] === 'amount') {
+                    $cost += $rule['value'];
+                } else if($rule['type'] === 'percentage') {
+                    $cost *= $rule['value'] / 100;
                 }
 
                 if (function_exists('wcml_get_woocommerce_currency_option')) {
@@ -178,7 +196,8 @@ namespace Cdek\Helpers {
             return !empty($this->rates);
         }
 
-        private function getPackagesData(array $contents): array {
+        private function getPackagesData(array $contents): array
+        {
             $totalWeight = 0;
             $lengthList  = [];
             $widthList   = [];
@@ -247,18 +266,21 @@ namespace Cdek\Helpers {
             ];
         }
 
-        private function checkDeliveryResponse(array $delivery): bool {
+        private function checkDeliveryResponse(array $delivery): bool
+        {
             return !isset($delivery['errors']);
         }
 
-        final public function getRates(): array {
+        final public function getRates(): array
+        {
             return array_values($this->rates);
         }
 
         /**
          * @throws \Cdek\Exceptions\TariffNotAvailableException
          */
-        final public function getTariffRate(int $code): array {
+        final public function getTariffRate(int $code): array
+        {
             if (!isset($this->rates[$code])) {
                 throw new TariffNotAvailableException(array_keys($this->rates));
             }
