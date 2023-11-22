@@ -51,9 +51,9 @@ const onChoose = (_type, _tariff, address) => {
 };
 
 const debouncedCheckoutUpdate = debounce(() => {
-    if ($('#ship-to-different-address-checkbox').is(':checked')
+    if (($('#ship-to-different-address-checkbox').is(':checked')
       ? shippingCityInput.val()
-      : billingCityInput.val() === '') {
+      : billingCityInput.val()) === '') {
         return;
     }
     console.debug(
