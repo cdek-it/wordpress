@@ -1,6 +1,9 @@
 import $ from 'jquery';
 import cdekWidget from '@cdek-it/widget';
 import './styles/main.scss';
+import { createRoot } from 'react-dom/client';
+import { DeliveryPrice } from './components/DeliveryPrice';
+
 $.getJSON(window.cdek_admin_settings.api.check_auth)
  .done(() => $('.token-wrong').remove())
  .fail((jqxhr) => {
@@ -113,4 +116,12 @@ const showMap = () => {
 
 if ($('input#woocommerce_official_cdek_map').length) {
     showMap();
+}
+
+const deliveryRulesInput = $('input#woocommerce_official_cdek_delivery_price_rules');
+
+if (deliveryRulesInput.length){
+    const div = window.document.createElement('div');
+    deliveryRulesInput.after(div);
+    createRoot(div).render(<DeliveryPrice input={deliveryRulesInput}/>);
 }
