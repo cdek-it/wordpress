@@ -1,17 +1,24 @@
 .cdek-delivery-rules {
-  width: 830px;
+  width: 700px;
 
   & > div {
     display: flex;
     align-items: center;
     gap: 10px;
 
-    &:first-of-type {
-      justify-content: space-around;
+    & h4 {
+      margin: 0;
+      text-align: center;
     }
 
-    & h4 {
-      margin: 0
+    &.cdek-header {
+      margin-top: 10px;
+      display: grid;
+      grid-template-columns: 4fr 1fr;
+
+      & > span {
+        justify-self: end;
+      }
     }
 
     .woocommerce table.form-table & {

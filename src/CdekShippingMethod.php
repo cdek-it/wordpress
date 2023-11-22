@@ -13,16 +13,16 @@ class CdekShippingMethod extends WC_Shipping_Method
     public function __construct($instance_id = 0)
     {
         parent::__construct($instance_id);
-        $this->id = Config::DELIVERY_NAME;
-        $this->instance_id = absint($instance_id);
-        $this->method_title = 'Cdek Shipping';
+        $this->id                 = Config::DELIVERY_NAME;
+        $this->instance_id        = absint($instance_id);
+        $this->method_title       = 'Cdek Shipping';
         $this->method_description = 'Custom Shipping Method for Cdek';
-        $this->supports = [
+        $this->supports           = [
             'settings',
             'shipping-zones',
             'instance-settings',
         ];
-        $this->enabled = 'yes';
+        $this->enabled            = 'yes';
         $this->init();
     }
 
@@ -30,23 +30,17 @@ class CdekShippingMethod extends WC_Shipping_Method
     {
         $this->title = 'CDEK Shipping';
         $this->init_settings();
-        add_action('woocommerce_update_options_shipping_' . $this->id, [$this, 'process_admin_options']);
+        add_action('woocommerce_update_options_shipping_'.$this->id, [$this, 'process_admin_options']);
         $this->init_form_fields();
     }
 
     final public function init_form_fields(): void
     {
         $this->instance_form_fields = [
-            'extra_cost' => [
-                'title'             => 'Доп. цена к доставке',
-                'type'              => 'number',
-                'description'       => "стоимость доставки в рублях которая будет добавлена к расчетной стоимости доставки",
-                'desc_tip'          => true,
-                'default'           => '',
-                'custom_attributes' => [
-                    'min'  => 0,
-                    'step' => 1,
-                ],
+            'delivery_price_rules' => [
+                'title' => 'Правила отображения суммы доставки',
+                'label' => '',
+                'type'  => 'hidden',
             ],
         ];
 
@@ -249,8 +243,8 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'class' => 'cdek_package_setting_block_name',
             ],
             'product_weight_default'         => [
-                'title'             => 'Вес одной единицы товара по умолчанию в (' .
-                                       get_option('woocommerce_weight_unit') .
+                'title'             => 'Вес одной единицы товара по умолчанию в ('.
+                                       get_option('woocommerce_weight_unit').
                                        ')',
                 'desc_tip'          => true,
                 'description'       => "У всех товаров должен быть указан вес,
@@ -315,7 +309,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'desc_tip'    => true,
                 'description' => "Расчитывается по сумме товаров в заказе",
             ],
-            'delivery_price_rules'               => [
+            'delivery_price_rules'           => [
                 'title' => 'Правила отображения суммы доставки',
                 'label' => '',
                 'type'  => 'hidden',
@@ -367,10 +361,8 @@ class CdekShippingMethod extends WC_Shipping_Method
         }
 
         // Return global option.
-        $option = apply_filters('woocommerce_shipping_' . $this->id . '_option',
-                                WC_Settings_API::get_option($key, $empty_value),
-                                $key,
-                                $this);
+        $option = apply_filters('woocommerce_shipping_'.$this->id.'_option',
+                                WC_Settings_API::get_option($key, $empty_value), $key, $this);
 
         return $option;
     }
