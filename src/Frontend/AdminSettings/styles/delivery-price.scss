@@ -1,0 +1,29 @@
+.cdek-delivery-rules {
+  width: 830px;
+
+  & > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    &:first-of-type {
+      justify-content: space-around;
+    }
+
+    & h4 {
+      margin: 0
+    }
+
+    .woocommerce table.form-table & {
+      & > select.cdek-selector {
+        width: 145px;
+        line-height: 28px;
+        margin: 5px 0;
+      }
+
+      & > input[type=number] {
+        width: 75px;
+      }
+    }
+  }
+}
