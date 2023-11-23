@@ -1,7 +1,8 @@
 import $ from 'jquery';
 import cdekWidget from '@cdek-it/widget';
-import {addQueryArgs} from '@wordpress/url';
+import { addQueryArgs } from '@wordpress/url';
 import './style/main.scss';
+import { debounce } from 'lodash';
 
 const billingCityInput = $('#billing_city');
 const shippingCityInput = $('#shipping_city');
@@ -39,21 +40,31 @@ const onChoose = (_type, _tariff, address) => {
     el.html('Повторно выбрать ПВЗ');
     const officeInfo = el.parent().children('.cdek-office-info');
     if (officeInfo.length === 0) {
-        el.before(`<div class="cdek-office-info">${address.name} - [${address.code}]</div>`);
+        el.before(
+          `<div class="cdek-office-info">${address.name} - [${address.code}]</div>`);
     } else {
         officeInfo.html(`${address.name} - [${address.code}]`);
     }
 
-    $.getJSON(addQueryArgs(window.cdek_map.tmp_pvz_code, {pvz_code: address.code}))
+    $.getJSON(
+      addQueryArgs(window.cdek_map.tmp_pvz_code, { pvz_code: address.code }));
 };
 
+const debouncedCheckoutUpdate = debounce(() => {
+    if (($('#ship-to-different-address-checkbox').is(':checked')
+      ? shippingCityInput.val()
+      : billingCityInput.val()) === '') {
+        return;
+    }
+    console.debug(
+      '[CDEK-MAP] City or postcode changed, initiating checkout update');
+    $(document.body).trigger('update_checkout');
+}, 500);
+
 $(document.body)
-  .on('change', '#billing_city, #billing_postcode, #shipping_city, #shipping_postcode', () => {
-      if ($('#ship-to-different-address-checkbox').is(':checked') ? shippingCityInput.val() : billingCityInput.val() !== '') {
-          console.debug('[CDEK-MAP] City or state changed, initiating checkout update');
-          $(document.body).trigger('update_checkout');
-      }
-  })
+  .on('input',
+    '#billing_city, #billing_postcode, #shipping_city, #shipping_postcode',
+    debouncedCheckoutUpdate)
   .on('updated_checkout', () => {
       if (widget !== null) {
           console.debug('[CDEK-MAP] Clearing widget selection');
@@ -73,12 +84,14 @@ $(document.body)
 
       if (typeof points !== 'object') {
           console.error('[CDEK_MAP] backend points not object');
-          closeMap(el, 'CDEK не смог загрузить список доступных ПВЗ, выберите другой метод доставки');
+          closeMap(el,
+            'CDEK не смог загрузить список доступных ПВЗ, выберите другой метод доставки');
 
           return;
       } else if (!points.length) {
           console.warn('[CDEK_MAP] backend points are empty');
-          closeMap(el, 'По данному направлению нет доступных пунктов выдачи CDEK, выберите другой метод доставки');
+          closeMap(el,
+            'По данному направлению нет доступных пунктов выдачи CDEK, выберите другой метод доставки');
 
           return;
       }
@@ -88,7 +101,10 @@ $(document.body)
               apiKey: window.cdek.apiKey,
               popup: true,
               debug: true,
-              defaultLocation: $('#ship-to-different-address-checkbox').is(':checked') ? shippingCityInput.val() : billingCityInput.val(),
+              defaultLocation: $('#ship-to-different-address-checkbox')
+                .is(':checked')
+                ? shippingCityInput.val()
+                : billingCityInput.val(),
               officesRaw: points,
               hideDeliveryOptions: {
                   door: true,
@@ -97,7 +113,10 @@ $(document.body)
           });
       } else {
           widget.updateOfficesRaw(points);
-          widget.updateLocation($('#ship-to-different-address-checkbox').is(':checked') ? shippingCityInput.val() : billingCityInput.val());
+          widget.updateLocation(
+            $('#ship-to-different-address-checkbox').is(':checked')
+              ? shippingCityInput.val()
+              : billingCityInput.val());
       }
 
       widget.open();
