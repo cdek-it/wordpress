@@ -14,17 +14,20 @@ namespace Cdek\Helpers {
     use Cdek\Model\Tariff;
     use WC_Shipping_Method;
 
-    class DeliveryCalc {
+    class DeliveryCalc
+    {
         private WC_Shipping_Method $method;
         private array $rates = [];
         private CdekApi $api;
 
-        public function __construct(int $instanceID = null) {
+        public function __construct(int $instanceID = null)
+        {
             $this->method = Helper::getActualShippingMethod($instanceID);
             $this->api    = new CdekApi;
         }
 
-        final public function calculate(array $package, bool $addTariffsToOffice = true): bool {
+        final public function calculate(array $package, bool $addTariffsToOffice = true): bool
+        {
             if (!$this->api->checkAuth()) {
                 return false;
             }
@@ -46,6 +49,7 @@ namespace Cdek\Helpers {
             $deliveryParam['to']       = [
                 'postal_code'  => $package['destination']['postcode'],
                 'city'         => $package['destination']['city'],
+                'address'      => $package['destination']['city'],
                 'country_code' => $package['destination']['country'],
             ];
             $deliveryParam['packages'] = $this->getPackagesData($package['contents']);
@@ -100,7 +104,8 @@ namespace Cdek\Helpers {
                     $this->rates[$tariff['tariff_code']] = [
                         'id'        => sprintf('%s_%s', Config::DELIVERY_NAME, $tariff['tariff_code']),
                         'label'     => sprintf("CDEK: %s, (%s-%s дней)",
-                            Tariff::getTariffUserNameByCode($tariff['tariff_code']), $minDay, $maxDay),
+                                               Tariff::getTariffUserNameByCode($tariff['tariff_code']), $minDay,
+                                               $maxDay),
                         'cost'      => $cost,
                         'meta_data' => [
                             Config::ADDRESS_HASH_META_KEY => sha1($deliveryParam['to']['postal_code'].
@@ -178,7 +183,8 @@ namespace Cdek\Helpers {
             return !empty($this->rates);
         }
 
-        private function getPackagesData(array $contents): array {
+        private function getPackagesData(array $contents): array
+        {
             $totalWeight = 0;
             $lengthList  = [];
             $widthList   = [];
@@ -246,18 +252,21 @@ namespace Cdek\Helpers {
             ];
         }
 
-        private function checkDeliveryResponse(array $delivery): bool {
+        private function checkDeliveryResponse(array $delivery): bool
+        {
             return !isset($delivery['errors']);
         }
 
-        final public function getRates(): array {
+        final public function getRates(): array
+        {
             return array_values($this->rates);
         }
 
         /**
          * @throws \Cdek\Exceptions\TariffNotAvailableException
          */
-        final public function getTariffRate(int $code): array {
+        final public function getTariffRate(int $code): array
+        {
             if (!isset($this->rates[$code])) {
                 throw new TariffNotAvailableException(array_keys($this->rates));
             }
