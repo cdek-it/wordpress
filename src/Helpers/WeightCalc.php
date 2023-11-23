@@ -17,7 +17,7 @@ namespace Cdek\Helpers {
         private const G_INTO_LBS = 453.6;
         private const G_INTO_OZ = 28.35;
 
-        final public static function getWeight(string $weight): float
+        final public static function getWeight($weight): float
         {
             if (empty($weight) ||
                 Helper::getActualShippingMethod()->get_option('product_package_default_toggle') === 'yes') {
@@ -31,7 +31,7 @@ namespace Cdek\Helpers {
             return (float)$weight;
         }
 
-        final public static function getWeightInGrams(float $weight): int
+        final public static function getWeightInGrams($weight): int
         {
             $weightWithFallback = self::getWeight($weight);
             $measurement = get_option('woocommerce_weight_unit');
