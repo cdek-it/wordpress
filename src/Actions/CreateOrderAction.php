@@ -20,11 +20,6 @@ namespace Cdek\Actions {
 
     class CreateOrderAction {
         private CdekApi $api;
-        private WeightCalc $weightCalc;
-
-        public function __construct() {
-            $this->weightCalc = new WeightCalc;
-        }
 
         /**
          * @throws \Cdek\Exceptions\RestApiInvalidRequestException|\Throwable|\JsonException
@@ -203,7 +198,7 @@ namespace Cdek\Actions {
 
             foreach ($items as $item) {
                 $product     = $item->get_product();
-                $weight      = $this->weightCalc->getWeightInGrams($product->get_weight());
+                $weight      = WeightCalc::getWeightInGrams($product->get_weight());
                 $quantity    = (int) $item->get_quantity();
                 $totalWeight += $quantity * $weight;
                 $cost        = $product->get_price();
