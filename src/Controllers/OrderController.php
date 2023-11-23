@@ -19,11 +19,11 @@ namespace Cdek\Controllers {
         /**
          * @throws \JsonException
          * @throws \Cdek\Exceptions\RestApiInvalidRequestException
+         * @throws \Throwable
          */
         public static function createOrder(WP_REST_Request $request): WP_REST_Response
         {
-            return new WP_REST_Response((new CreateOrderAction)($request->get_param('id'),
-                                                                0,
+            return new WP_REST_Response((new CreateOrderAction)($request->get_param('id'), 0,
                                                                 $request->get_param('packages')), 200);
         }
 
@@ -69,6 +69,27 @@ namespace Cdek\Controllers {
                                     'description' => 'Высота упаковки',
                                     'required'    => true,
                                     'type'        => 'integer',
+                                ],
+                                'items'  => [
+                                    'description' => 'Товары в упаковке',
+                                    'required'    => false,
+                                    'type'        => 'array',
+                                    'minItems'    => 1,
+                                    'items'       => [
+                                        'type'       => 'object',
+                                        'properties' => [
+                                            'id' => [
+                                                'description' => 'ID товара',
+                                                'required'    => true,
+                                                'type'        => 'integer',
+                                            ],
+                                            'quantity' => [
+                                                'description' => 'Количество товара в упаковке',
+                                                'required'    => true,
+                                                'type'        => 'integer',
+                                            ],
+                                        ],
+                                    ],
                                 ],
                             ],
                         ],

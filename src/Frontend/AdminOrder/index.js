@@ -18,10 +18,11 @@ $(document).ready(function() {
         packageData.items = [];
         $('.product_list').each(function(index, item) {
             if ($(item).css('display') !== 'none') {
-                packageData.items.push([
-                    $(item).find('input[name=product_id]').val(),
-                    $(item).find('input[type=text]').val(),
-                    $(item).find('input[type=number]').val()]);
+                packageData.items.push({
+                    id: $(item).find('input[name=product_id]').val(),
+                    name: $(item).find('input[type=text]').val(),
+                    quantity: $(item).find('input[type=number]').val(),
+                });
             }
         });
 
@@ -32,7 +33,7 @@ $(document).ready(function() {
             packageInfo = `Упаковка №${packageList.length} (${packageData.length}х${packageData.width}х${packageData.height}):`;
 
             packageData.items.forEach(function(item) {
-                packageInfo += `${item[1]} х${item[2]}, `;
+                packageInfo += `${item.name} х${item.quantity}, `;
             });
 
             $('#package_list').append(`<p>${packageInfo.slice(0, -2)}</p>`);
@@ -48,7 +49,7 @@ $(document).ready(function() {
 
         apiFetch({
             method: 'POST', url: e.target.dataset.action, data: {
-                packages: JSON.stringify(packageList),
+                packages: packageList,
             },
         })
           .then(resp => {
@@ -234,5 +235,4 @@ $(document).ready(function() {
             }
         }).catch(e => console.error(e)).finally(() => $('#cdek-loader').hide());
     });
-
 });
