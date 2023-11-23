@@ -17,7 +17,7 @@ namespace Cdek\Helpers {
         private const G_INTO_LBS = 453.6;
         private const G_INTO_OZ = 28.35;
 
-        final public function getWeight(string $weight): float
+        final public static function getWeight(string $weight): float
         {
             if (empty($weight) ||
                 Helper::getActualShippingMethod()->get_option('product_package_default_toggle') === 'yes') {
@@ -31,23 +31,24 @@ namespace Cdek\Helpers {
             return (float)$weight;
         }
 
-        final public function getWeightInGrams(float $weight): int
+        final public static function getWeightInGrams(float $weight): int
         {
+            $weightWithFallback = self::getWeight($weight);
             $measurement = get_option('woocommerce_weight_unit');
             switch ($measurement) {
                 case 'g':
-                    return (int)$weight;
+                    return (int)$weightWithFallback;
                 case 'kg':
-                    return $this->convertToG($weight, self::G_INTO_KG);
+                    return self::convertToG($weightWithFallback, self::G_INTO_KG);
                 case 'lbs':
-                    return $this->convertToG($weight, self::G_INTO_LBS);
+                    return self::convertToG($weightWithFallback, self::G_INTO_LBS);
                 case 'oz':
-                    return $this->convertToG($weight, self::G_INTO_OZ);
+                    return self::convertToG($weightWithFallback, self::G_INTO_OZ);
             }
             throw new RuntimeException('CDEKDelivery: The selected unit of measure is not found');
         }
 
-        private function convertToG(float $weight, float $coefficient): int
+        private static function convertToG(float $weight, float $coefficient): int
         {
             return (int)($weight * $coefficient);
         }
