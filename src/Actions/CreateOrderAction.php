@@ -102,9 +102,9 @@ namespace Cdek\Actions {
                     ],
                 ],
                 'recipient'       => [
-                    'name'   => $order->get_shipping_first_name() ?:
-                        $order->get_billing_first_name().' '.$order->get_shipping_last_name() ?:
-                            $order->get_billing_last_name(),
+                    'name'   => ($order->get_shipping_first_name() ?:
+                        $order->get_billing_first_name()).' '.($order->get_shipping_last_name() ?:
+                            $order->get_billing_last_name()),
                     'email'  => $order->get_billing_email(),
                     'phones' => [
                         'number' => $order->get_shipping_phone() ?: $order->get_billing_phone(),
