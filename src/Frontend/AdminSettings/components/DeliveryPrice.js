@@ -38,8 +38,7 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
     return rules.map((rule, index) => (<div
       key={rule.to + rule.value + rule.type + index}>{__('Сумма заказа',
       'cdek-official')} {rules[index - 1] &&
-      <>{__('от', 'cdek-official')} {rules[index - 1].to +
-        1}{CURRENCY.symbol}</>} {rule.to && <>{__('до', 'cdek-official')}
+      <>{__('от', 'cdek-official')} {rules[index - 1].to}{CURRENCY.symbol}</>} {rule.to && <>{__('меньше или равно', 'cdek-official')}
         <input defaultValue={rule.to}
                min={rules[index - 1] ? rules[index - 1].to + 1 : 0}
                type="number"
@@ -53,7 +52,7 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
                 {__('бесплатно', 'cdek-official')}
             </option>
             <option value="percentage">
-                {__('взять процентом', 'cdek-official')}
+                {__('взять в процентах', 'cdek-official')}
             </option>
             <option value="fixed">
                 {__('фиксировать на', 'cdek-official')}
