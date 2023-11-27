@@ -8,7 +8,7 @@ const billingCityInput = $('#billing_city');
 const shippingCityInput = $('#shipping_city');
 let widget = null;
 
-if (billingCityInput.val() !== '' || shippingCityInput.val() !== '') {
+if ((billingCityInput.val() || '') !== '' || (shippingCityInput.val() || '') !== '') {
     console.debug('[CDEK-MAP] City has value, initiating checkout update');
     $(document.body).trigger('update_checkout');
 }
