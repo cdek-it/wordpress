@@ -151,13 +151,13 @@ namespace Cdek\Helpers {
             ) {
                 $rule = Tariff::isTariffToOffice($tariff['meta_data']['tariff_code']) ? $priceRules['office'] :
                     $priceRules['door'];
-                if ($rule['type'] === 'free') {
+                if (isset($rule['type']) && $rule['type'] === 'free') {
                     $tariff['cost'] = 0;
 
                     return $tariff;
                 }
 
-                if ($rule['type'] === 'fixed') {
+                if (isset($rule['type']) && $rule['type'] === 'fixed') {
                     $tariff['cost'] = function_exists('wcml_get_woocommerce_currency_option') ?
                         apply_filters('wcml_raw_price_amount', $rule['value'], 'RUB') : $rule['value'];
 
@@ -177,9 +177,9 @@ namespace Cdek\Helpers {
 
                 $cost = $delivery['total_sum'];
 
-                if ($rule['type'] === 'amount') {
+                if (isset($rule['type']) && $rule['type'] === 'amount') {
                     $cost += $rule['value'];
-                } else if($rule['type'] === 'percentage') {
+                } else if(isset($rule['type']) && $rule['type'] === 'percentage') {
                     $cost *= $rule['value'] / 100;
                 }
 
