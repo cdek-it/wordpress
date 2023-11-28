@@ -14,7 +14,7 @@ namespace Cdek\UI {
 
     class Admin {
         public static function registerAdminScripts(): void {
-            if (!isset($_GET['section']) || $_GET['section'] !== Config::DELIVERY_NAME) {
+            if (!isset($_GET['tab']) || $_GET['tab'] !== 'shipping') {
                 return;
             }
 

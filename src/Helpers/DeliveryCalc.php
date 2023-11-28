@@ -65,6 +65,26 @@ namespace Cdek\Helpers {
 
             $tariffList = $this->method->get_option('tariff_list');
 
+            $priceRules = json_decode($this->method->get_option('delivery_price_rules')) ?? [
+                'office' => ['type' => 'percentage', 'to' => null, 'value' => 100],
+                'door'   => ['type' => 'percentage', 'to' => null, 'value' => 100],
+            ];
+
+            foreach (['office', 'door'] as $ruleType) {
+                $priceRules[$ruleType] = array_reduce($priceRules[$ruleType] ?? [],
+                    static function ($carry, $item) use ($package) {
+                        if ($carry !== null) {
+                            return $carry;
+                        }
+
+                        if ($item['to'] >= $package['cart_subtotal']) {
+                            return $item;
+                        }
+
+                        return null;
+                    });
+            }
+
             foreach ([Tariff::SHOP_TYPE, Tariff::DELIVERY_TYPE] as $deliveryType) {
                 $deliveryParam['type'] = $deliveryType;
 
@@ -123,29 +143,23 @@ namespace Cdek\Helpers {
                 }
             }
 
-            $fixedPrice = ($this->method->get_option('fixprice_toggle') === 'yes') ?
-                (int) $this->method->get_option('fixprice') : null;
-
-            if (($this->method->get_option('stepprice_toggle') === 'yes') &&
-                (int) $package['cart_subtotal'] > (int) $this->method->get_option('stepprice')) {
-                $fixedPrice = 0;
-            }
-
-            $extraCost = (int) $this->method->get_option('extra_cost');
-
-            $percentPrice = $this->method->get_option('percentprice_toggle') === 'yes' ?
-                ($this->method->get_option('percentprice') / 100) : null;
-
             $api         = $this->api;
             $this->rates = array_map(static function ($tariff) use (
-                $fixedPrice,
-                $extraCost,
+                $priceRules,
                 $api,
-                $deliveryParam,
-                $percentPrice
+                $deliveryParam
             ) {
-                if ($fixedPrice !== null) {
-                    $tariff['cost'] = $fixedPrice;
+                $rule = Tariff::isTariffToOffice($deliveryParam['tariff_code']) ? $priceRules['office'] :
+                    $priceRules['door'];
+                if ($rule['type'] === 'free') {
+                    $tariff['cost'] = 0;
+
+                    return $tariff;
+                }
+
+                if ($rule['type'] === 'fixed') {
+                    $tariff['cost'] = function_exists('wcml_get_woocommerce_currency_option') ?
+                        apply_filters('wcml_raw_price_amount', $rule['value'], 'RUB') : $rule['value'];
 
                     return $tariff;
                 }
@@ -163,10 +177,10 @@ namespace Cdek\Helpers {
 
                 $cost = $delivery['total_sum'];
 
-                $cost += $extraCost;
-
-                if ($percentPrice !== null) {
-                    $cost *= $percentPrice;
+                if ($rule['type'] === 'amount') {
+                    $cost += $rule['value'];
+                } else if($rule['type'] === 'percentage') {
+                    $cost *= $rule['value'] / 100;
                 }
 
                 if (function_exists('wcml_get_woocommerce_currency_option')) {

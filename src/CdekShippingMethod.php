@@ -13,16 +13,16 @@ class CdekShippingMethod extends WC_Shipping_Method
     public function __construct($instance_id = 0)
     {
         parent::__construct($instance_id);
-        $this->id = Config::DELIVERY_NAME;
-        $this->instance_id = absint($instance_id);
-        $this->method_title = 'Cdek Shipping';
+        $this->id                 = Config::DELIVERY_NAME;
+        $this->instance_id        = absint($instance_id);
+        $this->method_title       = 'Cdek Shipping';
         $this->method_description = 'Custom Shipping Method for Cdek';
-        $this->supports = [
+        $this->supports           = [
             'settings',
             'shipping-zones',
             'instance-settings',
         ];
-        $this->enabled = 'yes';
+        $this->enabled            = 'yes';
         $this->init();
     }
 
@@ -30,23 +30,17 @@ class CdekShippingMethod extends WC_Shipping_Method
     {
         $this->title = 'CDEK Shipping';
         $this->init_settings();
-        add_action('woocommerce_update_options_shipping_' . $this->id, [$this, 'process_admin_options']);
+        add_action('woocommerce_update_options_shipping_'.$this->id, [$this, 'process_admin_options']);
         $this->init_form_fields();
     }
 
     final public function init_form_fields(): void
     {
         $this->instance_form_fields = [
-            'extra_cost' => [
-                'title'             => 'Доп. цена к доставке',
-                'type'              => 'number',
-                'description'       => "стоимость доставки в рублях которая будет добавлена к расчетной стоимости доставки",
-                'desc_tip'          => true,
-                'default'           => '',
-                'custom_attributes' => [
-                    'min'  => 0,
-                    'step' => 1,
-                ],
+            'delivery_price_rules' => [
+                'title' => 'Правила отображения суммы доставки',
+                'label' => '',
+                'type'  => 'hidden',
             ],
         ];
 
@@ -249,8 +243,8 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'class' => 'cdek_package_setting_block_name',
             ],
             'product_weight_default'         => [
-                'title'             => 'Вес одной единицы товара по умолчанию в (' .
-                                       get_option('woocommerce_weight_unit') .
+                'title'             => 'Вес одной единицы товара по умолчанию в ('.
+                                       get_option('woocommerce_weight_unit').
                                        ')',
                 'desc_tip'          => true,
                 'description'       => "У всех товаров должен быть указан вес,
@@ -308,17 +302,6 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'type'  => 'title',
                 'class' => 'cdek_delivery_price_block_name',
             ],
-            'extra_cost'                     => [
-                'title'             => 'Доп. цена к доставке',
-                'type'              => 'number',
-                'description'       => "стоимость доставки в рублях которая будет добавлена к расчетной стоимости доставки",
-                'desc_tip'          => true,
-                'default'           => 0,
-                'custom_attributes' => [
-                    'min'  => 1,
-                    'step' => 1,
-                ],
-            ],
             'insurance'                      => [
                 'title'       => 'Страховка',
                 'label'       => 'Добавить расчет страховки к стоимости доставки',
@@ -326,78 +309,16 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'desc_tip'    => true,
                 'description' => "Расчитывается по сумме товаров в заказе",
             ],
-            'percentprice_title'             => [
-                'title' => 'Отображение суммы доставки',
-                'type'  => 'title',
-            ],
-            'percentprice_toggle'            => [
-                'title' => '',
-                'type'  => 'checkbox',
-                'label' => 'Изменить отображение суммы доставки (в процентах от тарифа)',
-            ],
-            'percentprice'                   => [
-                'title'             => '',
-                'type'              => 'number',
-                'description'       => 'Значение больше 100 -> увеличение стоимости доставки, значение меньше 100 -> уменьшение стоимости',
-                'desc_tip'          => true,
-                'default'           => 100,
-                'custom_attributes' => [
-                    'min'  => 1,
-                    'step' => 1,
-                ],
-            ],
-            'fixprice_title'                 => [
-                'title' => 'Фиксированная стоимость доставки',
-                'type'  => 'title',
-            ],
-            'fixprice_toggle'                => [
-                'title' => '',
-                'label' => 'Включить фиксированную стоимость доставки',
-                'type'  => 'checkbox',
-            ],
-            'fixprice'                       => [
-                'type'              => 'number',
-                'description'       => "Стоимость в рублях",
-                'default'           => 0,
-                'custom_attributes' => [
-                    'min'  => 0,
-                    'step' => 1,
-                ],
-            ],
-            'stepprice_title'                => [
-                'title' => 'Бесплатная доставка от суммы заказа',
-                'type'  => 'title',
-            ],
-            'stepprice_toggle'               => [
-                'title' => '',
-                'label' => 'Включить бесплатную доставку от суммы заказа',
-                'type'  => 'checkbox',
-            ],
-            'stepprice'                      => [
-                'type'              => 'number',
-                'description'       => "Сумма заказа в рублях, от которой будет бесплатная доставка",
-                'default'           => 1000,
-                'custom_attributes' => [
-                    'min'  => 0,
-                    'step' => 1,
-                ],
+            'delivery_price_rules'           => [
+                'title' => 'Правила отображения суммы доставки',
+                'label' => '',
+                'type'  => 'hidden',
             ],
             'stepcodprice_title'             => [
                 'title'       => 'Настройки наложенного платежа',
                 'type'        => 'title',
                 'description' => 'Настройки для наложенного платежа применяются только во время отправки заказа из админ
                 панели и для пользователя на странице чекаута не отображаются',
-            ],
-            'stepcodprice'                   => [
-                'title'             => 'Бесплатная доставка от суммы заказа в рублях',
-                'type'              => 'number',
-                'desc_tip'          => true,
-                'description'       => "Не применяется если значение не задано",
-                'default'           => 1000,
-                'custom_attributes' => [
-                    'min'  => 0,
-                    'step' => 1,
-                ],
             ],
             'percentcod'                     => [
                 'title'             => 'Наценка к заказу в процентах',
@@ -440,10 +361,8 @@ class CdekShippingMethod extends WC_Shipping_Method
         }
 
         // Return global option.
-        $option = apply_filters('woocommerce_shipping_' . $this->id . '_option',
-                                WC_Settings_API::get_option($key, $empty_value),
-                                $key,
-                                $this);
+        $option = apply_filters('woocommerce_shipping_'.$this->id.'_option',
+                                WC_Settings_API::get_option($key, $empty_value), $key, $this);
 
         return $option;
     }
