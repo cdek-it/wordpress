@@ -13,8 +13,10 @@ namespace Cdek\Helpers {
     use WC_Order;
     use WC_Order_Item;
 
-    class CheckoutHelper {
-        public static function getValueFromCurrentSession(string $valueName, string $defaultValue = null): ?string {
+    class CheckoutHelper
+    {
+        public static function getValueFromCurrentSession(string $valueName, string $defaultValue = null): ?string
+        {
             $shippingValue = WC()->checkout()->get_value("shipping_$valueName");
             if (isset($shippingValue)) {
                 return $shippingValue;
@@ -33,7 +35,8 @@ namespace Cdek\Helpers {
                    $defaultValue;
         }
 
-        public static function isCdekShippingMethod(WC_Order $order): bool {
+        public static function isCdekShippingMethod(WC_Order $order): bool
+        {
             try {
                 return self::getOrderShippingMethod($order)->get_method_id() === Config::DELIVERY_NAME;
             } catch (RuntimeException $e) {
@@ -41,7 +44,8 @@ namespace Cdek\Helpers {
             }
         }
 
-        public static function getOrderShippingMethod(WC_Order $order): WC_Order_Item {
+        public static function getOrderShippingMethod(WC_Order $order): WC_Order_Item
+        {
             $shippingMethodArray = $order->get_items('shipping');
             if (empty($shippingMethodArray)) {
                 throw new RuntimeException('Order don\'t have shipping methods');
@@ -50,7 +54,8 @@ namespace Cdek\Helpers {
             return array_shift($shippingMethodArray);
         }
 
-        public static function restoreCheckoutFields(array $fields): array {
+        public static function restoreCheckoutFields(array $fields): array
+        {
             $checkout = WC()->checkout();
 
             $originalFields = $checkout->get_checkout_fields('billing');
@@ -59,9 +64,7 @@ namespace Cdek\Helpers {
             foreach (
                 [
                     'billing_first_name',
-                    'billing_last_name',
                     'billing_city',
-                    'billing_postcode',
                     'billing_phone',
                     'billing_address_1',
                 ] as $requiredField
@@ -71,9 +74,17 @@ namespace Cdek\Helpers {
                                                      $originalFields[$requiredField];
             }
 
-            foreach (['billing_address_1', 'billing_address_2'] as $field) {
+            foreach (
+                [
+                    'billing_address_1'  => false,
+                    'billing_address_2'  => false,
+                    'billing_phone'      => true,
+                    'billing_city'       => true,
+                    'billing_first_name' => true,
+                ] as $field => $value
+            ) {
                 if (isset($fields['billing'][$field])) {
-                    $fields['billing'][$field]['required'] = false;
+                    $fields['billing'][$field]['required'] = $value;
                 }
             }
 
