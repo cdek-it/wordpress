@@ -65,7 +65,7 @@ namespace Cdek\Helpers {
 
             $tariffList = $this->method->get_option('tariff_list');
 
-            $priceRules = json_decode($this->method->get_option('delivery_price_rules')) ?? [
+            $priceRules = json_decode($this->method->get_option('delivery_price_rules'), true) ?? [
                 'office' => ['type' => 'percentage', 'to' => null, 'value' => 100],
                 'door'   => ['type' => 'percentage', 'to' => null, 'value' => 100],
             ];
@@ -149,7 +149,7 @@ namespace Cdek\Helpers {
                 $api,
                 $deliveryParam
             ) {
-                $rule = Tariff::isTariffToOffice($deliveryParam['tariff_code']) ? $priceRules['office'] :
+                $rule = Tariff::isTariffToOffice($tariff['meta_data']['tariff_code']) ? $priceRules['office'] :
                     $priceRules['door'];
                 if ($rule['type'] === 'free') {
                     $tariff['cost'] = 0;
