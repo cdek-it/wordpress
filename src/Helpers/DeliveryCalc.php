@@ -49,6 +49,7 @@ namespace Cdek\Helpers {
             $deliveryParam['to']       = [
                 'postal_code'  => $package['destination']['postcode'],
                 'city'         => $package['destination']['city'],
+                'address'      => $package['destination']['city'],
                 'country_code' => $package['destination']['country'],
             ];
             $deliveryParam['packages'] = $this->getPackagesData($package['contents']);
@@ -202,7 +203,6 @@ namespace Cdek\Helpers {
             $lengthList  = [];
             $widthList   = [];
             $heightList  = [];
-            $weightClass = new WeightCalc();
             foreach ($contents as $productGroup) {
                 $quantity = $productGroup['quantity'];
                 $weight   = $productGroup['data']->get_weight();
@@ -229,7 +229,7 @@ namespace Cdek\Helpers {
                 $heightList[] = $dimensions[1];
                 $widthList[]  = $dimensions[2];
 
-                $weight      = $weightClass->getWeight($weight);
+                $weight      = WeightCalc::getWeight($weight);
                 $totalWeight += $quantity * $weight;
             }
 
@@ -261,7 +261,7 @@ namespace Cdek\Helpers {
                 'length'           => $length,
                 'width'            => $width,
                 'height'           => $height,
-                'weight'           => $weightClass->getWeightInGrams($totalWeight),
+                'weight'           => WeightCalc::getWeightInGrams($totalWeight),
                 'weight_orig_unit' => $totalWeight,
             ];
         }

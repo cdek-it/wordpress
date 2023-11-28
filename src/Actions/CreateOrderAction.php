@@ -18,18 +18,15 @@ namespace Cdek\Actions {
     use Throwable;
     use WC_Order;
 
-    class CreateOrderAction {
+    class CreateOrderAction
+    {
         private CdekApi $api;
-        private WeightCalc $weightCalc;
-
-        public function __construct() {
-            $this->weightCalc = new WeightCalc;
-        }
 
         /**
          * @throws \Cdek\Exceptions\RestApiInvalidRequestException|\Throwable|\JsonException
          */
-        public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array {
+        public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
+        {
             $this->api                    = new CdekApi;
             $order                        = wc_get_order($orderId);
             $postOrderData                = OrderMetaData::getMetaByOrderId($orderId);
@@ -71,7 +68,8 @@ namespace Cdek\Actions {
             }
         }
 
-        private function buildRequestData(WC_Order $order): array {
+        private function buildRequestData(WC_Order $order): array
+        {
             $postOrderData  = OrderMetaData::getMetaByOrderId($order->get_id());
             $deliveryMethod = Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
                                                                             ->get_data()['instance_id']);
@@ -104,11 +102,9 @@ namespace Cdek\Actions {
                     ],
                 ],
                 'recipient'       => [
-                    'name'   => $order->get_shipping_first_name()
-                                ?:
-                                $order->get_billing_first_name().' '.$order->get_shipping_last_name()
-                                ?:
-                                $order->get_billing_last_name(),
+                    'name'   => ($order->get_shipping_first_name() ?:
+                        $order->get_billing_first_name()).' '.($order->get_shipping_last_name() ?:
+                            $order->get_billing_last_name()),
                     'email'  => $order->get_billing_email(),
                     'phones' => [
                         'number' => $order->get_shipping_phone() ?: $order->get_billing_phone(),
@@ -165,23 +161,48 @@ namespace Cdek\Actions {
             return $param;
         }
 
-        private function buildPackagesData(WC_Order $order, array $packages = null): array {
+        private function buildPackagesData(WC_Order $order, array $packages = null): array
+        {
             $items = $order->get_items();
-
             if ($packages === null) {
                 $deliveryMethod = CheckoutHelper::getOrderShippingMethod($order);
 
                 return [
                     $this->buildItemsData($order, $deliveryMethod->get_meta('length'),
-                        $deliveryMethod->get_meta('width'), $deliveryMethod->get_meta('height'), $items),
+                                          $deliveryMethod->get_meta('width'), $deliveryMethod->get_meta('height'),
+                                          $items),
                 ];
             }
 
             $output = [];
 
             foreach ($packages as $package) {
+                if (empty($package['items'])) {
+                    $package['items'] = array_map(static function ($item) {
+                        $product = $item->get_product();
+
+                        return [
+                            'id'       => $product->get_id(),
+                            'name'     => $product->get_name(),
+                            'weight'   => $product->get_weight(),
+                            'quantity' => $item->get_quantity(),
+                            'price'    => $product->get_price(),
+                        ];
+                    }, $items);
+                }else{
+                    $package['items'] = array_map(static function ($el) {
+                        $product = wc_get_product($el['id']);
+                        return [
+                            'id'       => $product->get_id(),
+                            'name'     => $product->get_name(),
+                            'weight'   => $product->get_weight(),
+                            'quantity' => $el['quantity'],
+                            'price'    => $product->get_price(),
+                        ];
+                    }, $package['items']);
+                }
                 $output[] = $this->buildItemsData($order, $package['length'], $package['width'], $package['height'],
-                    $package['items'] ?? $items);
+                                                  $package['items']);
             }
 
             return $output;
@@ -202,11 +223,10 @@ namespace Cdek\Actions {
             $itemsData   = [];
 
             foreach ($items as $item) {
-                $product     = $item->get_product();
-                $weight      = $this->weightCalc->getWeightInGrams($product->get_weight());
-                $quantity    = (int) $item->get_quantity();
+                $weight      = WeightCalc::getWeightInGrams($item['weight']);
+                $quantity    = (int) $item['quantity'];
                 $totalWeight += $quantity * $weight;
-                $cost        = $product->get_price();
+                $cost        = $item['price'];
 
                 if ($postOrderData['currency'] !== 'RUB' && function_exists('wcml_get_woocommerce_currency_option')) {
                     $cost = $this->convertCurrencyToRub($cost, $postOrderData['currency']);
@@ -225,11 +245,11 @@ namespace Cdek\Actions {
                 }
 
                 $itemsData[] = [
-                    'ware_key'     => $product->get_id(),
+                    'ware_key'     => $item['id'],
                     'payment'      => ['value' => $paymentValue],
-                    'name'         => $product->get_name(),
+                    'name'         => $item['name'],
                     'cost'         => $cost,
-                    'amount'       => $item->get_quantity(),
+                    'amount'       => $item['quantity'],
                     'weight'       => $weight,
                     'weight_gross' => $weight + 1,
                 ];
@@ -251,7 +271,8 @@ namespace Cdek\Actions {
             return $package;
         }
 
-        private function convertCurrencyToRub(float $cost, string $currency): float {
+        private function convertCurrencyToRub(float $cost, string $currency): float
+        {
             global $woocommerce_wpml;
 
             $multiCurrency = $woocommerce_wpml->get_multi_currency();
@@ -279,7 +300,8 @@ namespace Cdek\Actions {
             return $cost;
         }
 
-        private function getCdekOrderNumber(string $orderUuid, int $iteration = 1): ?string {
+        private function getCdekOrderNumber(string $orderUuid, int $iteration = 1): ?string
+        {
             sleep(1);
 
             if ($iteration === 5) {

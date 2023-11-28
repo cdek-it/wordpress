@@ -39,6 +39,8 @@ namespace Cdek\Actions {
                                                ], $order->get_items()),
                                                'destination' => [
                                                    'city' => $order->get_shipping_city(),
+                                                   'country' => $order->get_shipping_country(),
+                                                   'postcode' => $order->get_shipping_postcode(),
                                                ],
                                            ], isset(OrderMetaData::getMetaByOrderId($order->get_id())['pvz_code']));
 
