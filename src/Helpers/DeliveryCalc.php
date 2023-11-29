@@ -65,9 +65,9 @@ namespace Cdek\Helpers {
 
             $tariffList = $this->method->get_option('tariff_list');
 
-            $priceRules = json_decode($this->method->get_option('delivery_price_rules'), true) ?? [
-                'office' => ['type' => 'percentage', 'to' => null, 'value' => 100],
-                'door'   => ['type' => 'percentage', 'to' => null, 'value' => 100],
+            $priceRules = json_decode($this->method->get_option('delivery_price_rules'), true) ?: [
+                'office' => [['type' => 'percentage', 'to' => null, 'value' => 100]],
+                'door'   => [['type' => 'percentage', 'to' => null, 'value' => 100]],
             ];
 
             foreach (['office', 'door'] as $ruleType) {
