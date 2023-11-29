@@ -85,7 +85,8 @@ namespace Cdek {
                     throw new RuntimeException("$plugin plugin is not activated, but required.");
                 }
 
-                if (version_compare($checkFields['version'], get_file_data(plugin_basename($checkFields['entry']), ['Version'])[0], '>')) {
+                if (version_compare($checkFields['version'], get_file_data(WP_PLUGIN_DIR. '/'. $checkFields['entry'],
+                                                                           ['Version'])[0], '>')) {
                     throw new RuntimeException("$plugin plugin version is too old, required minimum version is {$checkFields['version']}.");
                 }
             }
