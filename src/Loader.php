@@ -35,7 +35,7 @@ namespace Cdek {
         public const REQUIRED_PLUGINS = [
             'WooCommerce' => [
                 'entry'   => 'woocommerce/woocommerce.php',
-                'version' => '7.0.0',
+                'version' => '6.9.0',
             ],
         ];
         public const EXTENSIONS = [
@@ -83,6 +83,10 @@ namespace Cdek {
             foreach (self::REQUIRED_PLUGINS as $plugin => $checkFields) {
                 if (!in_array($checkFields['entry'], $activePlugins, true)) {
                     throw new RuntimeException("$plugin plugin is not activated, but required.");
+                }
+
+                if (version_compare($checkFields['version'], get_file_data(plugin_basename($checkFields['entry']), ['Version'])[0], '>')) {
+                    throw new RuntimeException("$plugin plugin version is too old, required minimum version is {$checkFields['version']}.");
                 }
             }
 
