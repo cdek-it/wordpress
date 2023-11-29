@@ -45,9 +45,6 @@ const onChoose = (_type, _tariff, address) => {
     } else {
         officeInfo.html(`${address.name} - [${address.code}]`);
     }
-
-    $.getJSON(
-      addQueryArgs(window.cdek_map.tmp_pvz_code, { pvz_code: address.code }));
 };
 
 const debouncedCheckoutUpdate = debounce(() => {

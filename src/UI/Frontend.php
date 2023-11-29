@@ -18,9 +18,6 @@ namespace Cdek\UI {
             }
 
             Helper::enqueueScript('cdek-map', 'cdek-checkout-map', true);
-            wp_localize_script('cdek-map', 'cdek_map', [
-                'tmp_pvz_code' => UrlHelper::buildRest('/set-pvz-code-tmp'),
-            ]);
         }
 
         public function __invoke(): void {
