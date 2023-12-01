@@ -34,7 +34,7 @@ namespace Cdek\Validator {
 
             $tariffCode = explode('_', $shippingMethodIdSelected)[2];
             if (Tariff::isTariffToOffice($tariffCode)) {
-                $pvzCode = CheckoutHelper::getValueFromCurrentSession('pvz_code') ?? WC()->session->get('pvz_code');
+                $pvzCode = CheckoutHelper::getValueFromCurrentSession('pvz_code');
                 if (empty($pvzCode)) {
                     wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
                 }

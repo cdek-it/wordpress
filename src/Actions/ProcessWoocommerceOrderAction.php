@@ -13,7 +13,7 @@ namespace Cdek\Actions {
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
-    use Google\Exception;
+    use Exception;
     use WC_Order;
 
     class ProcessWoocommerceOrderAction

@@ -20,13 +20,6 @@ namespace Cdek\Controllers {
             return new WP_REST_Response((new CdekApi)->getOffices($data->get_params()), 200);
         }
 
-        public static function setTmpPointCode(WP_REST_Request $data): WP_REST_Response
-        {
-            WC()->session->set('pvz_code', $data->get_param('pvz_code'));
-
-            return new WP_REST_Response('', 204);
-        }
-
         public function __invoke(): void
         {
             register_rest_route(Config::DELIVERY_NAME, '/get-offices', [
