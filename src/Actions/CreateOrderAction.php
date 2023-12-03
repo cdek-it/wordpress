@@ -27,6 +27,7 @@ namespace Cdek\Actions {
          */
         public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
         {
+
             $this->api                    = new CdekApi;
             $order                        = wc_get_order($orderId);
             $postOrderData                = OrderMetaData::getMetaByOrderId($orderId);
@@ -102,9 +103,9 @@ namespace Cdek\Actions {
                     ],
                 ],
                 'recipient'       => [
-                    'name'   => ($order->get_shipping_first_name() ?:
-                        $order->get_billing_first_name()).' '.($order->get_shipping_last_name() ?:
-                            $order->get_billing_last_name()),
+                    'name'   => ($order->get_shipping_first_name() ?: $order->get_billing_first_name()).
+                                ' '.
+                                ($order->get_shipping_last_name() ?: $order->get_billing_last_name()),
                     'email'  => $order->get_billing_email(),
                     'phones' => [
                         'number' => $order->get_shipping_phone() ?: $order->get_billing_phone(),
@@ -167,10 +168,22 @@ namespace Cdek\Actions {
             if ($packages === null) {
                 $deliveryMethod = CheckoutHelper::getOrderShippingMethod($order);
 
+                $packageItems = array_map(static function ($item) {
+                    $product = $item->get_product();
+
+                    return [
+                        'id'       => $product->get_id(),
+                        'name'     => $product->get_name(),
+                        'weight'   => $product->get_weight(),
+                        'quantity' => $item->get_quantity(),
+                        'price'    => $product->get_price(),
+                    ];
+                }, $items);
+
                 return [
                     $this->buildItemsData($order, $deliveryMethod->get_meta('length'),
                                           $deliveryMethod->get_meta('width'), $deliveryMethod->get_meta('height'),
-                                          $items),
+                                          $packageItems),
                 ];
             }
 
@@ -189,9 +202,10 @@ namespace Cdek\Actions {
                             'price'    => $product->get_price(),
                         ];
                     }, $items);
-                }else{
+                } else {
                     $package['items'] = array_map(static function ($el) {
                         $product = wc_get_product($el['id']);
+
                         return [
                             'id'       => $product->get_id(),
                             'name'     => $product->get_name(),
