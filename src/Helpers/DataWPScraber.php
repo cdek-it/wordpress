@@ -7,7 +7,7 @@ namespace {
 
 namespace Cdek\Helpers {
 
-    use Cdek\Config;
+    use Cdek\MetaKeys;
 
     class DataWPScraber
     {
@@ -23,7 +23,34 @@ namespace Cdek\Helpers {
 
         public static function hideMeta(array $hiddenMeta): array
         {
-            $hiddenMeta[] = Config::ADDRESS_HASH_META_KEY;
+            $hiddenMeta[] = MetaKeys::ADDRESS_HASH;
+            $hiddenMeta[] = MetaKeys::WEIGHT;
+            $hiddenMeta[] = MetaKeys::LENGTH;
+            $hiddenMeta[] = MetaKeys::WIDTH;
+            $hiddenMeta[] = MetaKeys::HEIGHT;
+            $hiddenMeta[] = MetaKeys::TARIFF_CODE;
+            $hiddenMeta[] = MetaKeys::TARIFF_MODE;
+            $hiddenMeta[] = MetaKeys::OFFICE_CODE;
+
+            if (($_REQUEST['page'] === 'wc-orders' &&
+                 $_REQUEST['action'] === 'edit' &&
+                 CheckoutHelper::isCdekShippingMethod(wc_get_order($_REQUEST['id']))) ||
+                ($_REQUEST['action'] === 'woocommerce_load_order_items' &&
+                 CheckoutHelper::isCdekShippingMethod(wc_get_order($_REQUEST['order_id'])))) {
+                $hiddenMeta[] = 'tariff_code';
+                $hiddenMeta[] = 'tariff_type';
+                $hiddenMeta[] = 'tariff_mode';
+                $hiddenMeta[] = 'length';
+                $hiddenMeta[] = 'width';
+                $hiddenMeta[] = 'height';
+                $hiddenMeta[] = 'pvz';
+                $hiddenMeta[] = 'weight';
+                $hiddenMeta[] = 'weight (kg)';
+                $hiddenMeta[] = 'weight (g)';
+                $hiddenMeta[] = 'weight (lbs)';
+                $hiddenMeta[] = 'weight (oz)';
+            }
+
             return $hiddenMeta;
         }
     }

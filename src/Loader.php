@@ -23,6 +23,7 @@ namespace Cdek {
     use Cdek\Helpers\DataWPScraber;
     use Cdek\UI\Admin;
     use Cdek\UI\AdminNotices;
+    use Cdek\UI\AdminShippingFields;
     use Cdek\UI\CdekWidget;
     use Cdek\UI\CheckoutMap;
     use Cdek\UI\Frontend;
@@ -101,7 +102,7 @@ namespace Cdek {
 
         public function __invoke(string $pluginMainFile): void {
             self::$pluginMainFile = $pluginMainFile;
-            add_action('activate_cdek/cdek.php', [__CLASS__, 'activate']);
+            add_action("activate_$pluginMainFile", [__CLASS__, 'activate']);
 
             try {
                 self::checkRequirements();
@@ -141,6 +142,8 @@ namespace Cdek {
             add_action('woocommerce_blocks_loaded', [CheckoutMapBlock::class, 'addStoreApiData']);
 
             add_action('woocommerce_store_api_checkout_update_order_from_request', [CheckoutMapBlock::class, 'saveOrderData'], 10, 2);
+
+            add_action('woocommerce_before_order_itemmeta', new AdminShippingFields, 10, 2);
 
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, new CreateOrderAction, 10, 2);
 
