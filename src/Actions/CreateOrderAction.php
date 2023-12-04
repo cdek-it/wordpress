@@ -13,6 +13,7 @@ namespace Cdek\Actions {
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\StringHelper;
     use Cdek\Helpers\WeightCalc;
+    use Cdek\MetaKeys;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
     use Throwable;
@@ -27,16 +28,20 @@ namespace Cdek\Actions {
          */
         public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
         {
-            $this->api                    = new CdekApi;
-            $order                        = wc_get_order($orderId);
-            $postOrderData                = OrderMetaData::getMetaByOrderId($orderId);
-            $postOrderData['tariff_code'] = CheckoutHelper::getOrderShippingMethod($order)->get_meta('tariff_code') ?:
-                $postOrderData['tariff_id'];
-            $postOrderData['type']        = Tariff::getTariffType($postOrderData['tariff_code']);
+            $this->api      = new CdekApi;
+            $order          = wc_get_order($orderId);
+            $postOrderData  = OrderMetaData::getMetaByOrderId($orderId);
+            $shippingMethod = CheckoutHelper::getOrderShippingMethod($order);
+            $tariffCode     = $shippingMethod->get_meta(MetaKeys::TARIFF_CODE) ?:
+                $shippingMethod->get_meta('tariff_code') ?: $postOrderData['tariff_id'];
+            $postOrderData  = [
+                'currency'    => $order->get_currency() ?: 'RUB',
+                'tariff_code' => $tariffCode,
+                'type'        => Tariff::getTariffType($tariffCode),
+                'pvz_code'    => $shippingMethod->get_meta(MetaKeys::OFFICE_CODE) ?: $postOrderData['pvz_code'],
+            ];
 
-            OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
-
-            $param             = $this->buildRequestData($order);
+            $param             = $this->buildRequestData($order, $postOrderData);
             $param['packages'] = $this->buildPackagesData($order, $packages);
 
             try {
@@ -68,9 +73,8 @@ namespace Cdek\Actions {
             }
         }
 
-        private function buildRequestData(WC_Order $order): array
+        private function buildRequestData(WC_Order $order, $postOrderData): array
         {
-            $postOrderData  = OrderMetaData::getMetaByOrderId($order->get_id());
             $deliveryMethod = Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
                                                                             ->get_data()['instance_id']);
 
@@ -102,9 +106,9 @@ namespace Cdek\Actions {
                     ],
                 ],
                 'recipient'       => [
-                    'name'   => ($order->get_shipping_first_name() ?:
-                        $order->get_billing_first_name()).' '.($order->get_shipping_last_name() ?:
-                            $order->get_billing_last_name()),
+                    'name'   => ($order->get_shipping_first_name() ?: $order->get_billing_first_name()).
+                                ' '.
+                                ($order->get_shipping_last_name() ?: $order->get_billing_last_name()),
                     'email'  => $order->get_billing_email(),
                     'phones' => [
                         'number' => $order->get_shipping_phone() ?: $order->get_billing_phone(),
@@ -189,9 +193,10 @@ namespace Cdek\Actions {
                             'price'    => $product->get_price(),
                         ];
                     }, $items);
-                }else{
+                } else {
                     $package['items'] = array_map(static function ($el) {
                         $product = wc_get_product($el['id']);
+
                         return [
                             'id'       => $product->get_id(),
                             'name'     => $product->get_name(),
