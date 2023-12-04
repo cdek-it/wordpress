@@ -11,6 +11,7 @@ namespace Cdek\Actions {
     use Cdek\Config;
     use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
+    use Cdek\MetaKeys;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
     use Exception;
@@ -29,27 +30,12 @@ namespace Cdek\Actions {
 
             $shippingMethod = CheckoutHelper::getOrderShippingMethod($order);
             $pvzCode = CheckoutHelper::getValueFromCurrentSession('pvz_code');
-            $tariffId = $shippingMethod->get_meta('tariff_code');
-            $currency = function_exists('wcml_get_woocommerce_currency_option') ? get_woocommerce_currency() : 'RUB';
+            $tariffId = $shippingMethod->get_meta(MetaKeys::TARIFF_CODE) ?: $shippingMethod->get_meta('tariff_code');
 
             if (Tariff::isTariffToOffice($tariffId)) {
-                $api = new CdekApi;
-                $pvzAddress = $api->getOffices(['code' => $pvzCode]);
-                try {
-                    $pvzArray = json_decode($pvzAddress, true);
-                    if (isset($pvzArray[0]['location']['address'])) {
-                        $shippingMethod->add_meta_data('pvz', $pvzCode . ' (' . $pvzArray[0]['location']['address'] . ')');
-                        $shippingMethod->save_meta_data();
-                    }
-                } catch (Exception $exception) {}
+                $shippingMethod->add_meta_data(MetaKeys::OFFICE_CODE, $pvzCode);
+                $shippingMethod->save_meta_data();
             }
-
-            $data = [
-                'pvz_code'  => $pvzCode,
-                'currency'  => $currency,
-            ];
-
-            OrderMetaData::addMetaByOrderId($order->get_id(), $data);
 
             $instance = $shippingMethod->get_data()['instance_id'];
             $instance = empty($instance) ? null : $instance;

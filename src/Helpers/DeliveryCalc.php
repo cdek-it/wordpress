@@ -11,6 +11,7 @@ namespace Cdek\Helpers {
     use Cdek\Config;
     use Cdek\Exceptions\TariffNotAvailableException;
     use Cdek\Helper;
+    use Cdek\MetaKeys;
     use Cdek\Model\Tariff;
     use WC_Shipping_Method;
 
@@ -53,7 +54,6 @@ namespace Cdek\Helpers {
                 'country_code' => $package['destination']['country'],
             ];
             $deliveryParam['packages'] = $this->getPackagesData($package['contents']);
-            $weightOrigUnit            = $deliveryParam['packages']['weight_orig_unit'];
             unset($deliveryParam['packages']['weight_orig_unit']);
 
             if ($this->method->get_option('insurance') === 'yes') {
@@ -114,8 +114,6 @@ namespace Cdek\Helpers {
                     $maxDay = (int) $tariff['period_max'] + (int) $this->method->get_option('extra_day');
                     $cost   = (int) $tariff['delivery_sum'];
 
-                    $measurement = get_option('woocommerce_weight_unit');
-
                     if ((!isset($officeData['city']) && Tariff::isTariffFromOffice($tariff['tariff_code'])) ||
                         (!isset($doorData['city']) && Tariff::isTariffFromDoor($tariff['tariff_code']))) {
                         continue;
@@ -128,16 +126,15 @@ namespace Cdek\Helpers {
                                                $maxDay),
                         'cost'      => $cost,
                         'meta_data' => [
-                            Config::ADDRESS_HASH_META_KEY => sha1($deliveryParam['to']['postal_code'].
-                                                                  $deliveryParam['to']['city'].
-                                                                  $deliveryParam['to']['country_code']),
-                            'tariff_code'                 => $tariff['tariff_code'],
-                            "weight ($measurement)"       => $weightOrigUnit,
-                            'tariff_type'                 => $deliveryType,
-                            'tariff_mode'                 => $tariff['delivery_mode'],
-                            'length'                      => $deliveryParam['packages']['length'],
-                            'width'                       => $deliveryParam['packages']['width'],
-                            'height'                      => $deliveryParam['packages']['height'],
+                            MetaKeys::ADDRESS_HASH => sha1($deliveryParam['to']['postal_code'].
+                                                           $deliveryParam['to']['city'].
+                                                           $deliveryParam['to']['country_code']),
+                            MetaKeys::TARIFF_CODE  => $tariff['tariff_code'],
+                            MetaKeys::TARIFF_MODE  => $tariff['delivery_mode'],
+                            MetaKeys::WEIGHT       => $deliveryParam['packages']['weight'],
+                            MetaKeys::LENGTH       => $deliveryParam['packages']['length'],
+                            MetaKeys::WIDTH        => $deliveryParam['packages']['width'],
+                            MetaKeys::HEIGHT       => $deliveryParam['packages']['height'],
                         ],
                     ];
                 }
@@ -149,7 +146,7 @@ namespace Cdek\Helpers {
                 $api,
                 $deliveryParam
             ) {
-                $rule = Tariff::isTariffToOffice($tariff['meta_data']['tariff_code']) ? $priceRules['office'] :
+                $rule = Tariff::isTariffToOffice($tariff['meta_data'][MetaKeys::TARIFF_CODE]) ? $priceRules['office'] :
                     $priceRules['door'];
                 if (isset($rule['type']) && $rule['type'] === 'free') {
                     $tariff['cost'] = 0;
@@ -164,8 +161,8 @@ namespace Cdek\Helpers {
                     return $tariff;
                 }
 
-                $deliveryParam['type']        = $tariff['meta_data']['tariff_type'];
-                $deliveryParam['tariff_code'] = $tariff['meta_data']['tariff_code'];
+                $deliveryParam['tariff_code'] = $tariff['meta_data'][MetaKeys::TARIFF_CODE];
+                $deliveryParam['type']        = Tariff::getTariffType($deliveryParam['tariff_code']);
 
                 $tariffInfo = $api->calculateTariff($deliveryParam);
 
@@ -179,7 +176,7 @@ namespace Cdek\Helpers {
 
                 if (isset($rule['type']) && $rule['type'] === 'amount') {
                     $cost += $rule['value'];
-                } else if(isset($rule['type']) && $rule['type'] === 'percentage') {
+                } elseif (isset($rule['type']) && $rule['type'] === 'percentage') {
                     $cost *= $rule['value'] / 100;
                 }
 
@@ -258,11 +255,10 @@ namespace Cdek\Helpers {
             }
 
             return [
-                'length'           => $length,
-                'width'            => $width,
-                'height'           => $height,
-                'weight'           => WeightCalc::getWeightInGrams($totalWeight),
-                'weight_orig_unit' => $totalWeight,
+                'length' => $length,
+                'width'  => $width,
+                'height' => $height,
+                'weight' => WeightCalc::getWeightInGrams($totalWeight),
             ];
         }
 

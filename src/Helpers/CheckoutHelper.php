@@ -24,15 +24,11 @@ namespace Cdek\Helpers {
 
             $billingValue = WC()->checkout()->get_value("billing_$valueName");
 
-            if (isset($billingValue)) {
-                return $billingValue;
-            }
-
-            return $_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName]
-                   ??
-                   WC()->checkout()->get_value($valueName)
-                   ??
-                   $defaultValue;
+            return $billingValue ?? $_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName]
+                                    ??
+                                    WC()->checkout()->get_value($valueName)
+                                    ??
+                                    $defaultValue;
         }
 
         public static function isCdekShippingMethod(WC_Order $order): bool
