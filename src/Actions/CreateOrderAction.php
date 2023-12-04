@@ -171,10 +171,22 @@ namespace Cdek\Actions {
             if ($packages === null) {
                 $deliveryMethod = CheckoutHelper::getOrderShippingMethod($order);
 
+                $packageItems = array_map(static function ($item) {
+                    $product = $item->get_product();
+
+                    return [
+                        'id'       => $product->get_id(),
+                        'name'     => $product->get_name(),
+                        'weight'   => $product->get_weight(),
+                        'quantity' => $item->get_quantity(),
+                        'price'    => $product->get_price(),
+                    ];
+                }, $items);
+
                 return [
                     $this->buildItemsData($order, $deliveryMethod->get_meta('length'),
                                           $deliveryMethod->get_meta('width'), $deliveryMethod->get_meta('height'),
-                                          $items),
+                                          $packageItems),
                 ];
             }
 
