@@ -131,9 +131,9 @@ namespace Cdek\UI {
             $fromDoor      = Tariff::isTariffFromDoor($shipping->get_meta(MetaKeys::TARIFF_CODE) ?:
                                                           $shipping->get_meta('tariff_code') ?:
                                                               $orderData['tariff_id']);
-            $length        = $shipping->get_meta('length');
-            $height        = $shipping->get_meta('height');
-            $width         = $shipping->get_meta('width');
+            $length        = $shipping->get_meta(MetaKeys::LENGTH)?: $shipping->get_meta('length');
+            $height        = $shipping->get_meta(MetaKeys::HEIGHT)?: $shipping->get_meta('height');
+            $width         = $shipping->get_meta(MetaKeys::WIDTH)?: $shipping->get_meta('width');
 
             include __DIR__.'/../../templates/admin/create-order.php';
         }
