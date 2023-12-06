@@ -42,7 +42,7 @@ namespace Cdek\Actions {
             ];
 
             $param             = $this->buildRequestData($order, $postOrderData);
-            $param['packages'] = $this->buildPackagesData($order, $packages);
+            $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
 
             try {
                 $orderData = $this->api->createOrder($param);
@@ -165,7 +165,7 @@ namespace Cdek\Actions {
             return $param;
         }
 
-        private function buildPackagesData(WC_Order $order, array $packages = null): array
+        private function buildPackagesData(WC_Order $order, array $postOrderData, array $packages = null): array
         {
             $items = $order->get_items();
             if ($packages === null) {
@@ -186,7 +186,7 @@ namespace Cdek\Actions {
                 return [
                     $this->buildItemsData($order, $deliveryMethod->get_meta('length'),
                                           $deliveryMethod->get_meta('width'), $deliveryMethod->get_meta('height'),
-                                          $packageItems),
+                                          $packageItems, $postOrderData),
                 ];
             }
 
@@ -219,9 +219,8 @@ namespace Cdek\Actions {
                     }, $package['items']);
                 }
                 $output[] = $this->buildItemsData($order, $package['length'], $package['width'], $package['height'],
-                                                  $package['items']);
+                                                  $package['items'], $postOrderData);
             }
-
             return $output;
         }
 
@@ -230,9 +229,9 @@ namespace Cdek\Actions {
             int $length,
             int $width,
             int $height,
-            array $items
+            array $items,
+            array $postOrderData
         ): array {
-            $postOrderData  = OrderMetaData::getMetaByOrderId($order->get_id());
             $deliveryMethod = Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
                                                                             ->get_data()['instance_id']);
 
