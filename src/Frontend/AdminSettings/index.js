@@ -1,7 +1,7 @@
 import $ from 'jquery';
 import cdekWidget from '@cdek-it/widget';
 import './styles/main.scss';
-import { createRoot } from 'react-dom/client';
+import { createRoot, render } from '@wordpress/element';
 import { DeliveryPrice } from './components/DeliveryPrice';
 
 $.getJSON(window.cdek_admin_settings.api.check_auth)
@@ -123,5 +123,9 @@ const deliveryRulesInput = $('input#woocommerce_official_cdek_delivery_price_rul
 if (deliveryRulesInput.length){
     const div = window.document.createElement('div');
     deliveryRulesInput.after(div);
-    createRoot(div).render(<DeliveryPrice input={deliveryRulesInput}/>);
+    if(typeof render === 'function'){
+        render(<DeliveryPrice input={deliveryRulesInput}/>, div);
+    } else {
+        createRoot(div).render(<DeliveryPrice input={deliveryRulesInput}/>);
+    }
 }

@@ -4,7 +4,7 @@
  * Plugin URI: https://www.cdek.ru/ru/integration/modules/33
  * Description: Интеграция доставки CDEK
  * Version: dev
- * Requires at least: 6.2
+ * Requires at least: 6.0
  * Requires PHP: 7.4
  * Author: CDEK IT
  * WC requires at least: 6.9
