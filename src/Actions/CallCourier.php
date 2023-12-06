@@ -9,6 +9,7 @@ namespace Cdek\Actions {
 
     use Cdek\CdekApi;
     use Cdek\Helpers\CheckoutHelper;
+    use Cdek\MetaKeys;
     use Cdek\Model\CourierMetaData;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
@@ -36,7 +37,7 @@ namespace Cdek\Actions {
             $orderMetaData = OrderMetaData::getMetaByOrderId($orderId);
             $shippingMethod = CheckoutHelper::getOrderShippingMethod(wc_get_order($orderId));
 
-            $tariffId = $shippingMethod->get_meta('tariff_code') ?: $orderMetaData['tariff_id'];
+            $tariffId = $shippingMethod->get_meta(MetaKeys::TARIFF_CODE) ?: $shippingMethod->get_meta('tariff_code') ?: $orderMetaData['tariff_id'];
 
             if (Tariff::isTariffFromDoor($tariffId)) {
                 $orderNumber = $orderMetaData['order_number'];
@@ -57,7 +58,7 @@ namespace Cdek\Actions {
                 $courierObj->errors[0]->code === 'v2_intake_exists_by_order') {
                 $validate =
                     new Validate(false,
-                                 "Во время создания заявки произошла ошибка. Код ошибки: v2_intake_exists_by_order");
+                                 "Во время создания заявки произошла ошибка. Заявка на вызов курьера к данной накладной уже существует.");
                 return $validate->response();
             }
 
@@ -204,44 +205,6 @@ namespace Cdek\Actions {
 
             $validate = new Validate(true, 'Заявка удалена.');
             return $validate->response();
-        }
-
-        public function checkExistCall(int $order_id)
-        {
-            $postDataCourier = CourierMetaData::getMetaByOrderId($order_id);
-
-            if (empty($postDataCourier) || $postDataCourier['courier_uuid'] === '') {
-                return true;
-            }
-
-            $callCourierJson = $this->api->courierInfo($postDataCourier['courier_uuid']);
-            $callCourier = json_decode($callCourierJson);
-
-            $validate = ValidateCourier::validateExist($callCourier);
-            if (!$validate->state) {
-                $message = 'Заявка была удалена: ' . $postDataCourier['courier_uuid'];
-                Note::send($order_id, $message);
-            }
-
-            return $validate->state();
-        }
-
-        public function cleanMetaData(int $order_id)
-        {
-            CourierMetaData::cleanMetaByOrderId($order_id);
-        }
-
-        public function deleteIfNotExist(int $order_id)
-        {
-            $meta = CourierMetaData::getMetaByOrderId($order_id);
-
-            if (array_key_exists('courier_uuid', $meta) && $meta['courier_uuid'] !== '') {
-                $courierInfoJson = $this->api->courierInfo($meta['courier_uuid']);
-                $courierInfo = json_decode($courierInfoJson);
-                if ($courierInfo->entity->statuses[0]->code === 'REMOVED') {
-                    CourierMetaData::cleanMetaByOrderId($order_id);
-                }
-            }
         }
     }
 }
