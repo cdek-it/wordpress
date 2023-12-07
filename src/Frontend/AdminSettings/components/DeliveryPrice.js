@@ -6,7 +6,7 @@ import { CURRENCY } from '@woocommerce/settings';
 import '../styles/delivery-price.scss';
 
 const RulesComponent = ({ rules, onRulesUpdate }) => {
-    const changeTo = (e, index) => {
+    const changeTo = useCallback(debounce((e, index) => {
         rules[index].to = parseInt(e.target.value);
         rules.forEach((e, i) => {
             if (i === 0 || e.to === null) {
@@ -17,16 +17,16 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
             }
         });
         onRulesUpdate([...rules]);
-    };
+    }, 1000), [rules]);
     const changeType = (e, index) => {
         rules[index].type = e.target.value;
         onRulesUpdate([...rules]);
     };
 
-    const changeValue = (e, index) => {
+    const changeValue = useCallback(debounce((e, index) => {
         rules[index].value = e.target.value;
         onRulesUpdate([...rules]);
-    };
+    }, 1000), [rules]);
 
     const removeRule = (index) => {
         if (index === (rules.length - 1)) {

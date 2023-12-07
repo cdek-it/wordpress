@@ -37,7 +37,11 @@ class CdekShippingMethod extends WC_Shipping_Method
     final public function init_form_fields(): void
     {
         $this->instance_form_fields = [
-            'delivery_price_rules' => [
+            'use_delivery_price_rules' => [
+                'title' => 'Использовать правила отображения суммы доставки для зоны',
+                'type'  => 'checkbox',
+            ],
+            'delivery_price_rules'     => [
                 'title' => 'Правила отображения суммы доставки',
                 'label' => '',
                 'type'  => 'hidden',
@@ -355,7 +359,11 @@ class CdekShippingMethod extends WC_Shipping_Method
         if ($this->instance_id && array_key_exists($key, $this->get_instance_form_fields())) {
             $instanceValue = $this->get_instance_option($key, $empty_value);
 
-            if (!empty($instanceValue)) {
+            if (array_key_exists("use_$key", $this->get_instance_form_fields())) {
+                if ($this->get_instance_option("use_$key", false)) {
+                    return $instanceValue;
+                }
+            } elseif (!empty($instanceValue)) {
                 return $instanceValue;
             }
         }
