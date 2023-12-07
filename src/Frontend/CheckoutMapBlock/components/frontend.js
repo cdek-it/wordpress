@@ -83,12 +83,12 @@ export const Block = ({
     useEffect(() => {
         setShowMap(false);
         if (cart.isLoading || cart.isLoadingRates ||
-          extensions.official_cdek === undefined) {
+          !extensions.official_cdek) {
             clearValidationError('official_cdek_office');
             return;
         }
 
-        debouncedMapRender(cart.shippingRates, extensions.official_cdek.points);
+        debouncedMapRender(cart.shippingRates, extensions.official_cdek.points || []);
     }, [
         cart.isLoading,
         cart.isLoadingRates,
