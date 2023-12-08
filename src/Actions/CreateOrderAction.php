@@ -38,7 +38,7 @@ namespace Cdek\Actions {
                 'currency'    => $order->get_currency() ?: 'RUB',
                 'tariff_code' => $tariffCode,
                 'type'        => Tariff::getTariffType($tariffCode),
-                'pvz_code'    => $shippingMethod->get_meta(MetaKeys::OFFICE_CODE) ?: $postOrderData['pvz_code'],
+                'pvz_code'    => $shippingMethod->get_meta(MetaKeys::OFFICE_CODE) ?: $postOrderData['pvz_code'] ?: null,
             ];
 
             $param             = $this->buildRequestData($order, $postOrderData);
@@ -184,9 +184,9 @@ namespace Cdek\Actions {
                 }, $items);
 
                 return [
-                    $this->buildItemsData($order, $deliveryMethod->get_meta('length'),
-                                          $deliveryMethod->get_meta('width'), $deliveryMethod->get_meta('height'),
-                                          $packageItems, $postOrderData),
+                    $this->buildItemsData($order, (int) $deliveryMethod->get_meta('length'),
+                                          (int) $deliveryMethod->get_meta('width'),
+                                          (int) $deliveryMethod->get_meta('height'), $packageItems, $postOrderData),
                 ];
             }
 
@@ -218,9 +218,10 @@ namespace Cdek\Actions {
                         ];
                     }, $package['items']);
                 }
-                $output[] = $this->buildItemsData($order, $package['length'], $package['width'], $package['height'],
-                                                  $package['items'], $postOrderData);
+                $output[] = $this->buildItemsData($order, (int) $package['length'], (int) $package['width'],
+                                                  (int) $package['height'], $package['items'], $postOrderData);
             }
+
             return $output;
         }
 
