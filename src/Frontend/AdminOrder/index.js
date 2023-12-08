@@ -152,6 +152,7 @@ $(document).ready(function() {
                       $('#cdek-courier-result-block').hide();
                       $('#cdek-order-courier').show();
                   }
+                  $('#cdek-order-status-block').html(resp.statuses);
                   $('#cdek-create-order-form').hide();
                   $('#cdek-order-number')
                     .html(`№ <b>${resp.code}</b>`);
@@ -235,4 +236,15 @@ $(document).ready(function() {
             }
         }).catch(e => console.error(e)).finally(() => $('#cdek-loader').hide());
     });
+
+    $('#cdek-info-order').on('click', '#cdek-order-status-btn', function(event) {
+        let statusList = $('#cdek-order-status-list');
+        let arrowUp = $('#cdek-btn-arrow-up');
+        let arrowDown = $('#cdek-btn-arrow-down');
+
+        statusList.toggle();
+        arrowUp.toggle(!statusList.is(':visible'));
+        arrowDown.toggle(statusList.is(':visible'));
+    })
+
 });

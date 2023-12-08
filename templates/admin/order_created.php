@@ -1,11 +1,11 @@
 <?php
 /** @var $orderNumber */
+/** @var $orderStatusList */
 /** @var $orderUuid */
 /** @var $dateMin */
 /** @var $dateMax */
 /** @var $courierNumber */
 /** @var $orderIdWP */
-
 /** @var $fromDoor */
 
 use Cdek\Helpers\UrlHelper;
@@ -18,6 +18,9 @@ if (!$orderNumber) { ?>style="display: none" <?php
         <h3 style="margin-bottom: 0">Заказ создан</h3>
         <div id="cdek-order-number-block">
             <div>
+                <div id="cdek-order-status-block">
+                    <?php include 'status_list.php'; ?>
+                </div>
                 <p id="cdek-order-number">№ <b><?= $orderNumber ?></b></p>
                 <a id="cdek-order-waybill" target="_blank"
                    href="<?= UrlHelper::buildRest("order/$orderIdWP/waybill") ?>">Получить

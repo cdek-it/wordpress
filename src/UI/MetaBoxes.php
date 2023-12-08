@@ -127,6 +127,7 @@ namespace Cdek\UI {
                                    ->get_option('has_packages_mode') === 'yes';
             $orderNumber   = $orderData['order_number'] ?? null;
             $orderUuid     = $orderData['order_uuid'] ?? null;
+            $cdekStatuses  = Helper::getCdekOrderStatuses($orderUuid);
             $courierNumber = CourierMetaData::getMetaByOrderId($orderIdWP)['courier_number'] ?? '';
             $fromDoor      = Tariff::isTariffFromDoor($shipping->get_meta(MetaKeys::TARIFF_CODE) ?:
                                                           $shipping->get_meta('tariff_code') ?:
