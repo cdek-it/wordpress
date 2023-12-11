@@ -1,5 +1,6 @@
 <?php
 /** @var $cdekStatuses */
+/** @var $actionOrderAvailable */
 
 use Cdek\Config;
 
@@ -7,7 +8,7 @@ if (empty($cdekStatuses)) { ?>
     <p>Статусы заказа не найдены. Попробуйте перезагрузить страницу позднее</p>
 <?php
 } else { ?>
-    <p>Статусы заказа</p>
+    <p id="cdek-status-block" data-status-available="<?= (int)$actionOrderAvailable?>">Статусы заказа</p>
     <hr>
     <div class="cdek-order-status-elem-time"><?= $cdekStatuses[0]['time'] ?></div>
     <div id="cdek-order-status-btn" class="cdek-order-status-elem-name">

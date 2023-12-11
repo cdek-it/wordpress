@@ -67,11 +67,19 @@ namespace Cdek {
                 $formattedDate = $dateTime->format('y.m.d H:i:s');
                 $statusName[] = ['time' => $formattedDate, 'name' => $status['name']];
             }
-            $statusName[] = ['time' => '23.12.08 13:18:49', 'name' => 'Шаблон'];
-            $statusName[] = ['time' => '23.12.08 13:18:49', 'name' => 'Шаблон'];
-            $statusName[] = ['time' => '23.12.08 13:18:49', 'name' => 'Длинный Длинный Длинный Длинный Длинный Длинный Сатус'];
-            $statusName[] = ['time' => '23.12.08 13:18:49', 'name' => 'Шаблон'];
+
             return $statusName;
         }
+
+        public static function getCdekActionOrderAvailable(array $cdekStatuses): bool
+        {
+            foreach ($cdekStatuses as $key => $status) {
+                if ($status['name'] === 'Создан' && $key !== 0) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
     }
 }

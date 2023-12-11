@@ -5,6 +5,18 @@ import apiFetch from '@wordpress/api-fetch';
 $(document).ready(function() {
     let packageList = [];
 
+    checkOrderAvailable();
+    function checkOrderAvailable() {
+        let dataStatusAvailable = $('#cdek-status-block').data('status-available');
+        if (dataStatusAvailable !== undefined && !dataStatusAvailable) {
+            $('#order_data').find('input[name="order_date"]').attr('disabled', true);
+            $('#order_data').find('input[name="order_date_hour"]').attr('disabled', true);
+            $('#order_data').find('input[name="order_date_minute"]').attr('disabled', true);
+            $('#order_data').find('select[name="customer_user"]').attr('disabled', true);
+            $('#order_data').find('a[class="edit_address"]').hide();
+        }
+    }
+
     $('#selected_product').change(function() {
         let productId = $('#selected_product').val();
         $('#product_' + productId).css('display', 'flex');
@@ -152,6 +164,8 @@ $(document).ready(function() {
                       $('#cdek-courier-result-block').hide();
                       $('#cdek-order-courier').show();
                   }
+                  $('#cdek-status-block').data('status-available', resp.available);
+                  checkOrderAvailable();
                   $('#cdek-order-status-block').html(resp.statuses);
                   $('#cdek-create-order-form').hide();
                   $('#cdek-order-number')

@@ -52,6 +52,7 @@ namespace Cdek\Actions {
 
                 $cdekNumber                    = $this->getCdekOrderNumber($orderData['entity']['uuid']);
                 $cdekStatuses                  = Helper::getCdekOrderStatuses($orderData['entity']['uuid']);
+                $actionOrderAvailable          = Helper::getCdekActionOrderAvailable($cdekStatuses);
                 $postOrderData['order_number'] = $cdekNumber ?? $orderData['entity']['uuid'];
                 $postOrderData['order_uuid']   = $orderData['entity']['uuid'];
                 OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
@@ -63,6 +64,7 @@ namespace Cdek\Actions {
                     'state'    => true,
                     'code'     => $cdekNumber,
                     'statuses' => $cdekStatusesRender,
+                    'available' => $actionOrderAvailable,
                     'door'     => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
                 ];
             } catch (Throwable $e) {

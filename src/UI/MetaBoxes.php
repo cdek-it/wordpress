@@ -128,6 +128,12 @@ namespace Cdek\UI {
             $orderNumber   = $orderData['order_number'] ?? null;
             $orderUuid     = $orderData['order_uuid'] ?? null;
             $cdekStatuses  = Helper::getCdekOrderStatuses($orderUuid);
+            $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
+
+            if (!$actionOrderAvailable) {
+                self::notAvailableEditOrderData();
+            }
+
             $courierNumber = CourierMetaData::getMetaByOrderId($orderIdWP)['courier_number'] ?? '';
             $fromDoor      = Tariff::isTariffFromDoor($shipping->get_meta(MetaKeys::TARIFF_CODE) ?:
                                                           $shipping->get_meta('tariff_code') ?:
@@ -137,6 +143,16 @@ namespace Cdek\UI {
             $width         = $shipping->get_meta(MetaKeys::WIDTH)?: $shipping->get_meta('width');
 
             include __DIR__.'/../../templates/admin/create-order.php';
+        }
+
+        public static function notAvailableEditOrderData(): void
+        {
+            echo <<<PAGE
+                <div class="notice notice-warning"><p>
+                <strong>CDEKDelivery:</strong> Редактирование заказа недоступно из за смены статуса заказа в системе 
+                CDEK
+                </p></div>
+                PAGE;
         }
 
         public function __invoke(): void
