@@ -65,7 +65,7 @@ namespace Cdek {
             foreach ($orderInfo['entity']['statuses'] as $status) {
                 $dateTime = DateTime::createFromFormat('Y-m-d\TH:i:sO', $status['date_time']);
                 $formattedDate = $dateTime->format('y.m.d H:i:s');
-                $statusName[] = ['time' => $formattedDate, 'name' => $status['name']];
+                $statusName[] = ['time' => $formattedDate, 'name' => $status['name'], 'code' => $status['code']];
             }
 
             return $statusName;
@@ -74,7 +74,7 @@ namespace Cdek {
         public static function getCdekActionOrderAvailable(array $cdekStatuses): bool
         {
             foreach ($cdekStatuses as $key => $status) {
-                if ($status['name'] === 'Создан' && $key !== 0) {
+                if ($status['code'] === 'CREATED' && $key !== 0) {
                     return false;
                 }
             }
