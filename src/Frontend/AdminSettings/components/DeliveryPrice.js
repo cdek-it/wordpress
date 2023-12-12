@@ -17,7 +17,7 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
             }
         });
         onRulesUpdate([...rules]);
-    }, 1000), [rules]);
+    }, 4000), [rules]);
     const changeType = (e, index) => {
         rules[index].type = e.target.value;
         onRulesUpdate([...rules]);
@@ -26,7 +26,7 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
     const changeValue = useCallback(debounce((e, index) => {
         rules[index].value = e.target.value;
         onRulesUpdate([...rules]);
-    }, 1000), [rules]);
+    }, 4000), [rules]);
 
     const removeRule = (index) => {
         if (index === (rules.length - 1)) {
@@ -38,12 +38,14 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
     return rules.map((rule, index) => (<div
       key={rule.to + rule.value + rule.type + index}>{__('Сумма заказа',
       'cdek-official')} {rules[index - 1] &&
-      <>{__('от', 'cdek-official')} {rules[index - 1].to}{CURRENCY.symbol}</>} {rule.to && <>{__('меньше или равно', 'cdek-official')}
-        <input defaultValue={rule.to}
-               min={rules[index - 1] ? rules[index - 1].to + 1 : 0}
-               type="number"
-               onInput={(e) => changeTo(e,
-                 index)} />{CURRENCY.symbol}</>} {rules.length === 1 &&
+      <>{__('от', 'cdek-official')} {rules[index -
+      1].to}{CURRENCY.symbol}</>} {rule.to &&
+      <>{__('меньше или равно', 'cdek-official')}
+          <input defaultValue={rule.to}
+                 min={rules[index - 1] ? rules[index - 1].to + 1 : 0}
+                 type="number"
+                 onInput={(e) => changeTo(e,
+                   index)} />{CURRENCY.symbol}</>} {rules.length === 1 &&
       <>{__('любая', 'cdek-official')}</>}, {__('стоимость доставки',
       'cdek-official')}
         <select onChange={(e) => changeType(e, index)}
@@ -61,9 +63,10 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
                 {__('изменить на', 'cdek-official')}
             </option>
         </select>
-        {rule.type !== 'free' &&
-          <input defaultValue={rule.value} type="number" min={rule.type === 'amount' ? null : 0}
-                 onInput={(e) => changeValue(e, index)} />}
+        {rule.type !== 'free' && <input defaultValue={rule.value} type="number"
+                                        min={rule.type === 'amount' ? null : 0}
+                                        onInput={(e) => changeValue(e,
+                                          index)} />}
         {rule.type === 'percentage' && <>%</>}
         {(rule.type === 'amount' || rule.type === 'fixed') &&
           <>{CURRENCY.symbol}</>}
@@ -76,15 +79,13 @@ export const DeliveryPrice = ({ input }) => {
     const [doorRules, setDoorRules] = useState([]);
     const [officeRules, setOfficeRules] = useState([]);
 
-    const debouncedSetRules = useCallback(debounce((doorRules, officeRules) => {
-        input.val(JSON.stringify({
-            door: doorRules, office: officeRules,
-        }));
-    }, 300), []);
+    const debouncedSetRules = useCallback(
+      debounce((doorRules, officeRules) => input.val(JSON.stringify({
+          door: doorRules, office: officeRules,
+      })), 300), []);
 
-    useEffect(() => {
-        debouncedSetRules(doorRules, officeRules);
-    }, [doorRules, officeRules]);
+    useEffect(() => debouncedSetRules(doorRules, officeRules),
+      [doorRules, officeRules]);
 
     useEffect(() => {
         try {
