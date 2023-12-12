@@ -19,7 +19,7 @@ namespace Cdek\UI {
                                    Loader::getPluginUrl() . 'build/cdek-widget.umd.js');
             } else {
                 wp_register_script('cdek-widget',
-                                   '//cdn.jsdelivr.net/gh/cdek-it/widget@3.6/dist/cdek-widget.umd.js');
+                                   '//cdn.jsdelivr.net/gh/cdek-it/widget@3.8/dist/cdek-widget.umd.js');
             }
 
             wp_localize_script('cdek-widget', 'cdek', [
