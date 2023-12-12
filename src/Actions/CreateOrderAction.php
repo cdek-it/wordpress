@@ -152,6 +152,14 @@ namespace Cdek\Actions {
                 ]);
             }
 
+            if ($deliveryMethod->get_option('services_ban_attachment_inspection') === 'yes' &&
+                !Tariff::isTariffToPostamat($param['tariff_code']) &&
+                Tariff::isTariffModeIM($param['tariff_code'])) {
+                $param['services'][] = [
+                    'code' => 'BAN_ATTACHMENT_INSPECTION',
+                ];
+            }
+
             if ($order->get_payment_method() === 'cod') {
                 $codPriceThreshold = (int) $deliveryMethod->get_option('stepcodprice');
                 $total             = number_format($order->get_subtotal(), wc_get_price_decimals(), '.', '');
