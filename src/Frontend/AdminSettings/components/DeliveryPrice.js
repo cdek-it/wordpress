@@ -26,7 +26,7 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
     const changeValue = useCallback(debounce((e, index) => {
         rules[index].value = e.target.value;
         onRulesUpdate([...rules]);
-    }, 4000), [rules]);
+    }, 1000), [rules]);
 
     const removeRule = (index) => {
         if (index === (rules.length - 1)) {
@@ -79,13 +79,15 @@ export const DeliveryPrice = ({ input }) => {
     const [doorRules, setDoorRules] = useState([]);
     const [officeRules, setOfficeRules] = useState([]);
 
-    const debouncedSetRules = useCallback(
-      debounce((doorRules, officeRules) => input.val(JSON.stringify({
-          door: doorRules, office: officeRules,
-      })), 300), []);
+    const debouncedSetRules = useCallback(debounce((doorRules, officeRules) => {
+        input.val(JSON.stringify({
+            door: doorRules, office: officeRules,
+        }));
+    }, 300), []);
 
-    useEffect(() => debouncedSetRules(doorRules, officeRules),
-      [doorRules, officeRules]);
+    useEffect(() => {
+        debouncedSetRules(doorRules, officeRules);
+    }, [doorRules, officeRules]);
 
     useEffect(() => {
         try {
