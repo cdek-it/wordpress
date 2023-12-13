@@ -6,8 +6,8 @@ namespace {
 }
 
 namespace Cdek {
-
     use DateTime;
+    use RuntimeException;
     use Throwable;
     use WC_Shipping_Method;
     use function WC;
@@ -53,14 +53,14 @@ namespace Cdek {
         public static function getCdekOrderStatuses(mixed $uuid): array
         {
             if (!$uuid) {
-                return [];
+                throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Некорректный uuid заказа.');
             }
             $api = new CdekApi;
             $orderInfoJson = $api->getOrder($uuid);
             $orderInfo     = json_decode($orderInfoJson, true);
             $statusName = [];
-            if (!isset($orderInfo['entity']['statuses']) && is_array($orderInfo['entity']['statuses'])) {
-                return [];
+            if (!isset($orderInfo['entity']['statuses'])) {
+                throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Заказ не найден.');
             }
             foreach ($orderInfo['entity']['statuses'] as $status) {
                 $dateTime = DateTime::createFromFormat('Y-m-d\TH:i:sO', $status['date_time']);

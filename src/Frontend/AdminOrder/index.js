@@ -7,7 +7,7 @@ $(document).ready(function() {
 
     checkOrderAvailable();
     function checkOrderAvailable() {
-        let dataStatusAvailable = $('#cdek-status-block').data('status-available');
+        const dataStatusAvailable = $('#cdek-status-block').data('status-available');
         if (dataStatusAvailable !== undefined && !dataStatusAvailable) {
             $('#order_data').find('input[name="order_date"]').attr('disabled', true);
             $('#order_data').find('input[name="order_date_hour"]').attr('disabled', true);

@@ -10,6 +10,7 @@ namespace Cdek\UI {
     use Automattic\WooCommerce\Utilities\OrderUtil;
     use Cdek\CdekApi;
     use Cdek\Config;
+    use Cdek\Exceptions\CdekApiException;
     use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Loader;
@@ -127,8 +128,14 @@ namespace Cdek\UI {
                                    ->get_option('has_packages_mode') === 'yes';
             $orderNumber   = $orderData['order_number'] ?? null;
             $orderUuid     = $orderData['order_uuid'] ?? null;
-            $cdekStatuses  = Helper::getCdekOrderStatuses($orderUuid);
-            $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
+
+            try {
+                $cdekStatuses = Helper::getCdekOrderStatuses($orderData['order_uuid']);
+                $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
+            } catch (\Exception $e) {
+                $cdekStatuses = [];
+                $actionOrderAvailable = true;
+            }
 
             if (!$actionOrderAvailable) {
                 self::notAvailableEditOrderData();
