@@ -26,7 +26,7 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
     const changeValue = useCallback(debounce((e, index) => {
         rules[index].value = e.target.value;
         onRulesUpdate([...rules]);
-    }, 1000), [rules]);
+    }, 4000), [rules]);
 
     const removeRule = (index) => {
         if (index === (rules.length - 1)) {
