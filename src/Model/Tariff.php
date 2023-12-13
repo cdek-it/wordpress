@@ -312,7 +312,7 @@ namespace Cdek\Model {
                 throw new RuntimeException('Unknown tariff');
             }
 
-            return self::TARIFF_DATA[$code]['type'] === 1;
+            return self::TARIFF_DATA[$code]['type'] === self::SHOP_TYPE;
         }
     }
 }
