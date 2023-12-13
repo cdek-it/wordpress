@@ -77,7 +77,7 @@ namespace Cdek\Helpers {
                             return $carry;
                         }
 
-                        if ($item['to'] >= $package['cart_subtotal']) {
+                        if ($item['to'] >= $package['cart_subtotal'] || $item['to'] === null) {
                             return $item;
                         }
 

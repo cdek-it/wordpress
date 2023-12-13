@@ -79,13 +79,15 @@ export const DeliveryPrice = ({ input }) => {
     const [doorRules, setDoorRules] = useState([]);
     const [officeRules, setOfficeRules] = useState([]);
 
-    const debouncedSetRules = useCallback(
-      debounce((doorRules, officeRules) => input.val(JSON.stringify({
-          door: doorRules, office: officeRules,
-      })), 300), []);
+    const debouncedSetRules = useCallback(debounce((doorRules, officeRules) => {
+        input.val(JSON.stringify({
+            door: doorRules, office: officeRules,
+        }));
+    }, 300), []);
 
-    useEffect(() => debouncedSetRules(doorRules, officeRules),
-      [doorRules, officeRules]);
+    useEffect(() => {
+        debouncedSetRules(doorRules, officeRules);
+    }, [doorRules, officeRules]);
 
     useEffect(() => {
         try {
