@@ -62,6 +62,7 @@ namespace Cdek {
             if (!isset($orderInfo['entity']['statuses'])) {
                 throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Заказ не найден.');
             }
+            $statusName[] = ['time' => '12312', 'name' => 'qweqwe', 'code' => 'asdas'];
             foreach ($orderInfo['entity']['statuses'] as $status) {
                 $dateTime = DateTime::createFromFormat('Y-m-d\TH:i:sO', $status['date_time']);
                 $formattedDate = $dateTime->format('y.m.d H:i:s');
@@ -73,10 +74,8 @@ namespace Cdek {
 
         public static function getCdekActionOrderAvailable(array $cdekStatuses): bool
         {
-            foreach ($cdekStatuses as $key => $status) {
-                if ($status['code'] === 'CREATED' && $key !== 0) {
-                    return false;
-                }
+            if ($cdekStatuses[0]['code'] !== 'CREATED') {
+                return false;
             }
             return true;
         }
