@@ -20,16 +20,22 @@ namespace Cdek\UI {
                 return;
             }
 
+            $city     = CheckoutHelper::getValueFromCurrentSession('city');
+            $postcode = CheckoutHelper::getValueFromCurrentSession('postcode');
+
+            if (empty($city) || empty($postcode)) {
+                return;
+            }
+
             $api = new CdekApi;
 
-            $city = $api->getCityCode(CheckoutHelper::getValueFromCurrentSession('city'),
-                                                CheckoutHelper::getValueFromCurrentSession('postcode'));
+            $city = $api->getCityCode($city, $postcode);
 
             $points = $city !== -1 ? $api->getOffices([
-                                           'city_code' => $city,
-                                       ]) : '[]';
+                                                          'city_code' => $city,
+                                                      ]) : '[]';
 
-            include __DIR__ . '/../../templates/public/open-map.php';
+            include __DIR__.'/../../templates/public/open-map.php';
         }
 
         private function isTariffDestinationCdekOffice($shippingMethodCurrent): bool
