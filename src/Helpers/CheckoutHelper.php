@@ -18,16 +18,16 @@ namespace Cdek\Helpers {
         public static function getValueFromCurrentSession(string $valueName, string $defaultValue = null): ?string
         {
             $shippingValue = WC()->checkout()->get_value("shipping_$valueName");
-            if (isset($shippingValue)) {
+            if (!empty($shippingValue)) {
                 return $shippingValue;
             }
 
             $billingValue = WC()->checkout()->get_value("billing_$valueName");
 
-            return $billingValue ?? $_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName]
-                                    ??
+            return $billingValue ?: $_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName]
+                                    ?:
                                     WC()->checkout()->get_value($valueName)
-                                    ??
+                                    ?:
                                     $defaultValue;
         }
 
