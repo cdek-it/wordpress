@@ -129,3 +129,45 @@ if (deliveryRulesInput.length){
         createRoot(div).render(<DeliveryPrice input={deliveryRulesInput}/>);
     }
 }
+
+services();
+function services() {
+    const banAttachmentCheckbox = $('#woocommerce_official_cdek_services_ban_attachment_inspection');
+    const tryingOnCheckbox = $('#woocommerce_official_cdek_services_trying_on');
+    const partDelivCheckbox = $('#woocommerce_official_cdek_services_part_deliv');
+
+    handleCheckboxState(banAttachmentCheckbox, tryingOnCheckbox.add(partDelivCheckbox));
+    handleCheckboxState(tryingOnCheckbox, banAttachmentCheckbox);
+    handleCheckboxState(partDelivCheckbox, banAttachmentCheckbox);
+
+    banAttachmentCheckbox.change(function() {
+        handleCheckboxState($(this), tryingOnCheckbox.add(partDelivCheckbox));
+    });
+
+    tryingOnCheckbox.change(function() {
+        handleTryingOnChange();
+    });
+
+    partDelivCheckbox.change(function() {
+        handleTryingOnChange();
+    });
+
+    function handleTryingOnChange() {
+        const tryingOnCheckbox = $('#woocommerce_official_cdek_services_trying_on');
+        const partDelivCheckbox = $('#woocommerce_official_cdek_services_part_deliv');
+        const banAttachmentCheckbox = $('#woocommerce_official_cdek_services_ban_attachment_inspection');
+
+        if (tryingOnCheckbox.prop('checked')) {
+            handleCheckboxState(tryingOnCheckbox, banAttachmentCheckbox);
+        } else if (partDelivCheckbox.prop('checked')) {
+            handleCheckboxState(partDelivCheckbox, banAttachmentCheckbox);
+        } else {
+            banAttachmentCheckbox.prop('disabled', false);
+        }
+    }
+
+    function handleCheckboxState(checkbox, targets) {
+        targets.prop('checked', checkbox.prop('checked') ? false : targets.prop('checked'))
+               .prop('disabled', checkbox.prop('checked'));
+    }
+}

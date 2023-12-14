@@ -7,6 +7,7 @@ namespace {
 
 namespace Cdek {
 
+    use Cdek\Model\Tariff;
     use Throwable;
     use WC_Shipping_Method;
     use function WC;
@@ -47,6 +48,35 @@ namespace Cdek {
             }
 
             return WC()->shipping->load_shipping_methods()['official_cdek'];
+        }
+
+        public static function getServices($deliveryMethod, $tariffId) {
+            $serviceBanAttachmentInspectionEnabled = $deliveryMethod->get_option('services_ban_attachment_inspection')
+                                                     === 'yes';
+            $serviceTrying = $deliveryMethod->get_option('services_trying_on') === 'yes';
+            $servicePartDevil = $deliveryMethod->get_option('services_part_deliv') === 'yes';
+            $serviceList = [];
+            if (!Tariff::isTariffToPostamat($tariffId) &&
+                Tariff::isTariffModeIM($tariffId)) {
+                if ($serviceBanAttachmentInspectionEnabled && !$serviceTrying && !$servicePartDevil) {
+                    $serviceList[] = [
+                        'code' => 'BAN_ATTACHMENT_INSPECTION',
+                    ];
+                }
+
+                if (!$serviceBanAttachmentInspectionEnabled && $serviceTrying) {
+                    $serviceList[] = [
+                        'code' => 'TRYING_ON',
+                    ];
+                }
+
+                if (!$serviceBanAttachmentInspectionEnabled && $servicePartDevil) {
+                    $serviceList[] = [
+                        'code' => 'PART_DELIV',
+                    ];
+                }
+            }
+            return $serviceList;
         }
     }
 }
