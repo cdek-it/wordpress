@@ -301,6 +301,17 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'desc_tip'    => true,
                 'default'     => 'no',
             ],
+            'services_block_name'            => [
+                'title' => '<h3 style="text-align: center;">Услуги</h3>',
+                'type'  => 'title',
+                'class' => 'cdek_delivery_block_name',
+            ],
+            'services_ban_attachment_inspection' => [
+                'title'       => 'Запрет осмотра вложения',
+                'description' => 'Эта услуга недоступна для тарифов до постамата и доступна только для клиентов с договором типа ИМ',
+                'type'        => 'checkbox',
+                'default'     => 'no',
+            ],
             'delivery_price_block_name'      => [
                 'title' => '<h3 style="text-align: center;">Cтоимость доставки</h3>',
                 'type'  => 'title',
