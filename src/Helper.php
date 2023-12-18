@@ -6,8 +6,9 @@ namespace {
 }
 
 namespace Cdek {
-
     use Cdek\Model\Tariff;
+    use DateTime;
+    use RuntimeException;
     use Throwable;
     use WC_Shipping_Method;
     use function WC;
@@ -78,5 +79,36 @@ namespace Cdek {
             }
             return $serviceList;
         }
+
+        public static function getCdekOrderStatuses(mixed $uuid): array
+        {
+            if (!$uuid) {
+                throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Некорректный uuid заказа.');
+            }
+            $api = new CdekApi;
+            $orderInfoJson = $api->getOrder($uuid);
+            $orderInfo     = json_decode($orderInfoJson, true);
+            $statusName = [];
+            if (!isset($orderInfo['entity']['statuses'])) {
+                throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Заказ не найден.');
+            }
+            $statusName[] = ['time' => '12312', 'name' => 'qweqwe', 'code' => 'asdas'];
+            foreach ($orderInfo['entity']['statuses'] as $status) {
+                $dateTime = DateTime::createFromFormat('Y-m-d\TH:i:sO', $status['date_time']);
+                $formattedDate = $dateTime->format('y.m.d H:i:s');
+                $statusName[] = ['time' => $formattedDate, 'name' => $status['name'], 'code' => $status['code']];
+            }
+
+            return $statusName;
+        }
+
+        public static function getCdekActionOrderAvailable(array $cdekStatuses): bool
+        {
+            if ($cdekStatuses[0]['code'] !== 'CREATED') {
+                return false;
+            }
+            return true;
+        }
+
     }
 }

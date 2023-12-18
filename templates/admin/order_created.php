@@ -1,16 +1,18 @@
 <?php
 /** @var $orderNumber */
+/** @var $orderStatusList */
 /** @var $orderUuid */
 /** @var $dateMin */
 /** @var $dateMax */
 /** @var $courierNumber */
 /** @var $orderIdWP */
-
 /** @var $fromDoor */
+/** @var $actionOrderAvailable */
 
 use Cdek\Helpers\UrlHelper;
 
 ?>
+
 <div id="cdek-info-order" <?php
 if (!$orderNumber) { ?>style="display: none" <?php
 } ?>>
@@ -18,14 +20,19 @@ if (!$orderNumber) { ?>style="display: none" <?php
         <h3 style="margin-bottom: 0">Заказ создан</h3>
         <div id="cdek-order-number-block">
             <div>
+                <div id="cdek-order-status-block">
+                    <?php include 'status_list.php'; ?>
+                </div>
                 <p id="cdek-order-number">№ <b><?= $orderNumber ?></b></p>
                 <a id="cdek-order-waybill" target="_blank"
                    href="<?= UrlHelper::buildRest("order/$orderIdWP/waybill") ?>">Получить
                     квитанцию</a>
                 <a id="cdek-order-barcode" target="_blank"
                    href="<?= UrlHelper::buildRest("order/$orderIdWP/barcode") ?>">Получить ШК</a>
+                <?php if ($actionOrderAvailable) { ?>
                 <p id="cdek-order-courier">
                     Вызвать курьера</p>
+                <?php } ?>
             </div>
 
             <div id="cdek-courier-result-block"
@@ -48,9 +55,11 @@ if (!$orderNumber) { ?>style="display: none" <?php
 
         </div>
     </div>
+    <?php if ($actionOrderAvailable) { ?>
     <hr>
     <div>
         <p id="cdek-delete-order-error" class="form-field form-field-wide wc-order-status" style="display: none"></p>
         <a id="delete-order-btn" href="<?= UrlHelper::buildRest("order/$orderIdWP/delete") ?>">Отменить заказ</a>
     </div>
+    <?php } ?>
 </div>

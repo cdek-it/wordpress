@@ -16,6 +16,7 @@ namespace Cdek\Actions {
     use Cdek\MetaKeys;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
+    use DateTime;
     use Throwable;
     use WC_Order;
 
@@ -50,14 +51,28 @@ namespace Cdek\Actions {
                 sleep(1);
 
                 $cdekNumber                    = $this->getCdekOrderNumber($orderData['entity']['uuid']);
+
+                try {
+                    $cdekStatuses = Helper::getCdekOrderStatuses($orderData['entity']['uuid']);
+                    $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
+                } catch (\Exception $e) {
+                    $cdekStatuses = [];
+                    $actionOrderAvailable = true;
+                }
+
                 $postOrderData['order_number'] = $cdekNumber ?? $orderData['entity']['uuid'];
                 $postOrderData['order_uuid']   = $orderData['entity']['uuid'];
                 OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
 
+                ob_start();
+                include(WP_PLUGIN_DIR . '/cdek/templates/admin/status_list.php');
+                $cdekStatusesRender = ob_get_clean();
                 return [
-                    'state' => true,
-                    'code'  => $cdekNumber,
-                    'door'  => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
+                    'state'    => true,
+                    'code'     => $cdekNumber,
+                    'statuses' => $cdekStatusesRender,
+                    'available' => $actionOrderAvailable,
+                    'door'     => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
                 ];
             } catch (Throwable $e) {
                 if ($attempt < 1 || $attempt > 5) {
