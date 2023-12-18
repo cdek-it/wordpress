@@ -308,7 +308,20 @@ class CdekShippingMethod extends WC_Shipping_Method
             ],
             'services_ban_attachment_inspection' => [
                 'title'       => 'Запрет осмотра вложения',
-                'description' => 'Эта услуга недоступна для тарифов до постамата и доступна только для клиентов с договором типа ИМ',
+                'description' => 'Эта услуга недоступна для тарифов до постамата и доступна только для клиентов с договором типа ИМ.
+                Также запрет осмотра вложения не работает при включенных услугах примерка на дому и частичная доставка.',
+                'type'        => 'checkbox',
+                'default'     => 'no',
+            ],
+            'services_trying_on' => [
+                'title'       => 'Примерка',
+                'description' => '',
+                'type'        => 'checkbox',
+                'default'     => 'no',
+            ],
+            'services_part_deliv' => [
+                'title'       => 'Частичная доставка',
+                'description' => '',
                 'type'        => 'checkbox',
                 'default'     => 'no',
             ],

@@ -129,3 +129,42 @@ if (deliveryRulesInput.length){
         createRoot(div).render(<DeliveryPrice input={deliveryRulesInput}/>);
     }
 }
+
+(function() {
+    const banAttachmentCheckbox = $('#woocommerce_official_cdek_services_ban_attachment_inspection');
+    const tryingOnCheckbox = $('#woocommerce_official_cdek_services_trying_on');
+    const partDelivCheckbox = $('#woocommerce_official_cdek_services_part_deliv');
+
+    processBanAttachmentCheckbox(banAttachmentCheckbox, tryingOnCheckbox.add(partDelivCheckbox));
+    processOtherServicesCheckbox([tryingOnCheckbox, partDelivCheckbox], banAttachmentCheckbox);
+
+    banAttachmentCheckbox.change(function() {
+        processBanAttachmentCheckbox($(this), tryingOnCheckbox.add(partDelivCheckbox));
+    });
+
+    tryingOnCheckbox.change(function() {
+        processOtherServicesCheckbox([$(this), partDelivCheckbox], banAttachmentCheckbox);
+    });
+
+    partDelivCheckbox.change(function() {
+        processOtherServicesCheckbox([$(this), tryingOnCheckbox], banAttachmentCheckbox);
+    });
+
+    function processBanAttachmentCheckbox(currentService, bindService) {
+        if (currentService.prop('checked')) {
+            bindService.prop('checked', false);
+            bindService.prop('disabled', true);
+        } else {
+            bindService.prop('disabled', false);
+        }
+    }
+
+    function processOtherServicesCheckbox(services, bindService) {
+        if (services[0].prop('checked') || services[1].prop('checked')) {
+            bindService.prop('checked', false);
+            bindService.prop('disabled', true);
+        } else {
+            bindService.prop('disabled', false);
+        }
+    }
+})();

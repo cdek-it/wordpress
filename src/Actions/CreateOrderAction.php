@@ -167,12 +167,9 @@ namespace Cdek\Actions {
                 ]);
             }
 
-            if ($deliveryMethod->get_option('services_ban_attachment_inspection') === 'yes' &&
-                !Tariff::isTariffToPostamat($param['tariff_code']) &&
-                Tariff::isTariffModeIM($param['tariff_code'])) {
-                $param['services'][] = [
-                    'code' => 'BAN_ATTACHMENT_INSPECTION',
-                ];
+            $serviceList = Helper::getServices($deliveryMethod, $param['tariff_code']);
+            if (!empty($serviceList)) {
+                $param['services'] = $serviceList;
             }
 
             if ($order->get_payment_method() === 'cod') {

@@ -141,13 +141,12 @@ namespace Cdek\Helpers {
             }
 
             $api         = $this->api;
-            $serviceBanAttachmentInspectionEnabled = $this->method->get_option('services_ban_attachment_inspection') ===
-                                                  'yes';
+            $deliveryMethod = $this->method;
             $this->rates = array_map(static function ($tariff) use (
                 $priceRules,
                 $api,
                 $deliveryParam,
-                $serviceBanAttachmentInspectionEnabled
+                $deliveryMethod
             ) {
                 $rule = Tariff::isTariffToOffice($tariff['meta_data'][MetaKeys::TARIFF_CODE]) ? $priceRules['office'] :
                     $priceRules['door'];
@@ -167,12 +166,9 @@ namespace Cdek\Helpers {
                 $deliveryParam['tariff_code'] = $tariff['meta_data'][MetaKeys::TARIFF_CODE];
                 $deliveryParam['type']        = Tariff::getTariffType($deliveryParam['tariff_code']);
 
-                if ($serviceBanAttachmentInspectionEnabled &&
-                    !Tariff::isTariffToPostamat($deliveryParam['tariff_code']) &&
-                    Tariff::isTariffModeIM($deliveryParam['tariff_code'])) {
-                    $deliveryParam['services'][] = [
-                        'code' => 'BAN_ATTACHMENT_INSPECTION',
-                    ];
+                $serviceList = Helper::getServices($deliveryMethod, $deliveryParam['tariff_code']);
+                if (!empty($serviceList)) {
+                    $deliveryParam['services'] = $serviceList;
                 }
 
                 $tariffInfo = $api->calculateTariff($deliveryParam);
