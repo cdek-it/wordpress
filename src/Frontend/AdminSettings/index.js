@@ -136,38 +136,36 @@ function services() {
     const tryingOnCheckbox = $('#woocommerce_official_cdek_services_trying_on');
     const partDelivCheckbox = $('#woocommerce_official_cdek_services_part_deliv');
 
-    handleCheckboxState(banAttachmentCheckbox, tryingOnCheckbox.add(partDelivCheckbox));
-    handleCheckboxState(tryingOnCheckbox, banAttachmentCheckbox);
-    handleCheckboxState(partDelivCheckbox, banAttachmentCheckbox);
+    processBanAttachmentCheckbox(banAttachmentCheckbox, tryingOnCheckbox.add(partDelivCheckbox));
+    processOtherServicesCheckbox([tryingOnCheckbox, partDelivCheckbox], banAttachmentCheckbox);
 
     banAttachmentCheckbox.change(function() {
-        handleCheckboxState($(this), tryingOnCheckbox.add(partDelivCheckbox));
+        processBanAttachmentCheckbox($(this), tryingOnCheckbox.add(partDelivCheckbox));
     });
 
     tryingOnCheckbox.change(function() {
-        handleTryingOnChange();
+        processOtherServicesCheckbox([$(this), partDelivCheckbox], banAttachmentCheckbox);
     });
 
     partDelivCheckbox.change(function() {
-        handleTryingOnChange();
+        processOtherServicesCheckbox([$(this), tryingOnCheckbox], banAttachmentCheckbox);
     });
 
-    function handleTryingOnChange() {
-        const tryingOnCheckbox = $('#woocommerce_official_cdek_services_trying_on');
-        const partDelivCheckbox = $('#woocommerce_official_cdek_services_part_deliv');
-        const banAttachmentCheckbox = $('#woocommerce_official_cdek_services_ban_attachment_inspection');
-
-        if (tryingOnCheckbox.prop('checked')) {
-            handleCheckboxState(tryingOnCheckbox, banAttachmentCheckbox);
-        } else if (partDelivCheckbox.prop('checked')) {
-            handleCheckboxState(partDelivCheckbox, banAttachmentCheckbox);
+    function processBanAttachmentCheckbox(currentService, bindService) {
+        if (currentService.prop('checked')) {
+            bindService.prop('checked', false);
+            bindService.prop('disabled', true);
         } else {
-            banAttachmentCheckbox.prop('disabled', false);
+            bindService.prop('disabled', false);
         }
     }
 
-    function handleCheckboxState(checkbox, targets) {
-        targets.prop('checked', checkbox.prop('checked') ? false : targets.prop('checked'))
-               .prop('disabled', checkbox.prop('checked'));
+    function processOtherServicesCheckbox(services, bindService) {
+        if (services[0].prop('checked') || services[1].prop('checked')) {
+            bindService.prop('checked', false);
+            bindService.prop('disabled', true);
+        } else {
+            bindService.prop('disabled', false);
+        }
     }
 }
