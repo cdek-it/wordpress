@@ -294,5 +294,25 @@ namespace Cdek\Model {
                 self::OFFICE_PICKUP,
             ];
         }
+
+        public static function isTariffToPostamat(int $code): bool
+        {
+            if (!isset(self::TARIFF_DATA[$code])) {
+                throw new RuntimeException('Unknown tariff');
+            }
+
+            return self::TARIFF_DATA[$code]['mode'] === self::DOOR_PICKUP ||
+                   self::TARIFF_DATA[$code]['mode'] === self::OFFICE_PICKUP ||
+                   self::TARIFF_DATA[$code]['mode'] === self::PICKUP_PICKUP;
+        }
+
+        public static function isTariffModeIM(int $code): bool
+        {
+            if (!isset(self::TARIFF_DATA[$code])) {
+                throw new RuntimeException('Unknown tariff');
+            }
+
+            return self::TARIFF_DATA[$code]['type'] === self::SHOP_TYPE;
+        }
     }
 }
