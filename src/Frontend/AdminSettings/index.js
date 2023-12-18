@@ -130,8 +130,7 @@ if (deliveryRulesInput.length){
     }
 }
 
-services();
-function services() {
+(function() {
     const banAttachmentCheckbox = $('#woocommerce_official_cdek_services_ban_attachment_inspection');
     const tryingOnCheckbox = $('#woocommerce_official_cdek_services_trying_on');
     const partDelivCheckbox = $('#woocommerce_official_cdek_services_part_deliv');
@@ -168,4 +167,4 @@ function services() {
             bindService.prop('disabled', false);
         }
     }
-}
+})();
