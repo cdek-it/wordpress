@@ -130,7 +130,7 @@ namespace Cdek\UI {
             $orderUuid     = $orderData['order_uuid'] ?? null;
 
             try {
-                $cdekStatuses = Helper::getCdekOrderStatuses($orderData['order_uuid']);
+                $cdekStatuses = Helper::getCdekOrderStatuses($orderUuid);
                 $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
             } catch (\Exception $e) {
                 $cdekStatuses = [];

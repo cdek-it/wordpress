@@ -73,14 +73,14 @@ namespace Cdek {
 
                 if (!$serviceBanAttachmentInspectionEnabled && $servicePartDevil) {
                     $serviceList[] = [
-                        'code' => 'PART_DELIV',
+                        'code' => 'PART_DELIV'
                     ];
                 }
             }
             return $serviceList;
         }
 
-        public static function getCdekOrderStatuses(mixed $uuid): array
+        public static function getCdekOrderStatuses(?string $uuid): array
         {
             if (!$uuid) {
                 throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Некорректный uuid заказа.');
@@ -92,7 +92,7 @@ namespace Cdek {
             if (!isset($orderInfo['entity']['statuses'])) {
                 throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Заказ не найден.');
             }
-            $statusName[] = ['time' => '12312', 'name' => 'qweqwe', 'code' => 'asdas'];
+
             foreach ($orderInfo['entity']['statuses'] as $status) {
                 $dateTime = DateTime::createFromFormat('Y-m-d\TH:i:sO', $status['date_time']);
                 $formattedDate = $dateTime->format('y.m.d H:i:s');
