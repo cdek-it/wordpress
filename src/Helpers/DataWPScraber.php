@@ -32,10 +32,12 @@ namespace Cdek\Helpers {
             $hiddenMeta[] = MetaKeys::TARIFF_MODE;
             $hiddenMeta[] = MetaKeys::OFFICE_CODE;
 
-            if (($_REQUEST['page'] === 'wc-orders' &&
+            if ((isset($_REQUEST['page'], $_REQUEST['action'], $_REQUEST['id']) &&
+                 $_REQUEST['page'] === 'wc-orders' &&
                  $_REQUEST['action'] === 'edit' &&
                  CheckoutHelper::isCdekShippingMethod(wc_get_order($_REQUEST['id']))) ||
-                ($_REQUEST['action'] === 'woocommerce_load_order_items' &&
+                (isset($_REQUEST['action'], $_REQUEST['order_id']) &&
+                 $_REQUEST['action'] === 'woocommerce_load_order_items' &&
                  CheckoutHelper::isCdekShippingMethod(wc_get_order($_REQUEST['order_id'])))) {
                 $hiddenMeta[] = 'tariff_code';
                 $hiddenMeta[] = 'tariff_type';
