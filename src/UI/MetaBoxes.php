@@ -18,6 +18,8 @@ namespace Cdek\UI {
     use Cdek\Model\CourierMetaData;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
+    use Exception;
+    use Throwable;
 
     class MetaBoxes
     {
@@ -124,16 +126,16 @@ namespace Cdek\UI {
             $shipping = CheckoutHelper::getOrderShippingMethod($order);
 
             $hasPackages
-                           = Helper::getActualShippingMethod($shipping->get_data()['instance_id'])
-                                   ->get_option('has_packages_mode') === 'yes';
-            $orderNumber   = $orderData['order_number'] ?? null;
-            $orderUuid     = $orderData['order_uuid'] ?? null;
+                         = Helper::getActualShippingMethod($shipping->get_data()['instance_id'])
+                                 ->get_option('has_packages_mode') === 'yes';
+            $orderNumber = $orderData['order_number'] ?? null;
+            $orderUuid   = $orderData['order_uuid'] ?? null;
 
             try {
-                $cdekStatuses = Helper::getCdekOrderStatuses($orderUuid);
+                $cdekStatuses         = Helper::getCdekOrderStatuses($orderUuid);
                 $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
-            } catch (\Exception $e) {
-                $cdekStatuses = [];
+            } catch (Exception $e) {
+                $cdekStatuses         = [];
                 $actionOrderAvailable = true;
             }
 
@@ -141,15 +143,16 @@ namespace Cdek\UI {
                 self::notAvailableEditOrderData();
             }
 
-            $courierNumber = CourierMetaData::getMetaByOrderId($orderIdWP)['courier_number'] ?? '';
-            $fromDoor      = Tariff::isTariffFromDoor($shipping->get_meta(MetaKeys::TARIFF_CODE) ?:
-                                                          $shipping->get_meta('tariff_code') ?:
-                                                              $orderData['tariff_id']);
-            $length        = $shipping->get_meta(MetaKeys::LENGTH)?: $shipping->get_meta('length');
-            $height        = $shipping->get_meta(MetaKeys::HEIGHT)?: $shipping->get_meta('height');
-            $width         = $shipping->get_meta(MetaKeys::WIDTH)?: $shipping->get_meta('width');
+            try {
+                $fromDoor = Tariff::isTariffFromDoor($shipping->get_meta(MetaKeys::TARIFF_CODE) ?:
+                                                         $shipping->get_meta('tariff_code') ?: $orderData['tariff_id']);
+                $courierNumber = CourierMetaData::getMetaByOrderId($orderIdWP)['courier_number'] ?? '';
+                $length        = $shipping->get_meta(MetaKeys::LENGTH) ?: $shipping->get_meta('length');
+                $height        = $shipping->get_meta(MetaKeys::HEIGHT) ?: $shipping->get_meta('height');
+                $width         = $shipping->get_meta(MetaKeys::WIDTH) ?: $shipping->get_meta('width');
 
-            include __DIR__.'/../../templates/admin/create-order.php';
+                include __DIR__.'/../../templates/admin/create-order.php';
+            } catch (Throwable $e) {}
         }
 
         public static function notAvailableEditOrderData(): void
