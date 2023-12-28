@@ -23,7 +23,7 @@ namespace Cdek\UI {
             $city     = CheckoutHelper::getValueFromCurrentSession('city');
             $postcode = CheckoutHelper::getValueFromCurrentSession('postcode');
 
-            if (empty($city) || empty($postcode)) {
+            if (empty($city)) {
                 return;
             }
 
