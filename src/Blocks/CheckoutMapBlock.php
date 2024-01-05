@@ -53,6 +53,13 @@ namespace Cdek\Blocks {
             ];
         }
 
+        public static function extend_checkout_data(): array
+        {
+            return [
+                'office_code' => null,
+            ];
+        }
+
         public static function extend_cart_schema(): array
         {
             return [
