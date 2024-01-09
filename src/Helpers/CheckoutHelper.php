@@ -24,7 +24,9 @@ namespace Cdek\Helpers {
 
             $billingValue = WC()->checkout()->get_value("billing_$valueName");
 
-            return $billingValue ?: $_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName]
+            $requestValue = $_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName] ?? null;
+
+            return $billingValue ?: $requestValue
                                     ?:
                                     WC()->checkout()->get_value($valueName)
                                     ?:

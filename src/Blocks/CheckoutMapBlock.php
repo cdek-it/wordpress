@@ -43,13 +43,26 @@ namespace Cdek\Blocks {
         {
             $api = new CdekApi;
 
-            $city = $api->getCityCode(CheckoutHelper::getValueFromCurrentSession('city'),
-                                      CheckoutHelper::getValueFromCurrentSession('postcode'));
+            $city     = CheckoutHelper::getValueFromCurrentSession('city');
+            $postcode = CheckoutHelper::getValueFromCurrentSession('postcode');
+
+            if (empty($city)) {
+                return ['points' => '[]'];
+            }
+
+            $city = $api->getCityCode($city, $postcode);
 
             return [
                 'points' => $city !== -1 ? $api->getOffices([
                                                                 'city_code' => $city,
                                                             ]) : '[]',
+            ];
+        }
+
+        public static function extend_checkout_data(): array
+        {
+            return [
+                'office_code' => null,
             ];
         }
 
