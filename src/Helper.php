@@ -104,10 +104,7 @@ namespace Cdek {
 
         public static function getCdekActionOrderAvailable(array $cdekStatuses): bool
         {
-            if ($cdekStatuses[0]['code'] !== 'CREATED') {
-                return false;
-            }
-            return true;
+            return !($cdekStatuses[0]['code'] !== 'CREATED' && $cdekStatuses[0]['code'] !== 'INVALID');
         }
 
     }
