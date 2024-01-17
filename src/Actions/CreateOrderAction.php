@@ -201,9 +201,9 @@ namespace Cdek\Actions {
                 }, $items);
 
                 return [
-                    $this->buildItemsData($order, (int) $deliveryMethod->get_meta('length'),
-                                          (int) $deliveryMethod->get_meta('width'),
-                                          (int) $deliveryMethod->get_meta('height'), $packageItems, $postOrderData),
+                    $this->buildItemsData($order, (int) $deliveryMethod->get_meta(MetaKeys::LENGTH),
+                                          (int) $deliveryMethod->get_meta(MetaKeys::WIDTH),
+                                          (int) $deliveryMethod->get_meta(MetaKeys::HEIGHT), $packageItems, $postOrderData),
                 ];
             }
 
