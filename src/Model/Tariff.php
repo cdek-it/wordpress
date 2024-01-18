@@ -126,16 +126,6 @@ namespace Cdek\Model {
                 'mode' => self::DOOR_OFFICE,
                 'type' => self::SHOP_TYPE,
             ],
-            361 => [
-                'name' => 'Экспресс лайт дверь-постамат',
-                'mode' => self::DOOR_PICKUP,
-                'type' => self::SHOP_TYPE,
-            ],
-            363 => [
-                'name' => 'Экспресс лайт склад-постамат',
-                'mode' => self::OFFICE_PICKUP,
-                'type' => self::SHOP_TYPE,
-            ],
             366 => [
                 'name' => 'Посылка дверь-постамат',
                 'mode' => self::DOOR_PICKUP,
