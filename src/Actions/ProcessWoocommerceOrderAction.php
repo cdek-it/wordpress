@@ -7,14 +7,11 @@ namespace {
 
 namespace Cdek\Actions {
 
-    use Cdek\CdekApi;
     use Cdek\Config;
     use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\MetaKeys;
-    use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
-    use Exception;
     use WC_Order;
 
     class ProcessWoocommerceOrderAction
