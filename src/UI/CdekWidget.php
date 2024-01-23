@@ -14,7 +14,13 @@ namespace Cdek\UI {
     {
         public static function registerScripts(): void
         {
-            wp_register_script('cdek-widget', Loader::getPluginUrl().'build/cdek-widget.umd.js');
+            if (file_exists(Loader::getPluginPath() . 'build/cdek-widget.umd.js')) {
+                wp_register_script('cdek-widget',
+                                   Loader::getPluginUrl() . 'build/cdek-widget.umd.js');
+            } else {
+                wp_register_script('cdek-widget',
+                                   '//cdn.jsdelivr.net/npm/@cdek-it/widget@3.8');
+            }
 
             wp_localize_script('cdek-widget', 'cdek', [
                 'apiKey' => Helper::getActualShippingMethod()->get_option('yandex_map_api_key'),

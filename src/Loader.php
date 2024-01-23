@@ -24,6 +24,7 @@ namespace Cdek {
     use Cdek\UI\Admin;
     use Cdek\UI\AdminNotices;
     use Cdek\UI\AdminShippingFields;
+    use Cdek\UI\CdekWidget;
     use Cdek\UI\CheckoutMap;
     use Cdek\UI\Frontend;
     use Cdek\UI\MetaBoxes;
@@ -147,6 +148,7 @@ namespace Cdek {
 
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, new CreateOrderAction, 10, 2);
 
+            (new CdekWidget)();
             (new Admin)();
             (new Frontend)();
             (new MetaBoxes)();
