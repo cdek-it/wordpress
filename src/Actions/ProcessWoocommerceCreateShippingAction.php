@@ -32,9 +32,6 @@ namespace Cdek\Actions {
             $tariffId = $shipping->get_meta(MetaKeys::TARIFF_CODE) ?: $shipping->get_meta('tariff_code');
 
             if (Tariff::isTariffToOffice($tariffId)) {
-                if(empty($pvzCode)) {
-                    throw new RuntimeException(__('Не задан ПВЗ отправки', 'official_cdek'));
-                }
                 $shipping->add_meta_data(MetaKeys::OFFICE_CODE, $pvzCode);
                 $shipping->save_meta_data();
             }
