@@ -1573,7 +1573,7 @@ __metadata:
 
 "@cdek-it/widget@npm:^3.8.2":
   version: 3.8.2
-  resolution: "@cdek-it/widget@npm:3.8.2::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40cdek-it%2Fwidget%2F3.8.2%2F28328beac7bd9085571cd410e2bc190e5b20a48b"
+  resolution: "@cdek-it/widget@npm:3.8.2"
   dependencies:
     "@vueuse/core": "npm:^10.7.0"
     axios: "npm:^1.6.2"
@@ -1584,7 +1584,7 @@ __metadata:
     vue-i18n: "npm:^9.8.0"
     vue-yandex-maps: "npm:2.0.0-rc.10"
     yup: "npm:^1.3.3"
-  checksum: e4d0666966c86bcf3d93b6fed7939d84db6e7372c698fe7588748af1d2c33aa63c2d0f9891a10a6cffebc7522489a833afb919fb92ba3bd4a783997f52f487f8
+  checksum: 186bf48bb947c96738860b942440d33c048da00f86fd5de706e0757938cbea06b1b930a95af52fe1cae9d1831fde7aa0b59ef17a08ab594e5f648dbfc867acc3
   languageName: node
   linkType: hard
 
