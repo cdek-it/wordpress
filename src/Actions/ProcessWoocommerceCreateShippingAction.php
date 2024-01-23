@@ -12,7 +12,6 @@ namespace Cdek\Actions {
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\MetaKeys;
     use Cdek\Model\Tariff;
-    use RuntimeException;
     use WC_Order;
     use WC_Order_Item_Shipping;
 
