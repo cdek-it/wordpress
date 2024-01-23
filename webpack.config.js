@@ -39,14 +39,6 @@ module.exports = {
         ...defaultConfig.plugins.filter((plugin) => plugin.constructor.name !==
           'DependencyExtractionWebpackPlugin' && plugin.constructor.name !==
           'MiniCSSExtractPlugin'),
-        new WooCommerceDependencyExtractionWebpackPlugin({
-            requestToExternal: r => (r === '@cdek-it/widget')
-              ? 'CDEKWidget'
-              : undefined,
-            requestToHandle: r => (r === '@cdek-it/widget')
-              ? 'cdek-widget'
-              : undefined,
-        }),
         new MiniCssExtractPlugin({
             filename: `[name].css`,
         }),

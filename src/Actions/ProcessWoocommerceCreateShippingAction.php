@@ -14,14 +14,14 @@ namespace Cdek\Actions {
     use Cdek\Model\Tariff;
     use WC_Order;
 
-    class ProcessWoocommerceOrderAction
+    class ProcessWoocommerceCreateShippingAction
     {
         /**
          * @throws \WC_Data_Exception
          */
-        public function __invoke(int $orderId, WC_Order $order): void
+        public function __invoke(\WC_Order_Item_Shipping $shipping, $package_key, $package, WC_Order $order): void
         {
-            if (!CheckoutHelper::isCdekShippingMethod($order)) {
+            if ($shipping->get_method_id() !== Config::DELIVERY_NAME) {
                 return;
             }
 
@@ -34,10 +34,7 @@ namespace Cdek\Actions {
                 $shippingMethod->save_meta_data();
             }
 
-            $instance = $shippingMethod->get_data()['instance_id'];
-            $instance = empty($instance) ? null : $instance;
-
-            if (Helper::getActualShippingMethod($instance)
+            if (Helper::getActualShippingMethod($shipping->get_instance_id())
                       ->get_option('automate_orders') === 'yes') {
                 wp_schedule_single_event(time() + 1, Config::ORDER_AUTOMATION_HOOK_NAME, [$order->get_id(),
                                                                                                    1]);
