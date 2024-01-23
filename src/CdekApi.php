@@ -208,7 +208,7 @@ class CdekApi
         if (!$result) {
             return [
                 'success' => false,
-                'message' => __(Messages::NO_DELIVERY_POINTS_IN_CITY, Config::TRANSLATION_DOMAIN),
+                'message' => __(Messages::NO_DELIVERY_POINTS_IN_CITY, 'official_cdek'),
             ];
         }
 

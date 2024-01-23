@@ -1,6 +1,5 @@
 import $ from 'jquery';
 import cdekWidget from '@cdek-it/widget';
-import { addQueryArgs } from '@wordpress/url';
 import './style/main.scss';
 import { debounce } from 'lodash';
 

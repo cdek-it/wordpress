@@ -11,7 +11,7 @@ namespace Cdek {
     use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
     use Automattic\WooCommerce\Utilities\FeaturesUtil;
     use Cdek\Actions\CreateOrderAction;
-    use Cdek\Actions\ProcessWoocommerceOrderAction;
+    use Cdek\Actions\ProcessWoocommerceCreateShippingAction;
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
     use Cdek\Blocks\CheckoutMapBlock;
@@ -24,7 +24,6 @@ namespace Cdek {
     use Cdek\UI\Admin;
     use Cdek\UI\AdminNotices;
     use Cdek\UI\AdminShippingFields;
-    use Cdek\UI\CdekWidget;
     use Cdek\UI\CheckoutMap;
     use Cdek\UI\Frontend;
     use Cdek\UI\MetaBoxes;
@@ -132,7 +131,8 @@ namespace Cdek {
             add_action('woocommerce_order_before_calculate_totals', new RecalculateShippingAction, 10, 2);
 
             add_action('woocommerce_after_shipping_rate', new CheckoutMap, 10, 2);
-            add_filter('woocommerce_new_order', new ProcessWoocommerceOrderAction, 10, 2);
+            add_filter('woocommerce_checkout_create_order_shipping_item', new ProcessWoocommerceCreateShippingAction,
+                       10, 4);
             add_action('woocommerce_checkout_create_order', new SaveCustomCheckoutFieldsAction, 10, 2);
 
             add_action('woocommerce_blocks_loaded',
@@ -147,7 +147,6 @@ namespace Cdek {
 
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, new CreateOrderAction, 10, 2);
 
-            (new CdekWidget)();
             (new Admin)();
             (new Frontend)();
             (new MetaBoxes)();

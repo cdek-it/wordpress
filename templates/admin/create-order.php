@@ -1,4 +1,5 @@
 <?php
+defined('ABSPATH') or exit;
 /** @var $order */
 /** @var $orderNumber */
 /** @var $orderIdWP */
@@ -11,7 +12,8 @@
 /** @var $fromDoor */
 ?>
 <div id="cdek-loader" style="display: none"></div>
-<?php if ($hasPackages) {
+<?php
+if ($hasPackages) {
     include 'form_package_many.php';
 } else {
     include 'form_package.php';

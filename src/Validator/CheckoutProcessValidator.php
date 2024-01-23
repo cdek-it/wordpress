@@ -38,10 +38,8 @@ namespace Cdek\Validator {
                 if (empty($pvzCode)) {
                     wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
                 }
-            } else {
-                if (empty(CheckoutHelper::getValueFromCurrentSession('address_1'))) {
-                    wc_add_notice(__('Нет адреса отправки.'), 'error');
-                }
+            } elseif (empty(CheckoutHelper::getValueFromCurrentSession('address_1'))) {
+                wc_add_notice(__('Нет адреса отправки.'), 'error');
             }
         }
     }
