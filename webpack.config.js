@@ -39,6 +39,7 @@ module.exports = {
         ...defaultConfig.plugins.filter((plugin) => plugin.constructor.name !==
           'DependencyExtractionWebpackPlugin' && plugin.constructor.name !==
           'MiniCSSExtractPlugin'),
+        new WooCommerceDependencyExtractionWebpackPlugin(),
         new MiniCssExtractPlugin({
             filename: `[name].css`,
         }),
