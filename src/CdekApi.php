@@ -116,7 +116,7 @@ class CdekApi
 
     public function getFileByLink($link)
     {
-        return HttpClient::sendCdekRequest($link, 'GET', $this->getToken(), null, true);
+        return HttpClient::sendCdekRequest($link, 'GET', $this->getToken(), null, true)['body'];
     }
 
     public function createWaybill($orderUuid)
