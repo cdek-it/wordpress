@@ -26,7 +26,7 @@ export const Block = ({
     }, 500);
 
     const debouncedMapRender = useCallback(debounce((shippingRates, points) => {
-        if (points === '') {
+        if (points === '' || !cart.cartNeedsShipping) {
             debouncedSetExtensionData('official_cdek', 'office_code', null);
             clearValidationError('official_cdek_office');
             return;
