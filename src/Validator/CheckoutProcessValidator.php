@@ -16,6 +16,10 @@ namespace Cdek\Validator {
 
         public function __invoke(): void
         {
+            if (!WC()->cart->needs_shipping()) {
+                return;
+            }
+
             $api = new CdekApi;
 
             $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
@@ -24,7 +28,7 @@ namespace Cdek\Validator {
                 return;
             }
 
-            $city = CheckoutHelper::getValueFromCurrentSession('city');
+            $city  = CheckoutHelper::getValueFromCurrentSession('city');
             $state = CheckoutHelper::getValueFromCurrentSession('postcode');
 
             $cityCode = $api->getCityCode($city, $state);
