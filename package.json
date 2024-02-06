@@ -44,5 +44,5 @@
     "prettier": "^3.1.0",
     "webpack": "^5.89.0"
   },
-  "packageManager": "yarn@4.0.1"
+  "packageManager": "yarn@4.1.0"
 }
