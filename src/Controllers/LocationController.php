@@ -17,7 +17,8 @@ namespace Cdek\Controllers {
     {
         public static function getPoints(WP_REST_Request $data): WP_REST_Response
         {
-            return new WP_REST_Response((new CdekApi)->getOffices($data->get_params()), 200);
+            $data = (new CdekApi)->getOffices($data->get_params());
+            return new WP_REST_Response($data instanceof \WP_Error ? $data : $data['body'], 200, $data['headers']);
         }
 
         public function __invoke(): void

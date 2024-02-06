@@ -13,15 +13,16 @@ namespace Cdek\Transport {
 
     class HttpClient
     {
-        public static function sendCdekRequest(string $url,
-                                               string $method,
-                                               string $token,
-                                               array  $data = null,
-                                               bool   $plain = false)
-        {
+        public static function sendCdekRequest(
+            string $url,
+            string $method,
+            string $token,
+            array $data = null,
+            bool $plain = false
+        ) {
             $config = [
                 'headers' => [
-                    'Content-Type' => 'application/json',
+                    'Content-Type'  => 'application/json',
                     'Authorization' => $token,
                 ],
                 'timeout' => 60,
@@ -38,19 +39,19 @@ namespace Cdek\Transport {
         {
             $pluginVersion = Loader::getPluginVersion();
 
-            $resp =
-                (new WP_Http())->request($url,
-                                         array_merge($config,
-                                                     ['method' => $method, 'user-agent' => "wp/$pluginVersion"]));
+            $resp = (new WP_Http)->request($url, array_merge($config, [
+                                                                        'method'     => $method,
+                                                                        'user-agent' => "wp/$pluginVersion",
+                                                                    ]));
 
             if ($plain || is_array($resp)) {
-                return is_array($resp) ? $resp['body'] : $resp;
+                return is_array($resp) ? ['body' => $resp['body'], 'headers' => $resp['headers']] : $resp;
             }
 
             $ip = @file_get_contents('https://ipecho.net/plain');
 
-            if(!headers_sent()) {
-                header( "X-Requester-IP: $ip" );
+            if (!headers_sent()) {
+                header("X-Requester-IP: $ip");
             }
 
             return json_encode(['error' => true, 'ip' => $ip]);
