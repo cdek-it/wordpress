@@ -48,7 +48,8 @@ class AdminShippingFields
                     break;
                 case MetaKeys::OFFICE_CODE:
                     try {
-                        $officeAddress = json_decode((new CdekApi)->getOffices(['code' => $meta['value']]), true, 512,
+                        $officeAddress = json_decode((new CdekApi)->getOffices(['code' => $meta['value']])['body'],
+                                                     true, 512,
                                                      JSON_THROW_ON_ERROR);
 
                         self::renderOffice(sprintf('%s (%s)', $meta['value'],
