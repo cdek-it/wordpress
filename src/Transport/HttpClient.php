@@ -40,12 +40,16 @@ namespace Cdek\Transport {
             $pluginVersion = Loader::getPluginVersion();
 
             $resp = (new WP_Http)->request($url, array_merge($config, [
-                                                                        'method'     => $method,
-                                                                        'user-agent' => "wp/$pluginVersion",
-                                                                    ]));
+                'method'     => $method,
+                'user-agent' => "wp/$pluginVersion",
+            ]));
 
             if ($plain || is_array($resp)) {
-                return is_array($resp) ? ['body' => $resp['body'], 'headers' => $resp['headers']] : $resp;
+                if ($plain) {
+                    return is_array($resp) ? ['body' => $resp['body'], 'headers' => $resp['headers']] : $resp;
+                }
+
+                return is_array($resp) ? $resp['body'] : $resp;
             }
 
             $ip = @file_get_contents('https://ipecho.net/plain');
