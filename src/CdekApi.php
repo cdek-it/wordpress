@@ -116,7 +116,7 @@ class CdekApi
 
     public function getFileByLink($link)
     {
-        return HttpClient::sendCdekRequest($link, 'GET', $this->getToken(), null, true);
+        return HttpClient::sendCdekRequest($link, 'GET', $this->getToken(), null, true)['body'];
     }
 
     public function createWaybill($orderUuid)
@@ -208,7 +208,7 @@ class CdekApi
         if (!$result) {
             return [
                 'success' => false,
-                'message' => __(Messages::NO_DELIVERY_POINTS_IN_CITY, Config::TRANSLATION_DOMAIN),
+                'message' => __(Messages::NO_DELIVERY_POINTS_IN_CITY, 'official_cdek'),
             ];
         }
 

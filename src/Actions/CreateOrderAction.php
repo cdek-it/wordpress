@@ -16,7 +16,7 @@ namespace Cdek\Actions {
     use Cdek\MetaKeys;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
-    use DateTime;
+    use Exception;
     use Throwable;
     use WC_Order;
 
@@ -50,13 +50,13 @@ namespace Cdek\Actions {
 
                 sleep(1);
 
-                $cdekNumber                    = $this->getCdekOrderNumber($orderData['entity']['uuid']);
+                $cdekNumber = $this->getCdekOrderNumber($orderData['entity']['uuid']);
 
                 try {
-                    $cdekStatuses = Helper::getCdekOrderStatuses($orderData['entity']['uuid']);
+                    $cdekStatuses         = Helper::getCdekOrderStatuses($orderData['entity']['uuid']);
                     $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
-                } catch (\Exception $e) {
-                    $cdekStatuses = [];
+                } catch (Exception $e) {
+                    $cdekStatuses         = [];
                     $actionOrderAvailable = true;
                 }
 
@@ -65,14 +65,15 @@ namespace Cdek\Actions {
                 OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
 
                 ob_start();
-                include(WP_PLUGIN_DIR . '/cdek/templates/admin/status_list.php');
+                include(WP_PLUGIN_DIR.'/cdek/templates/admin/status_list.php');
                 $cdekStatusesRender = ob_get_clean();
+
                 return [
-                    'state'    => true,
-                    'code'     => $cdekNumber,
-                    'statuses' => $cdekStatusesRender,
+                    'state'     => true,
+                    'code'      => $cdekNumber,
+                    'statuses'  => $cdekStatusesRender,
                     'available' => $actionOrderAvailable,
-                    'door'     => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
+                    'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
                 ];
             } catch (Throwable $e) {
                 if ($attempt < 1 || $attempt > 5) {
@@ -135,10 +136,10 @@ namespace Cdek\Actions {
                 $param['delivery_point'] = $postOrderData['pvz_code'];
             } else {
                 $param['to_location'] = [
-                    'city'         => $order->get_shipping_city(),
-                    'postal_code'  => $order->get_shipping_postcode(),
-                    'country_code' => $order->get_shipping_country() ?? 'RU',
-                    'address'      => $order->get_shipping_address_1(),
+                    'city'         => $order->get_shipping_city() ?: $order->get_billing_city(),
+                    'postal_code'  => $order->get_shipping_postcode() ?: $order->get_billing_postcode(),
+                    'country_code' => ($order->get_shipping_country() ?: $order->get_billing_country()) ?? 'RU',
+                    'address'      => $order->get_shipping_address_1() ?: $order->get_billing_address_1(),
                 ];
             }
 
@@ -173,13 +174,9 @@ namespace Cdek\Actions {
             }
 
             if ($order->get_payment_method() === 'cod') {
-                $codPriceThreshold = (int) $deliveryMethod->get_option('stepcodprice');
-                $total             = number_format($order->get_subtotal(), wc_get_price_decimals(), '.', '');
-                if ($codPriceThreshold === 0 || $codPriceThreshold > $total) {
-                    $param['delivery_recipient_cost'] = [
-                        'value' => $order->get_shipping_total(),
-                    ];
-                }
+                $param['delivery_recipient_cost'] = [
+                    'value' => $order->get_shipping_total(),
+                ];
             }
 
             return $param;
@@ -204,9 +201,9 @@ namespace Cdek\Actions {
                 }, $items);
 
                 return [
-                    $this->buildItemsData($order, (int) $deliveryMethod->get_meta('length'),
-                                          (int) $deliveryMethod->get_meta('width'),
-                                          (int) $deliveryMethod->get_meta('height'), $packageItems, $postOrderData),
+                    $this->buildItemsData($order, (int) $deliveryMethod->get_meta(MetaKeys::LENGTH),
+                                          (int) $deliveryMethod->get_meta(MetaKeys::WIDTH),
+                                          (int) $deliveryMethod->get_meta(MetaKeys::HEIGHT), $packageItems, $postOrderData),
                 ];
             }
 

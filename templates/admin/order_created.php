@@ -1,4 +1,5 @@
 <?php
+defined('ABSPATH') or exit;
 /** @var $orderNumber */
 /** @var $orderStatusList */
 /** @var $orderUuid */
@@ -7,6 +8,7 @@
 /** @var $courierNumber */
 /** @var $orderIdWP */
 /** @var $fromDoor */
+
 /** @var $actionOrderAvailable */
 
 use Cdek\Helpers\UrlHelper;
@@ -21,18 +23,24 @@ if (!$orderNumber) { ?>style="display: none" <?php
         <div id="cdek-order-number-block">
             <div>
                 <div id="cdek-order-status-block">
-                    <?php include 'status_list.php'; ?>
+                    <?php
+                    include 'status_list.php'; ?>
                 </div>
-                <p id="cdek-order-number">№ <b><?= $orderNumber ?></b></p>
+                <p id="cdek-order-number">№ <b><?php
+                        echo $orderNumber ?></b></p>
                 <a id="cdek-order-waybill" target="_blank"
-                   href="<?= UrlHelper::buildRest("order/$orderIdWP/waybill") ?>">Получить
+                   href="<?php
+                   echo esc_url(UrlHelper::buildRest("order/$orderIdWP/waybill")) ?>">Получить
                     квитанцию</a>
                 <a id="cdek-order-barcode" target="_blank"
-                   href="<?= UrlHelper::buildRest("order/$orderIdWP/barcode") ?>">Получить ШК</a>
-                <?php if ($actionOrderAvailable) { ?>
-                <p id="cdek-order-courier">
-                    Вызвать курьера</p>
-                <?php } ?>
+                   href="<?php
+                   echo esc_url(UrlHelper::buildRest("order/$orderIdWP/barcode")) ?>">Получить ШК</a>
+                <?php
+                if ($actionOrderAvailable) { ?>
+                    <p id="cdek-order-courier">
+                        Вызвать курьера</p>
+                    <?php
+                } ?>
             </div>
 
             <div id="cdek-courier-result-block"
@@ -41,8 +49,12 @@ if (!$orderNumber) { ?>style="display: none" <?php
             } else { ?> style="margin-top: 10px;" <?php
             } ?>>
                 <hr>
-                <p id="cdek-courier-info">Номер заявки: <?= $courierNumber ?></p>
-                <p id="cdek-courier-delete" data-action="<?= UrlHelper::buildRest("order/$orderIdWP/courier/delete") ?>">Отменить заявку</p>
+                <p id="cdek-courier-info">Номер заявки: <?php
+                    echo $courierNumber ?></p>
+                <p id="cdek-courier-delete"
+                   data-action="<?php
+                   echo esc_url(UrlHelper::buildRest("order/$orderIdWP/courier/delete")) ?>">Отменить
+                    заявку</p>
             </div>
 
             <div id="call-courier-form">
@@ -55,11 +67,16 @@ if (!$orderNumber) { ?>style="display: none" <?php
 
         </div>
     </div>
-    <?php if ($actionOrderAvailable) { ?>
-    <hr>
-    <div>
-        <p id="cdek-delete-order-error" class="form-field form-field-wide wc-order-status" style="display: none"></p>
-        <a id="delete-order-btn" href="<?= UrlHelper::buildRest("order/$orderIdWP/delete") ?>">Отменить заказ</a>
-    </div>
-    <?php } ?>
+    <?php
+    if ($actionOrderAvailable) { ?>
+        <hr>
+        <div>
+            <p id="cdek-delete-order-error" class="form-field form-field-wide wc-order-status"
+               style="display: none"></p>
+            <a id="delete-order-btn" href="<?php
+            echo esc_url(UrlHelper::buildRest("order/$orderIdWP/delete")) ?>">Отменить
+                заказ</a>
+        </div>
+        <?php
+    } ?>
 </div>

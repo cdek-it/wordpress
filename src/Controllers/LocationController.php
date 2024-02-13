@@ -9,6 +9,7 @@ namespace Cdek\Controllers {
 
     use Cdek\CdekApi;
     use Cdek\Config;
+    use WP_Error;
     use WP_REST_Request;
     use WP_REST_Response;
     use WP_REST_Server;
@@ -17,7 +18,12 @@ namespace Cdek\Controllers {
     {
         public static function getPoints(WP_REST_Request $data): WP_REST_Response
         {
-            return new WP_REST_Response((new CdekApi)->getOffices($data->get_params()), 200);
+            $data = (new CdekApi)->getOffices($data->get_params());
+            return new WP_REST_Response($data instanceof WP_Error ? $data : $data['body'], 200, [
+                'x-current-page' => $data['headers']['x-current-page'] ?? null,
+                'x-total-pages' => $data['headers']['x-total-pages'] ?? null,
+                'x-total-elements' => $data['headers']['x-total-elements'] ?? null,
+            ]);
         }
 
         public function __invoke(): void

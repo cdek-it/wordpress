@@ -384,10 +384,10 @@ class CdekShippingMethod extends WC_Shipping_Method
             $instanceValue = $this->get_instance_option($key, $empty_value);
 
             if (array_key_exists("use_$key", $this->get_instance_form_fields())) {
-                if ($this->get_instance_option("use_$key", false)) {
+                if ($this->get_instance_option("use_$key", false) === 'yes') {
                     return $instanceValue;
                 }
-            } elseif (!empty($instanceValue)) {
+            } elseif (!empty($instanceValue) || strpos($key, 'use_') === 0) {
                 return $instanceValue;
             }
         }

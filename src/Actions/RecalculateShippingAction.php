@@ -9,6 +9,7 @@ namespace Cdek\Actions {
 
     use Cdek\Exceptions\TariffNotAvailableException;
     use Cdek\Helpers\DeliveryCalc;
+    use Cdek\MetaKeys;
     use Cdek\Model\OrderMetaData;
     use WC_Abstract_Order;
     use WC_Order;
@@ -44,13 +45,13 @@ namespace Cdek\Actions {
                                                ],
                                            ], isset(OrderMetaData::getMetaByOrderId($order->get_id())['pvz_code']));
 
-                    $rate = $calculator->getTariffRate((int)$shipping->get_meta('tariff_code'));
+                    $rate = $calculator->getTariffRate((int)($shipping->get_meta(MetaKeys::TARIFF_CODE) ?: $shipping->get_meta('tariff_code')));
                     $shipping->set_total($rate['cost']);
                     $shipping->set_name($rate['label']);
                     $shipping->set_meta_data([
-                                                 'width'  => $rate['width'],
-                                                 'height' => $rate['height'],
-                                                 'length' => $rate['length'],
+                                                 MetaKeys::WIDTH  => $rate['width'],
+                                                 MetaKeys::HEIGHT => $rate['height'],
+                                                 MetaKeys::LENGTH => $rate['length'],
                                              ]);
                 }
             } catch (TariffNotAvailableException $e) {

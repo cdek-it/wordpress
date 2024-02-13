@@ -6,7 +6,7 @@ import { CURRENCY } from '@woocommerce/settings';
 import '../styles/delivery-price.scss';
 
 const RulesComponent = ({ rules, onRulesUpdate }) => {
-    const changeTo = useCallback(debounce((e, index) => {
+    const changeTo = (e, index) => {
         rules[index].to = parseInt(e.target.value);
         rules.forEach((e, i) => {
             if (i === 0 || e.to === null) {
@@ -17,16 +17,20 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
             }
         });
         onRulesUpdate([...rules]);
-    }, 4000), [rules]);
+    };
+
+    const changeToDebounced = useCallback(debounce(changeTo, 4000), [rules]);
     const changeType = (e, index) => {
         rules[index].type = e.target.value;
         onRulesUpdate([...rules]);
     };
 
-    const changeValue = useCallback(debounce((e, index) => {
+    const changeValue = (e, index) => {
         rules[index].value = e.target.value;
         onRulesUpdate([...rules]);
-    }, 4000), [rules]);
+    };
+
+    const changeValueDebounced = useCallback(debounce(changeValue, 4000), [rules]);
 
     const removeRule = (index) => {
         if (index === (rules.length - 1)) {
@@ -44,7 +48,8 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
           <input defaultValue={rule.to}
                  min={rules[index - 1] ? rules[index - 1].to + 1 : 0}
                  type="number"
-                 onInput={(e) => changeTo(e,
+                 onBlur={(e) => changeTo(e, index)}
+                 onInput={(e) => changeToDebounced(e,
                    index)} />{CURRENCY.symbol}</>} {rules.length === 1 &&
       <>{__('любая', 'cdek-official')}</>}, {__('стоимость доставки',
       'cdek-official')}
@@ -65,7 +70,8 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
         </select>
         {rule.type !== 'free' && <input defaultValue={rule.value} type="number"
                                         min={rule.type === 'amount' ? null : 0}
-                                        onInput={(e) => changeValue(e,
+                                        onBlur={(e) => changeValue(e, index)}
+                                        onInput={(e) => changeValueDebounced(e,
                                           index)} />}
         {rule.type === 'percentage' && <>%</>}
         {(rule.type === 'amount' || rule.type === 'fixed') &&

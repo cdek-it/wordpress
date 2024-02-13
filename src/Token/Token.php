@@ -61,9 +61,8 @@ class Token extends TokenProcess
     /**
      * @throws \Cdek\Exceptions\CdekApiException
      */
-    public function fetchTokenFromApi() {
-        $cdekApi = new CdekApi();
-        return $cdekApi->fetchToken();
+    final public function fetchTokenFromApi() {
+        return (new CdekApi())->fetchToken();
     }
 
     private function getTokenExp($token)

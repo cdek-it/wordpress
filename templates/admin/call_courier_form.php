@@ -1,10 +1,12 @@
 <?php
+defined('ABSPATH') or exit;
 /** @var $orderNumber */
 /** @var $orderIdWP */
 /** @var $orderUuid */
 /** @var $dateMin */
 /** @var $dateMax */
 /** @var $courierNumber */
+
 /** @var $fromDoor */
 
 use Cdek\Helpers\UrlHelper;
@@ -15,7 +17,9 @@ use Cdek\Helpers\UrlHelper;
     <div>
         <div>
             <p>Дата ожидания курьера:</p>
-            <input id="cdek-courier-date" type="date" min='<?= $dateMin ?>' max='<?= $dateMax ?>'>
+            <input id="cdek-courier-date" type="date" min='<?php
+            echo $dateMin ?>' max='<?php
+            echo $dateMax ?>'>
         </div>
         <div>
             <p>Время ожидания курьера:</p>
@@ -43,33 +47,39 @@ use Cdek\Helpers\UrlHelper;
     </div>
     <input id="cdek-courier-name" type="text" placeholder="ФИО">
     <input id="cdek-courier-phone" type="tel" min="0" placeholder="Телефон">
-    <?php $tip = "Должен передаваться в международном формате: код страны (для России +7) и сам номер (10 и более цифр)"; echo wc_help_tip($tip, false);?>
+    <?php
+    echo wc_help_tip('Должен передаваться в международном формате: код страны (для России +7) и сам номер (10 и более цифр)'); ?>
     <input id="cdek-courier-address" title="tooltip" type="text" placeholder="Адрес">
     <label for="cdek-courier-address">
-        <?php $tip = "Город берется из настроек плагина. В поле 'Адрес' вводится только улица, дом, кв"; echo wc_help_tip($tip, false);?>
+        <?php
+        echo wc_help_tip('Город берется из настроек плагина. В поле "Адрес" вводится только улица, дом, кв'); ?>
     </label>
     <input id="cdek-courier-comment" type="text" placeholder="Комментарий">
-    <?php if (!$fromDoor) { ?>
-    <input id="cdek-courier-package-desc" type="text" placeholder="Описание груза">
-    <div>
-        <div style="display: inline-flex; margin-top: 5px; align-items: center;">
-            <p style="margin: auto">Габариты</p>
-            <?php $tip = "Для тарифов 'От склада' можно отправить сразу несколько заказов. 
+    <?php
+    if (!$fromDoor) { ?>
+        <input id="cdek-courier-package-desc" type="text" placeholder="Описание груза">
+        <div>
+            <div style="display: inline-flex; margin-top: 5px; align-items: center;">
+                <p style="margin: auto">Габариты</p>
+                <?php
+                echo wc_help_tip('Для тарифов "От склада" можно отправить сразу несколько заказов. 
                     Поэтому габариты могут отличаться от тех что указывались при создании заказа. 
-                    Для тарифов 'От двери' можно продублировать те что указывались при создании заказа"; echo wc_help_tip($tip, false);?>
-        </div>
+                    Для тарифов "От двери" можно продублировать те что указывались при создании заказа'); ?>
+            </div>
 
-        <input id="cdek-courier-weight" type="number" min="0" placeholder="Вес в кг">
-        <input id="cdek-courier-length" type="number" min="0" placeholder="Длина в см">
-        <input id="cdek-courier-width" type="number"  min="0"placeholder="Ширина в см">
-        <input id="cdek-courier-height" type="number" min="0" placeholder="Высота в см">
-    </div>
-    <?php } ?>
+            <input id="cdek-courier-weight" type="number" min="0" placeholder="Вес в кг">
+            <input id="cdek-courier-length" type="number" min="0" placeholder="Длина в см">
+            <input id="cdek-courier-width" type="number" min="0" placeholder="Ширина в см">
+            <input id="cdek-courier-height" type="number" min="0" placeholder="Высота в см">
+        </div>
+        <?php
+    } ?>
     <div>
         <label for="cdek-courier-startime">Необходим звонок</label>
         <input id="cdek-courier-call" type="checkbox">
     </div>
     <p id="cdek-courier-error" style="display: none"></p>
     <input id="cdek-courier-send-call" class="button save_order button-primary" type="button" value="Отправить"
-           data-action="<?= UrlHelper::buildRest("order/$orderIdWP/courier") ?>">
+           data-action="<?php
+           echo esc_url(UrlHelper::buildRest("order/$orderIdWP/courier")) ?>">
 </div>

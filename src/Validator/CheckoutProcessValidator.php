@@ -16,6 +16,10 @@ namespace Cdek\Validator {
 
         public function __invoke(): void
         {
+            if (!WC()->cart->needs_shipping()) {
+                return;
+            }
+
             $api = new CdekApi;
 
             $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
@@ -24,7 +28,7 @@ namespace Cdek\Validator {
                 return;
             }
 
-            $city = CheckoutHelper::getValueFromCurrentSession('city');
+            $city  = CheckoutHelper::getValueFromCurrentSession('city');
             $state = CheckoutHelper::getValueFromCurrentSession('postcode');
 
             $cityCode = $api->getCityCode($city, $state);
@@ -38,10 +42,8 @@ namespace Cdek\Validator {
                 if (empty($pvzCode)) {
                     wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
                 }
-            } else {
-                if (empty(CheckoutHelper::getValueFromCurrentSession('address_1'))) {
-                    wc_add_notice(__('Нет адреса отправки.'), 'error');
-                }
+            } elseif (empty(CheckoutHelper::getValueFromCurrentSession('address_1'))) {
+                wc_add_notice(__('Нет адреса отправки.'), 'error');
             }
         }
     }

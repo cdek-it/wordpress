@@ -23,7 +23,7 @@ namespace Cdek\UI {
             $city     = CheckoutHelper::getValueFromCurrentSession('city');
             $postcode = CheckoutHelper::getValueFromCurrentSession('postcode');
 
-            if (empty($city) || empty($postcode)) {
+            if (empty($city)) {
                 return;
             }
 
@@ -33,7 +33,7 @@ namespace Cdek\UI {
 
             $points = $city !== -1 ? $api->getOffices([
                                                           'city_code' => $city,
-                                                      ]) : '[]';
+                                                      ])['body'] : '[]';
 
             include __DIR__.'/../../templates/public/open-map.php';
         }

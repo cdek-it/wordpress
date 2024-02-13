@@ -10,7 +10,6 @@ namespace Cdek\UI {
     use Automattic\WooCommerce\Utilities\OrderUtil;
     use Cdek\CdekApi;
     use Cdek\Config;
-    use Cdek\Exceptions\CdekApiException;
     use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Loader;
@@ -18,6 +17,8 @@ namespace Cdek\UI {
     use Cdek\Model\CourierMetaData;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
+    use Exception;
+    use Throwable;
 
     class MetaBoxes
     {
@@ -74,36 +75,30 @@ namespace Cdek\UI {
         {
             $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME);
             $pluginName        = Loader::getPluginName();
-            echo <<<PAGE
-        <div>
-            <h4>Не задан адрес отправки</h4>
-            <p>Выберите корректный адрес отправки в <a href="$settings_page_url">настройках</a> плагина $pluginName</p>
-        </div>
-        PAGE;
+            echo "<div>
+                <h4>Не задан адрес отправки</h4>
+                <p>Выберите корректный адрес отправки в <a href='$settings_page_url'>настройках</a> плагина $pluginName</p>
+            </div>";
         }
 
         public static function noOfficeMetaBox(): void
         {
             $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME);
             $pluginName        = Loader::getPluginName();
-            echo <<<PAGE
-        <div>
-            <h4>Не задан ПВЗ отправки</h4>
-            <p>Выберите корректный ПВЗ для отправки в <a href="$settings_page_url">настройках</a> плагина $pluginName</p>
-        </div>
-        PAGE;
+            echo "<div>
+                <h4>Не задан ПВЗ отправки</h4>
+                <p>Выберите корректный ПВЗ для отправки в <a href='$settings_page_url'>настройках</a> плагина $pluginName</p>
+            </div>";
         }
 
         public static function noAuthMetaBox(): void
         {
             $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME);
             $pluginName        = Loader::getPluginName();
-            echo <<<PAGE
-        <div>
-            <h4>Авторизация не пройдена</h4>
-            <p>Введите корректные идентификатор и секретный ключ клиента в <a href="$settings_page_url">настройках</a> плагина $pluginName</p>
-        </div>
-        PAGE;
+            echo "<div>
+                <h4>Авторизация не пройдена</h4>
+                <p>Введите корректные идентификатор и секретный ключ клиента в <a href='$settings_page_url'>настройках</a> плагина $pluginName</p>
+            </div>";
         }
 
         public static function createOrderMetaBox($post): void
@@ -124,16 +119,16 @@ namespace Cdek\UI {
             $shipping = CheckoutHelper::getOrderShippingMethod($order);
 
             $hasPackages
-                           = Helper::getActualShippingMethod($shipping->get_data()['instance_id'])
-                                   ->get_option('has_packages_mode') === 'yes';
-            $orderNumber   = $orderData['order_number'] ?? null;
-            $orderUuid     = $orderData['order_uuid'] ?? null;
+                         = Helper::getActualShippingMethod($shipping->get_data()['instance_id'])
+                                 ->get_option('has_packages_mode') === 'yes';
+            $orderNumber = $orderData['order_number'] ?? null;
+            $orderUuid   = $orderData['order_uuid'] ?? null;
 
             try {
-                $cdekStatuses = Helper::getCdekOrderStatuses($orderUuid);
+                $cdekStatuses         = Helper::getCdekOrderStatuses($orderUuid);
                 $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
-            } catch (\Exception $e) {
-                $cdekStatuses = [];
+            } catch (Exception $e) {
+                $cdekStatuses         = [];
                 $actionOrderAvailable = true;
             }
 
@@ -141,25 +136,26 @@ namespace Cdek\UI {
                 self::notAvailableEditOrderData();
             }
 
-            $courierNumber = CourierMetaData::getMetaByOrderId($orderIdWP)['courier_number'] ?? '';
-            $fromDoor      = Tariff::isTariffFromDoor($shipping->get_meta(MetaKeys::TARIFF_CODE) ?:
-                                                          $shipping->get_meta('tariff_code') ?:
-                                                              $orderData['tariff_id']);
-            $length        = $shipping->get_meta(MetaKeys::LENGTH)?: $shipping->get_meta('length');
-            $height        = $shipping->get_meta(MetaKeys::HEIGHT)?: $shipping->get_meta('height');
-            $width         = $shipping->get_meta(MetaKeys::WIDTH)?: $shipping->get_meta('width');
+            try {
+                $fromDoor      = Tariff::isTariffFromDoor($shipping->get_meta(MetaKeys::TARIFF_CODE) ?:
+                                                              $shipping->get_meta('tariff_code') ?:
+                                                                  $orderData['tariff_id']);
+                $courierNumber = CourierMetaData::getMetaByOrderId($orderIdWP)['courier_number'] ?? '';
+                $length        = $shipping->get_meta(MetaKeys::LENGTH) ?: $shipping->get_meta('length');
+                $height        = $shipping->get_meta(MetaKeys::HEIGHT) ?: $shipping->get_meta('height');
+                $width         = $shipping->get_meta(MetaKeys::WIDTH) ?: $shipping->get_meta('width');
 
-            include __DIR__.'/../../templates/admin/create-order.php';
+                include __DIR__.'/../../templates/admin/create-order.php';
+            } catch (Throwable $e) {
+            }
         }
 
         public static function notAvailableEditOrderData(): void
         {
-            echo <<<PAGE
-                <div class="notice notice-warning"><p>
-                <strong>CDEKDelivery:</strong> Редактирование заказа недоступно из за смены статуса заказа в системе 
+            echo '<div class="notice notice-warning"><p>
+                <strong>CDEKDelivery:</strong> Редактирование заказа недоступно из-за смены статуса заказа в системе 
                 CDEK
-                </p></div>
-                PAGE;
+            </p></div>';
         }
 
         public function __invoke(): void
