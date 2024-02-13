@@ -3,6 +3,7 @@ const WooCommerceDependencyExtractionWebpackPlugin = require(
   '@woocommerce/dependency-extraction-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { resolve } = require('path');
+const CopyPlugin = require('copy-webpack-plugin');
 
 // Remove SASS rule from the default config so we can define our own.
 const defaultRules = defaultConfig.module.rules.filter((rule) => {
@@ -50,5 +51,13 @@ module.exports = {
         new MiniCssExtractPlugin({
             filename: `[name].css`,
         }),
+        new CopyPlugin({
+                           patterns: [
+                               {
+                                   from: resolve(__dirname, 'node_modules', '@cdek-it', 'widget/dist/cdek-widget.umd.js'),
+                                   to: resolve(__dirname, 'build', 'cdek-widget.umd.js'),
+                               },
+                           ],
+                       }),
     ],
 };
