@@ -22,7 +22,7 @@ endif ?> >
                 <?php
                 foreach ($items as $key => $item): ?>
                     <option value="<?php
-                    echo esc_html($key) ?>"><?= esc_html($item['name']) ?></option>
+                    echo esc_html($key) ?>"><?php echo esc_html($item['name']) ?></option>
                 <?php
                 endforeach; ?>
             </select>

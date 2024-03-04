@@ -29,7 +29,7 @@ namespace Cdek\Transport {
             ];
 
             if (!empty($data)) {
-                $config['body'] = ($method === WP_REST_Server::READABLE) ? $data : json_encode($data);
+                $config['body'] = ($method === WP_REST_Server::READABLE) ? $data : wp_json_encode($data);
             }
 
             return self::sendRequest($url, $method, $config, $plain);
@@ -58,7 +58,7 @@ namespace Cdek\Transport {
                 header("X-Requester-IP: $ip");
             }
 
-            return json_encode(['error' => true, 'ip' => $ip]);
+            return wp_json_encode(['error' => true, 'ip' => $ip]);
         }
     }
 }

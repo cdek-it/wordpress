@@ -97,7 +97,7 @@ namespace Cdek\Actions {
             $param = [
                 'type'            => $postOrderData['type'],
                 'tariff_code'     => $postOrderData['tariff_code'],
-                'date_invoice'    => date('Y-m-d'),
+                'date_invoice'    => gmdate('Y-m-d'),
                 'number'          => $order->get_id(),
                 'shipper_name'    => $deliveryMethod->get_option('shipper_name'),
                 'shipper_address' => $deliveryMethod->get_option('shipper_address'),
