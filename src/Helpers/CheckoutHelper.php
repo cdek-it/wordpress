@@ -10,6 +10,7 @@ namespace Cdek\Helpers {
     use Cdek\Config;
     use Cdek\Helper;
     use RuntimeException;
+    use Throwable;
     use WC_Order;
     use WC_Order_Item;
 
@@ -17,21 +18,34 @@ namespace Cdek\Helpers {
     {
         public static function getValueFromCurrentSession(string $valueName, string $defaultValue = null): ?string
         {
+            try {
+                $cdekValue = WC()->session->get(Config::DELIVERY_NAME."_$valueName");
+                if (!empty($cdekValue)) {
+                    return $cdekValue;
+                }
+            } catch (Throwable $e) {
+                //do nothing
+            }
+
             $shippingValue = WC()->checkout()->get_value("shipping_$valueName");
             if (!empty($shippingValue)) {
                 return $shippingValue;
             }
 
             $billingValue = WC()->checkout()->get_value("billing_$valueName");
+            if (!empty($billingValue)) {
+                return $billingValue;
+            }
 
-            $extensionRequestValue = $_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName] ?? null;
-            $plainRequestValue = $_REQUEST[$valueName] ?? null;
+            if (!empty($_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName])) {
+                return $_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName];
+            }
 
-            return $billingValue ?: $extensionRequestValue ?: $plainRequestValue
-                                    ?:
-                                    WC()->checkout()->get_value($valueName)
-                                    ?:
-                                    $defaultValue;
+            if (!empty($_REQUEST[$valueName])) {
+                return $_REQUEST[$valueName];
+            }
+
+            return WC()->checkout()->get_value($valueName) ?: $defaultValue;
         }
 
         public static function isCdekShippingMethod(WC_Order $order): bool
