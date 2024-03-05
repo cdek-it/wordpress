@@ -20,16 +20,20 @@ namespace Cdek\UI {
                 return;
             }
 
-            $city     = CheckoutHelper::getValueFromCurrentSession('city');
-            $postcode = CheckoutHelper::getValueFromCurrentSession('postcode');
+            $cityInput     = CheckoutHelper::getValueFromCurrentSession('city');
+            $postcodeInput = CheckoutHelper::getValueFromCurrentSession('postcode');
 
-            if (empty($city)) {
+            if (empty($cityInput)) {
                 return;
             }
 
             $api = new CdekApi;
 
-            $city = $api->getCityCode($city, $postcode);
+            $city = $api->getCityCode($cityInput, $postcodeInput);
+
+            if($city === -1){
+                $city = $api->getCityCode($cityInput, '');
+            }
 
             $points = $city !== -1 ? $api->getOffices([
                                                           'city_code' => $city,

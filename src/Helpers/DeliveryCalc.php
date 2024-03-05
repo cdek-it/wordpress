@@ -13,6 +13,7 @@ namespace Cdek\Helpers {
     use Cdek\Helper;
     use Cdek\MetaKeys;
     use Cdek\Model\Tariff;
+    use Exception;
     use WC_Shipping_Method;
 
     class DeliveryCalc
@@ -47,12 +48,20 @@ namespace Cdek\Helpers {
                 return false;
             }
 
-            $deliveryParam['to']       = [
+            $deliveryParam['to'] = [
                 'postal_code'  => $package['destination']['postcode'],
                 'city'         => $package['destination']['city'],
                 'address'      => $package['destination']['city'],
                 'country_code' => $package['destination']['country'],
             ];
+
+            try {
+                WC()->session->set(Config::DELIVERY_NAME.'_postcode', $deliveryParam['to']['postal_code']);
+                WC()->session->set(Config::DELIVERY_NAME.'_city', $deliveryParam['to']['city']);
+            } catch (Exception $e) {
+                // do nothing
+            }
+
             $deliveryParam['packages'] = $this->getPackagesData($package['contents']);
             unset($deliveryParam['packages']['weight_orig_unit']);
 
@@ -140,9 +149,9 @@ namespace Cdek\Helpers {
                 }
             }
 
-            $api         = $this->api;
+            $api            = $this->api;
             $deliveryMethod = $this->method;
-            $this->rates = array_map(static function ($tariff) use (
+            $this->rates    = array_map(static function ($tariff) use (
                 $priceRules,
                 $api,
                 $deliveryParam,
