@@ -11,6 +11,7 @@ namespace Cdek {
     use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
     use Automattic\WooCommerce\Utilities\FeaturesUtil;
     use Cdek\Actions\CreateOrderAction;
+    use Cdek\Actions\DispatchOrderAutomationAction;
     use Cdek\Actions\ProcessWoocommerceCreateShippingAction;
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
@@ -132,9 +133,9 @@ namespace Cdek {
             add_action('woocommerce_order_before_calculate_totals', new RecalculateShippingAction, 10, 2);
 
             add_action('woocommerce_after_shipping_rate', new CheckoutMap, 10, 2);
-            add_filter('woocommerce_checkout_create_order_shipping_item', new ProcessWoocommerceCreateShippingAction,
-                       10, 4);
+            add_filter('woocommerce_checkout_create_order_shipping_item', new ProcessWoocommerceCreateShippingAction);
             add_action('woocommerce_checkout_create_order', new SaveCustomCheckoutFieldsAction, 10, 2);
+            add_action('woocommerce_checkout_order_processed', new DispatchOrderAutomationAction, 10, 3);
 
             add_action('woocommerce_blocks_loaded',
                 static fn() => add_action('woocommerce_blocks_checkout_block_registration',
