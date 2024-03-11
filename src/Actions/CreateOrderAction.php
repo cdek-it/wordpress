@@ -184,7 +184,8 @@ namespace Cdek\Actions {
 
         private function buildPackagesData(WC_Order $order, array $postOrderData, array $packages = null): array
         {
-            $items = $order->get_items();
+            $items = array_filter($order->get_items(), static fn($el) => $el->get_product()->get_type() === 'simple');
+
             if ($packages === null) {
                 $deliveryMethod = CheckoutHelper::getOrderShippingMethod($order);
 
@@ -203,7 +204,8 @@ namespace Cdek\Actions {
                 return [
                     $this->buildItemsData($order, (int) $deliveryMethod->get_meta(MetaKeys::LENGTH),
                                           (int) $deliveryMethod->get_meta(MetaKeys::WIDTH),
-                                          (int) $deliveryMethod->get_meta(MetaKeys::HEIGHT), $packageItems, $postOrderData),
+                                          (int) $deliveryMethod->get_meta(MetaKeys::HEIGHT), $packageItems,
+                                          $postOrderData),
                 ];
             }
 
