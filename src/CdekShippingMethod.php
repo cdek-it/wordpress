@@ -228,6 +228,13 @@ class CdekShippingMethod extends WC_Shipping_Method
                     'step' => 1,
                 ],
             ],
+            'map_auto_close'              => [
+                'title'       => 'Закрыть карту после выбора пвз',
+                'type'        => 'checkbox',
+                'desc_tip'    => true,
+                'description' => "Если включена эта настройка, то после выбора ПВЗ на странице чекаута карта автоматически закроется.",
+                'default'     => 'no',
+            ],
             'map'                            => [
                 'type'  => 'hidden',
                 'title' => 'Выбрать адреса для отправки на карте',

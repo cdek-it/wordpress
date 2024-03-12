@@ -39,6 +39,8 @@ namespace Cdek\UI {
                                                           'city_code' => $city,
                                                       ])['body'] : '[]';
 
+            $mapAutoClose = CheckoutHelper::getMapAutoClose();
+
             include __DIR__.'/../../templates/public/open-map.php';
         }
 

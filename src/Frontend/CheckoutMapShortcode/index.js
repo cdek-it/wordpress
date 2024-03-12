@@ -44,6 +44,9 @@ const onChoose = (_type, _tariff, address) => {
     } else {
         officeInfo.html(`${address.name} - [${address.code}]`);
     }
+    if ($('.cdek-office-code').data('map-auto-close')) {
+        widget.close();
+    }
 };
 
 const debouncedCheckoutUpdate = debounce(() => {
