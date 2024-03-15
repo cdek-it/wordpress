@@ -34,22 +34,27 @@ namespace Cdek\UI {
                 return;
             }
 
-            $cdekTariff = CheckoutHelper::getOrderShippingMethod($order);
+            $cdekMethod     = CheckoutHelper::getOrderShippingMethod($order);
+            $selectedTariff = (int) ($cdekMethod->get_meta(MetaKeys::TARIFF_CODE) ?:
+                $cdekMethod->get_meta('tariff_code'));
 
-            if (!(new CdekApi($cdekTariff->get_data()['instance_id']))->checkAuth()) {
+            if($selectedTariff === 0) {
+                return;
+            }
+
+            if (!(new CdekApi($cdekMethod->get_data()['instance_id']))->checkAuth()) {
                 add_meta_box(Config::ORDER_META_BOX_KEY, Loader::getPluginName(), [__CLASS__, 'noAuthMetaBox'],
                              ['woocommerce_page_wc-orders', 'shop_order'], 'side', 'core');
 
                 return;
             }
 
-            $settings = Helper::getActualShippingMethod($cdekTariff->get_data()['instance_id']);
+            $settings = Helper::getActualShippingMethod($cdekMethod->get_data()['instance_id']);
 
             $address = $settings->get_option('address');
 
             if ((empty($address) || !isset(json_decode($address, true)['country'])) &&
-                Tariff::isTariffFromDoor($cdekTariff->get_meta(MetaKeys::TARIFF_CODE) ?:
-                                             $cdekTariff->get_meta('tariff_code'))) {
+                Tariff::isTariffFromDoor($selectedTariff)) {
                 add_meta_box(Config::ORDER_META_BOX_KEY, Loader::getPluginName(), [__CLASS__, 'noAddressMetaBox'],
                              ['woocommerce_page_wc-orders', 'shop_order'], 'side', 'core');
 
@@ -59,8 +64,7 @@ namespace Cdek\UI {
             $office = $settings->get_option('pvz_code');
 
             if ((empty($office) || !isset(json_decode($office, true)['country'])) &&
-                Tariff::isTariffFromOffice($cdekTariff->get_meta(MetaKeys::TARIFF_CODE) ?:
-                                               $cdekTariff->get_meta('tariff_code'))) {
+                Tariff::isTariffFromOffice($selectedTariff)) {
                 add_meta_box(Config::ORDER_META_BOX_KEY, Loader::getPluginName(), [__CLASS__, 'noOfficeMetaBox'],
                              ['woocommerce_page_wc-orders', 'shop_order'], 'side', 'core');
 

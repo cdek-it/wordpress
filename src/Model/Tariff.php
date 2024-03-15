@@ -201,7 +201,7 @@ namespace Cdek\Model {
         public static function getTariffType(int $code): int
         {
             if (!isset(self::TARIFF_DATA[$code])) {
-                throw new RuntimeException('Unknown tariff');
+                throw new RuntimeException("Unknown tariff $code");
             }
 
             return self::TARIFF_DATA[$code]['type'];
@@ -210,7 +210,7 @@ namespace Cdek\Model {
         public static function isTariffToOffice(int $code): bool
         {
             if (!isset(self::TARIFF_DATA[$code])) {
-                throw new RuntimeException('Unknown tariff');
+                throw new RuntimeException("Unknown tariff $code");
             }
 
             return self::TARIFF_DATA[$code]['mode'] === self::DOOR_OFFICE ||
@@ -224,7 +224,7 @@ namespace Cdek\Model {
         public static function isTariffFromOffice(int $code): bool
         {
             if (!isset(self::TARIFF_DATA[$code])) {
-                throw new RuntimeException('Unknown tariff');
+                throw new RuntimeException("Unknown tariff $code");
             }
 
             return self::TARIFF_DATA[$code]['mode'] === self::OFFICE_DOOR ||
@@ -235,7 +235,7 @@ namespace Cdek\Model {
         public static function isTariffFromDoor(int $code): bool
         {
             if (!isset(self::TARIFF_DATA[$code])) {
-                throw new RuntimeException('Unknown tariff');
+                throw new RuntimeException("Unknown tariff $code");
             }
 
             return self::TARIFF_DATA[$code]['mode'] === self::DOOR_DOOR ||
@@ -246,7 +246,7 @@ namespace Cdek\Model {
         public static function getTariffUserNameByCode(int $code)
         {
             if (!isset(self::TARIFF_DATA[$code])) {
-                throw new RuntimeException('Unknown tariff');
+                throw new RuntimeException("Unknown tariff $code");
             }
 
             $tariffNameEdit = Helper::getActualShippingMethod()->get_option('tariff_name');
@@ -288,7 +288,7 @@ namespace Cdek\Model {
         public static function isTariffToPostamat(int $code): bool
         {
             if (!isset(self::TARIFF_DATA[$code])) {
-                throw new RuntimeException('Unknown tariff');
+                throw new RuntimeException("Unknown tariff $code");
             }
 
             return self::TARIFF_DATA[$code]['mode'] === self::DOOR_PICKUP ||
@@ -299,7 +299,7 @@ namespace Cdek\Model {
         public static function isTariffModeIM(int $code): bool
         {
             if (!isset(self::TARIFF_DATA[$code])) {
-                throw new RuntimeException('Unknown tariff');
+                throw new RuntimeException("Unknown tariff $code");
             }
 
             return self::TARIFF_DATA[$code]['type'] === self::SHOP_TYPE;
