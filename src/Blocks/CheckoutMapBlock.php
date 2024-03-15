@@ -94,8 +94,12 @@ namespace Cdek\Blocks {
         {
             $shippingMethod = CheckoutHelper::getOrderShippingMethod($order);
 
-            if (Tariff::isTariffToOffice($shippingMethod->get_meta(MetaKeys::TARIFF_CODE) ?:
-                                             $shippingMethod->get_meta('tariff_code'))) {
+            if(!CheckoutHelper::isCdekShippingMethod($order)){
+                return;
+            }
+
+            if (Tariff::isTariffToOffice((int) ($shippingMethod->get_meta(MetaKeys::TARIFF_CODE) ?:
+                $shippingMethod->get_meta('tariff_code')))) {
                 $shippingMethod->add_meta_data(MetaKeys::OFFICE_CODE,
                                                $request['extensions'][Config::DELIVERY_NAME]['office_code']);
             }
