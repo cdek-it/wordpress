@@ -22,6 +22,8 @@ namespace Cdek\Actions {
 
     class CreateOrderAction
     {
+        private const ALLOWED_PRODUCT_TYPES = ['variation', 'simple'];
+
         private CdekApi $api;
 
         /**
@@ -184,7 +186,8 @@ namespace Cdek\Actions {
 
         private function buildPackagesData(WC_Order $order, array $postOrderData, array $packages = null): array
         {
-            $items = array_filter($order->get_items(), static fn($el) => $el->get_product()->get_type() === 'simple');
+            $items = array_filter($order->get_items(),
+                static fn($el) => in_array($el->get_product()->get_type(), self::ALLOWED_PRODUCT_TYPES, true));
 
             if ($packages === null) {
                 $deliveryMethod = CheckoutHelper::getOrderShippingMethod($order);
