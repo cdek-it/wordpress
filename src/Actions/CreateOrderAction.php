@@ -82,7 +82,7 @@ namespace Cdek\Actions {
                     throw $e;
                 }
 
-                wp_schedule_single_event(time() + 60, Config::ORDER_AUTOMATION_HOOK_NAME, [$orderId, $attempt + 1]);
+                wp_schedule_single_event(time() + 60 * 5, Config::ORDER_AUTOMATION_HOOK_NAME, [$orderId, $attempt + 1]);
 
                 return [
                     'state'   => false,

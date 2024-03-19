@@ -21,7 +21,7 @@ class DispatchOrderAutomationAction
             return;
         }
 
-        $result = wp_schedule_single_event(time() + 1, Config::ORDER_AUTOMATION_HOOK_NAME, [
+        $result = wp_schedule_single_event(time() + 60 * 5, Config::ORDER_AUTOMATION_HOOK_NAME, [
             $orderId,
             1,
         ]);
