@@ -12,6 +12,7 @@ namespace Cdek {
     use Automattic\WooCommerce\Utilities\FeaturesUtil;
     use Cdek\Actions\CreateOrderAction;
     use Cdek\Actions\DispatchOrderAutomationAction;
+    use Cdek\Actions\FlushTokenCacheAction;
     use Cdek\Actions\ProcessWoocommerceCreateShippingAction;
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
@@ -136,6 +137,8 @@ namespace Cdek {
             add_filter('woocommerce_checkout_create_order_shipping_item', new ProcessWoocommerceCreateShippingAction);
             add_action('woocommerce_checkout_create_order', new SaveCustomCheckoutFieldsAction, 10, 2);
             add_action('woocommerce_checkout_order_processed', new DispatchOrderAutomationAction, 10, 3);
+
+            add_action('woocommerce_update_options_shipping_official_cdek', new FlushTokenCacheAction);
 
             add_action('woocommerce_blocks_loaded',
                 static fn() => add_action('woocommerce_blocks_checkout_block_registration',
