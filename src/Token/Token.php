@@ -10,6 +10,10 @@ class Token extends TokenProcess
     private static string $tokenStatic = '';
     private static int $tokenExpStatic = 0;
 
+    final public static function flushCache(): void {
+        Helper::getActualShippingMethod()->update_option('token', null);
+    }
+
     public function getToken(): string {
         $token = $this->getTokenFromCache();
 
