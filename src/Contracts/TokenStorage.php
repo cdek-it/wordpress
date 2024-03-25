@@ -1,10 +1,10 @@
 <?php
 
-namespace Cdek\Token;
+namespace Cdek\Contracts;
 
-abstract class TokenProcess
+abstract class TokenStorage
 {
-    const CIPHER = 'AES-256-CBC';
+    private const CIPHER = 'AES-256-CBC';
 
     abstract function getToken();
 
@@ -12,13 +12,13 @@ abstract class TokenProcess
 
     abstract function fetchTokenFromApi();
 
-    protected function encryptToken($token, $clientId) {
+    protected function encryptToken($token, $clientId): string {
         $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length(self::CIPHER));
         $encryptedToken = openssl_encrypt($token, self::CIPHER, $clientId, 0, $iv);
         return base64_encode($iv . $encryptedToken);
     }
 
-    protected function decryptToken($token, $clientId) {
+    protected function decryptToken($token, $clientId): string {
         $data = base64_decode($token);
         $iv = substr($data, 0, openssl_cipher_iv_length(self::CIPHER));
         $encryptedData = substr($data, openssl_cipher_iv_length(self::CIPHER));

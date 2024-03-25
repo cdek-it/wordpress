@@ -30,7 +30,7 @@ namespace Cdek {
             }
         }
 
-        public static function getActualShippingMethod(?int $instanceId = null): WC_Shipping_Method {
+        public static function getActualShippingMethod(?int $instanceId = null): CdekShippingMethod {
             if (!is_null($instanceId)) {
                 return new CdekShippingMethod($instanceId);
             }
