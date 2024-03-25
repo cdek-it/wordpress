@@ -100,10 +100,7 @@ $(document.body)
               apiKey: window.cdek.apiKey,
               popup: true,
               debug: true,
-              defaultLocation: $('#ship-to-different-address-checkbox')
-                .is(':checked')
-                ? shippingCityInput.val()
-                : billingCityInput.val(),
+              defaultLocation: el.data('city'),
               officesRaw: points,
               hideDeliveryOptions: {
                   door: true,
@@ -112,10 +109,7 @@ $(document.body)
           });
       } else {
           widget.updateOfficesRaw(points);
-          widget.updateLocation(
-            $('#ship-to-different-address-checkbox').is(':checked')
-              ? shippingCityInput.val()
-              : billingCityInput.val());
+          widget.updateLocation(el.data('city'));
       }
 
       widget.open();
