@@ -36,17 +36,16 @@ namespace Cdek\Helpers {
 
         final public static function getWeightInWcMeasurement($weight): float
         {
-            $weightWithFallback = self::getWeight($weight);
             $measurement        = get_option('woocommerce_weight_unit');
             switch ($measurement) {
                 case 'g':
-                    return $weightWithFallback;
+                    return $weight;
                 case 'kg':
-                    return self::convertToMeasurement($weightWithFallback, self::G_INTO_KG);
+                    return self::convertToMeasurement($weight, self::G_INTO_KG);
                 case 'lbs':
-                    return self::convertToMeasurement($weightWithFallback, self::G_INTO_LBS);
+                    return self::convertToMeasurement($weight, self::G_INTO_LBS);
                 case 'oz':
-                    return self::convertToMeasurement($weightWithFallback, self::G_INTO_OZ);
+                    return self::convertToMeasurement($weight, self::G_INTO_OZ);
             }
             throw new RuntimeException('CDEKDelivery: The selected unit of measure is not found');
         }
