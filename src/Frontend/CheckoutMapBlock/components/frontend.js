@@ -36,7 +36,9 @@ export const Block = ({
           (cartShippingRate) => cartShippingRate.shipping_rates)
           .find((rate) => rate.selected);
 
-        if (selectedRate.method_id !== 'official_cdek') {
+        if (!selectedRate ||
+          Object.prototype.hasOwnProperty.call(selectedRate, 'method_id') ||
+          selectedRate.method_id !== 'official_cdek') {
             debouncedSetExtensionData('official_cdek', 'office_code', null);
             clearValidationError('official_cdek_office');
             return;
@@ -88,7 +90,8 @@ export const Block = ({
             return;
         }
 
-        debouncedMapRender(cart.shippingRates, extensions.official_cdek.points || []);
+        debouncedMapRender(cart.shippingRates,
+          extensions.official_cdek.points || []);
     }, [
         cart.isLoading,
         cart.isLoadingRates,
