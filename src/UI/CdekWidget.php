@@ -22,6 +22,8 @@ namespace Cdek\UI {
             wp_localize_script('cdek-widget', 'cdek', [
                 'apiKey' => Helper::getActualShippingMethod()->get_option('yandex_map_api_key'),
             ]);
+
+            wp_set_script_translations('cdek-widget', 'official-cdek', dirname( plugin_basename(__FILE__) ) . '/../../lang');
         }
 
         public function __invoke(): void
