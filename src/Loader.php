@@ -120,9 +120,12 @@ namespace Cdek {
 
             self::declareCompatibility();
 
-            add_action('plugins_loaded', function(){
-                load_plugin_textdomain( 'official-cdek', false, dirname( plugin_basename(__FILE__) ) . '/../lang' );
-            });
+            add_action('plugins_loaded',
+                static fn () => load_plugin_textdomain(
+                    'official-cdek',
+                    false,
+                    dirname( plugin_basename(__FILE__) ) . '/../lang' )
+            );
 
             add_action('rest_api_init', new RestController);
             add_action('rest_api_init', new OrderController);
