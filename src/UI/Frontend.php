@@ -18,8 +18,6 @@ namespace Cdek\UI {
             }
 
             Helper::enqueueScript('cdek-map', 'cdek-checkout-map', true);
-
-            wp_set_script_translations('cdek-map', 'official-cdek', dirname( plugin_basename(__FILE__) ) . '/../../lang');
         }
 
         public function __invoke(): void {

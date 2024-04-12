@@ -1,16 +1,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: official-cdek\n"
-"POT-Creation-Date: 2024-04-10 09:30+0300\n"
-"PO-Revision-Date: \n"
+"Report-Msgid-Bugs-To: \n"
 "Last-Translator: Demin <demin.sv@cdek.ru>\n"
 "Language-Team: CDEK\n"
-"Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
-"%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"POT-Creation-Date: 2024-04-10 09:30+0300\n"
+"PO-Revision-Date: \n"
+"Language: ru_RU\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-KeywordsList: _e;_x:1,2c;_ex:1,2c;_n:1,2;_nx:1,2,4c;__\n"
 "X-Poedit-Basepath: ..\n"
@@ -51,76 +51,35 @@ msgstr "ИНН"
 msgid "Birthday"
 msgstr "Дата рождения"
 
-#: src/Frontend/AdminSettings/components/DeliveryPrice.js:43
-msgid "Order price"
-msgstr "Сумма заказа"
-
-#: src/Frontend/AdminSettings/components/DeliveryPrice.js:45
-msgid "from"
-msgstr "от"
-
-#: src/Frontend/AdminSettings/components/DeliveryPrice.js:47
-msgid "less or equal"
-msgstr "меньше или равно"
-
-#: src/Frontend/AdminSettings/components/DeliveryPrice.js:54
-msgid "any"
-msgstr "любая"
-
-#: src/Frontend/AdminSettings/components/DeliveryPrice.js:54
-msgid "delivery price"
-msgstr "стоимость доставки"
-
-#: src/Frontend/AdminSettings/components/DeliveryPrice.js:59
-msgid "free"
-msgstr "бесплатно"
-
-#: src/Frontend/AdminSettings/components/DeliveryPrice.js:62
-msgid "percentage"
-msgstr "взять в процентах"
-
-#: src/Frontend/AdminSettings/components/DeliveryPrice.js:65
-msgid "fixed on"
-msgstr "фиксировать на"
-
-#: src/Frontend/AdminSettings/components/DeliveryPrice.js:68
-msgid "amount on"
-msgstr "изменить на"
-
-#: src/Frontend/AdminSettings/components/DeliveryPrice.js:136
-msgid "Rules for delivery by courier"
-msgstr "Правила для доставки курьером"
-
-#: src/Frontend/AdminSettings/components/DeliveryPrice.js:142
-msgid "Rules for delivery to pick-up"
-msgstr "Правила для доставки до ПВЗ/Постаматов"
-
-#: src/Frontend/CheckoutMapBlock/components/admin.js:15
+#: build/cdek-checkout-map-block.js:1
 msgid "Pickups map from CDEK"
 msgstr "Карта ПВЗ от СДЭК"
 
-#: src/Frontend/CheckoutMapBlock/components/frontend.js:56
-#: src/Frontend/CheckoutMapShortcode/index.js:20
-#: templates/public/open-map.php:14
+#: build/cdek-checkout-map-block-frontend.js:1
 #, fuzzy
 msgid "Choose pick-up"
 msgstr "Выберите ПВЗ"
-
-#: src/Frontend/CheckoutMapShortcode/index.js:40
-msgid "Re-select pick-up"
-msgstr "Повторно выбрать ПВЗ"
 
 #: src/Validator/CheckoutProcessValidator.php:36
 msgid "Failed to determine locality. "
 msgstr "Не удалось определить населенный пункт. "
 
-#: src/Validator/CheckoutProcessValidator.php:43
-msgid "Order pickup point not selected."
-msgstr "Не выбран пункт выдачи заказа."
+#. Plugin Name of the plugin
+#: cdek.php
+msgid "CDEKDelivery"
+msgstr "CDEKDelivery"
 
-#: src/Validator/CheckoutProcessValidator.php:46
-msgid "No shipping address."
-msgstr "Нет адреса отправки."
+#. Plugin URI of the plugin
+#: cdek.php
+msgid "https://www.cdek.ru/ru/integration/modules/33"
+msgstr "https://www.cdek.ru/ru/integration/modules/33"
 
-#~ msgid "Order automation has been scheduled"
-#~ msgstr "Автоматизация заказа"
+#. Description of the plugin
+#: cdek.php
+msgid "Интеграция доставки CDEK"
+msgstr ""
+
+#. Author of the plugin
+#: cdek.php
+msgid "CDEK IT"
+msgstr ""
