@@ -55,51 +55,6 @@ class InternationalOrderFields implements FieldConstructorInterface
         }
     }
 
-    public function __construct($fields = [])
-    {
-        if(empty($fields)){
-            $this->fields = [
-                'passport_series' => [
-                    'label' => __('Passport Series', 'official-cdek'),
-                    'required' => true,
-                    'custom_attributes' => [
-                        'maxlength' => 4,
-                    ],
-                ],
-                'passport_number' => [
-                    'label' => __('Passport number', 'official-cdek'),
-                    'required' => true,
-                    'custom_attributes' => [
-                        'maxlength' => 6,
-                    ],
-                ],
-                'passport_date_of_issue' => [
-                    'type'     => 'date',
-                    'label' => __('Passport date of issue', 'official-cdek'),
-                    'required' => true,
-                ],
-                'passport_organization' => [
-                    'label' => __('Passport organization', 'official-cdek'),
-                    'required' => true,
-                ],
-                'tin' => [
-                    'label' => __('TIN', 'official-cdek'),
-                    'required' => true,
-                    'custom_attributes' => [
-                        'maxlength' => 12,
-                    ],
-                ],
-                'passport_date_of_birth' => [
-                    'type'     => 'date',
-                    'label' => __('Birthday', 'official-cdek'),
-                    'required' => true,
-                ],
-            ];
-        }else{
-            $this->fields = $fields;
-        }
-    }
-
 
     public function getFields(): array
     {
