@@ -33,7 +33,7 @@ namespace Cdek\Validator {
 
             $cityCode = $api->getCityCode($city, $state);
             if ($cityCode === -1) {
-                wc_add_notice(__('Не удалось определить населенный пункт. ' . $city . ' ' . $state), 'error');
+                wc_add_notice(__('Не удалось определить населенный пункт.'), 'error');
             }
 
             $tariffCode = explode('_', $shippingMethodIdSelected)[2];
