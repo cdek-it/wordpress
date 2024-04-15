@@ -16,12 +16,12 @@ msgstr ""
 #. Plugin Name of the plugin
 #: cdek.php
 msgid "CDEKDelivery"
-msgstr "CDEKDelivery"
+msgstr ""
 
 #. Plugin URI of the plugin
 #: cdek.php
 msgid "https://www.cdek.ru/ru/integration/modules/33"
-msgstr "https://www.cdek.ru/ru/integration/modules/33"
+msgstr ""
 
 #. Description of the plugin
 #: cdek.php
@@ -36,40 +36,40 @@ msgstr ""
 #: src/Actions/DispatchOrderAutomationAction.php:36
 #: src/Actions/DispatchOrderAutomationAction.php:39
 msgid "Order automation failed with error "
-msgstr "Ошибка автоматизация заказа "
+msgstr ""
 
 #: src/Checkout/InternationalOrderFields.php:18
 msgid "Passport Series"
-msgstr "Серия паспорта"
+msgstr ""
 
 #: src/Checkout/InternationalOrderFields.php:25
 msgid "Passport number"
-msgstr "Номер паспорта"
+msgstr ""
 
 #: src/Checkout/InternationalOrderFields.php:33
 msgid "Passport date of issue"
-msgstr "Дата выдачи паспорта"
+msgstr ""
 
 #: src/Checkout/InternationalOrderFields.php:37
 msgid "Passport organization"
-msgstr "Орган выдачи паспорта"
+msgstr ""
 
 #: src/Checkout/InternationalOrderFields.php:41
 msgid "TIN"
-msgstr "ИНН"
+msgstr ""
 
 #: src/Checkout/InternationalOrderFields.php:49
 msgid "Birthday"
-msgstr "Дата рождения"
+msgstr ""
 
 #: src/Validator/CheckoutProcessValidator.php:36
 msgid "Failed to determine locality. "
-msgstr "Ошибка определения местоположения "
+msgstr ""
 
 #: build/cdek-checkout-map-block-frontend.js:1
 msgid "Choose pick-up"
-msgstr "Выбрать ПВЗ"
+msgstr ""
 
 #: build/cdek-checkout-map-block.js:1
 msgid "Pickups map from CDEK"
-msgstr "Карта ПВЗ от CDEK"
+msgstr ""
