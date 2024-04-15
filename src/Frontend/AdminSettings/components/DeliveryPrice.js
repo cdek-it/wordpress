@@ -40,32 +40,32 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
     };
 
     return rules.map((rule, index) => (<div
-      key={rule.to + rule.value + rule.type + index}>{__('Order price',
-      'official-cdek')} {rules[index - 1] &&
-      <>{__('from', 'official-cdek')} {rules[index -
+      key={rule.to + rule.value + rule.type + index}>{__('Сумма заказа',
+      'cdek-official')} {rules[index - 1] &&
+      <>{__('от', 'cdek-official')} {rules[index -
       1].to}{CURRENCY.symbol}</>} {rule.to &&
-      <>{__('less or equal', 'official-cdek')}
+      <>{__('меньше или равно', 'cdek-official')}
           <input defaultValue={rule.to}
                  min={rules[index - 1] ? rules[index - 1].to + 1 : 0}
                  type="number"
                  onBlur={(e) => changeTo(e, index)}
                  onInput={(e) => changeToDebounced(e,
                    index)} />{CURRENCY.symbol}</>} {rules.length === 1 &&
-      <>{__('any', 'official-cdek')}</>}, {__('delivery price',
-      'official-cdek')}
+      <>{__('любая', 'cdek-official')}</>}, {__('стоимость доставки',
+      'cdek-official')}
         <select onChange={(e) => changeType(e, index)}
                 className="cdek-selector" defaultValue={rule.type}>
             <option value="free">
-                {__('free', 'official-cdek')}
+                {__('бесплатно', 'cdek-official')}
             </option>
             <option value="percentage">
-                {__('percentage', 'official-cdek')}
+                {__('взять в процентах', 'cdek-official')}
             </option>
             <option value="fixed">
-                {__('fixed on', 'official-cdek')}
+                {__('фиксировать на', 'cdek-official')}
             </option>
             <option value="amount">
-                {__('amount on', 'official-cdek')}
+                {__('изменить на', 'cdek-official')}
             </option>
         </select>
         {rule.type !== 'free' && <input defaultValue={rule.value} type="number"
@@ -133,13 +133,13 @@ export const DeliveryPrice = ({ input }) => {
     return (<>
         <div className="cdek-delivery-rules">
             <div className="cdek-header"><h4>{__(
-              'Rules for delivery by courier', 'official-cdek')}</h4>
+              'Правила для доставки курьером', 'cdek-official')}</h4>
                 <span className="button"
                       onClick={addDoorRule}>+</span>
             </div>
             <RulesComponent rules={doorRules} onRulesUpdate={setDoorRules} />
             <div className="cdek-header"><h4>{__(
-              'Rules for delivery to pick-up', 'official-cdek')}</h4>
+              'Правила для доставки до ПВЗ/Постаматов', 'cdek-official')}</h4>
                 <span className="button"
                       onClick={addOfficeRule}>+</span>
             </div>

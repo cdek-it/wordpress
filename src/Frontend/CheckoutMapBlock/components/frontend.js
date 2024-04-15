@@ -53,7 +53,7 @@ export const Block = ({
 
         setValidationErrors({
             ['official_cdek_office']: {
-                message: __('Choose pick-up', 'official-cdek'),
+                message: __('Выберите пункт получения', 'official-cdek'),
                 hidden: true,
             },
         });

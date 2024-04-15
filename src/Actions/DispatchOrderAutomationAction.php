@@ -33,10 +33,10 @@ class DispatchOrderAutomationAction
         ]);
 
         if ($result) {
-            Note::send($orderId, __('Order automation failed with error ', 'official-cdek'));
+            Note::send($orderId, __('Order automation has been scheduled', 'cdek_official'));
         } else {
             Note::send($orderId,
-                       __('Order automation failed with error ', 'official-cdek').$result->get_error_message());
+                       __('Order automation failed with error ', 'cdek_official').$result->get_error_message());
         }
     }
 }

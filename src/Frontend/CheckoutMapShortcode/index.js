@@ -1,14 +1,11 @@
 import $ from 'jquery';
 import cdekWidget from '@cdek-it/widget';
 import './style/main.scss';
-import { __ } from '@wordpress/i18n';
 import { debounce } from 'lodash';
 
 const billingCityInput = $('#billing_city');
 const shippingCityInput = $('#shipping_city');
 let widget = null;
-
-
 
 if ((billingCityInput.val() || '') !== '' || (shippingCityInput.val() || '') !== '') {
     console.debug('[CDEK-MAP] City has value, initiating checkout update');
@@ -19,7 +16,7 @@ const closeMap = (el, errorMessage = null) => {
     console.debug('[CDEK-MAP] Removing selected office info');
 
     $('.cdek-office-info').remove();
-    el.html(__('Choose pick-up', 'official-cdek'));
+    el.html('Выбрать ПВЗ');
     $('.cdek-office-code').val('');
 
     if (widget !== null) {
@@ -39,7 +36,7 @@ let el;
 
 const onChoose = (_type, _tariff, address) => {
     $('.cdek-office-code').val(address.code);
-    el.html(__('Re-select pick-up', 'official-cdek'));
+    el.html('Повторно выбрать ПВЗ');
     const officeInfo = el.parent().children('.cdek-office-info');
     if (officeInfo.length === 0) {
         el.before(

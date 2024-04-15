@@ -33,17 +33,17 @@ namespace Cdek\Validator {
 
             $cityCode = $api->getCityCode($city, $state);
             if ($cityCode === -1) {
-                wc_add_notice(__('Failed to determine locality. ' . $city . ' ' . $state, 'official-cdek'), 'error');
+                wc_add_notice(__('Не удалось определить населенный пункт. ' . $city . ' ' . $state), 'error');
             }
 
             $tariffCode = explode('_', $shippingMethodIdSelected)[2];
             if (Tariff::isTariffToOffice($tariffCode)) {
                 $pvzCode = CheckoutHelper::getValueFromCurrentSession('pvz_code');
                 if (empty($pvzCode)) {
-                    wc_add_notice(__('Order pickup point not selected.', 'official_cdek'), 'error');
+                    wc_add_notice(__('Не выбран пункт выдачи заказа.'), 'error');
                 }
             } elseif (empty(CheckoutHelper::getValueFromCurrentSession('address_1'))) {
-                wc_add_notice(__('No shipping address.', 'official_cdek'), 'error');
+                wc_add_notice(__('Нет адреса отправки.'), 'error');
             }
         }
     }
