@@ -103,14 +103,10 @@ namespace Cdek\Helpers {
                 }
             }
 
-            foreach (array_keys($fields['billing']) as $field){
-                if(!$fieldsConstructor->isExistField($field)){
-                    unset($fields['billing'][$field]);
-                }
-            }
-
             if (Helper::getActualShippingMethod()->get_option('international_mode') === 'yes') {
-                $fields['billing'] = array_merge($fields['billing'], (new InternationalOrderFields())->getFields());
+                foreach ((new InternationalOrderFields())->getFields() as $field => $arField){
+                    $fields['billing'][$field] = $arField;
+                }
             }
 
             return $fields;
