@@ -49,10 +49,10 @@ namespace Cdek\Helpers {
             }
 
             $deliveryParam['to'] = [
-                'postal_code'  => $package['destination']['postcode'],
-                'city'         => $package['destination']['city'],
-                'address'      => $package['destination']['city'],
-                'country_code' => $package['destination']['country'],
+                'postal_code'  => trim($package['destination']['postcode']),
+                'city'         => trim($package['destination']['city']),
+                'address'      => trim($package['destination']['city']),
+                'country_code' => trim($package['destination']['country']),
             ];
 
             try {
