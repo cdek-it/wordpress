@@ -138,10 +138,10 @@ namespace Cdek\Actions {
                 $param['delivery_point'] = $postOrderData['pvz_code'];
             } else {
                 $param['to_location'] = [
-                    'city'         => $order->get_shipping_city() ?: $order->get_billing_city(),
-                    'postal_code'  => $order->get_shipping_postcode() ?: $order->get_billing_postcode(),
-                    'country_code' => ($order->get_shipping_country() ?: $order->get_billing_country()) ?? 'RU',
-                    'address'      => $order->get_shipping_address_1() ?: $order->get_billing_address_1(),
+                    'city'         => trim($order->get_shipping_city() ?: $order->get_billing_city()),
+                    'postal_code'  => trim($order->get_shipping_postcode() ?: $order->get_billing_postcode()),
+                    'country_code' => trim(($order->get_shipping_country() ?: $order->get_billing_country()) ?? 'RU'),
+                    'address'      => trim($order->get_shipping_address_1() ?: $order->get_billing_address_1()),
                 ];
             }
 
