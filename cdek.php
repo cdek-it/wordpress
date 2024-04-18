@@ -9,6 +9,7 @@
  * Author: CDEK IT
  * WC requires at least: 6.9
  * WC tested up to: 8.0
+ * License: GPLv3
  */
 
 defined('ABSPATH') or exit;

@@ -4,33 +4,29 @@ defined('ABSPATH') or exit;
 
 /** @var $actionOrderAvailable */
 
-use Cdek\Config;
-
 if (empty($cdekStatuses)) { ?>
     <p>Статусы заказа не найдены. Попробуйте перезагрузить страницу позднее</p>
     <?php
 } else { ?>
     <p id="cdek-status-block" data-status-available="<?php
-    echo (int) $actionOrderAvailable ?>">Статусы заказа</p>
+    echo esc_attr((int) $actionOrderAvailable) ?>">Статусы заказа</p>
     <hr>
     <div class="cdek-order-status-elem-time"><?php
-        echo $cdekStatuses[0]['time'] ?></div>
+        echo esc_html($cdekStatuses[0]['time']) ?></div>
     <div id="cdek-order-status-btn" class="cdek-order-status-elem-name">
         <b><?php
-            echo $cdekStatuses[0]['name'] ?></b>
-        <div id="cdek-btn-arrow-up" class="cdek-btn-arrow"><?php
-            echo Config::CODE_ARROW_DOWN; ?></div>
-        <div id="cdek-btn-arrow-down" class="cdek-btn-arrow"><?php
-            echo Config::CODE_ARROW_UP; ?></div>
+            echo esc_html($cdekStatuses[0]['name']) ?></b>
+        <div id="cdek-btn-arrow-up" class="cdek-btn-arrow">&#9660;</div>
+        <div id="cdek-btn-arrow-down" class="cdek-btn-arrow">&#9650;</div>
     </div>
     <hr>
     <div id="cdek-order-status-list">
         <?php
         foreach (array_slice($cdekStatuses, 1) as $orderStatus) { ?>
             <div class="cdek-order-status-elem-time"><?php
-                echo $orderStatus['time'] ?></div>
+                echo esc_html($orderStatus['time']) ?></div>
             <div class="cdek-order-status-elem-name"><b><?php
-                    echo $orderStatus['name'] ?></b></div>
+                   echo esc_html($orderStatus['name']) ?></b></div>
             <hr>
             <?php
         } ?>

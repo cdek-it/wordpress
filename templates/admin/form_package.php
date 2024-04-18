@@ -18,15 +18,15 @@ use Cdek\Helpers\UrlHelper;
         <p id="cdek-create-order-error" class="form-field form-field-wide wc-order-status" style="display: none"></p>
         <p class="form-field form-field-wide wc-order-status">
             <input name="package_length" placeholder="Длина в см" type="text" value="<?php
-            echo esc_html($length) ?>">
+            echo esc_attr($length) ?>">
         </p>
         <p class="form-field form-field-wide wc-order-status">
             <input name="package_width" placeholder="Ширина в см" type="text" value="<?php
-            echo esc_html($width) ?>">
+            echo esc_attr($width) ?>">
         </p>
         <p class="form-field form-field-wide wc-order-status">
             <input name="package_height" placeholder="Высота в см" type="text" value="<?php
-            echo esc_html($height) ?>">
+            echo esc_attr($height) ?>">
         </p>
         <p class="form-field form-field-wide wc-order-status">
             <button id="create-order-btn" type="button" class="button refund-items"

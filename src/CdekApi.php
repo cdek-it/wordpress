@@ -208,7 +208,7 @@ class CdekApi
         if (!$result) {
             return [
                 'success' => false,
-                'message' => __(Messages::NO_DELIVERY_POINTS_IN_CITY, 'official_cdek'),
+                'message' => __('В этом населенном пункте (НП) доступна доставка только для тарифов "от двери". Выберите другой НП, чтобы получить доступ к тарифам "от склада".', 'official_cdek'),
             ];
         }
 

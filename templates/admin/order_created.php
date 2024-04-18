@@ -27,7 +27,7 @@ if (!$orderNumber) { ?>style="display: none" <?php
                     include 'status_list.php'; ?>
                 </div>
                 <p id="cdek-order-number">№ <b><?php
-                        echo $orderNumber ?></b></p>
+                        echo esc_html($orderNumber) ?></b></p>
                 <a id="cdek-order-waybill" target="_blank"
                    href="<?php
                    echo esc_url(UrlHelper::buildRest("order/$orderIdWP/waybill")) ?>">Получить
@@ -50,7 +50,7 @@ if (!$orderNumber) { ?>style="display: none" <?php
             } ?>>
                 <hr>
                 <p id="cdek-courier-info">Номер заявки: <?php
-                    echo $courierNumber ?></p>
+                    echo esc_html($courierNumber) ?></p>
                 <p id="cdek-courier-delete"
                    data-action="<?php
                    echo esc_url(UrlHelper::buildRest("order/$orderIdWP/courier/delete")) ?>">Отменить
@@ -58,12 +58,9 @@ if (!$orderNumber) { ?>style="display: none" <?php
             </div>
 
             <div id="call-courier-form">
-
                 <?php
                 include 'call_courier_form.php'; ?>
-
             </div>
-
 
         </div>
     </div>

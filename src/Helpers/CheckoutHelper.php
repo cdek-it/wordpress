@@ -38,11 +38,11 @@ namespace Cdek\Helpers {
             }
 
             if (!empty($_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName])) {
-                return $_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName];
+                return wp_strip_all_tags($_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName]);
             }
 
             if (!empty($_REQUEST[$valueName])) {
-                return $_REQUEST[$valueName];
+                return wp_strip_all_tags($_REQUEST[$valueName]);
             }
 
             return WC()->checkout()->get_value($valueName) ?: $defaultValue;

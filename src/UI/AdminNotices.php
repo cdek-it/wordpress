@@ -19,7 +19,7 @@ namespace Cdek\UI {
                 return;
             }
 
-            $measurement = get_option('woocommerce_weight_unit');
+            $measurement = esc_html(get_option('woocommerce_weight_unit'));
             if (!in_array($measurement, ['g', 'kg', 'lbs', 'oz'])) {
                 echo "<div class='notice notice-info is-dismissible'><p>
             CDEKDelivery: Выбранная единица измерения веса ($measurement) не поддерживается данным плагином.

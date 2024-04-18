@@ -1,7 +1,7 @@
 {
   "name": "cdek/woocommerce-delivery-integration",
   "type": "wordpress-plugin",
-  "license": "GPL-3.0-or-later",
+  "license": "GPL-3.0-only",
   "authors": [
     {
       "name": "Ilya Klementiev",

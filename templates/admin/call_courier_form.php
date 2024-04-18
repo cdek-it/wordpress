@@ -18,8 +18,8 @@ use Cdek\Helpers\UrlHelper;
         <div>
             <p>Дата ожидания курьера:</p>
             <input id="cdek-courier-date" type="date" min='<?php
-            echo $dateMin ?>' max='<?php
-            echo $dateMax ?>'>
+            echo esc_attr($dateMin) ?>' max='<?php
+            echo esc_attr($dateMax) ?>'>
         </div>
         <div>
             <p>Время ожидания курьера:</p>

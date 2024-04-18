@@ -13,4 +13,5 @@ defined('ABSPATH') or exit;
      echo esc_attr($points) ?>"
     data-city="<?php echo esc_attr($cityInput)?>">Выбрать ПВЗ
 </div>
-<input name="pvz_code" class="cdek-office-code" type="hidden" data-map-auto-close="<?php echo $mapAutoClose ?>">
+<input name="pvz_code" class="cdek-office-code" type="hidden" data-map-auto-close="<?php echo esc_attr($mapAutoClose)
+?>">

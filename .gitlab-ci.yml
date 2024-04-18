@@ -31,6 +31,7 @@ build_tag:
     - yarn
     - yarn build
     - rm -rf node_modules
+    - rm -rf vendor/composer/installers
     - mkdir /cdek
     - cp -r * /cdek
     - mv /cdek .
@@ -67,6 +68,7 @@ build_custom:
     - yarn
     - yarn build
     - rm -rf node_modules
+    - rm -rf vendor/composer/installers
     - mkdir /cdek
     - cp -r * /cdek
     - mv /cdek .

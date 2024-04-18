@@ -12,8 +12,8 @@ const defaultRules = defaultConfig.module.rules.filter((rule) => {
 
 module.exports = {
     ...defaultConfig, entry: {
-        'cdek-checkout-map-block': resolve(process.cwd(), 'src',
-          'Frontend', 'CheckoutMapBlock', 'index.js'),
+        'cdek-checkout-map-block': resolve(process.cwd(), 'src', 'Frontend',
+          'CheckoutMapBlock', 'index.js'),
         'cdek-checkout-map-block-frontend': resolve(process.cwd(), 'src',
           'Frontend', 'CheckoutMapBlock', 'frontend.js'),
         'cdek-admin-settings': resolve(process.cwd(), 'src', 'Frontend',
@@ -52,12 +52,11 @@ module.exports = {
             filename: `[name].css`,
         }),
         new CopyPlugin({
-                           patterns: [
-                               {
-                                   from: resolve(__dirname, 'node_modules', '@cdek-it', 'widget/dist/cdek-widget.umd.js'),
-                                   to: resolve(__dirname, 'build', 'cdek-widget.umd.js'),
-                               },
-                           ],
-                       }),
-    ],
+            patterns: [
+                {
+                    from: resolve(__dirname, 'node_modules', '@cdek-it',
+                      'widget/dist/cdek-widget.umd.js'),
+                    to: resolve(__dirname, 'build', 'cdek-widget.umd.js'),
+                }],
+        })],
 };

@@ -29,7 +29,6 @@ namespace Cdek\Actions {
                     Config::GRAPHICS_FIRST_SLEEP +
                     Config::GRAPHICS_TIMEOUT_SEC * Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS);
 
-
             $order = json_decode($this->api->getOrder($cdekUuid), true);
 
             if (!isset($order['entity'])) {

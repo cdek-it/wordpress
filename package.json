@@ -6,7 +6,7 @@
     "email": "a.viarvelskii@cdek.ru"
   },
   "private": true,
-  "license": "GPL-3.0-or-later",
+  "license": "GPL-3.0-only",
   "main": "build/index.js",
   "scripts": {
     "build": "wp-scripts build",

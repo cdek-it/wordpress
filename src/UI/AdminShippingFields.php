@@ -70,31 +70,31 @@ class AdminShippingFields
     private static function renderWeight($value): void
     {
         $measurement = get_option('woocommerce_weight_unit');
-        echo "<div>Вес: $value$measurement</div>";
+        echo '<div>Вес: ' . esc_html($value . $measurement) .'</div>';
     }
 
     private static function renderLength(string $length): void
     {
-        echo "<div>Длина: {$length}см</div>";
+        echo '<div>Длина: ' . esc_html($length) .'см</div>';
     }
 
     private static function renderWidth(string $length): void
     {
-        echo "<div>Ширина: {$length}см</div>";
+        echo '<div>Ширина: ' . esc_html($length) .'см</div>';
     }
 
     private static function renderHeight(string $length): void
     {
-        echo "<div>Высота: {$length}см</div>";
+        echo '<div>Высота: ' . esc_html($length) .'см</div>';
     }
 
     private static function renderOffice($value): void
     {
-        echo "<div>Выбранный ПВЗ: $value</div>";
+        echo '<div>Выбранный ПВЗ: '. esc_html($value). '</div>';
     }
 
     private static function renderTariff($tariffCode): void
     {
-        echo "<div>Код тарифа: $tariffCode</div>";
+        echo '<div>Код тарифа: ' . esc_html($tariffCode) .'</div>';
     }
 }
