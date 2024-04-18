@@ -15,7 +15,7 @@ class DispatchOrderAutomationAction
     {
         try {
             $shipping = CheckoutHelper::getOrderShippingMethod($order);
-        }catch (ShippingMethodNotFoundException $exception){
+        } catch (ShippingMethodNotFoundException $exception) {
             return;
         }
 

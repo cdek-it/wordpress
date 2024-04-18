@@ -6,8 +6,6 @@ use Cdek\Checkout\FieldConstructorInterface;
 
 class InternationalOrderFields implements FieldConstructorInterface
 {
-    const MODULE_COMMERCE = 'woocommerce';
-
     private array $fields;
 
     public function __construct($fields = [])
@@ -81,18 +79,8 @@ class InternationalOrderFields implements FieldConstructorInterface
         return $arFields;
     }
 
-    public function getRequiredFields(): array
-    {
-        return $this->fields;
-    }
-
     public function isRequiredField(string $field): bool
     {
         return $this->fields[$field]['required'];
-    }
-
-    public function isExistField(string $field): bool
-    {
-        return isset($this->fields[$field]);
     }
 }
