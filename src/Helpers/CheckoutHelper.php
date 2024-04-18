@@ -11,9 +11,9 @@ namespace Cdek\Helpers {
     use Cdek\Checkout\InternationalOrderFields;
     use Cdek\Checkout\VirtualOrderFields;
     use Cdek\Config;
-    use Cdek\Helper;
-    use Cdek\Checkout\FieldConstructorInterface;
+    use Cdek\Contracts\FieldConstructorInterface;
     use Cdek\Exceptions\ShippingMethodNotFoundException;
+    use Cdek\Helper;
     use Throwable;
     use WC_Order;
     use WC_Order_Item;
@@ -86,20 +86,20 @@ namespace Cdek\Helpers {
 
             $originalFields = $checkout->get_checkout_fields('billing');
 
-            $fieldsConstructor = self::getFieldConstructor($fields);
+            $fieldsConstructor = self::getFieldConstructor();
 
-            //Восстанавливаем требуемые поля для чекаута
+            //Восстанавливаем требуемые поля для чекаута и обязательность поля
             foreach (
-                $fieldsConstructor->getRequiredFields() as $requiredField
+                $fieldsConstructor->getFields() as $requiredField
             ) {
-                $fields['billing'][$requiredField] = $fields['billing'][$requiredField]
-                                                     ??
-                                                     $originalFields[$requiredField];
-            }
+                if($requiredField){
+                    $fields['billing'][$requiredField] = $fields['billing'][$requiredField]
+                                                         ??
+                                                         $originalFields[$requiredField];
 
-            foreach ($fieldsConstructor->getFields() as $field => $value) {
-                if (isset($fields['billing'][$field])) {
-                    $fields['billing'][$field]['required'] = $value;
+                }
+                if (isset($fields['billing'][$requiredField])) {
+                    $fields['billing'][$requiredField]['required'] = $requiredField;
                 }
             }
 
@@ -117,13 +117,13 @@ namespace Cdek\Helpers {
             return Helper::getActualShippingMethod()->get_option('map_auto_close') === 'yes';
         }
 
-        public static function getFieldConstructor($fields): FieldConstructorInterface
+        public static function getFieldConstructor(): FieldConstructorInterface
         {
             $basketItems = WC()->cart->cart_contents;
 
             foreach ($basketItems as $basketItem){
                 if(!$basketItem['data']->get_virtual()){
-                    return new GeneralOrderFields($fields);
+                    return new GeneralOrderFields();
                 }
             }
 

@@ -2,49 +2,11 @@
 
 namespace Cdek\Checkout;
 
-use Cdek\Checkout\FieldConstructorInterface;
+use Cdek\Contracts\FieldConstructorInterface;
 
 class InternationalOrderFields implements FieldConstructorInterface
 {
-    const MODULE_COMMERCE = 'woocommerce';
-
-    private array $fields = [
-        'passport_series' => [
-            'label' => 'Серия паспорта',
-            'required' => true,
-            'custom_attributes' => [
-                'maxlength' => 4
-            ]
-        ],
-        'passport_number' => [
-            'label' => 'Номер паспорта',
-            'required' => true,
-            'custom_attributes' => [
-                'maxlength' => 6
-            ]
-        ],
-        'passport_date_of_issue' => [
-            'type'     => 'date',
-            'label' => 'Дата выдачи паспорта',
-            'required' => true,
-        ],
-        'passport_organization' => [
-            'label' => 'Орган выдачи паспорта',
-            'required' => true,
-        ],
-        'tin' => [
-            'label' => 'ИНН',
-            'required' => true,
-            'custom_attributes' => [
-                'maxlength' => 12
-            ]
-        ],
-        'passport_date_of_birth' => [
-            'type'     => 'date',
-            'label' => 'Орган выдачи паспорта',
-            'required' => true,
-        ],
-    ];
+    private array $fields;
 
     public function __construct($fields = [])
     {
@@ -91,7 +53,6 @@ class InternationalOrderFields implements FieldConstructorInterface
         }
     }
 
-
     public function getFields(): array
     {
         $arFields = [];
@@ -117,18 +78,8 @@ class InternationalOrderFields implements FieldConstructorInterface
         return $arFields;
     }
 
-    public function getRequiredFields(): array
-    {
-        return $this->fields;
-    }
-
     public function isRequiredField(string $field): bool
     {
         return $this->fields[$field]['required'];
-    }
-
-    public function isExistField(string $field): bool
-    {
-        return isset($this->fields[$field]);
     }
 }
