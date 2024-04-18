@@ -7,7 +7,7 @@ namespace {
 
 namespace Cdek\Exceptions {
 
-    class TariffNotAvailableException extends CdekException
+    class TariffNotAvailableException extends \RuntimeException
     {
 
         public function __construct(array $availableTariffs)

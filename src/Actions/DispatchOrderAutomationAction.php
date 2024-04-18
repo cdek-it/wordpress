@@ -15,7 +15,7 @@ class DispatchOrderAutomationAction
     {
         try {
             $shipping = CheckoutHelper::getOrderShippingMethod($order);
-        }catch (ShippingMethodNotFoundException $exception){
+        } catch (ShippingMethodNotFoundException $exception) {
             return;
         }
 
@@ -36,7 +36,7 @@ class DispatchOrderAutomationAction
             Note::send($orderId, __('Order automation has been scheduled', 'cdek_official'));
         } else {
             Note::send($orderId,
-                       __('Order automation failed with error ', 'cdek_official').$result->get_error_message());
+                       __('Order automation failed with error ', 'cdek_official') . $result->get_error_message());
         }
     }
 }

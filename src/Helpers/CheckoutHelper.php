@@ -20,19 +20,10 @@ namespace Cdek\Helpers {
 
     class CheckoutHelper
     {
-
-        const EXCLUDE_FIELD_VIRTUAL_BASKET = [
-            'billing_city',
-            'billing_state',
-            'billing_address_1',
-            'billing_address_2',
-            'billing_postcode',
-        ];
-
         public static function getValueFromCurrentSession(string $valueName, string $defaultValue = null): ?string
         {
             try {
-                $cdekValue = WC()->session->get(Config::DELIVERY_NAME."_$valueName");
+                $cdekValue = WC()->session->get(Config::DELIVERY_NAME . "_$valueName");
                 if (!empty($cdekValue)) {
                     return $cdekValue;
                 }
@@ -92,7 +83,7 @@ namespace Cdek\Helpers {
             foreach (
                 $fieldsConstructor->getFields() as $requiredField
             ) {
-                if($requiredField){
+                if ($requiredField) {
                     $fields['billing'][$requiredField] = $fields['billing'][$requiredField]
                                                          ??
                                                          $originalFields[$requiredField];
@@ -104,7 +95,7 @@ namespace Cdek\Helpers {
             }
 
             if (Helper::getActualShippingMethod()->get_option('international_mode') === 'yes') {
-                foreach ((new InternationalOrderFields())->getFields() as $field => $arField){
+                foreach ((new InternationalOrderFields())->getFields() as $field => $arField) {
                     $fields['billing'][$field] = $arField;
                 }
             }
@@ -119,15 +110,7 @@ namespace Cdek\Helpers {
 
         public static function getFieldConstructor(): FieldConstructorInterface
         {
-            $basketItems = WC()->cart->cart_contents;
-
-            foreach ($basketItems as $basketItem){
-                if(!$basketItem['data']->get_virtual()){
-                    return new GeneralOrderFields();
-                }
-            }
-
-            return new VirtualOrderFields();
+            return WC()->cart->needs_shipping() ? new GeneralOrderFields() : new VirtualOrderFields();
         }
     }
 }
