@@ -73,3 +73,7 @@ msgstr ""
 #: build/cdek-checkout-map-block.js:1
 msgid "Pickups map from CDEK"
 msgstr ""
+
+#: build/cdek-checkout-map.js:1
+msgid "Re-select pick-up"
+msgstr ""
