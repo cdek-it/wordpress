@@ -1,0 +1,85 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: official-cdek\n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: Demin <demin.sv@cdek.ru>\n"
+"Language-Team: CDEK\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2024-04-10 09:30+0300\n"
+"PO-Revision-Date: \n"
+"Language: ru_RU\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-KeywordsList: _e;_x:1,2c;_ex:1,2c;_n:1,2;_nx:1,2,4c;__\n"
+"X-Poedit-Basepath: ..\n"
+"X-Generator: Poedit 3.4.2\n"
+"X-Poedit-SearchPath-0: src\n"
+"X-Poedit-SearchPath-1: templates\n"
+"X-Poedit-SearchPathExcluded-0: ../src/node_modules\n"
+"X-Poedit-SearchPathExcluded-1: ../src/build\n"
+"X-Poedit-SearchPathExcluded-2: ../src/assets\n"
+"X-Poedit-SearchPathExcluded-3: ../src/vendor\n"
+
+#: src/Actions/DispatchOrderAutomationAction.php:36
+#: src/Actions/DispatchOrderAutomationAction.php:39
+msgid "Order automation failed with error "
+msgstr "Ошибка автоматизации заказа "
+
+#: src/Checkout/InternationalOrderFields.php:18
+msgid "Passport Series"
+msgstr "Серия паспорта"
+
+#: src/Checkout/InternationalOrderFields.php:25
+msgid "Passport number"
+msgstr "Номер паспорта"
+
+#: src/Checkout/InternationalOrderFields.php:33
+msgid "Passport date of issue"
+msgstr "Дата выдачи паспорта"
+
+#: src/Checkout/InternationalOrderFields.php:37
+msgid "Passport organization"
+msgstr "Орган выдачи паспорта"
+
+#: src/Checkout/InternationalOrderFields.php:41
+msgid "TIN"
+msgstr "ИНН"
+
+#: src/Checkout/InternationalOrderFields.php:49
+msgid "Birthday"
+msgstr "Дата рождения"
+
+#: build/cdek-checkout-map-block.js:1
+msgid "Pickups map from CDEK"
+msgstr "Карта ПВЗ от СДЭК"
+
+#: build/cdek-checkout-map-block-frontend.js:1
+#, fuzzy
+msgid "Choose pick-up"
+msgstr "Выберите ПВЗ"
+
+#: src/Validator/CheckoutProcessValidator.php:36
+msgid "Failed to determine locality. "
+msgstr "Не удалось определить населенный пункт. "
+
+#. Plugin Name of the plugin
+#: cdek.php
+msgid "CDEKDelivery"
+msgstr "CDEKDelivery"
+
+#. Plugin URI of the plugin
+#: cdek.php
+msgid "https://www.cdek.ru/ru/integration/modules/33"
+msgstr "https://www.cdek.ru/ru/integration/modules/33"
+
+#. Description of the plugin
+#: cdek.php
+msgid "Интеграция доставки CDEK"
+msgstr ""
+
+#. Author of the plugin
+#: cdek.php
+msgid "CDEK IT"
+msgstr ""
