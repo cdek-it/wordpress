@@ -5,6 +5,7 @@
  * Description: Интеграция доставки CDEK
  * Version: dev
  * Requires at least: 6.0
+ * Domain Path: /lang
  * Requires PHP: 7.4
  * Author: CDEK IT
  * WC requires at least: 6.9

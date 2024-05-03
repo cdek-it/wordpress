@@ -33,7 +33,9 @@ namespace Cdek\Validator {
 
             $cityCode = $api->getCityCode($city, $state);
             if ($cityCode === -1) {
-                wc_add_notice(__('Failed to determine locality. ' . $city . ' ' . $state, 'official-cdek'), 'error');
+                wc_add_notice(sprintf(/* translators: 1: Name of a city 2: ZIP code */ __('Failed to determine locality in %1$s %2$s',
+                                                                                          'official-cdek'), $city,
+                    $state),  'error');
             }
 
             $tariffCode = explode('_', $shippingMethodIdSelected)[2];

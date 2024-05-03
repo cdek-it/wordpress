@@ -41,3 +41,6 @@ assets/js/cdek-widget.umd.js
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+lang/*.mo
+lang/*.json

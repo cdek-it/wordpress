@@ -25,8 +25,7 @@ namespace Cdek\Actions {
                 $_POST['action'] !== 'woocommerce_calc_line_taxes' ||
                 !($order instanceof WC_Order) ||
                 !is_ajax() ||
-                !is_admin()
-            ) {
+                !is_admin()) {
                 return;
             }
 
@@ -39,13 +38,14 @@ namespace Cdek\Actions {
                                                    'quantity' => $el->get_quantity(),
                                                ], $order->get_items()),
                                                'destination' => [
-                                                   'city' => $order->get_shipping_city(),
-                                                   'country' => $order->get_shipping_country(),
+                                                   'city'     => $order->get_shipping_city(),
+                                                   'country'  => $order->get_shipping_country(),
                                                    'postcode' => $order->get_shipping_postcode(),
                                                ],
                                            ], isset(OrderMetaData::getMetaByOrderId($order->get_id())['pvz_code']));
 
-                    $rate = $calculator->getTariffRate((int)($shipping->get_meta(MetaKeys::TARIFF_CODE) ?: $shipping->get_meta('tariff_code')));
+                    $rate = $calculator->getTariffRate((int) ($shipping->get_meta(MetaKeys::TARIFF_CODE) ?:
+                        $shipping->get_meta('tariff_code')));
                     $shipping->set_total($rate['cost']);
                     $shipping->set_name($rate['label']);
                     $shipping->set_meta_data([
@@ -61,7 +61,9 @@ namespace Cdek\Actions {
 
                 self::$addedError = true;
                 $availableTariffs = implode(', ', $e->getData());
-                echo "<div class='cdek-error'>Выбранный тариф СДЭК при заданных параметрах недоступен. Доступны тарифы с кодами: $availableTariffs</div>";
+                echo '<div class="cdek-error">Выбранный тариф СДЭК при заданных параметрах недоступен. Доступны тарифы с кодами: '.
+                     esc_html($availableTariffs).
+                     '</div>';
             }
         }
     }

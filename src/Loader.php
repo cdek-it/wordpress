@@ -124,7 +124,7 @@ namespace Cdek {
                 static fn () => load_plugin_textdomain(
                     'official-cdek',
                     false,
-                    dirname( plugin_basename(__FILE__) ) . '/../lang' )
+                    self::getPluginPath() . '/lang' )
             );
 
             add_action('rest_api_init', new RestController);
