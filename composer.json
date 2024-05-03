@@ -1,0 +1,48 @@
+{
+  "name": "cdek/woocommerce-delivery-integration",
+  "type": "wordpress-plugin",
+  "license": "GPL-3.0-only",
+  "authors": [
+    {
+      "name": "Ilya Klementiev",
+      "email": "i.klementev@cdek.ru",
+      "role": "Creator"
+    },
+    {
+      "name": "Alex V",
+      "email": "a.viarvelskii@cdek.ru",
+      "role": "Contributor"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Cdek\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^7.4",
+    "composer/installers": "~1.0"
+  },
+  "require-dev": {
+    "roave/security-advisories": "dev-latest"
+  },
+  "config": {
+    "sort-packages": true,
+    "optimize-autoloader": true,
+    "allow-plugins": {
+      "composer/installers": true
+    },
+    "platform": {
+      "php": "7.4"
+    }
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://repo.cdek.ru/artifactory/api/composer/cdek-php"
+    },
+    {
+      "packagist.org": false
+    }
+  ]
+}

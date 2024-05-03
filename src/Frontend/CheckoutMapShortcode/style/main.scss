@@ -1,0 +1,41 @@
+.open-pvz-btn {
+    appearance: none;
+    background-color: #2ea44f;
+    border: 1px solid rgba(27, 31, 35, .15);
+    border-radius: 6px;
+    box-shadow: rgb(27 31 35 / 10%) 0 1px 0;
+    box-sizing: border-box;
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 20px;
+    padding: 6px 16px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    vertical-align: middle;
+    white-space: nowrap;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+.cdek-office-info {
+    background: #cccccc;
+    border-radius: 6px;
+    padding: 5px 10px;
+    margin-top: 7px;
+
+    &:before {
+        content: url(../img/map-pin-filled.svg);
+        display: inline-block;
+        width: 15px;
+        height: 15px;
+        margin-right: 15px;
+        position: relative;
+        top: 4px;
+    }
+}
