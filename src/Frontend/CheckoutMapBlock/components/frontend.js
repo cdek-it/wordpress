@@ -37,7 +37,7 @@ export const Block = ({
           .find((rate) => rate.selected);
 
         if (!selectedRate ||
-          Object.prototype.hasOwnProperty.call(selectedRate, 'method_id') ||
+          !Object.prototype.hasOwnProperty.call(selectedRate, 'method_id') ||
           selectedRate.method_id !== 'official_cdek') {
             debouncedSetExtensionData('official_cdek', 'office_code', null);
             clearValidationError('official_cdek_office');
@@ -53,7 +53,7 @@ export const Block = ({
 
         setValidationErrors({
             ['official_cdek_office']: {
-                message: __('Выберите пункт получения', 'official-cdek'),
+                message: __('Choose pick-up', 'official-cdek'),
                 hidden: true,
             },
         });

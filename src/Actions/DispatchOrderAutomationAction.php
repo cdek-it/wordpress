@@ -6,13 +6,19 @@ use Cdek\Config;
 use Cdek\Helper;
 use Cdek\Helpers\CheckoutHelper;
 use Cdek\Note;
+use Cdek\Exceptions\ShippingMethodNotFoundException;
 use WC_Order;
 
 class DispatchOrderAutomationAction
 {
     public function __invoke(int $orderId, $posted_data, WC_Order $order): void
     {
-        $shipping = CheckoutHelper::getOrderShippingMethod($order);
+        try {
+            $shipping = CheckoutHelper::getOrderShippingMethod($order);
+        } catch (ShippingMethodNotFoundException $exception) {
+            return;
+        }
+
         if ($shipping->get_method_id() !== Config::DELIVERY_NAME) {
             return;
         }
@@ -27,10 +33,10 @@ class DispatchOrderAutomationAction
         ]);
 
         if ($result) {
-            Note::send($orderId, __('Order automation has been scheduled', 'cdek_official'));
+            Note::send($orderId, __('Order automation failed with error ', 'official-cdek'));
         } else {
             Note::send($orderId,
-                       __('Order automation failed with error ', 'cdek_official').$result->get_error_message());
+                       __('Order automation failed with error ', 'official-cdek').$result->get_error_message());
         }
     }
 }

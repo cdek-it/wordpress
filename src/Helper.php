@@ -28,6 +28,8 @@ namespace Cdek {
             if ($hasStyles) {
                 wp_enqueue_style($handle, Loader::getPluginUrl()."build/$fileName.css", [], Loader::getPluginVersion());
             }
+
+            wp_set_script_translations($handle, 'official-cdek', dirname( __FILE__ ) . '/../lang');
         }
 
         public static function getActualShippingMethod(?int $instanceId = null): CdekShippingMethod {

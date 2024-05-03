@@ -12,7 +12,7 @@ import '../styles/main.scss';
 export const Edit = () => {
     const blockProps = useBlockProps();
     return (<div {...blockProps} className="admin-block-cdek-map">
-        {__('Карта ПВЗ от СДЭК', 'cdek-official')}
+        {__('Pickups map from CDEK', 'official-cdek')}
     </div>);
 };
 
