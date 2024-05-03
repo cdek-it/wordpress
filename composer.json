@@ -24,7 +24,8 @@
     "composer/installers": "~2.0"
   },
   "require-dev": {
-    "roave/security-advisories": "dev-latest"
+    "roave/security-advisories": "dev-latest",
+    "wp-cli/wp-cli-bundle": "*"
   },
   "config": {
     "sort-packages": true,

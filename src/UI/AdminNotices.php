@@ -19,14 +19,14 @@ namespace Cdek\UI {
                 return;
             }
 
-            $measurement = esc_html(get_option('woocommerce_weight_unit'));
+            $measurement = get_option('woocommerce_weight_unit');
             if (!in_array($measurement, ['g', 'kg', 'lbs', 'oz'])) {
-                echo "<div class='notice notice-info is-dismissible'><p>
-            CDEKDelivery: Выбранная единица измерения веса ($measurement) не поддерживается данным плагином.
+                echo '<div class="notice notice-info is-dismissible"><p>
+            CDEKDelivery: Выбранная единица измерения веса ('. esc_html($measurement) .') не поддерживается данным плагином.
             Вы можете использовать значение для габаритов товара по умолчанию.
             Также вы можете обратиться в поддержку плагина для дополнительной информации.
             В противном случае, единица измерения будет автоматически обрабатываться как граммы.
-            </p></div>";
+            </p></div>';
             }
         }
 

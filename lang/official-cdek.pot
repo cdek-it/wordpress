@@ -1,41 +1,20 @@
-# Copyright 2024 (C) Example cdek-official CDEK
+# Copyright 2024 (C) CDEK-IT
 msgid ""
 msgstr ""
 "Project-Id-Version: CDEKDelivery dev\n"
-"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/official_cdek\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
+"Report-Msgid-Bugs-To: https://github.com/cdek-it/wordpress\n"
+"Language-Team: CDEK <intergator@cdek.ru>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2024-04-12T09:04:46+03:00\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.10.0\n"
 "X-Domain: official-cdek\n"
 
-#. Plugin Name of the plugin
-#: cdek.php
-msgid "CDEKDelivery"
-msgstr ""
-
-#. Plugin URI of the plugin
-#: cdek.php
-msgid "https://www.cdek.ru/ru/integration/modules/33"
-msgstr ""
-
-#. Description of the plugin
-#: cdek.php
-msgid "Интеграция доставки CDEK"
-msgstr ""
-
-#. Author of the plugin
-#: cdek.php
-msgid "CDEK IT"
+#: src/Actions/DispatchOrderAutomationAction.php:39
+msgid "Order automation failed with error: %s"
 msgstr ""
 
 #: src/Actions/DispatchOrderAutomationAction.php:36
-#: src/Actions/DispatchOrderAutomationAction.php:39
-msgid "Order automation failed with error "
+msgid "Order automation failed with error"
 msgstr ""
 
 #: src/Checkout/InternationalOrderFields.php:18

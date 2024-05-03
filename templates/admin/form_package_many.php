@@ -22,7 +22,7 @@ endif ?> >
                 <?php
                 foreach ($items as $key => $item): ?>
                     <option value="<?php
-                    esc_attr_e($key) ?>"><?php esc_html_e($item['name']) ?></option>
+                    esc_attr_e($key) ?>"><?php echo esc_html($item['name']) ?></option>
                 <?php
                 endforeach; ?>
             </select>
@@ -31,15 +31,15 @@ endif ?> >
             <?php
             foreach ($items as $id => $item): ?>
                 <div id="product_<?php
-                esc_attr_e($id) ?>" class="product_list" style="display: none;">
+                echo esc_attr($id) ?>" class="product_list" style="display: none;">
                     <p class="form-field form-field-wide wc-order-status" style="display: flex">
                         <input name="product_id" type="hidden" readonly value="<?php
-                        esc_attr_e($id) ?>">
+                        echo esc_attr($id) ?>">
                         <input type="text" readonly value="<?php
-                        esc_attr_e($item['name']) ?>">
+                        echo esc_attr($item['name']) ?>">
                         <label for="quantity" style="margin-left: 10px; margin-right: 10px">x</label>
                         <input name="quantity" type="number" min="1" max="<?php
-                        esc_attr_e($item['quantity']) ?>"
+                        echo esc_attr($item['quantity']) ?>"
                                value="1"
                                style="width: 4em">
                     </p>

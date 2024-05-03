@@ -38,7 +38,7 @@ namespace Cdek\UI {
             $selectedTariff = (int) ($cdekMethod->get_meta(MetaKeys::TARIFF_CODE) ?:
                 $cdekMethod->get_meta('tariff_code'));
 
-            if($selectedTariff === 0) {
+            if ($selectedTariff === 0) {
                 return;
             }
 
@@ -79,30 +79,39 @@ namespace Cdek\UI {
         {
             $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME);
             $pluginName        = Loader::getPluginName();
-            echo "<div>
+            echo '<div>
                 <h4>Не задан адрес отправки</h4>
-                <p>Выберите корректный адрес отправки в <a href='$settings_page_url'>настройках</a> плагина $pluginName</p>
-            </div>";
+                <p>Выберите корректный адрес отправки в <a href="'.
+                 esc_url($settings_page_url).
+                 '">настройках</a> плагина '.
+                 esc_html($pluginName).
+                 '</p>
+            </div>';
         }
 
         public static function noOfficeMetaBox(): void
         {
             $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME);
             $pluginName        = Loader::getPluginName();
-            echo "<div>
-                <h4>Не задан ПВЗ отправки</h4>
-                <p>Выберите корректный ПВЗ для отправки в <a href='$settings_page_url'>настройках</a> плагина $pluginName</p>
-            </div>";
+            echo '<div>
+                <h4>Не задан адрес отправки</h4>
+                <p>Выберите корректный адрес отправки в <a href="'.
+                 esc_url($settings_page_url).
+                 '">настройках</a> плагина '.
+                 esc_html($pluginName).
+                 '</p>
+            </div>';
         }
 
         public static function noAuthMetaBox(): void
         {
             $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME);
             $pluginName        = Loader::getPluginName();
-            echo "<div>
+            echo '<div>
                 <h4>Авторизация не пройдена</h4>
-                <p>Введите корректные идентификатор и секретный ключ клиента в <a href='$settings_page_url'>настройках</a> плагина $pluginName</p>
-            </div>";
+                <p>Введите корректные идентификатор и секретный ключ клиента в <a href="'.esc_url($settings_page_url)
+                 .'">настройках</a> плагина ' . esc_html($pluginName).'</p>
+            </div>';
         }
 
         public static function createOrderMetaBox($post): void
@@ -117,8 +126,8 @@ namespace Cdek\UI {
                 $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
             }
 
-            $dateMin = date('Y-m-d');
-            $dateMax = date('Y-m-d', strtotime($dateMin." +31 days"));
+            $dateMin = gmdate('Y-m-d');
+            $dateMax = gmdate('Y-m-d', strtotime($dateMin." +31 days"));
 
             $shipping = CheckoutHelper::getOrderShippingMethod($order);
 

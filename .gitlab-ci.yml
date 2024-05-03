@@ -31,6 +31,10 @@ build_tag:
     - yarn
     - yarn build
     - rm -rf node_modules
+    - vendor/bin/wp i18n --allow-root make-mo lang lang
+    - vendor/bin/wp i18n --allow-root make-json --no-purge lang lang
+    - rm -rf vendor
+    - composer i -a --no-dev
     - rm -rf vendor/composer/installers
     - mkdir /cdek
     - cp -r * /cdek

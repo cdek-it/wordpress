@@ -3,10 +3,10 @@
 namespace Cdek\Actions;
 
 use Cdek\Config;
+use Cdek\Exceptions\ShippingMethodNotFoundException;
 use Cdek\Helper;
 use Cdek\Helpers\CheckoutHelper;
 use Cdek\Note;
-use Cdek\Exceptions\ShippingMethodNotFoundException;
 use WC_Order;
 
 class DispatchOrderAutomationAction
@@ -33,10 +33,12 @@ class DispatchOrderAutomationAction
         ]);
 
         if ($result) {
-            Note::send($orderId, __('Order automation failed with error ', 'official-cdek'));
+            Note::send($orderId, __('Order automation failed with error', 'official-cdek'));
         } else {
-            Note::send($orderId,
-                       __('Order automation failed with error ', 'official-cdek').$result->get_error_message());
+            Note::send($orderId, sprintf(
+                /* translators: %s: error message */
+                __('Order automation failed with error: %s', 'official-cdek'),
+                                         $result->get_error_message()));
         }
     }
 }
