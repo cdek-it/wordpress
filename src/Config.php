@@ -22,5 +22,7 @@ namespace Cdek {
         public const GRAPHICS_FIRST_SLEEP = 2;
         public const MAX_REQUEST_RETRIES_FOR_GRAPHICS = 3;
         public const DEV_KEY = '7wV8tk&r6VH4zK:1&0uDpjOkvM~qngLl';
+        public const DOCS_URL = 'https://github.com/cdek-it/wordpress/wiki/';
+        public const FAQ_URL = 'https://github.com/cdek-it/wordpress/wiki/FAQ';
     }
 }

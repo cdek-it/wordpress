@@ -34,42 +34,51 @@ namespace Cdek {
     use RuntimeException;
     use function deactivate_plugins;
 
-    class Loader {
-        public const REQUIRED_PLUGINS = [
-            'WooCommerce' => [
-                'entry'   => 'woocommerce/woocommerce.php',
-                'version' => '6.9.0',
-            ],
-        ];
-        public const EXTENSIONS = [
-            'openssl',
-            'curl',
-        ];
+    class Loader
+    {
+        public const REQUIRED_PLUGINS
+            = [
+                'WooCommerce' => [
+                    'entry'   => 'woocommerce/woocommerce.php',
+                    'version' => '6.9.0',
+                ],
+            ];
+        public const EXTENSIONS
+            = [
+                'openssl',
+                'curl',
+            ];
         private static string $pluginVersion;
-        private static string $pluginMainFile;
+        private static string $pluginMainFilePath;
 
         private static string $pluginName;
+        private static string $pluginMainFile;
 
-        public static function getPluginVersion(): string {
+        public static function getPluginVersion(): string
+        {
             return self::$pluginVersion;
         }
 
-        public static function getPluginName(): string {
+        public static function getPluginName(): string
+        {
             return self::$pluginName;
         }
 
-        public static function getPluginUrl(): string {
-            return plugin_dir_url(self::$pluginMainFile);
+        public static function getPluginUrl(): string
+        {
+            return plugin_dir_url(self::$pluginMainFilePath);
         }
 
-        public static function getPluginPath(): string {
-            return plugin_dir_path(self::$pluginMainFile);
+        public static function getPluginFile(): string
+        {
+            return self::$pluginMainFile;
         }
 
         /**
          * @throws RuntimeException
          */
-        public static function activate(): void {
+        public static function activate(): void
+        {
             if (!current_user_can('activate_plugins')) {
                 return;
             }
@@ -80,7 +89,8 @@ namespace Cdek {
         /**
          * @throws RuntimeException
          */
-        private static function checkRequirements(): void {
+        private static function checkRequirements(): void
+        {
             $activePlugins = get_option('active_plugins');
 
             foreach (self::REQUIRED_PLUGINS as $plugin => $checkFields) {
@@ -88,8 +98,8 @@ namespace Cdek {
                     throw new RuntimeException("$plugin plugin is not activated, but required.");
                 }
 
-                if (version_compare($checkFields['version'], get_file_data(WP_PLUGIN_DIR. '/'. $checkFields['entry'],
-                                                                           ['Version'])[0], '>')) {
+                if (version_compare($checkFields['version'],
+                                    get_file_data(WP_PLUGIN_DIR.'/'.$checkFields['entry'], ['Version'])[0], '>')) {
                     throw new RuntimeException("$plugin plugin version is too old, required minimum version is {$checkFields['version']}.");
                 }
             }
@@ -99,33 +109,34 @@ namespace Cdek {
                     throw new RuntimeException("$extension is not enabled, but required.");
                 }
             }
-
         }
 
-        public function __invoke(string $pluginMainFile): void {
-            self::$pluginMainFile = $pluginMainFile;
+        public function __invoke(string $pluginMainFile): void
+        {
+            self::$pluginMainFilePath = $pluginMainFile;
+
             add_action("activate_$pluginMainFile", [__CLASS__, 'activate']);
 
             try {
                 self::checkRequirements();
             } catch (RuntimeException $e) {
                 require_once(ABSPATH.'wp-admin/includes/plugin.php');
-                deactivate_plugins(self::$pluginMainFile);
+                deactivate_plugins(self::$pluginMainFilePath);
 
                 return;
             }
 
-            self::$pluginVersion = get_file_data(self::$pluginMainFile, ['Version'])[0];
-            self::$pluginName    = get_file_data(self::$pluginMainFile, ['Plugin Name'])[0];
+            self::$pluginVersion  = get_file_data(self::$pluginMainFilePath, ['Version'])[0];
+            self::$pluginName     = get_file_data(self::$pluginMainFilePath, ['Plugin Name'])[0];
+            self::$pluginMainFile = plugin_basename(self::$pluginMainFilePath);
 
             self::declareCompatibility();
 
             add_action('plugins_loaded',
-                static fn () => load_plugin_textdomain(
-                    'official-cdek',
-                    false,
-                    self::getPluginPath() . '/lang' )
-            );
+                static fn() => load_plugin_textdomain('official-cdek', false, self::getPluginPath().'/lang'));
+
+            add_filter('plugin_action_links_'.self::$pluginMainFile, [Admin::class, 'addPluginLinks']);
+            add_filter('plugin_row_meta', [Admin::class, 'addPluginRowMeta'], 10, 2);
 
             add_action('rest_api_init', new RestController);
             add_action('rest_api_init', new OrderController);
@@ -153,7 +164,8 @@ namespace Cdek {
 
             add_action('woocommerce_blocks_loaded', [CheckoutMapBlock::class, 'addStoreApiData']);
 
-            add_action('woocommerce_store_api_checkout_update_order_from_request', [CheckoutMapBlock::class, 'saveOrderData'], 10, 2);
+            add_action('woocommerce_store_api_checkout_update_order_from_request',
+                       [CheckoutMapBlock::class, 'saveOrderData'], 10, 2);
 
             add_action('woocommerce_before_order_itemmeta', new AdminShippingFields, 10, 2);
 
@@ -166,13 +178,19 @@ namespace Cdek {
             (new AdminNotices)();
         }
 
-        private static function declareCompatibility(): void {
+        private static function declareCompatibility(): void
+        {
             add_action('before_woocommerce_init', static function () {
                 if (class_exists(FeaturesUtil::class)) {
-                    FeaturesUtil::declare_compatibility('custom_order_tables', self::$pluginMainFile, true);
-                    FeaturesUtil::declare_compatibility('cart_checkout_blocks', self::$pluginMainFile, true);
+                    FeaturesUtil::declare_compatibility('custom_order_tables', self::$pluginMainFilePath, true);
+                    FeaturesUtil::declare_compatibility('cart_checkout_blocks', self::$pluginMainFilePath, true);
                 }
             });
+        }
+
+        public static function getPluginPath(): string
+        {
+            return plugin_dir_path(self::$pluginMainFilePath);
         }
 
     }

@@ -8,6 +8,7 @@
  * Domain Path: /lang
  * Requires PHP: 7.4
  * Author: CDEK IT
+ * Author URI: https://cdek.ru
  * WC requires at least: 6.9
  * WC tested up to: 8.0
  * License: GPLv3
