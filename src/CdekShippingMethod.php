@@ -16,7 +16,7 @@ class CdekShippingMethod extends WC_Shipping_Method
         $this->id                 = Config::DELIVERY_NAME;
         $this->instance_id        = absint($instance_id);
         $this->method_title       = 'Cdek Shipping';
-        $this->method_description = 'Custom Shipping Method for Cdek';
+        $this->method_description = 'Official Shipping Method for Cdek';
         $this->supports           = [
             'settings',
             'shipping-zones',
