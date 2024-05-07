@@ -1544,9 +1544,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cdek-it/widget@npm:3.10.0":
-  version: 3.10.0
-  resolution: "@cdek-it/widget@npm:3.10.0"
+"@cdek-it/widget@npm:^3.10.0":
+  version: 3.10.1
+  resolution: "@cdek-it/widget@npm:3.10.1"
   dependencies:
     "@vueuse/core": "npm:^10.9.0"
     axios: "npm:^1.6.8"
@@ -1557,7 +1557,7 @@ __metadata:
     vue-i18n: "npm:^9.11.0"
     vue-yandex-maps: "npm:2.1.2"
     yup: "npm:^1.4.0"
-  checksum: 10c0/0e8da809bf548e9c788dd792fa9700e5f51a971cdffc1b2f6e6f292c75b401b5f8ab44b7f190c1a37aa6e90dd436687830b4b20516079f2f5577a96dd3216fac
+  checksum: 10c0/39ba290bb6670c87e7bec218c4da6567121135c78cc50ea40b79fa792e0e21bf284e75f32a0fea6a3687e551a1acb9b2d959a9aea9f3963f7bf564055c1f7ebe
   languageName: node
   linkType: hard
 
@@ -1565,7 +1565,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@cdek/woocommerce-delivery-integration@workspace:."
   dependencies:
-    "@cdek-it/widget": "npm:3.10.0"
+    "@cdek-it/widget": "npm:^3.10.0"
     "@playwright/test": "npm:^1.43.1"
     "@woocommerce/data": "npm:^4.1.0"
     "@woocommerce/dependency-extraction-webpack-plugin": "npm:^3.0.0"

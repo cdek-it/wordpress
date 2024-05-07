@@ -16,7 +16,7 @@
     "env": "wp-env start"
   },
   "dependencies": {
-    "@cdek-it/widget": "3.10.0",
+    "@cdek-it/widget": "^3.10.0",
     "@woocommerce/data": "^4.1.0",
     "@woocommerce/dependency-extraction-webpack-plugin": "^3.0.0",
     "@woocommerce/eslint-plugin": "^2.2.0",
