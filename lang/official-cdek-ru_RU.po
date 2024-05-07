@@ -55,3 +55,15 @@ msgstr "Выберите ПВЗ"
 #: src/Validator/CheckoutProcessValidator.php:36
 msgid "Failed to determine locality in %1$s %2$s"
 msgstr "Не удалось определить населенный пункт %1$s %2$s"
+
+#: src/UI/Admin.php:23
+msgid "Settings"
+msgstr "Настройки"
+
+#: src/UI/Admin.php:38
+msgid "Docs"
+msgstr "Документация"
+
+#: src/UI/Admin.php:44
+msgid "FAQ"
+msgstr "ЧаВО"

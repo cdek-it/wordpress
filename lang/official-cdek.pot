@@ -56,3 +56,15 @@ msgstr ""
 #: build/cdek-checkout-map.js:1
 msgid "Re-select pick-up"
 msgstr ""
+
+#: src/UI/Admin.php:23
+msgid "Settings"
+msgstr ""
+
+#: src/UI/Admin.php:38
+msgid "Docs"
+msgstr ""
+
+#: src/UI/Admin.php:44
+msgid "FAQ"
+msgstr ""

@@ -18,7 +18,7 @@ namespace Cdek\UI {
         public static function addPluginLinks(array $links): array
         {
             array_unshift($links, '<a href="'.
-                                  admin_url('admin.php?page=wc-settings&tab=shipping&section=cdek').
+                                  admin_url('admin.php?page=wc-settings&tab=shipping&section=official_cdek').
                                   '">'.
                                   esc_html__('Settings', 'official-cdek').
                                   '</a>');
