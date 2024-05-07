@@ -39,7 +39,7 @@ namespace Cdek\Transport {
         {
             $pluginVersion = Loader::getPluginVersion();
 
-            $resp = (new WP_Http)->request($url, array_merge($config, [
+            $resp = wp_remote_request($url, array_merge($config, [
                 'method'     => $method,
                 'user-agent' => "wp/$pluginVersion",
             ]));
