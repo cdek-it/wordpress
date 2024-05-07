@@ -41,18 +41,27 @@ namespace Cdek\Blocks {
 
         public static function extend_cart_data(): array
         {
-            $api = new CdekApi;
+            $cityInput     = CheckoutHelper::getValueFromCurrentSession('city');
+            $postcodeInput = CheckoutHelper::getValueFromCurrentSession('postcode');
 
-            $city     = CheckoutHelper::getValueFromCurrentSession('city');
-            $postcode = CheckoutHelper::getValueFromCurrentSession('postcode');
-
-            if (empty($city)) {
+            if (empty($cityInput)) {
                 return ['points' => '[]'];
             }
 
-            $city = $api->getCityCode($city, $postcode);
+            $api = new CdekApi;
+
+            $city = $api->getCityCode($cityInput, $postcodeInput);
+
+            if ($city === -1) {
+                $city = $api->getCityCode($cityInput, '');
+            }
 
             return [
+                'inputs' => [
+                    'city'     => $cityInput,
+                    'postcode' => $postcodeInput,
+                ],
+                'city'   => $city,
                 'points' => $city !== -1 ? $api->getOffices([
                                                                 'city_code' => $city,
                                                             ])['body'] : '[]',
@@ -94,7 +103,7 @@ namespace Cdek\Blocks {
         {
             $shippingMethod = CheckoutHelper::getOrderShippingMethod($order);
 
-            if(!CheckoutHelper::isCdekShippingMethod($order)){
+            if (!CheckoutHelper::isCdekShippingMethod($order)) {
                 return;
             }
 
