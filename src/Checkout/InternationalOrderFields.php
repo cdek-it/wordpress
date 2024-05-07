@@ -2,7 +2,7 @@
 
 namespace Cdek\Checkout;
 
-use Cdek\Checkout\FieldConstructorInterface;
+use Cdek\Contracts\FieldConstructorInterface;
 
 class InternationalOrderFields implements FieldConstructorInterface
 {
