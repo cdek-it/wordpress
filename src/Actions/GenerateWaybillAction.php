@@ -30,9 +30,10 @@ namespace Cdek\Actions {
             $order = json_decode($this->api->getOrder($orderUuid), true);
 
             if (!isset($order['entity'])) {
-                echo 'Не удалось получить сведения о заказе. 
-        Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
-        и введите габариты упаковки повторно.';
+                _e("Failed to retrieve order information. \n
+                \rTo solve the problem, try re-creating the order. Click the \"Cancel\" button \n
+                \rand re-enter the package dimensions.",
+                   'cdekdelivery');
                 exit();
             }
 
@@ -49,9 +50,10 @@ namespace Cdek\Actions {
             $waybill = json_decode($this->api->createWaybill($order['entity']['uuid']), true);
 
             if (!isset($waybill['entity'])) {
-                echo 'Не удалось создать квитанцию. 
-        Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
-        и введите габариты упаковки повторно.';
+                _e("Failed to create receipt. \n
+                \r To solve the problem, try re-creating the order. Click the \"Cancel\" button \n
+                \r and re-enter the package dimensions.",
+                   'cdekdelivery');
                 exit();
             }
 
@@ -67,16 +69,19 @@ namespace Cdek\Actions {
                 }
 
                 if (!isset($waybillInfo['entity']) || end($waybillInfo['entity']['statuses'])['code'] === 'INVALID') {
-                    echo 'Не удалось создать квитанцию. 
-        Для решения проблемы, попробуй повторно запросить квитанцию.';
+                    _e("Failed to create receipt. \n
+                    \r To solve the problem, try requesting a receipt again",
+                       'cdekdelivery');
                     exit();
                 }
 
                 sleep(Config::GRAPHICS_TIMEOUT_SEC);
             }
 
-            echo 'Запрос на квитанцию был отправлен, но ответ по нему не пришел.
-        Для решения проблемы, попробуй подождать 1 час и попробуй запросить квитанцию еще раз.';
+            _e("A request for a receipt was sent, but no response was received. \n
+                \r To resolve the problem, try waiting 1 hour and try requesting a receipt again.",
+               'cdekdelivery');
+
             exit();
         }
     }

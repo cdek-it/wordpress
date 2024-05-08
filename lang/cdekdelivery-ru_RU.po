@@ -120,3 +120,78 @@ msgstr "Доставка СДЭК"
 #: src/CdekShippingMethod:19
 msgid "Official Shipping Method for Cdek"
 msgstr "Официальный метод доставки компанией СДЭК"
+
+#: src/Actions/GenerateBarcodeAction.php:35
+msgid ""
+"Failed to retrieve order information.\n"
+"\r To solve the problem, try re-creating the order.\n"
+"\r Click the \"Cancel\" button and enter the package dimensions again."
+msgstr ""
+"Не удалось получить сведения о заказе.\n"
+"\r Для решения проблемы, попробуй пересоздать заказ.\n"
+"\r Нажмите кнопку \"Отменить\" и введите габариты упаковки повторно."
+
+#: src/Actions/GenerateBarcodeAction.php:61
+msgid ""
+"Failed to create Barcode.To solve the problem, try re-creating the order. Click the \"Cancel\" button \n"
+"and enter the package dimensions again."
+msgstr ""
+"Не удалось создать ШК. \n"
+"Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку \"Отменить\"и введите габариты упаковки повторно."
+
+#: src/Actions/GenerateBarcodeAction.php:78
+msgid ""
+"Failed to create Barcode.\n"
+"\r To solve the problem, try requesting Barcode again."
+msgstr ""
+"Не удалось создать ШК.\n"
+"\r Для решения проблемы, попробуй повторно запросить ШК."
+
+#: src/Actions/GenerateBarcodeAction.php:85
+msgid "A request to Barcode was sent, but no response was received.\n"
+"\r To solve the problem, try to wait 1 hour"
+ "\r and try to request the Barcode again."
+msgstr ""
+"Запрос на ШК был отправлен, но ответ по нему не пришел.\n"
+"Для решения проблемы, попробуй подождать 1 час"
+"\r и попробуй запросить ШК еще раз."
+
+#: src/Actions/GenerateWaybillAction.php:33
+msgid ""
+"Failed to retrieve order information. \n"
+"\r To solve the problem, try re-creating the order. Click the \"Cancel\" button \n"
+"\r and re-enter the package dimensions."
+msgstr ""
+"Не удалось получить сведения о заказе. \n"
+"\r Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку \"Отменить\"
+"\r и введите габариты упаковки повторно."
+
+#: src/Actions/GenerateWaybillAction.php:53
+msgid ""
+"Failed to create receipt.\n"
+"\r To solve the problem, try re-creating the order. Click the \"Cancel\" button \n"
+"\r and re-enter the package dimensions."
+msgstr "Не удалось создать квитанцию. \n"
+"\r Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку \"Отменить\" \n"
+"\r и введите габариты упаковки повторно."
+
+#: src/Actions/GenerateWaybillAction.php:72
+msgid ""
+"Failed to create receipt.\n"
+"\r To solve the problem, try requesting a receipt again."
+msgstr ""
+"Не удалось создать квитанцию. \n"
+"\r Для решения проблемы, попробуй повторно запросить квитанцию."
+
+#: src/Actions/GenerateWaybillAction.php:81
+msgid ""
+"A request for a receipt was sent, but no response was received. \n"
+"\r To resolve the problem, try waiting 1 hour and try requesting a receipt again."
+msgstr ""
+"Запрос на квитанцию был отправлен, но ответ по нему не пришел. \n"
+"\r Для решения проблемы, попробуй подождать 1 час и попробуй запросить квитанцию еще раз."
+
+#: src/Actions/RecalculateShippingAction.php:81
+msgid "The selected CDEK tariff is not available with the specified parameters. Available tariffs with codes: "
+msgstr "Выбранный тариф СДЭК при заданных параметрах недоступен. Доступны тарифы с кодами: "
+

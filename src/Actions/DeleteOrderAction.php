@@ -47,7 +47,7 @@ namespace Cdek\Actions {
             $callCourier = new CallCourier();
             $callCourier->delete($orderId);
 
-            $validate = new Validate(true, 'Заказ удален.');
+            $validate = new Validate(true, __('Order has been deleted.', 'cdekdelivery'));
             return $validate->response();
         }
     }

@@ -58,7 +58,8 @@ namespace Cdek\Actions {
                 $courierObj->errors[0]->code === 'v2_intake_exists_by_order') {
                 $validate =
                     new Validate(false,
-                                 "Во время создания заявки произошла ошибка. Заявка на вызов курьера к данной накладной уже существует.");
+                                 __('An error occurred while creating request. Request to call a courier for this invoice already exists.', 'cdekdelivery')
+                                 );
                 return $validate->response();
             }
 
@@ -82,7 +83,7 @@ namespace Cdek\Actions {
             if (!property_exists($courierInfo, 'entity')) {
                 $validate =
                     new Validate(false,
-                                 "Заявка создана, но при получении номера заявки произошла ошибка. Uuid запроса: " .
+                                 __("Request has been created, but an error occurred while obtaining the request number. Request uuid: ", 'cdekdelivery') .
                                  $courierInfo->requests[0]->request_uuid);
                 return $validate->response();
             }
@@ -97,10 +98,11 @@ namespace Cdek\Actions {
                                               ]);
 
             $message =
-                'Создана заявка на вызов курьера: Номер: ' . $intakeNumber . ' | Uuid: ' . $courierObj->entity->uuid;
+                __('Request has been created to call a courier: Number: ') . $intakeNumber . ' | Uuid: ' .
+                                                             $courierObj->entity->uuid;
             Note::send($orderId, $message);
 
-            $validate = new Validate(true, "Номер заявки: " . $intakeNumber);
+            $validate = new Validate(true, __("Application number: ", 'cdekdelivery') . $intakeNumber);
             return $validate->response();
         }
 
@@ -200,10 +202,10 @@ namespace Cdek\Actions {
 
             CourierMetaData::cleanMetaByOrderId($orderId);
 
-            $message = 'Удаление заявки на вызов курьера: ' . $courierObj->entity->uuid;
+            $message = __('Deleting a request to call a courier: ', 'cdekdelivery') . $courierObj->entity->uuid;
             Note::send($orderId, $message);
 
-            $validate = new Validate(true, 'Заявка удалена.');
+            $validate = new Validate(true, __('Request has been deleted.', 'cdekdelivery'));
             return $validate->response();
         }
     }

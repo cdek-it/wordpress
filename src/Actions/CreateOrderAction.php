@@ -300,7 +300,7 @@ namespace Cdek\Actions {
                 'width'   => $width,
                 'height'  => $height,
                 'weight'  => $totalWeight,
-                'comment' => 'приложена опись',
+                'comment' => __('inventory attached', 'cdekdelivery'),
             ];
 
             if ($postOrderData['type'] === Tariff::SHOP_TYPE) {
