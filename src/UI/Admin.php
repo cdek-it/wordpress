@@ -18,9 +18,10 @@ namespace Cdek\UI {
         public static function addPluginLinks(array $links): array
         {
             array_unshift($links, '<a href="'.
-                                  admin_url('admin.php?page=wc-settings&tab=shipping&section=official_cdek').
+                                  esc_url(admin_url('admin.php?page=wc-settings&tab=shipping&section='.
+                                                    Config::DELIVERY_NAME)).
                                   '">'.
-                                  esc_html__('Settings', 'official-cdek').
+                                  esc_html__('Settings', 'cdekdelivery').
                                   '</a>');
 
             return $links;
@@ -35,13 +36,13 @@ namespace Cdek\UI {
             $links[] = '<a href="'.
                        esc_url(Config::DOCS_URL).
                        '" target="_blank">'.
-                       esc_html__('Docs', 'official-cdek').
+                       esc_html__('Docs', 'cdekdelivery').
                        '</a>';
 
             $links[] = '<a href="'.
                        esc_url(Config::FAQ_URL).
                        '" target="_blank">'.
-                       esc_html__('FAQ', 'official-cdek').
+                       esc_html__('FAQ', 'cdekdelivery').
                        '</a>';
 
             return $links;

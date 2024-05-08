@@ -8,6 +8,7 @@ namespace {
 namespace Cdek\Validator {
 
     use Cdek\CdekApi;
+    use Cdek\Config;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Model\Tariff;
 
@@ -24,7 +25,7 @@ namespace Cdek\Validator {
 
             $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
 
-            if (strpos($shippingMethodIdSelected, 'official_cdek') === false) {
+            if (strpos($shippingMethodIdSelected, Config::DELIVERY_NAME) === false) {
                 return;
             }
 
@@ -34,7 +35,7 @@ namespace Cdek\Validator {
             $cityCode = $api->getCityCode($city, $state);
             if ($cityCode === -1) {
                 wc_add_notice(sprintf(/* translators: 1: Name of a city 2: ZIP code */ __('Failed to determine locality in %1$s %2$s',
-                                                                                          'official-cdek'), $city,
+                                                                                          'cdekdelivery'), $city,
                     $state),  'error');
             }
 
@@ -42,10 +43,10 @@ namespace Cdek\Validator {
             if (Tariff::isTariffToOffice($tariffCode)) {
                 $pvzCode = CheckoutHelper::getValueFromCurrentSession('pvz_code');
                 if (empty($pvzCode)) {
-                    wc_add_notice(__('Order pickup point not selected.', 'official_cdek'), 'error');
+                    wc_add_notice(__('Order pickup point not selected.', 'cdekdelivery'), 'error');
                 }
             } elseif (empty(CheckoutHelper::getValueFromCurrentSession('address_1'))) {
-                wc_add_notice(__('No shipping address.', 'official_cdek'), 'error');
+                wc_add_notice(__('No shipping address.', 'cdekdelivery'), 'error');
             }
         }
     }

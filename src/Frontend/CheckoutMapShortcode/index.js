@@ -19,7 +19,7 @@ const closeMap = (el, errorMessage = null) => {
     console.debug('[CDEK-MAP] Removing selected office info');
 
     $('.cdek-office-info').remove();
-    el.html(__('Choose pick-up', 'official-cdek'));
+    el.html(__('Choose pick-up', 'cdekdelivery'));
     $('.cdek-office-code').val('');
 
     if (widget !== null) {
@@ -39,7 +39,7 @@ let el;
 
 const onChoose = (_type, _tariff, address) => {
     $('.cdek-office-code').val(address.code);
-    el.html(__('Re-select pick-up', 'official-cdek'));
+    el.html(__('Re-select pick-up', 'cdekdelivery'));
     const officeInfo = el.parent().children('.cdek-office-info');
     if (officeInfo.length === 0) {
         el.before(

@@ -133,7 +133,7 @@ namespace Cdek {
             self::declareCompatibility();
 
             add_action('plugins_loaded',
-                static fn() => load_plugin_textdomain('official-cdek', false, self::getPluginPath().'/lang'));
+                static fn() => load_plugin_textdomain('cdekdelivery', false, self::getPluginPath().'/lang'));
 
             add_filter('plugin_action_links_'.self::$pluginMainFile, [Admin::class, 'addPluginLinks']);
             add_filter('plugin_row_meta', [Admin::class, 'addPluginRowMeta'], 10, 2);
@@ -146,7 +146,7 @@ namespace Cdek {
             add_filter('woocommerce_hidden_order_itemmeta', [DataWPScraber::class, 'hideMeta']);
             add_filter('woocommerce_checkout_fields', [CheckoutHelper::class, 'restoreCheckoutFields'], 1090);
             add_action('woocommerce_shipping_methods',
-                static fn($methods) => array_merge($methods, ['official_cdek' => CdekShippingMethod::class]));
+                static fn($methods) => array_merge($methods, [Config::DELIVERY_NAME => CdekShippingMethod::class]));
 
             add_action('woocommerce_checkout_process', new CheckoutProcessValidator);
             add_action('woocommerce_order_before_calculate_totals', new RecalculateShippingAction, 10, 2);

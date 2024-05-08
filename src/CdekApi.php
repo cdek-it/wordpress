@@ -188,7 +188,7 @@ class CdekApi
 
         //по запросу к api v2 климовск записан как "климовск микрорайон" поэтому добавляем "микрорайон"
         if (mb_strtolower($city) === 'климовск') {
-            $city = $city . ' микрорайон';
+            $city .= ' микрорайон';
         }
 
         $cityData = json_decode(HttpClient::sendCdekRequest($url, 'GET', $this->tokenStorage->getToken(), ['city' => $city, 'postal_code' => $postcode]));
@@ -208,7 +208,7 @@ class CdekApi
         if (!$result) {
             return [
                 'success' => false,
-                'message' => __('В этом населенном пункте (НП) доступна доставка только для тарифов "от двери". Выберите другой НП, чтобы получить доступ к тарифам "от склада".', 'official_cdek'),
+                'message' => __('В этом населенном пункте (НП) доступна доставка только для тарифов "от двери". Выберите другой НП, чтобы получить доступ к тарифам "от склада".', 'cdekdelivery'),
             ];
         }
 

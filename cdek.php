@@ -5,8 +5,10 @@
  * Description: Интеграция доставки CDEK
  * Version: dev
  * Requires at least: 6.0
+ * Text Domain: cdekdelivery
  * Domain Path: /lang
  * Requires PHP: 7.4
+ * Requires Plugins: woocommerce
  * Author: CDEK IT
  * Author URI: https://cdek.ru
  * WC requires at least: 6.9

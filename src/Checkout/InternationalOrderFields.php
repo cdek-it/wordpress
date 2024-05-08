@@ -13,14 +13,14 @@ class InternationalOrderFields implements FieldConstructorInterface
         if (empty($fields)) {
             $this->fields = [
                 'passport_series'        => [
-                    'label'             => __('Passport Series', 'official-cdek'),
+                    'label'             => __('Passport Series', 'cdekdelivery'),
                     'required'          => true,
                     'custom_attributes' => [
                         'maxlength' => 4,
                     ],
                 ],
                 'passport_number'        => [
-                    'label'             => __('Passport number', 'official-cdek'),
+                    'label'             => __('Passport number', 'cdekdelivery'),
                     'required'          => true,
                     'custom_attributes' => [
                         'maxlength' => 6,
@@ -28,15 +28,15 @@ class InternationalOrderFields implements FieldConstructorInterface
                 ],
                 'passport_date_of_issue' => [
                     'type'     => 'date',
-                    'label'    => __('Passport date of issue', 'official-cdek'),
+                    'label'    => __('Passport date of issue', 'cdekdelivery'),
                     'required' => true,
                 ],
                 'passport_organization'  => [
-                    'label'    => __('Passport organization', 'official-cdek'),
+                    'label'    => __('Passport organization', 'cdekdelivery'),
                     'required' => true,
                 ],
                 'tin'                    => [
-                    'label'             => __('TIN', 'official-cdek'),
+                    'label'             => __('TIN', 'cdekdelivery'),
                     'required'          => true,
                     'custom_attributes' => [
                         'maxlength' => 12,
@@ -44,7 +44,7 @@ class InternationalOrderFields implements FieldConstructorInterface
                 ],
                 'passport_date_of_birth' => [
                     'type'     => 'date',
-                    'label'    => __('Birthday', 'official-cdek'),
+                    'label'    => __('Birthday', 'cdekdelivery'),
                     'required' => true,
                 ],
             ];
