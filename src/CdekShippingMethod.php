@@ -15,8 +15,8 @@ class CdekShippingMethod extends WC_Shipping_Method
         parent::__construct($instance_id);
         $this->id                 = Config::DELIVERY_NAME;
         $this->instance_id        = absint($instance_id);
-        $this->method_title       = 'Cdek Shipping';
-        $this->method_description = 'Official Shipping Method for Cdek';
+        $this->method_title       = __('Cdek Shipping', 'cdekdelivery');
+        $this->method_description = __('Official Shipping Method for Cdek', 'cdekdelivery');
         $this->supports           = [
             'settings',
             'shipping-zones',
@@ -28,7 +28,7 @@ class CdekShippingMethod extends WC_Shipping_Method
 
     final public function init(): void
     {
-        $this->title = 'CDEK Shipping';
+        $this->title = __('CDEK Shipping', 'cdekdelivery');
         $this->init_settings();
         add_action('woocommerce_update_options_shipping_'.$this->id, [$this, 'process_admin_options']);
         $this->init_form_fields();

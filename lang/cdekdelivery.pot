@@ -112,3 +112,12 @@ msgstr ""
 #: build/cdek-admin-settings.js:1
 msgid "Rules for delivery to pick-up"
 msgstr ""
+
+#: src/CdekShippingMethod:18
+#: src/CdekShippingMethod:31
+msgid "Cdek Shipping"
+msgstr ""
+
+#: src/CdekShippingMethod:19
+msgid "Official Shipping Method for Cdek"
+msgstr ""

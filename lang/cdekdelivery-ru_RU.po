@@ -111,3 +111,12 @@ msgstr "Правила для доставки курьером"
 #: build/cdek-admin-settings.js:1
 msgid "Rules for delivery to pick-up"
 msgstr "Правила для доставки до ПВЗ/Постаматов"
+
+#: src/CdekShippingMethod:18
+#: src/CdekShippingMethod:31
+msgid "Cdek Shipping"
+msgstr "Доставка СДЭК"
+
+#: src/CdekShippingMethod:19
+msgid "Official Shipping Method for Cdek"
+msgstr "Официальный метод доставки компанией СДЭК"
