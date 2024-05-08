@@ -29,7 +29,7 @@ namespace Cdek {
                 wp_enqueue_style($handle, Loader::getPluginUrl()."build/$fileName.css", [], Loader::getPluginVersion());
             }
 
-            wp_set_script_translations($handle, 'cdekdelivery', Loader::getPluginPath().'/lang');
+            wp_set_script_translations($handle, 'cdekdelivery', dirname(Loader::getPluginFile()) .'/lang');
         }
 
         public static function getActualShippingMethod(?int $instanceId = null): CdekShippingMethod {

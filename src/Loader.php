@@ -133,7 +133,7 @@ namespace Cdek {
             self::declareCompatibility();
 
             add_action('plugins_loaded',
-                static fn() => load_plugin_textdomain('cdekdelivery', false, self::getPluginPath().'/lang'));
+                static fn() => load_plugin_textdomain('cdekdelivery', false, dirname(self::$pluginMainFile) .'/lang'));
 
             add_filter('plugin_action_links_'.self::$pluginMainFile, [Admin::class, 'addPluginLinks']);
             add_filter('plugin_row_meta', [Admin::class, 'addPluginRowMeta'], 10, 2);
