@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import { debounce } from 'lodash';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { CURRENCY } from '@woocommerce/settings';
 
 import '../styles/delivery-price.scss';
@@ -30,7 +30,8 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
         onRulesUpdate([...rules]);
     };
 
-    const changeValueDebounced = useCallback(debounce(changeValue, 4000), [rules]);
+    const changeValueDebounced = useCallback(debounce(changeValue, 4000),
+      [rules]);
 
     const removeRule = (index) => {
         if (index === (rules.length - 1)) {
@@ -42,8 +43,8 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
     return rules.map((rule, index) => (<div
       key={rule.to + rule.value + rule.type + index}>{__('Order price',
       'cdekdelivery')} {rules[index - 1] &&
-      <>{__('from', 'cdekdelivery')} {rules[index -
-      1].to}{CURRENCY.symbol}</>} {rule.to &&
+      <>{sprintf(__('from %s%s', 'cdekdelivery'), rules[index - 1].to,
+        CURRENCY.symbol)}</>} {rule.to &&
       <>{__('less or equal', 'cdekdelivery')}
           <input defaultValue={rule.to}
                  min={rules[index - 1] ? rules[index - 1].to + 1 : 0}
@@ -51,8 +52,7 @@ const RulesComponent = ({ rules, onRulesUpdate }) => {
                  onBlur={(e) => changeTo(e, index)}
                  onInput={(e) => changeToDebounced(e,
                    index)} />{CURRENCY.symbol}</>} {rules.length === 1 &&
-      <>{__('any', 'cdekdelivery')}</>}, {__('delivery price',
-      'cdekdelivery')}
+      <>{__('any', 'cdekdelivery')}</>}, {__('delivery price', 'cdekdelivery')}
         <select onChange={(e) => changeType(e, index)}
                 className="cdek-selector" defaultValue={rule.type}>
             <option value="free">

@@ -67,3 +67,47 @@ msgstr "Документация"
 #: src/UI/Admin.php:44
 msgid "FAQ"
 msgstr "ЧаВО"
+
+#: build/cdek-admin-settings.js:1
+msgid "Order price"
+msgstr "Сумма заказа"
+
+#: build/cdek-admin-settings.js:1
+msgid "from %s%s"
+msgstr "от %s%s"
+
+#: build/cdek-admin-settings.js:1
+msgid "less or equal"
+msgstr "меньше или равно"
+
+#: build/cdek-admin-settings.js:1
+msgid "any"
+msgstr "любая"
+
+#: build/cdek-admin-settings.js:1
+msgid "delivery price"
+msgstr "стоимость доставки"
+
+#: build/cdek-admin-settings.js:1
+msgid "free"
+msgstr "бесплатно"
+
+#: build/cdek-admin-settings.js:1
+msgid "percentage"
+msgstr "взять в процентах"
+
+#: build/cdek-admin-settings.js:1
+msgid "fixed on"
+msgstr "фиксировать на"
+
+#: build/cdek-admin-settings.js:1
+msgid "amount on"
+msgstr "изменить на"
+
+#: build/cdek-admin-settings.js:1
+msgid "Rules for delivery by courier"
+msgstr "Правила для доставки курьером"
+
+#: build/cdek-admin-settings.js:1
+msgid "Rules for delivery to pick-up"
+msgstr "Правила для доставки до ПВЗ/Постаматов"
