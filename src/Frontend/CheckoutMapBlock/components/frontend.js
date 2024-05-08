@@ -10,7 +10,7 @@ import cdekWidget from '@cdek-it/widget';
 export const Block = ({
     checkoutExtensionData, extensions, cart, validation,
 }) => {
-    const { apiKey, officeDeliveryModes } = getSetting('cdekdelivery_data');
+    const { apiKey, officeDeliveryModes } = getSetting('official_cdek_data');
 
     const [showMap, setShowMap] = useState(false);
     const [validationError, setValidationError] = useState(null);
@@ -27,8 +27,8 @@ export const Block = ({
 
     const debouncedMapRender = useCallback(debounce((shippingRates, points) => {
         if (points === '' || !cart.cartNeedsShipping) {
-            debouncedSetExtensionData('cdekdelivery', 'office_code', null);
-            clearValidationError('cdekdelivery_office');
+            debouncedSetExtensionData('official_cdek', 'office_code', null);
+            clearValidationError('official_cdek_office');
             return;
         }
 
@@ -38,21 +38,21 @@ export const Block = ({
 
         if (!selectedRate ||
           !Object.prototype.hasOwnProperty.call(selectedRate, 'method_id') ||
-          selectedRate.method_id !== 'cdekdelivery') {
-            debouncedSetExtensionData('cdekdelivery', 'office_code', null);
-            clearValidationError('cdekdelivery_office');
+          selectedRate.method_id !== 'official_cdek') {
+            debouncedSetExtensionData('official_cdek', 'office_code', null);
+            clearValidationError('official_cdek_office');
             return;
         }
 
         if (officeDeliveryModes.indexOf(parseInt(selectedRate.meta_data.find(
-          (meta) => meta.key === '_cdekdelivery_tariff_mode').value)) === -1) {
-            debouncedSetExtensionData('cdekdelivery', 'office_code', null);
-            clearValidationError('cdekdelivery_office');
+          (meta) => meta.key === '_official_cdek_tariff_mode').value)) === -1) {
+            debouncedSetExtensionData('official_cdek', 'office_code', null);
+            clearValidationError('official_cdek_office');
             return;
         }
 
         setValidationErrors({
-            ['cdekdelivery_office']: {
+            ['official_cdek_office']: {
                 message: __('Choose pick-up', 'cdekdelivery'),
                 hidden: true,
             },
@@ -68,9 +68,9 @@ export const Block = ({
                     door: true,
                 },
                 onChoose(_type, _tariff, address) {
-                    debouncedSetExtensionData('cdekdelivery', 'office_code',
+                    debouncedSetExtensionData('official_cdek', 'office_code',
                       address.code);
-                    clearValidationError('cdekdelivery_office');
+                    clearValidationError('official_cdek_office');
                 },
             });
         } else {
@@ -86,7 +86,7 @@ export const Block = ({
         setShowMap(false);
         if (cart.isLoading || cart.isLoadingRates ||
           !extensions.official_cdek) {
-            clearValidationError('cdekdelivery_office');
+            clearValidationError('official_cdek_office');
             return;
         }
 
@@ -99,7 +99,7 @@ export const Block = ({
         extensions.official_cdek]);
 
     useEffect(() => {
-        setValidationError(getValidationError('cdekdelivery_office'));
+        setValidationError(getValidationError('official_cdek_office'));
     });
 
     return <div className="wp-block-shipping-cdek-map"
