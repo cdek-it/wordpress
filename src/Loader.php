@@ -111,6 +111,11 @@ namespace Cdek {
             }
         }
 
+        public static function getPluginPath(): string
+        {
+            return plugin_dir_path(self::$pluginMainFilePath);
+        }
+
         public function __invoke(string $pluginMainFile): void
         {
             self::$pluginMainFilePath = $pluginMainFile;
@@ -133,7 +138,7 @@ namespace Cdek {
             self::declareCompatibility();
 
             add_action('plugins_loaded',
-                static fn() => load_plugin_textdomain('cdekdelivery', false, dirname(self::$pluginMainFile) .'/lang'));
+                static fn() => load_plugin_textdomain('cdekdelivery', false, dirname(self::$pluginMainFile).'/lang'));
 
             add_filter('plugin_action_links_'.self::$pluginMainFile, [Admin::class, 'addPluginLinks']);
             add_filter('plugin_row_meta', [Admin::class, 'addPluginRowMeta'], 10, 2);
@@ -186,11 +191,6 @@ namespace Cdek {
                     FeaturesUtil::declare_compatibility('cart_checkout_blocks', self::$pluginMainFilePath, true);
                 }
             });
-        }
-
-        public static function getPluginPath(): string
-        {
-            return plugin_dir_path(self::$pluginMainFilePath);
         }
 
     }
