@@ -6,15 +6,17 @@ namespace {
 }
 
 namespace Cdek {
+
     use Cdek\Model\Tariff;
     use DateTime;
     use RuntimeException;
     use Throwable;
-    use WC_Shipping_Method;
     use function WC;
 
-    class Helper {
-        public static function enqueueScript(string $handle, string $fileName, bool $hasStyles = false): void {
+    class Helper
+    {
+        public static function enqueueScript(string $handle, string $fileName, bool $hasStyles = false): void
+        {
             $script_asset_path = Loader::getPluginPath()."/build/$fileName.asset.php";
 
             $script_asset = file_exists($script_asset_path) ? require $script_asset_path : [
@@ -23,22 +25,23 @@ namespace Cdek {
             ];
 
             wp_enqueue_script($handle, Loader::getPluginUrl()."build/$fileName.js", $script_asset['dependencies'],
-                $script_asset['version'], true);
+                              $script_asset['version'], true);
 
             if ($hasStyles) {
                 wp_enqueue_style($handle, Loader::getPluginUrl()."build/$fileName.css", [], Loader::getPluginVersion());
             }
 
-            wp_set_script_translations($handle, 'cdekdelivery', dirname(Loader::getPluginFile()) .'/lang');
+            wp_set_script_translations($handle, 'cdekdelivery', Loader::getPluginPath().'lang');
         }
 
-        public static function getActualShippingMethod(?int $instanceId = null): CdekShippingMethod {
+        public static function getActualShippingMethod(?int $instanceId = null): CdekShippingMethod
+        {
             if (!is_null($instanceId)) {
                 return new CdekShippingMethod($instanceId);
             }
 
             if (isset(WC()->cart)) {
-                try{
+                try {
                     $methods = wc_get_shipping_zone(WC()->cart->get_shipping_packages()[0])->get_shipping_methods(true);
 
                     foreach ($methods as $method) {
@@ -53,14 +56,14 @@ namespace Cdek {
             return WC()->shipping->load_shipping_methods()[Config::DELIVERY_NAME];
         }
 
-        public static function getServices($deliveryMethod, $tariffId) {
-            $serviceBanAttachmentInspectionEnabled = $deliveryMethod->get_option('services_ban_attachment_inspection')
-                                                     === 'yes';
-            $serviceTrying = $deliveryMethod->get_option('services_trying_on') === 'yes';
+        public static function getServices($deliveryMethod, $tariffId)
+        {
+            $serviceBanAttachmentInspectionEnabled
+                              = $deliveryMethod->get_option('services_ban_attachment_inspection') === 'yes';
+            $serviceTrying    = $deliveryMethod->get_option('services_trying_on') === 'yes';
             $servicePartDevil = $deliveryMethod->get_option('services_part_deliv') === 'yes';
-            $serviceList = [];
-            if (!Tariff::isTariffToPostamat($tariffId) &&
-                Tariff::isTariffModeIM($tariffId)) {
+            $serviceList      = [];
+            if (!Tariff::isTariffToPostamat($tariffId) && Tariff::isTariffModeIM($tariffId)) {
                 if ($serviceBanAttachmentInspectionEnabled && !$serviceTrying && !$servicePartDevil) {
                     $serviceList[] = [
                         'code' => 'BAN_ATTACHMENT_INSPECTION',
@@ -75,10 +78,11 @@ namespace Cdek {
 
                 if (!$serviceBanAttachmentInspectionEnabled && $servicePartDevil) {
                     $serviceList[] = [
-                        'code' => 'PART_DELIV'
+                        'code' => 'PART_DELIV',
                     ];
                 }
             }
+
             return $serviceList;
         }
 
@@ -87,18 +91,18 @@ namespace Cdek {
             if (!$uuid) {
                 throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Некорректный uuid заказа.');
             }
-            $api = new CdekApi;
+            $api           = new CdekApi;
             $orderInfoJson = $api->getOrder($uuid);
             $orderInfo     = json_decode($orderInfoJson, true);
-            $statusName = [];
+            $statusName    = [];
             if (!isset($orderInfo['entity']['statuses'])) {
                 throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Заказ не найден.');
             }
 
             foreach ($orderInfo['entity']['statuses'] as $status) {
-                $dateTime = DateTime::createFromFormat('Y-m-d\TH:i:sO', $status['date_time']);
+                $dateTime      = DateTime::createFromFormat('Y-m-d\TH:i:sO', $status['date_time']);
                 $formattedDate = $dateTime->format('y.m.d H:i:s');
-                $statusName[] = ['time' => $formattedDate, 'name' => $status['name'], 'code' => $status['code']];
+                $statusName[]  = ['time' => $formattedDate, 'name' => $status['name'], 'code' => $status['code']];
             }
 
             return $statusName;
