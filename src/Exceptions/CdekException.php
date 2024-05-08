@@ -13,7 +13,7 @@ namespace Cdek\Exceptions {
     abstract class CdekException extends Exception
     {
         protected $code = 'cdek_error';
-        private array $data;
+        private ?array $data;
 
         public function __construct(string $message = "",
                                     string $code = 'cdek_error',
