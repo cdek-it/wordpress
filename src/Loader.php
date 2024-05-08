@@ -44,7 +44,6 @@ namespace Cdek {
         public const EXTENSIONS
             = [
                 'openssl',
-                'curl',
             ];
         private static string $pluginVersion;
         private static string $pluginMainFilePath;
