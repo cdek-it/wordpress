@@ -209,6 +209,7 @@ msgid "Use delivery amount display rules for a zone"
 msgstr "Использовать правила отображения суммы доставки для зоны"
 
 #: src/CdekShippingMethod.php.php:45
+#: src/CdekShippingMethod.php.php:350
 msgid "Rules for displaying the delivery amount"
 msgstr "Правила отображения суммы доставки"
 
@@ -475,10 +476,6 @@ msgstr "Добавить расчет страховки к стоимости �
 #: src/CdekShippingMethod.php.php:347
 msgid "Calculated based on the amount of goods in the order"
 msgstr "Расчитывается по сумме товаров в заказе"
-
-#: src/CdekShippingMethod.php.php:350
-msgid "Rules for displaying the delivery amount"
-msgstr "Правила отображения суммы доставки"
 
 #: src/CdekShippingMethod.php.php:355
 msgid "Cash on delivery settings"

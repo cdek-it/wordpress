@@ -189,6 +189,7 @@ msgid "Use delivery amount display rules for a zone"
 msgstr ""
 
 #: src/CdekShippingMethod.php.php:45
+#: src/CdekShippingMethod.php.php:350
 msgid "Rules for displaying the delivery amount"
 msgstr ""
 
@@ -444,10 +445,6 @@ msgstr ""
 
 #: src/CdekShippingMethod.php.php:347
 msgid "Calculated based on the amount of goods in the order"
-msgstr ""
-
-#: src/CdekShippingMethod.php.php:350
-msgid "Rules for displaying the delivery amount"
 msgstr ""
 
 #: src/CdekShippingMethod.php.php:355
