@@ -38,11 +38,11 @@ class CdekShippingMethod extends WC_Shipping_Method
     {
         $this->instance_form_fields = [
             'use_delivery_price_rules' => [
-                'title' => 'Использовать правила отображения суммы доставки для зоны',
+                'title' => __('Use delivery amount display rules for a zone', 'cdekdelivery'),
                 'type'  => 'checkbox',
             ],
             'delivery_price_rules'     => [
-                'title' => 'Правила отображения суммы доставки',
+                'title' => __('Rules for displaying the delivery amount', 'cdekdelivery'),
                 'label' => '',
                 'type'  => 'hidden',
             ],
@@ -50,26 +50,28 @@ class CdekShippingMethod extends WC_Shipping_Method
 
         $this->form_fields = [
             'auth_block_name'                => [
-                'title' => '<h3 style="text-align: center;">Авторизация</h3>',
+                'title' => '<h3 style="text-align: center;">' .
+                           __('Authorization', 'cdekdelivery') .
+                           '</h3>',
                 'type'  => 'title',
                 'class' => 'cdek_setting_block_name',
             ],
             'test_mode'                      => [
-                'title'       => 'Тестовый режим',
+                'title'       => __('Test mode', 'cdekdelivery'),
                 'type'        => 'checkbox',
                 'default'     => false,
                 'desc_tip'    => true,
-                'description' => 'При включенном режиме используется тестовое апи',
+                'description' => __('When enabled, the test API is used', 'cdekdelivery'),
             ],
             'client_id'                      => [
-                'title'             => 'Идентификатор',
+                'title'             => __('Identifier', 'cdekdelivery'),
                 'type'              => 'text',
                 'custom_attributes' => [
                     'required' => true,
                 ],
             ],
             'client_secret'                  => [
-                'title'             => 'Секретный ключ',
+                'title'             => __('The secret key', 'cdekdelivery'),
                 'type'              => 'text',
                 'custom_attributes' => [
                     'required' => true,
@@ -77,42 +79,45 @@ class CdekShippingMethod extends WC_Shipping_Method
             ],
             'yandex_map_api_key'             => [
                 'type'              => 'text',
-                'title'             => 'Ключ Яндекс.Карты',
-                'description'       => 'Ключ доступа к API Яндекс. Процесс генерации описан на <a rel="noopener nofollower" href="https://yandex.ru/dev/jsapi-v2-1/doc/ru/#get-api-key" target="_blank">странице</a>.',
+                'title'             => __('Yandex map key', 'cdekdelivery'),
+                'description'       => __('Yandex API access key. The generation process is described on ', 'cdekdelivery') .
+                                       '<a rel="noopener nofollower" href="https://yandex.ru/dev/jsapi-v2-1/doc/ru/#get-api-key" target="_blank">' .
+                                       __('the page', 'cdekdelivery') .
+                                       '</a>.',
                 'custom_attributes' => [
                     'required' => true,
                 ],
             ],
             'seller_block_name'              => [
-                'title' => '<h3 style="text-align: center;">Клиент</h3>',
+                'title' => '<h3 style="text-align: center;">' . __('Client', 'cdekdelivery') . '</h3>',
                 'type'  => 'title',
                 'class' => 'cdek_setting_block_name',
             ],
             'seller_company'                 => [
-                'title'             => 'Название компании',
+                'title'             => __('Company name', 'cdekdelivery'),
                 'type'              => 'text',
                 'custom_attributes' => [
                     'required' => true,
                 ],
             ],
             'seller_name'                    => [
-                'title'             => 'ФИО',
+                'title'             => __('FIO', 'cdekdelivery'),
                 'type'              => 'text',
                 'custom_attributes' => [
                     'required' => true,
                 ],
             ],
             'seller_phone'                   => [
-                'title'             => 'Телефон',
+                'title'             => __('Phone', 'cdekdelivery'),
                 'type'              => 'text',
                 'desc_tip'          => true,
-                'description'       => 'Должен передаваться в международном формате: код страны (для России +7) и сам номер (10 и более цифр)',
+                'description'       => __('Must be transmitted in international format: country code (for Russia +7) and the number itself (10 or more digits)', 'cdekdelivery'),
                 'custom_attributes' => [
                     'required' => true,
                 ],
             ],
             'seller_email'                   => [
-                'title'             => 'Электронный адрес почты компании',
+                'title'             => __('Company email address', 'cdekdelivery'),
                 'type'              => 'text',
                 'custom_attributes' => [
                     'required' => true,
@@ -120,58 +125,56 @@ class CdekShippingMethod extends WC_Shipping_Method
                 ],
             ],
             'international_title'            => [
-                'title' => 'Международные заказы',
+                'title' => __('International orders', 'cdekdelivery'),
                 'type'  => 'title',
             ],
             'international_mode'             => [
-                'title'       => 'Включить режим международных заказов',
+                'title'       => __('Enable international order mode', 'cdekdelivery'),
                 'type'        => 'checkbox',
                 'desc_tip'    => true,
-                'description' => "При включенном режиме международных заказов, на странице чекаута появятся дополнительные поля:
-                серия паспорта, номер паспорта, дата выдачи, отдел, ИНН, дата рождения.",
+                'description' => __("When the international orders mode is enabled, additional fields will appear on the checkout page:\n\r passport series, passport number, date of issue, department, TIN, date of birth.", 'cdekdelivery'),
                 'default'     => 'no',
             ],
             'seller_address'                 => [
-                'title'       => 'Адрес истинного продавца',
+                'title'       => __('True seller address', 'cdekdelivery'),
                 'type'        => 'text',
                 'desc_tip'    => true,
-                'description' => 'Адрес истинного продавца. Используется при печати инвойсов для отображения адреса настоящего
-                продавца товара, либо торгового названия. Для международных заказов',
+                'description' => __("Address of the actual seller. Used when printing invoices to display the address of the present\n\r seller of the product or trade name. For international orders", 'cdekdelivery'),
             ],
             'shipper_name'                   => [
-                'title'       => 'Грузоотправитель',
+                'title'       =>  __('Shipper', 'cdekdelivery'),
                 'type'        => 'text',
                 'desc_tip'    => true,
-                'description' => 'Название компании грузоотправителя для международных заказов',
+                'description' => __('Shipper`s company name for international orders', 'cdekdelivery'),
             ],
             'shipper_address'                => [
-                'title'       => 'Адрес грузоотправителя',
+                'title'       => __('Shipper`s address', 'cdekdelivery'),
                 'type'        => 'text',
                 'desc_tip'    => true,
-                'description' => 'Адрес компании грузоотправителя для международных заказов',
+                'description' => __('Shipping company address for international orders', 'cdekdelivery'),
             ],
             'passport_series'                => [
-                'title' => 'Серия паспорта',
+                'title' => __('Passport Series', 'cdekdelivery'),
                 'type'  => 'text',
             ],
             'passport_number'                => [
-                'title'             => 'Номер паспорта',
+                'title'             => __('Passport number', 'cdekdelivery'),
                 'type'              => 'text',
                 'custom_attributes' => [
                     'pattern' => '\d*',
                 ],
             ],
             'passport_date_of_issue'         => [
-                'title'       => 'Дата выдачи паспорта',
+                'title'       => __('Passport date of issue', 'cdekdelivery'),
                 'type'        => 'date',
                 'date_format' => 'd.m.Y',
             ],
             'passport_organization'          => [
-                'title' => 'Орган выдачи паспорта',
+                'title' => __('Passport organization', 'cdekdelivery'),
                 'type'  => 'text',
             ],
             'tin'                            => [
-                'title'             => 'ИНН',
+                'title'             => __('TIN', 'cdekdelivery'),
                 'type'              => 'text',
                 'desc_tip'          => true,
                 'custom_attributes' => [
@@ -179,49 +182,47 @@ class CdekShippingMethod extends WC_Shipping_Method
                 ],
             ],
             'passport_date_of_birth'         => [
-                'title'       => 'Дата рождения',
+                'title'       => __('Birthday', 'cdekdelivery'),
                 'type'        => 'date',
                 'date_format' => 'd.m.Y',
             ],
             'delivery_block_name'            => [
-                'title' => '<h3 style="text-align: center;">Доставка</h3>',
+                'title' => '<h3 style="text-align: center;">' . __('Delivery', 'cdekdelivery') .'</h3>',
                 'type'  => 'title',
                 'class' => 'cdek_delivery_block_name',
             ],
             'automate_orders'                => [
-                'title'       => 'Автоматически создавать заказы в СДЭК',
+                'title'       => __('Automatically create orders in CDEK', 'cdekdelivery'),
                 'type'        => 'checkbox',
-                'description' => 'При наличии информации о габаритах и корректно заполненных адреса отправки накладная СДЭК будет создана автоматически',
+                'description' => __('If you have information about the dimensions and correctly filled in shipping addresses, the CDEK invoice will be created automatically', 'cdekdelivery'),
             ],
             'tariff_list'                    => [
-                'title'       => 'Тарифы',
+                'title'       => __('Tariff', 'cdekdelivery'),
                 'type'        => 'multiselect',
                 'desc_tip'    => true,
                 'options'     => Tariff::getTariffList(),
-                'description' => "Для выбора нескольких тарифов удерживайте клавишу \"CTRL\" и левой кнопкой мыши выберите тарифы.",
+                'description' => __("To select multiple tariffs, hold down the \"CTRL\" key and select tariffs with the left mouse button.", 'cdekdelivery'),
                 'css'         => 'height: 400px;',
             ],
             'tariff_name'                    => [
-                'title'       => 'Изменить название тарифа',
+                'title'       => __('Change tariff name', 'cdekdelivery'),
                 'type'        => 'text',
-                'description' => "В списке тарифов в поле \"Тарифы\" в скобках указан код тарифа. Для изменения названия тарифа
-                в поле добавляется запись в формате код-название, для множественного изменения, тарифы отделяются точкой с запятой, например
-                запись которая изменит название 136 и 137 тарифа выглядит так: <b>136-Доставка до пвз;137-Доставка курьером</b> <br>
-                Если значение не задано то названия тарифов будут стандартными.",
+                'description' => __("In the list of tariffs in the field \"Tariffs\" the tariff code is indicated in brackets.\n\r To change the name of the tariff, an entry in the code-name format is added to the field; for multiple changes,\n\r tariffs are separated by a semicolon, for example, an entry that will change the name of tariff 136 and 137 looks like this:", 'cdekdelivery') .
+                                 ' <b>' . __('136-Delivery to pick-up point; 137-Delivery by courier', 'cdekdelivery') . '</b><br>' .
+                                 __('If the value is not specified, the tariff names will be standard.', 'cdekdelivery'),
             ],
             'has_packages_mode'              => [
-                'title'       => 'Многоместка',
+                'title'       => __('Multi-seater', 'cdekdelivery'),
                 'type'        => 'checkbox',
                 'desc_tip'    => true,
-                'description' => "При включенном режиме 'Многоместка', на детальной странице заказа появится
-                 возможность создать несколько упаковок для одного заказа и распределить товары по созданным упаковкам",
+                'description' => __("When the 'Multi-seat' mode is enabled, the detailed order page will display\n\r the ability to create several packages for one order and distribute goods among the created packages", 'cdekdelivery'),
                 'default'     => 'no',
             ],
             'extra_day'                      => [
-                'title'             => 'Доп. дни к доставке',
+                'title'             => __('Add days for delivery', 'cdekdelivery'),
                 'type'              => 'number',
                 'desc_tip'          => true,
-                'description'       => "Колличество дней будет добавлено к расчетному времени доставки",
+                'description'       => __('Number of days will be added to the estimated delivery time', 'cdekdelivery'),
                 'default'           => 0,
                 'custom_attributes' => [
                     'min'  => 0,
@@ -229,15 +230,15 @@ class CdekShippingMethod extends WC_Shipping_Method
                 ],
             ],
             'map_auto_close'              => [
-                'title'       => 'Закрыть карту после выбора пвз',
+                'title'       => __('Close the map after selecting pick-up', 'cdekdelivery'),
                 'type'        => 'checkbox',
                 'desc_tip'    => true,
-                'description' => "Если включена эта настройка, то после выбора ПВЗ на странице чекаута карта автоматически закроется.",
+                'description' => __('If this setting is enabled, then after selecting a pick-up point on the checkout page, the card will automatically close.', 'cdekdelivery'),
                 'default'     => 'no',
             ],
             'map'                            => [
                 'type'  => 'hidden',
-                'title' => 'Выбрать адреса для отправки на карте',
+                'title' => __('Select addresses to send on the map', 'cdekdelivery'),
             ],
             'pvz_code'                       => [
                 'type' => 'hidden',
@@ -249,18 +250,20 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'type' => 'hidden',
             ],
             'package_setting_block_name'     => [
-                'title' => '<h3 style="text-align: center;">Габариты</h3>',
+                'title' => '<h3 style="text-align: center;">' . __('Dimensions', 'cdekdelivery') .'</h3>',
                 'type'  => 'title',
                 'class' => 'cdek_package_setting_block_name',
             ],
             'product_weight_default'         => [
-                'title'             => 'Вес одной единицы товара по умолчанию в ('.
+                'title'             => __('Default weight of one item in', 'cdekdelivery') . ' ('.
                                        get_option('woocommerce_weight_unit').
                                        ')',
                 'desc_tip'          => true,
-                'description'       => "У всех товаров должен быть указан вес,
-                            если есть товары без указанного <br> веса то для таких товаров будет подставляться значение из этого поля. <br>
-                            Это повлияет на точность расчета доставки. Значение по умолчанию 1 единица измерения веса заданная в настройках.",
+                'description'       => __('All goods must have their weight indicated, if there are goods without', 'cdekdelivery') .
+                                       "<br>" .
+                                       __('a specified weight, then for such goods the value from this field will be substituted.', 'cdekdelivery').
+                                       "<br>" .
+                                       __('This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings.', 'cdekdelivery'),
                 'type'              => 'number',
                 'default'           => 1,
                 'custom_attributes' => [
@@ -269,8 +272,8 @@ class CdekShippingMethod extends WC_Shipping_Method
                 ],
             ],
             'product_length_default'         => [
-                'title'             => 'Длина товара',
-                'description'       => "Длина товара по умолчанию в см",
+                'title'             =>  __('Item length', 'cdekdelivery'),
+                'description'       =>  __('Default product length in cm', 'cdekdelivery'),
                 'type'              => 'number',
                 'desc_tip'          => true,
                 'default'           => 10,
@@ -280,8 +283,8 @@ class CdekShippingMethod extends WC_Shipping_Method
                 ],
             ],
             'product_width_default'          => [
-                'title'             => 'Ширина товара',
-                'description'       => "Ширина товара по умолчанию в см",
+                'title'             => __('Item width', 'cdekdelivery'),
+                'description'       => __('Default product width in cm', 'cdekdelivery'),
                 'type'              => 'number',
                 'desc_tip'          => true,
                 'default'           => 10,
@@ -291,8 +294,8 @@ class CdekShippingMethod extends WC_Shipping_Method
                 ],
             ],
             'product_height_default'         => [
-                'title'             => 'Высота товара',
-                'description'       => "Высота товара по умолчанию в см",
+                'title'             => __('Item height', 'cdekdelivery'),
+                'description'       => __('Default product height in cm', 'cdekdelivery'),
                 'type'              => 'number',
                 'desc_tip'          => true,
                 'default'           => 10,
@@ -302,66 +305,63 @@ class CdekShippingMethod extends WC_Shipping_Method
                 ],
             ],
             'product_package_default_toggle' => [
-                'title'       => 'Габариты товара вкл/выкл',
-                'description' => 'Принудительно использовать габариты товара (длину, ширину и высоту) по умолчанию для всех товаров',
+                'title'       => __('Product dimensions on/off', 'cdekdelivery'),
+                'description' => __('Force the use of product dimensions (length, width and height) by default for all products', 'cdekdelivery'),
                 'type'        => 'checkbox',
                 'desc_tip'    => true,
                 'default'     => 'no',
             ],
             'services_block_name'            => [
-                'title' => '<h3 style="text-align: center;">Услуги</h3>',
+                'title' => '<h3 style="text-align: center;">'. __('Services', 'cdekdelivery') .'</h3>',
                 'type'  => 'title',
                 'class' => 'cdek_delivery_block_name',
             ],
             'services_ban_attachment_inspection' => [
-                'title'       => 'Запрет осмотра вложения',
-                'description' => 'Эта услуга недоступна для тарифов до постамата и доступна только для клиентов с договором типа ИМ.
-                Также запрет осмотра вложения не работает при включенных услугах примерка на дому и частичная доставка.',
+                'title'       => __('Prohibition of inspection of attachment', 'cdekdelivery'),
+                'description' => __("This service is not available for tariffs to the parcel locker and is only available to clients with an IM type agreement.\n\r Also, the prohibition on inspecting the attachment does not work when the services of fitting at home and partial delivery are included.", 'cdekdelivery'),
                 'type'        => 'checkbox',
                 'default'     => 'no',
             ],
             'services_trying_on' => [
-                'title'       => 'Примерка',
+                'title'       => __('Trying on', 'cdekdelivery'),
                 'description' => '',
                 'type'        => 'checkbox',
                 'default'     => 'no',
             ],
             'services_part_deliv' => [
-                'title'       => 'Частичная доставка',
+                'title'       => __('Partial delivery', 'cdekdelivery'),
                 'description' => '',
                 'type'        => 'checkbox',
                 'default'     => 'no',
             ],
             'delivery_price_block_name'      => [
-                'title' => '<h3 style="text-align: center;">Cтоимость доставки</h3>',
+                'title' => '<h3 style="text-align: center;">' . __('Delivery cost', 'cdekdelivery') . '</h3>',
                 'type'  => 'title',
                 'class' => 'cdek_delivery_price_block_name',
             ],
             'insurance'                      => [
-                'title'       => 'Страховка',
-                'label'       => 'Добавить расчет страховки к стоимости доставки',
+                'title'       => __('Insurance', 'cdekdelivery'),
+                'label'       => __('Add insurance quote to shipping cost', 'cdekdelivery'),
                 'type'        => 'checkbox',
                 'desc_tip'    => true,
-                'description' => "Расчитывается по сумме товаров в заказе",
+                'description' => __('Calculated based on the amount of goods in the order', 'cdekdelivery'),
             ],
             'delivery_price_rules'           => [
-                'title' => 'Правила отображения суммы доставки',
+                'title' => __('Rules for displaying the delivery amount', 'cdekdelivery'),
                 'label' => '',
                 'type'  => 'hidden',
             ],
             'stepcodprice_title'             => [
-                'title'       => 'Настройки наложенного платежа',
+                'title'       => __('Cash on delivery settings', 'cdekdelivery'),
                 'type'        => 'title',
-                'description' => 'Настройки для наложенного платежа применяются только во время отправки заказа из админ
-                панели и для пользователя на странице чекаута не отображаются',
+                'description' => __("Cash on delivery settings are applied only when sending an order from the admin\n\r panels and for the user on the checkout page are not displayed", 'cdekdelivery'),
             ],
             'percentcod'                     => [
-                'title'             => 'Наценка к заказу в процентах',
+                'title'             => __('Extra charge on order as a percentage', 'cdekdelivery'),
                 'type'              => 'number',
-                'description'       => "Расчитывается от стоимости заказа.
-                Меняет итоговую сумму в квитанции.
-                <br> <b>Наценка отобразится только в квитанции.</b> Поэтому рекомендуется на странице чекаута проинформировать пользователя
-                о наценки при отправки наложенным платежем.",
+                'description'       => __("Calculated from the cost of the order.\n\r Changes the total amount on the receipt.", 'cdekdelivery') . "
+                <br> <b> " . __('The surcharge will only appear on the receipt.', 'cdekdelivery') . "</b> " .
+                                       __("Therefore, it is recommended to inform the user on the checkout page\n\r about extra charges when sending by cash on delivery.", 'cdekdelivery'),
                 'custom_attributes' => [
                     'min'  => 100,
                     'step' => 1,
@@ -373,11 +373,11 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'default' => '44',
             ],
             'barcode_format_title'           => [
-                'title' => 'Настройки печати',
+                'title' => __('Print settings', 'cdekdelivery'),
                 'type'  => 'title',
             ],
             'barcode_format'                 => [
-                'title'   => 'Формат ШК',
+                'title'   => __('Barcode format', 'cdekdelivery'),
                 'type'    => 'select',
                 'options' => BarcodeFormat::getAll(),
             ],
