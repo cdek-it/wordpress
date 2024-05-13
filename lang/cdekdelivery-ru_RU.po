@@ -3,13 +3,16 @@ msgid ""
 msgstr ""
 "Project-Id-Version: official-cdek\n"
 "Report-Msgid-Bugs-To: https://github.com/cdek-it/wordpress\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
 "Last-Translator: AlexV <a.viarvelskii@cdek.ru>\n"
 "Language-Team: CDEK <integrator@cdek.ru>\n"
+"Language: ru_RU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ru_RU\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: src/Actions/DispatchOrderAutomationAction.php:39
 msgid "Order automation failed with error: %s"
@@ -19,27 +22,27 @@ msgstr "Ошибка автоматизации заказа: %s"
 msgid "Order automation failed with error"
 msgstr "Ошибка автоматизации заказа"
 
-#: src/Checkout/InternationalOrderFields.php:18
+#: src/Checkout/InternationalOrderFields.php:18 src/CdekShippingMethod.php.php:159
 msgid "Passport Series"
 msgstr "Серия паспорта"
 
-#: src/Checkout/InternationalOrderFields.php:25
+#: src/Checkout/InternationalOrderFields.php:25 src/CdekShippingMethod.php.php:163
 msgid "Passport number"
 msgstr "Номер паспорта"
 
-#: src/Checkout/InternationalOrderFields.php:33
+#: src/Checkout/InternationalOrderFields.php:33 src/CdekShippingMethod.php.php:170
 msgid "Passport date of issue"
 msgstr "Дата выдачи паспорта"
 
-#: src/Checkout/InternationalOrderFields.php:37
+#: src/Checkout/InternationalOrderFields.php:37 src/CdekShippingMethod.php.php:170
 msgid "Passport organization"
 msgstr "Орган выдачи паспорта"
 
-#: src/Checkout/InternationalOrderFields.php:41
+#: src/Checkout/InternationalOrderFields.php:41 src/CdekShippingMethod.php.php:170
 msgid "TIN"
 msgstr "ИНН"
 
-#: src/Checkout/InternationalOrderFields.php:49
+#: src/Checkout/InternationalOrderFields.php:49 src/CdekShippingMethod.php.php:170
 msgid "Birthday"
 msgstr "Дата рождения"
 
@@ -112,8 +115,7 @@ msgstr "Правила для доставки курьером"
 msgid "Rules for delivery to pick-up"
 msgstr "Правила для доставки до ПВЗ/Постаматов"
 
-#: src/CdekShippingMethod:18
-#: src/CdekShippingMethod:31
+#: src/CdekShippingMethod:18 src/CdekShippingMethod:31
 msgid "Cdek Shipping"
 msgstr "Доставка СДЭК"
 
@@ -153,8 +155,7 @@ msgid "A request to Barcode was sent, but no response was received.\n"
  "\r and try to request the Barcode again."
 msgstr ""
 "Запрос на ШК был отправлен, но ответ по нему не пришел.\n"
-"Для решения проблемы, попробуй подождать 1 час"
-"\r и попробуй запросить ШК еще раз."
+"Для решения проблемы, попробуй подождать 1 час\r и попробуй запросить ШК еще раз."
 
 #: src/Actions/GenerateWaybillAction.php:33
 msgid ""
@@ -163,15 +164,15 @@ msgid ""
 "\r and re-enter the package dimensions."
 msgstr ""
 "Не удалось получить сведения о заказе. \n"
-"\r Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку \"Отменить\"
-"\r и введите габариты упаковки повторно."
+"\r Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку \"Отменить\\\r и введите габариты упаковки повторно."
 
 #: src/Actions/GenerateWaybillAction.php:53
 msgid ""
-"Failed to create receipt.\n"
+"Failed to retrieve order information. \n"
 "\r To solve the problem, try re-creating the order. Click the \"Cancel\" button \n"
 "\r and re-enter the package dimensions."
-msgstr "Не удалось создать квитанцию. \n"
+msgstr ""
+"Не удалось создать квитанцию. \n"
 "\r Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку \"Отменить\" \n"
 "\r и введите габариты упаковки повторно."
 
@@ -195,3 +196,359 @@ msgstr ""
 msgid "The selected CDEK tariff is not available with the specified parameters. Available tariffs with codes: "
 msgstr "Выбранный тариф СДЭК при заданных параметрах недоступен. Доступны тарифы с кодами: "
 
+#: src/CdekApi.php:81
+msgid ""
+"In this locality, delivery is available only for \"door-to-door\" tariffs. Select another locality to gain access to \"from warehouse\" "
+"tariffs."
+msgstr ""
+"В этом населенном пункте (НП) доступна доставка только для тарифов \"от двери\". Выберите другой НП, чтобы получить доступ к тарифам \"от "
+"склада\"."
+
+#: src/CdekShippingMethod.php.php:41
+msgid "Use delivery amount display rules for a zone"
+msgstr "Использовать правила отображения суммы доставки для зоны"
+
+#: src/CdekShippingMethod.php.php:45
+msgid "Rules for displaying the delivery amount"
+msgstr "Правила отображения суммы доставки"
+
+#: src/CdekShippingMethod.php.php:53
+msgid "Authorization"
+msgstr "Авторизация"
+
+#: src/CdekShippingMethod.php.php:53
+msgid "Test mode"
+msgstr "Тестовый режим"
+
+#: src/CdekShippingMethod.php.php:64
+msgid "When enabled, the test API is used"
+msgstr "При включенном режиме используется тестовое апи"
+
+#: src/CdekShippingMethod.php.php:67
+msgid "Identifier"
+msgstr "Идентификатор"
+
+#: src/CdekShippingMethod.php.php:74
+msgid "The secret key"
+msgstr "Секретный ключ"
+
+#: src/CdekShippingMethod.php.php:82
+msgid "Yandex map key"
+msgstr "Ключ Яндекс.Карты"
+
+#: src/CdekShippingMethod.php.php:83
+msgid "Yandex API access key. The generation process is described on "
+msgstr "Ключ доступа к API Яндекс. Процесс генерации описан на "
+
+#: src/CdekShippingMethod.php.php:85
+msgid "the page"
+msgstr "странице"
+
+#: src/CdekShippingMethod.php.php:92
+msgid "Client"
+msgstr "Клиент"
+
+#: src/CdekShippingMethod.php.php:97
+msgid "Company name"
+msgstr "Название компании"
+
+#: src/CdekShippingMethod.php.php:104
+msgid "FIO"
+msgstr "ФИО"
+
+#: src/CdekShippingMethod.php.php:111
+msgid "Phone"
+msgstr "Телефон"
+
+#: src/CdekShippingMethod.php.php:114
+msgid "Must be transmitted in international format: country code (for Russia +7) and the number itself (10 or more digits)"
+msgstr "Должен передаваться в международном формате: код страны (для России +7) и сам номер (10 и более цифр)"
+
+#: src/CdekShippingMethod.php.php:120
+msgid "Company email address"
+msgstr "Электронный адрес почты компании"
+
+#: src/CdekShippingMethod.php.php:120
+msgid "International orders"
+msgstr "Международные заказы"
+
+#: src/CdekShippingMethod.php.php:132
+msgid "Enable international order mode"
+msgstr "Включить режим международных заказов"
+
+#: src/CdekShippingMethod.php.php:135
+msgid ""
+"When the international orders mode is enabled, additional fields will appear on the checkout page:\n"
+"\r passport series, passport number, date of issue, department, TIN, date of birth."
+msgstr ""
+"При включенном режиме международных заказов, на странице чекаута появятся дополнительные поля:\n"
+"\r серия паспорта, номер паспорта, дата выдачи, отдел, ИНН, дата рождения."
+
+#: src/CdekShippingMethod.php.php:140 src/CdekShippingMethod.php.php:147
+msgid "True seller address"
+msgstr "Адрес истинного продавца"
+
+#: src/CdekShippingMethod.php.php:143
+msgid ""
+"Address of the actual seller. Used when printing invoices to display the address of the present\n"
+"\r seller of the product or trade name. For international orders"
+msgstr ""
+"Адрес истинного продавца. Используется при печати инвойсов для отображения адреса настоящего\n"
+"\r продавца товара, либо торгового названия. Для международных заказов"
+
+#: src/CdekShippingMethod.php.php:145
+msgid "Shipper"
+msgstr "Грузоотправитель"
+
+#: src/CdekShippingMethod.php.php:150
+msgid "Shipper`s company name for international orders"
+msgstr "Название компании грузоотправителя для международных заказов"
+
+#: src/CdekShippingMethod.php.php:153
+msgid "Shipper`s address"
+msgstr "Адрес грузоотправителя"
+
+#: src/CdekShippingMethod.php.php:156
+msgid "Shipping company address for international orders"
+msgstr "Адрес компании грузоотправителя для международных заказов"
+
+#: src/CdekShippingMethod.php.php:190
+msgid "Delivery"
+msgstr "Доставка"
+
+#: src/CdekShippingMethod.php.php:195
+msgid "Automatically create orders in CDEK"
+msgstr "Автоматически создавать заказы в СДЭК"
+
+#: src/CdekShippingMethod.php.php:197
+msgid "If you have information about the dimensions and correctly filled in shipping addresses, the CDEK invoice will be created automatically"
+msgstr "При наличии информации о габаритах и корректно заполненных адреса отправки накладная СДЭК будет создана автоматически"
+
+#: src/CdekShippingMethod.php.php:200
+msgid "Tariff"
+msgstr "Тарифы"
+
+#: src/CdekShippingMethod.php.php:204
+msgid "To select multiple tariffs, hold down the \"CTRL\" key and select tariffs with the left mouse button."
+msgstr "Для выбора нескольких тарифов удерживайте клавишу \"CTRL\" и левой кнопкой мыши выберите тарифы."
+
+#: src/CdekShippingMethod.php.php:208
+msgid "Change tariff name"
+msgstr "Изменить название тарифа"
+
+#: src/CdekShippingMethod.php.php:210
+msgid ""
+"In the list of tariffs in the field \"Tariffs\" the tariff code is indicated in brackets.\n"
+"\r To change the name of the tariff, an entry in the code-name format is added to the field; for multiple changes,\n"
+"\r tariffs are separated by a semicolon, for example, an entry that will change the name of tariff 136 and 137 looks like this:"
+msgstr ""
+"В списке тарифов в поле \"Тарифы\" в скобках указан код тарифа. Для изменения названия тарифа \n"
+"\r в поле добавляется запись в формате код-название, для множественного изменения, тарифы отделяются точкой с запятой, например \n"
+"\r запись которая изменит название 136 и 137 тарифа выглядит так:"
+
+#: src/CdekShippingMethod.php.php:211
+msgid "136-Delivery to pick-up point; 137-Delivery by courier"
+msgstr "136-Доставка до пвз;137-Доставка курьером"
+
+#: src/CdekShippingMethod.php.php:212
+msgid "If the value is not specified, the tariff names will be standard."
+msgstr "Если значение не задано то названия тарифов будут стандартными."
+
+#: src/CdekShippingMethod.php.php:215
+msgid "Multi-seater"
+msgstr "Многоместка"
+
+#: src/CdekShippingMethod.php.php:218
+msgid ""
+"When the 'Multi-seat' mode is enabled, the detailed order page will display\n"
+"\r the ability to create several packages for one order and distribute goods among the created packages"
+msgstr ""
+"При включенном режиме 'Многоместка', на детальной странице заказа появится\n"
+"\r возможность создать несколько упаковок для одного заказа и распределить товары по созданным упаковкам"
+
+#: src/CdekShippingMethod.php.php:222
+msgid "Add days for delivery"
+msgstr "Доп. дни к доставке"
+
+#: src/CdekShippingMethod.php.php:225
+msgid "Number of days will be added to the estimated delivery time"
+msgstr "Колличество дней будет добавлено к расчетному времени доставки"
+
+#: src/CdekShippingMethod.php.php:233
+msgid "Close the map after selecting pick-up"
+msgstr "Закрыть карту после выбора пвз"
+
+#: src/CdekShippingMethod.php.php:236
+msgid "If this setting is enabled, then after selecting a pick-up point on the checkout page, the card will automatically close."
+msgstr "Если включена эта настройка, то после выбора ПВЗ на странице чекаута карта автоматически закроется."
+
+#: src/CdekShippingMethod.php.php:241
+msgid "Select addresses to send on the map"
+msgstr "Выбрать адреса для отправки на карте"
+
+#: src/CdekShippingMethod.php.php:253
+msgid "Dimensions"
+msgstr "Габариты"
+
+#: src/CdekShippingMethod.php.php:258
+msgid "Default weight of one item in"
+msgstr "Вес одной единицы товара по умолчанию в"
+
+#: src/CdekShippingMethod.php.php:262
+msgid "All goods must have their weight indicated, if there are goods without"
+msgstr "У всех товаров должен быть указан вес, если есть товары без указанного"
+
+#: src/CdekShippingMethod.php.php:264
+msgid "a specified weight, then for such goods the value from this field will be substituted."
+msgstr "веса то для таких товаров будет подставляться значение из этого поля."
+
+#: src/CdekShippingMethod.php.php:266
+msgid "This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings."
+msgstr "Это повлияет на точность расчета доставки. Значение по умолчанию 1 единица измерения веса заданная в настройках."
+
+#: src/CdekShippingMethod.php.php:275
+msgid "Item length"
+msgstr "Длина товара"
+
+#: src/CdekShippingMethod.php.php:276
+msgid "Default product length in cm"
+msgstr "Длина товара по умолчанию в см"
+
+#: src/CdekShippingMethod.php.php:286
+msgid "Item width"
+msgstr "Ширина товара"
+
+#: src/CdekShippingMethod.php.php:287
+msgid "Default product width in cm"
+msgstr "Ширина товара по умолчанию в см"
+
+#: src/CdekShippingMethod.php.php:297
+msgid "Item height"
+msgstr "Высота товара"
+
+#: src/CdekShippingMethod.php.php:298
+msgid "Default product height in cm"
+msgstr "Высота товара по умолчанию в см"
+
+#: src/CdekShippingMethod.php.php:308
+msgid "Product dimensions on/off"
+msgstr "Габариты товара вкл/выкл"
+
+#: src/CdekShippingMethod.php.php:309
+msgid "Force the use of product dimensions (length, width and height) by default for all products"
+msgstr "Принудительно использовать габариты товара (длину, ширину и высоту) по умолчанию для всех товаров"
+
+#: src/CdekShippingMethod.php.php:315
+msgid "Services"
+msgstr "Услуги"
+
+#: src/CdekShippingMethod.php.php:320
+msgid "Prohibition of inspection of attachment"
+msgstr "Запрет осмотра вложения"
+
+#: src/CdekShippingMethod.php.php:321
+msgid "This service is not available for tariffs to the parcel locker and is only available to clients with an IM type agreement.\n"
+"\r Also, the prohibition on inspecting the attachment does not work when the services of fitting at home and partial delivery are included."
+msgstr "Эта услуга недоступна для тарифов до постамата и доступна только для клиентов с договором типа ИМ.\n"
+"\r Также запрет осмотра вложения не работает при включенных услугах примерка на дому и частичная доставка."
+
+#: src/CdekShippingMethod.php.php:326
+msgid "Trying on"
+msgstr "Примерка"
+
+#: src/CdekShippingMethod.php.php:332
+msgid "Partial delivery"
+msgstr "Частичная доставка"
+
+#: src/CdekShippingMethod.php.php:338
+msgid "Delivery cost"
+msgstr "Cтоимость доставки"
+
+#: src/CdekShippingMethod.php.php:343
+msgid "Insurance"
+msgstr "Страховка"
+
+#: src/CdekShippingMethod.php.php:344
+msgid "Add insurance quote to shipping cost"
+msgstr "Добавить расчет страховки к стоимости доставки"
+
+#: src/CdekShippingMethod.php.php:347
+msgid "Calculated based on the amount of goods in the order"
+msgstr "Расчитывается по сумме товаров в заказе"
+
+#: src/CdekShippingMethod.php.php:350
+msgid "Rules for displaying the delivery amount"
+msgstr "Правила отображения суммы доставки"
+
+#: src/CdekShippingMethod.php.php:355
+msgid "Cash on delivery settings"
+msgstr "Настройки наложенного платежа"
+
+#: src/CdekShippingMethod.php.php:357
+msgid "Cash on delivery settings are applied only when sending an order from the admin\n"
+"\r panels and for the user on the checkout page are not displayed"
+msgstr "Настройки для наложенного платежа применяются только во время отправки заказа из админ\n"
+"\r панели и для пользователя на странице чекаута не отображаются"
+
+#: src/CdekShippingMethod.php.php:343
+msgid "Extra charge on order as a percentage"
+msgstr "Наценка к заказу в процентах"
+
+#: src/CdekShippingMethod.php.php:343
+msgid "Calculated from the cost of the order.\n"
+"\r Changes the total amount on the receipt."
+msgstr "Расчитывается от стоимости заказа.\n"
+"\r Меняет итоговую сумму в квитанции."
+
+#: src/CdekShippingMethod.php.php:343
+msgid "The surcharge will only appear on the receipt."
+msgstr "Наценка отобразится только в квитанции."
+
+#: src/CdekShippingMethod.php.php:343
+msgid "Therefore, it is recommended to inform the user on the checkout page\n"
+"\r about extra charges when sending by cash on delivery."
+msgstr "Поэтому рекомендуется на странице чекаута проинформировать пользователя\n"
+"\r о наценки при отправки наложенным платежем."
+
+#: src/CdekShippingMethod.php.php:343
+msgid "Print settings"
+msgstr "Настройки печати"
+
+#: src/CdekShippingMethod.php.php:343
+msgid "Barcode format"
+msgstr "Формат ШК"
+
+#: src/Controllers/CourierController.php:56
+#: src/Controllers/CourierController.php:70
+#: src/Controllers/OrderController.php.php:70
+#: src/Controllers/OrderController.php.php:107
+msgid "Order number"
+msgstr "Номер заказа"
+
+#: src/Controllers/OrderController.php.php:44
+msgid "Packages"
+msgstr "Упаковки"
+
+#: src/Controllers/OrderController.php.php:59
+msgid "Packing length"
+msgstr "Длина упаковки"
+
+#: src/Controllers/OrderController.php.php:64
+msgid "Packing width"
+msgstr "Ширина упаковки"
+
+#: src/Controllers/OrderController.php.php:69
+msgid "Packing height"
+msgstr "Высота упаковки"
+
+#: src/Controllers/OrderController.php.php:74
+msgid "Products in packaging"
+msgstr "Товары в упаковке"
+
+#: src/Controllers/OrderController.php.php:82
+msgid "Product ID"
+msgstr "ID товара"
+
+#: src/Controllers/OrderController.php.php:87
+msgid "Quantity of goods in packaging"
+msgstr "Количество товара в упаковке"

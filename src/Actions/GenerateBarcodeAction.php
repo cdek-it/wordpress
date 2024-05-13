@@ -32,9 +32,7 @@ namespace Cdek\Actions {
             $order = json_decode($this->api->getOrder($cdekUuid), true);
 
             if (!isset($order['entity'])) {
-                _e("Failed to retrieve order information.\n\r
-                To solve the problem, try re-creating the order.\n\r
-                Click the \"Cancel\" button and enter the package dimensions again.",
+                _e("Failed to retrieve order information.\n\r To solve the problem, try re-creating the order.\n\r Click the \"Cancel\" button and enter the package dimensions again.",
                    'cdekdelivery');
                 exit();
             }
