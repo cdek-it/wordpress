@@ -569,3 +569,95 @@ msgstr ""
 #: src/UI/AdminShippingFields.php:56
 msgid "Tariff code: %s"
 msgstr ""
+
+#: src/Validator/ValidateDeleteOrder.php:19
+msgid "An attempt to delete order number \n\r%s \n\r failed with an error. Error code: \n\r %s"
+msgstr ""
+
+#: src/Validator/ValidateDeleteOrder.php:26
+msgid "An error occurred while deleting the order. Order number \n\r%s \n\r was not deleted."
+msgstr ""
+
+#: src/Validator/ValidateGetOrder.php:20
+msgid "An attempt to delete order number %s failed with an error. Order not found"
+msgstr ""
+
+#: src/Validator/ValidateDeleteOrder.php:32
+msgid "An error occurred while deleting the order. Order number \n\r%s \n\r was not found."
+msgstr ""
+
+#: src/Validator/ValidateCourier.php:20
+msgid "Error. The courier request has not been created. (%s)"
+msgstr ""
+
+#: src/Validator/ValidateCourier.php:35
+msgid "Application deleted"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:22
+msgid "The courier waiting date has not been selected"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:38
+msgid "The courier waiting date cannot be earlier than the current date"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:48
+msgid "The courier waiting date cannot be later than the 31st of the current date"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:58
+msgid "No courier waiting time selected"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:71
+msgid "The start of the courier waiting time cannot start later than the end time"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:80
+msgid "FIO is required"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:91
+msgid "Phone is required"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:100
+msgid "Address is required"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:116
+msgid "Cargo description is required"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:126
+msgid "Weight is required"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:136
+msgid "Weight must be a number"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:146
+msgid "Length is required"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:156
+msgid "Length must be a number"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:166
+msgid "Width is required"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:176
+msgid "Width must be a number"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:186
+msgid "Height is required"
+msgstr ""
+
+#: src/Validator/ValidateCourierFormData.php:196
+msgid "Height must be a number"
+msgstr ""

@@ -588,3 +588,95 @@ msgstr "Выбранный ПВЗ: %s"
 #: src/UI/AdminShippingFields.php:148
 msgid "Tariff code: %s"
 msgstr "Код тарифа: %s"
+
+#: src/Validator/ValidateDeleteOrder.php:19
+msgid "An attempt to delete order number \n\r%s \n\r failed with an error. Error code: \n\r %s"
+msgstr "Попытка удаления заказа с номером \n\r%s \n\r  завершилась с ошибкой. Код ошибки: \n\r %s"
+
+#: src/Validator/ValidateDeleteOrder.php:26
+msgid "An error occurred while deleting the order. Order number \n\r%s \n\r was not deleted."
+msgstr "При удалении заказа произошла ошибка. Заказ c номером \n\r%s \n\r не удален."
+
+#: src/Validator/ValidateGetOrder.php:20
+msgid "An attempt to delete order number %s failed with an error. Order not found"
+msgstr "Попытка удаления заказа с номером %s завершилась с ошибкой. Заказ не найден."
+
+#: src/Validator/ValidateDeleteOrder.php:32
+msgid "An error occurred while deleting the order. Order number \n\r%s \n\r was not found."
+msgstr "При удалении заказа произошла ошибка. Заказ c номером \n\r%s \n\r не найден."
+
+#: src/Validator/ValidateCourier.php:20
+msgid "Error. The courier request has not been created. (%s)"
+msgstr "Ошибка. Заявка на вызов курьера не создана. (%s)"
+
+#: src/Validator/ValidateCourier.php:35
+msgid "Application deleted"
+msgstr "Заявка удалена"
+
+#: src/Validator/ValidateCourierFormData.php:22
+msgid "The courier waiting date has not been selected"
+msgstr "Дата ожидания курьера не выбрана"
+
+#: src/Validator/ValidateCourierFormData.php:38
+msgid "The courier waiting date cannot be earlier than the current date"
+msgstr "Дата ожидания курьера не может быть раньше текущей даты"
+
+#: src/Validator/ValidateCourierFormData.php:48
+msgid "The courier waiting date cannot be later than the 31st of the current date"
+msgstr "Дата ожидания курьера не может быть позднее на 31 текущей даты"
+
+#: src/Validator/ValidateCourierFormData.php:58
+msgid "No courier waiting time selected"
+msgstr "Время ожидания курьера не выбрано"
+
+#: src/Validator/ValidateCourierFormData.php:71
+msgid "The start of the courier waiting time cannot start later than the end time"
+msgstr "Начало времени ожидания курьера не может начинаться позже времени окончания"
+
+#: src/Validator/ValidateCourierFormData.php:80
+msgid "FIO is required"
+msgstr "ФИО обязательно для заполнения"
+
+#: src/Validator/ValidateCourierFormData.php:91
+msgid "Phone is required"
+msgstr "Телефон обязателен для заполнения"
+
+#: src/Validator/ValidateCourierFormData.php:100
+msgid "Address is required"
+msgstr "Адрес обязателен для заполнения"
+
+#: src/Validator/ValidateCourierFormData.php:116
+msgid "Cargo description is required"
+msgstr "Описание груза обязательно для заполнения"
+
+#: src/Validator/ValidateCourierFormData.php:126
+msgid "Weight is required"
+msgstr "Вес обязателен для заполнения"
+
+#: src/Validator/ValidateCourierFormData.php:136
+msgid "Weight must be a number"
+msgstr "Вес должен быть числом"
+
+#: src/Validator/ValidateCourierFormData.php:146
+msgid "Length is required"
+msgstr "Длина обязательна для заполнения"
+
+#: src/Validator/ValidateCourierFormData.php:156
+msgid "Length must be a number"
+msgstr "Длина должна быть числом"
+
+#: src/Validator/ValidateCourierFormData.php:166
+msgid "Width is required"
+msgstr "Ширина обязательна для заполнения"
+
+#: src/Validator/ValidateCourierFormData.php:176
+msgid "Width must be a number"
+msgstr "Ширина должна быть числом"
+
+#: src/Validator/ValidateCourierFormData.php:186
+msgid "Height is required"
+msgstr "Высота обязательна для заполнения"
+
+#: src/Validator/ValidateCourierFormData.php:196
+msgid "Height must be a number"
+msgstr "Высота должна быть числом"

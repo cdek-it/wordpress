@@ -30,9 +30,7 @@ namespace Cdek\Actions {
             $order = json_decode($this->api->getOrder($orderUuid), true);
 
             if (!isset($order['entity'])) {
-                _e("Failed to retrieve order information. \n
-                \rTo solve the problem, try re-creating the order. Click the \"Cancel\" button \n
-                \rand re-enter the package dimensions.",
+                _e("Failed to retrieve order information. \n\r To solve the problem, try re-creating the order. Click the \"Cancel\" button \n\r and re-enter the package dimensions.",
                    'cdekdelivery');
                 exit();
             }
@@ -50,9 +48,7 @@ namespace Cdek\Actions {
             $waybill = json_decode($this->api->createWaybill($order['entity']['uuid']), true);
 
             if (!isset($waybill['entity'])) {
-                _e("Failed to create receipt. \n
-                \r To solve the problem, try re-creating the order. Click the \"Cancel\" button \n
-                \r and re-enter the package dimensions.",
+                _e("Failed to create receipt. \n\r To solve the problem, try re-creating the order. Click the \"Cancel\" button \n\r and re-enter the package dimensions.",
                    'cdekdelivery');
                 exit();
             }
@@ -78,8 +74,7 @@ namespace Cdek\Actions {
                 sleep(Config::GRAPHICS_TIMEOUT_SEC);
             }
 
-            _e("A request for a receipt was sent, but no response was received. \n
-                \r To resolve the problem, try waiting 1 hour and try requesting a receipt again.",
+            _e("A request for a receipt was sent, but no response was received. \n\r To resolve the problem, try waiting 1 hour and try requesting a receipt again.",
                'cdekdelivery');
 
             exit();
