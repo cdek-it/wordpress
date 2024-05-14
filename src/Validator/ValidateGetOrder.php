@@ -18,7 +18,7 @@ namespace Cdek\Validator {
 
                 $message = sprintf(
                     __(
-                        "An attempt to delete order number %s failed with an error. Order not found",
+                        "An attempt to delete order number %s failed with an error. Order not found.",
                         'cdekdelivery'
                     ),
                     $orderNumber
@@ -30,7 +30,7 @@ namespace Cdek\Validator {
                     false,
                     sprintf(
                         __(
-                            "An error occurred while deleting the order. Order number \n\r%s \n\r was not found",
+                            "An error occurred while deleting the order. Order number \n\r%s \n\r was not found.",
                             'cdekdelivery'
                         ),
                         $orderNumber

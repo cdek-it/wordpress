@@ -25,7 +25,7 @@ namespace Cdek\Validator {
                     false,
                     sprintf(
                         __(
-                            "An error occurred while deleting the order. Order number \n\r%s \n\r was not deleted",
+                            "An error occurred while deleting the order. Order number \n\r%s \n\r was not deleted.",
                             'cdekdelivery'
                         ),
                         $orderNumber

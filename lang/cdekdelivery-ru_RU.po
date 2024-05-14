@@ -598,10 +598,10 @@ msgid "An error occurred while deleting the order. Order number \n\r%s \n\r was 
 msgstr "При удалении заказа произошла ошибка. Заказ c номером \n\r%s \n\r не удален."
 
 #: src/Validator/ValidateGetOrder.php:20
-msgid "An attempt to delete order number %s failed with an error. Order not found"
+msgid "An attempt to delete order number %s failed with an error. Order not found."
 msgstr "Попытка удаления заказа с номером %s завершилась с ошибкой. Заказ не найден."
 
-#: src/Validator/ValidateDeleteOrder.php:32
+#: src/Validator/ValidateGetOrder.php:32
 msgid "An error occurred while deleting the order. Order number \n\r%s \n\r was not found."
 msgstr "При удалении заказа произошла ошибка. Заказ c номером \n\r%s \n\r не найден."
 
