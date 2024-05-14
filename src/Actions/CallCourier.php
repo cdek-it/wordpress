@@ -83,7 +83,7 @@ namespace Cdek\Actions {
             if (!property_exists($courierInfo, 'entity')) {
                 $validate =
                     new Validate(false,
-                                 printf(
+                                 sprintf(
                                      __("Request has been created, but an error occurred while obtaining the request number. Request uuid: %s", 'cdekdelivery'),
                                      $courierInfo->requests[0]->request_uuid
                                  )
@@ -101,14 +101,14 @@ namespace Cdek\Actions {
                                               ]);
 
             $message =
-                printf(
+                sprintf(
                     __('Request has been created to call a courier: Number: %s | Uuid: %s', 'cdekdelivery'),
                     $intakeNumber,
                     $courierObj->entity->uuid
                 );
             Note::send($orderId, $message);
 
-            $validate = new Validate(true, printf(__("Application number: %s", 'cdekdelivery'), $intakeNumber));
+            $validate = new Validate(true, sprintf(__("Application number: %s", 'cdekdelivery'), $intakeNumber));
             return $validate->response();
         }
 
@@ -208,7 +208,7 @@ namespace Cdek\Actions {
 
             CourierMetaData::cleanMetaByOrderId($orderId);
 
-            $message = printf(
+            $message = sprintf(
                 __('Deleting a request to call a courier: %s', 'cdekdelivery'),
                 $courierObj->entity->uuid
             );
