@@ -511,3 +511,61 @@ msgstr ""
 #: src/Controllers/OrderController.php.php:87
 msgid "Quantity of goods in packaging"
 msgstr ""
+
+#: src/UI/MetaBoxes.php:83
+#: src/UI/MetaBoxes.php:100
+msgid "Shipping address not specified"
+msgstr ""
+
+#: src/UI/MetaBoxes.php:88
+#: src/UI/MetaBoxes.php:105
+msgid "Select the correct sending address in <a>the settings</a> plugin named %s"
+msgstr ""
+
+#: src/UI/MetaBoxes.php:100
+msgid "Authorization failed"
+msgstr ""
+
+#: src/UI/MetaBoxes.php:100
+msgid "Enter the correct client ID and secret key in <a>the settings</a> plugin named %s"
+msgstr ""
+
+#: src/UI/MetaBoxes.php:188
+msgid "Editing the order is not available due to a change in the order status in the CDEK system"
+msgstr ""
+
+#: src/UI/MetaBoxes.php:100
+msgid "CDEKDelivery: The selected weight unit %s is not supported by this plugin.\n"
+"\rYou can use the default value for product dimensions.\n"
+"\rYou can also contact plugin support for more information.\n"
+"\rOtherwise, the unit of measurement will be automatically treated as grams."
+msgstr ""
+
+#: src/UI/AdminShippingFields.php:56
+#: src/UI/AdminShippingFields.php:67
+msgid "Not available for order"
+msgstr ""
+
+#: src/UI/AdminShippingFields.php:56
+msgid "Weight: %s"
+msgstr ""
+
+#: src/UI/AdminShippingFields.php:56
+msgid "Length: %s"
+msgstr ""
+
+#: src/UI/AdminShippingFields.php:56
+msgid "Width: %s"
+msgstr ""
+
+#: src/UI/AdminShippingFields.php:56
+msgid "Height: %s"
+msgstr ""
+
+#: src/UI/AdminShippingFields.php:56
+msgid "Selected pickup point: %s"
+msgstr ""
+
+#: src/UI/AdminShippingFields.php:56
+msgid "Tariff code: %s"
+msgstr ""

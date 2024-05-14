@@ -527,3 +527,64 @@ msgstr "ID товара"
 #: src/Controllers/OrderController.php.php:87
 msgid "Quantity of goods in packaging"
 msgstr "Количество товара в упаковке"
+
+#: src/UI/MetaBoxes.php:83
+#: src/UI/MetaBoxes.php:100
+msgid "Shipping address not specified"
+msgstr "Не задан адрес отправки"
+
+#: src/UI/MetaBoxes.php:88
+#: src/UI/MetaBoxes.php:105
+msgid "Select the correct sending address in <a>the settings</a> plugin named %s"
+msgstr "Выберите корректный адрес отправки в <a>настройках</a> плагина %s"
+
+#: src/UI/MetaBoxes.php:100
+msgid "Authorization failed"
+msgstr "Авторизация не пройдена"
+
+#: src/UI/MetaBoxes.php:100
+msgid "Enter the correct client ID and secret key in <a>the settings</a> plugin named %s"
+msgstr "Введите корректные идентификатор и секретный ключ клиента в <a>настройках</a> плагина %s"
+
+#: src/UI/MetaBoxes.php:188
+msgid "Editing the order is not available due to a change in the order status in the CDEK system"
+msgstr "Редактирование заказа недоступно из-за смены статуса заказа в системе CDEK"
+
+#: src/UI/MetaBoxes.php:100
+msgid "CDEKDelivery: The selected weight unit %s is not supported by this plugin.\n"
+"\rYou can use the default value for product dimensions.\n"
+"\rYou can also contact plugin support for more information.\n"
+"\rOtherwise, the unit of measurement will be automatically treated as grams."
+msgstr "CDEKDelivery: Выбранная единица измерения веса %s не поддерживается данным плагином.\n"
+"\rВы можете использовать значение для габаритов товара по умолчанию.\n"
+"\rТакже вы можете обратиться в поддержку плагина для дополнительной информации.\n"
+"\rВ противном случае, единица измерения будет автоматически обрабатываться как граммы."
+
+#: src/UI/AdminShippingFields.php:56
+#: src/UI/AdminShippingFields.php:67
+msgid "Not available for order"
+msgstr "Недоступен для заказа"
+
+#: src/UI/AdminShippingFields.php:88
+msgid "Weight: %s"
+msgstr "Вес: %s"
+
+#: src/UI/AdminShippingFields.php:100
+msgid "Length: %s"
+msgstr "Длина: %s"
+
+#: src/UI/AdminShippingFields.php:111
+msgid "Width: %s"
+msgstr "Ширина: %s"
+
+#: src/UI/AdminShippingFields.php:124
+msgid "Height: %s"
+msgstr "Высота: %s"
+
+#: src/UI/AdminShippingFields.php:136
+msgid "Selected pickup point: %s"
+msgstr "Выбранный ПВЗ: %s"
+
+#: src/UI/AdminShippingFields.php:148
+msgid "Tariff code: %s"
+msgstr "Код тарифа: %s"

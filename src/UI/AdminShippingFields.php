@@ -52,13 +52,23 @@ class AdminShippingFields
                                                      true, 512, JSON_THROW_ON_ERROR);
 
                         if (empty($officeAddress[0]['location']['address'])) {
-                            self::renderOffice('Недоступен для заказа');
+                            self::renderOffice(
+                                __(
+                                    'Not available for order',
+                                    'cdekdelivery'
+                                )
+                            );
                         } else {
                             self::renderOffice(sprintf('%s (%s)', $meta['value'],
                                                        $officeAddress[0]['location']['address']));
                         }
                     } catch (Exception $exception) {
-                        self::renderOffice('Недоступен для заказа');
+                        self::renderOffice(
+                            __(
+                                'Not available for order',
+                                'cdekdelivery'
+                            )
+                        );
                     }
                     break;
                 case 'tariff_code':
@@ -73,31 +83,73 @@ class AdminShippingFields
     private static function renderWeight($value): void
     {
         $measurement = get_option('woocommerce_weight_unit');
-        echo '<div>Вес: '.esc_html($value.$measurement).'</div>';
+        echo '<div>'.
+             sprintf(
+                 __(
+                    'Weight: %s',
+                    'cdekdelivery'
+                ),
+                esc_html($value.$measurement)).
+             '</div>';
     }
 
     private static function renderLength(string $length): void
     {
-        echo '<div>Длина: '.esc_html($length).'см</div>';
+        echo '<div>'.
+             sprintf(
+                 __(
+                     'Length: %s',
+                     'cdekdelivery'
+                 ),
+                 esc_html($length)).
+             '</div>';
     }
 
-    private static function renderWidth(string $length): void
+    private static function renderWidth(string $width): void
     {
-        echo '<div>Ширина: '.esc_html($length).'см</div>';
+        echo '<div>'.
+             sprintf(
+                 __(
+                     'Width: %s',
+                     'cdekdelivery'
+                 ),
+                 esc_html($width)).
+             '</div>';
     }
 
-    private static function renderHeight(string $length): void
+    private static function renderHeight(string $height): void
     {
-        echo '<div>Высота: '.esc_html($length).'см</div>';
+        echo '<div>'.
+             sprintf(
+                 __(
+                     'Height: %s',
+                     'cdekdelivery'
+                 ),
+                 esc_html($height)).
+             '</div>';
     }
 
     private static function renderOffice($value): void
     {
-        echo '<div>Выбранный ПВЗ: '.esc_html($value).'</div>';
+        echo '<div>'.
+             sprintf(
+                 __(
+                     'Selected pickup point: %s',
+                     'cdekdelivery'
+                 ),
+                 esc_html($value)).
+             '</div>';
     }
 
     private static function renderTariff($tariffCode): void
     {
-        echo '<div>Код тарифа: '.esc_html($tariffCode).'</div>';
+        echo '<div>'.
+             sprintf(
+                 __(
+                     'Tariff code: %s',
+                     'cdekdelivery'
+                 ),
+                 esc_html($tariffCode)).
+             '</div>';
     }
 }

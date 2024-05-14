@@ -12,6 +12,8 @@ namespace Cdek\UI {
 
     class AdminNotices
     {
+        const AVAILABLE_MEASUREMENTS = ['g', 'kg', 'lbs', 'oz'];
+
         public static function weightUnitsConflict(): void
         {
             if (!(isset($_GET['section']) && $_GET['section'] === Config::DELIVERY_NAME) &&
@@ -20,13 +22,17 @@ namespace Cdek\UI {
             }
 
             $measurement = get_option('woocommerce_weight_unit');
-            if (!in_array($measurement, ['g', 'kg', 'lbs', 'oz'])) {
-                echo '<div class="notice notice-info is-dismissible"><p>
-            CDEKDelivery: Выбранная единица измерения веса ('. esc_html($measurement) .') не поддерживается данным плагином.
-            Вы можете использовать значение для габаритов товара по умолчанию.
-            Также вы можете обратиться в поддержку плагина для дополнительной информации.
-            В противном случае, единица измерения будет автоматически обрабатываться как граммы.
-            </p></div>';
+            if (!in_array($measurement, self::AVAILABLE_MEASUREMENTS)) {
+                echo '<div class="notice notice-info is-dismissible"><p> ' .
+                     sprintf(
+                         __(
+                             "CDEKDelivery: The selected weight unit %s is not supported by this plugin.\n\rYou can use the default value for product dimensions.\n\rYou can also contact plugin support for more information.\n\rOtherwise, the unit of measurement will be automatically treated as grams.",
+                             'cdekdelivery'
+                         ),
+                        esc_html($measurement)
+                     ) .
+
+            '</p></div>';
             }
         }
 
