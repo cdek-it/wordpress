@@ -263,7 +263,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                                        ')',
                 'desc_tip'          => true,
                 'description'       => sprintf(__('All goods must have their weight indicated, if there are goods without %s a specified weight, then for such goods the value from this field will be substituted. %s This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings.', 'cdekdelivery'),
-                                       "<br>"),
+                                       "<br>", "<br>"),
                 'type'              => 'number',
                 'default'           => 1,
                 'custom_attributes' => [
