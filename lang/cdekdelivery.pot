@@ -367,15 +367,7 @@ msgid "Default weight of one item in"
 msgstr ""
 
 #: src/CdekShippingMethod.php.php:262
-msgid "All goods must have their weight indicated, if there are goods without"
-msgstr ""
-
-#: src/CdekShippingMethod.php.php:264
-msgid "a specified weight, then for such goods the value from this field will be substituted."
-msgstr ""
-
-#: src/CdekShippingMethod.php.php:266
-msgid "This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings."
+msgid "All goods must have their weight indicated, if there are goods without %s a specified weight, then for such goods the value from this field will be substituted. %s This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings."
 msgstr ""
 
 #: src/CdekShippingMethod.php.php:275
@@ -460,9 +452,12 @@ msgstr ""
 msgid "Extra charge on order as a percentage"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:343
+#: src/CdekShippingMethod.php.php:360
 msgid "Calculated from the cost of the order.\n"
 "\r Changes the total amount on the receipt."
+"%s The surcharge will only appear on the receipt."
+"%s Therefore, it is recommended to inform the user on the checkout page\n"
+"\r about extra charges when sending by cash on delivery."
 msgstr ""
 
 #: src/CdekShippingMethod.php.php:343

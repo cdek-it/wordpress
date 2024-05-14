@@ -237,13 +237,9 @@ msgstr "Секретный ключ"
 msgid "Yandex map key"
 msgstr "Ключ Яндекс.Карты"
 
-#: src/CdekShippingMethod.php.php:83
-msgid "Yandex API access key. The generation process is described on "
-msgstr "Ключ доступа к API Яндекс. Процесс генерации описан на "
-
-#: src/CdekShippingMethod.php.php:85
-msgid "the page"
-msgstr "странице"
+#: src/CdekShippingMethod.php.php:86
+msgid "Yandex API access key. The generation process is described on <a>the page</a>"
+msgstr "Ключ доступа к API Яндекс. Процесс генерации описан на <a>странице</a>"
 
 #: src/CdekShippingMethod.php.php:92
 msgid "Client"
@@ -342,18 +338,12 @@ msgid ""
 "In the list of tariffs in the field \"Tariffs\" the tariff code is indicated in brackets.\n"
 "\r To change the name of the tariff, an entry in the code-name format is added to the field; for multiple changes,\n"
 "\r tariffs are separated by a semicolon, for example, an entry that will change the name of tariff 136 and 137 looks like this:"
+"%s If the value is not specified, the tariff names will be standard."
 msgstr ""
 "В списке тарифов в поле \"Тарифы\" в скобках указан код тарифа. Для изменения названия тарифа \n"
 "\r в поле добавляется запись в формате код-название, для множественного изменения, тарифы отделяются точкой с запятой, например \n"
-"\r запись которая изменит название 136 и 137 тарифа выглядит так:"
-
-#: src/CdekShippingMethod.php.php:211
-msgid "136-Delivery to pick-up point; 137-Delivery by courier"
-msgstr "136-Доставка до пвз;137-Доставка курьером"
-
-#: src/CdekShippingMethod.php.php:212
-msgid "If the value is not specified, the tariff names will be standard."
-msgstr "Если значение не задано то названия тарифов будут стандартными."
+"\r запись которая изменит название 136 и 137 тарифа выглядит так: %s"
+"Если значение не задано то названия тарифов будут стандартными."
 
 #: src/CdekShippingMethod.php.php:215
 msgid "Multi-seater"
@@ -396,16 +386,8 @@ msgid "Default weight of one item in"
 msgstr "Вес одной единицы товара по умолчанию в"
 
 #: src/CdekShippingMethod.php.php:262
-msgid "All goods must have their weight indicated, if there are goods without"
-msgstr "У всех товаров должен быть указан вес, если есть товары без указанного"
-
-#: src/CdekShippingMethod.php.php:264
-msgid "a specified weight, then for such goods the value from this field will be substituted."
-msgstr "веса то для таких товаров будет подставляться значение из этого поля."
-
-#: src/CdekShippingMethod.php.php:266
-msgid "This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings."
-msgstr "Это повлияет на точность расчета доставки. Значение по умолчанию 1 единица измерения веса заданная в настройках."
+msgid "All goods must have their weight indicated, if there are goods without %s a specified weight, then for such goods the value from this field will be substituted. %s This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings."
+msgstr "У всех товаров должен быть указан вес, если есть товары без указанного %s веса то для таких товаров будет подставляться значение из этого поля. %s Это повлияет на точность расчета доставки. Значение по умолчанию 1 единица измерения веса заданная в настройках."
 
 #: src/CdekShippingMethod.php.php:275
 msgid "Item length"
@@ -491,20 +473,16 @@ msgstr "Настройки для наложенного платежа прим
 msgid "Extra charge on order as a percentage"
 msgstr "Наценка к заказу в процентах"
 
-#: src/CdekShippingMethod.php.php:343
+#: src/CdekShippingMethod.php.php:360
 msgid "Calculated from the cost of the order.\n"
 "\r Changes the total amount on the receipt."
+"%s The surcharge will only appear on the receipt."
+"%s Therefore, it is recommended to inform the user on the checkout page\n"
+"\r about extra charges when sending by cash on delivery."
 msgstr "Расчитывается от стоимости заказа.\n"
 "\r Меняет итоговую сумму в квитанции."
-
-#: src/CdekShippingMethod.php.php:343
-msgid "The surcharge will only appear on the receipt."
-msgstr "Наценка отобразится только в квитанции."
-
-#: src/CdekShippingMethod.php.php:343
-msgid "Therefore, it is recommended to inform the user on the checkout page\n"
-"\r about extra charges when sending by cash on delivery."
-msgstr "Поэтому рекомендуется на странице чекаута проинформировать пользователя\n"
+"%s Наценка отобразится только в квитанции."
+"%s Поэтому рекомендуется на странице чекаута проинформировать пользователя\n"
 "\r о наценки при отправки наложенным платежем."
 
 #: src/CdekShippingMethod.php.php:343

@@ -80,10 +80,11 @@ class CdekShippingMethod extends WC_Shipping_Method
             'yandex_map_api_key'             => [
                 'type'              => 'text',
                 'title'             => __('Yandex map key', 'cdekdelivery'),
-                'description'       => __('Yandex API access key. The generation process is described on ', 'cdekdelivery') .
-                                       '<a rel="noopener nofollower" href="https://yandex.ru/dev/jsapi-v2-1/doc/ru/#get-api-key" target="_blank">' .
-                                       __('the page', 'cdekdelivery') .
-                                       '</a>.',
+                'description'       => str_replace(
+                    '<a>',
+                    '<a rel="noopener nofollower" href="https://yandex.ru/dev/jsapi-v2-1/doc/ru/#get-api-key" target="_blank">',
+                    __('Yandex API access key. The generation process is described on <a>the page</a>', 'cdekdelivery')
+                ),
                 'custom_attributes' => [
                     'required' => true,
                 ],
@@ -207,9 +208,11 @@ class CdekShippingMethod extends WC_Shipping_Method
             'tariff_name'                    => [
                 'title'       => __('Change tariff name', 'cdekdelivery'),
                 'type'        => 'text',
-                'description' => __("In the list of tariffs in the field \"Tariffs\" the tariff code is indicated in brackets.\n\r To change the name of the tariff, an entry in the code-name format is added to the field; for multiple changes,\n\r tariffs are separated by a semicolon, for example, an entry that will change the name of tariff 136 and 137 looks like this:", 'cdekdelivery') .
-                                 ' <b>' . __('136-Delivery to pick-up point; 137-Delivery by courier', 'cdekdelivery') . '</b><br>' .
-                                 __('If the value is not specified, the tariff names will be standard.', 'cdekdelivery'),
+                'description' => sprintf(
+                    __(
+                        "In the list of tariffs in the field \"Tariffs\" the tariff code is indicated in brackets.\n\r To change the name of the tariff, an entry in the code-name format is added to the field; for multiple changes,\n\r tariffs are separated by a semicolon, for example, an entry that will change the name of tariff 136 and 137 looks like this:%s If the value is not specified, the tariff names will be standard.",
+                        'cdekdelivery'),
+                    '<b>136-Доставка до пвз;137-Доставка курьером</b> <br>'),
             ],
             'has_packages_mode'              => [
                 'title'       => __('Multi-seater', 'cdekdelivery'),
@@ -259,11 +262,8 @@ class CdekShippingMethod extends WC_Shipping_Method
                                        get_option('woocommerce_weight_unit').
                                        ')',
                 'desc_tip'          => true,
-                'description'       => __('All goods must have their weight indicated, if there are goods without', 'cdekdelivery') .
-                                       "<br>" .
-                                       __('a specified weight, then for such goods the value from this field will be substituted.', 'cdekdelivery').
-                                       "<br>" .
-                                       __('This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings.', 'cdekdelivery'),
+                'description'       => sprintf(__('All goods must have their weight indicated, if there are goods without %s a specified weight, then for such goods the value from this field will be substituted. %s This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings.', 'cdekdelivery'),
+                                       "<br>"),
                 'type'              => 'number',
                 'default'           => 1,
                 'custom_attributes' => [
@@ -359,9 +359,9 @@ class CdekShippingMethod extends WC_Shipping_Method
             'percentcod'                     => [
                 'title'             => __('Extra charge on order as a percentage', 'cdekdelivery'),
                 'type'              => 'number',
-                'description'       => __("Calculated from the cost of the order.\n\r Changes the total amount on the receipt.", 'cdekdelivery') . "
-                <br> <b> " . __('The surcharge will only appear on the receipt.', 'cdekdelivery') . "</b> " .
-                                       __("Therefore, it is recommended to inform the user on the checkout page\n\r about extra charges when sending by cash on delivery.", 'cdekdelivery'),
+                'description'       => sprintf(
+                    __("Calculated from the cost of the order.\n\r Changes the total amount on the receipt.%s The surcharge will only appear on the receipt.%s Therefore, it is recommended to inform the user on the checkout page\n\r about extra charges when sending by cash on delivery.", 'cdekdelivery'),
+                "<br> <b> ", "</b> "),
                 'custom_attributes' => [
                     'min'  => 100,
                     'step' => 1,

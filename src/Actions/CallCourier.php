@@ -83,8 +83,11 @@ namespace Cdek\Actions {
             if (!property_exists($courierInfo, 'entity')) {
                 $validate =
                     new Validate(false,
-                                 __("Request has been created, but an error occurred while obtaining the request number. Request uuid: ", 'cdekdelivery') .
-                                 $courierInfo->requests[0]->request_uuid);
+                                 printf(
+                                     __("Request has been created, but an error occurred while obtaining the request number. Request uuid: %s", 'cdekdelivery'),
+                                     $courierInfo->requests[0]->request_uuid
+                                 )
+                    );
                 return $validate->response();
             }
 
@@ -98,11 +101,14 @@ namespace Cdek\Actions {
                                               ]);
 
             $message =
-                __('Request has been created to call a courier: Number: ') . $intakeNumber . ' | Uuid: ' .
-                                                             $courierObj->entity->uuid;
+                printf(
+                    __('Request has been created to call a courier: Number: %s | Uuid: %s', 'cdekdelivery'),
+                    $intakeNumber,
+                    $courierObj->entity->uuid
+                );
             Note::send($orderId, $message);
 
-            $validate = new Validate(true, __("Application number: ", 'cdekdelivery') . $intakeNumber);
+            $validate = new Validate(true, printf(__("Application number: %s", 'cdekdelivery'), $intakeNumber));
             return $validate->response();
         }
 
@@ -202,7 +208,11 @@ namespace Cdek\Actions {
 
             CourierMetaData::cleanMetaByOrderId($orderId);
 
-            $message = __('Deleting a request to call a courier: ', 'cdekdelivery') . $courierObj->entity->uuid;
+            $message = printf(
+                __('Deleting a request to call a courier: %s', 'cdekdelivery'),
+                $courierObj->entity->uuid
+            );
+
             Note::send($orderId, $message);
 
             $validate = new Validate(true, __('Request has been deleted.', 'cdekdelivery'));
