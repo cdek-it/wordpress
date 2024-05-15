@@ -22,27 +22,33 @@ msgstr "Ошибка автоматизации заказа: %s"
 msgid "Order automation failed with error"
 msgstr "Ошибка автоматизации заказа"
 
-#: src/Checkout/InternationalOrderFields.php:18 src/CdekShippingMethod.php.php:159
+#: src/Checkout/InternationalOrderFields.php:20
+#: src/CdekShippingMethod.php.php:159
 msgid "Passport Series"
 msgstr "Серия паспорта"
 
-#: src/Checkout/InternationalOrderFields.php:25 src/CdekShippingMethod.php.php:163
+#: src/Checkout/InternationalOrderFields.php:29
+#: src/CdekShippingMethod.php.php:163
 msgid "Passport number"
 msgstr "Номер паспорта"
 
-#: src/Checkout/InternationalOrderFields.php:33 src/CdekShippingMethod.php.php:170
+#: src/Checkout/InternationalOrderFields.php:39
+#: src/CdekShippingMethod.php.php:170
 msgid "Passport date of issue"
 msgstr "Дата выдачи паспорта"
 
-#: src/Checkout/InternationalOrderFields.php:37 src/CdekShippingMethod.php.php:170
+#: src/Checkout/InternationalOrderFields.php:45
+#: src/CdekShippingMethod.php.php:170
 msgid "Passport organization"
 msgstr "Орган выдачи паспорта"
 
-#: src/Checkout/InternationalOrderFields.php:41 src/CdekShippingMethod.php.php:170
+#: src/Checkout/InternationalOrderFields.php:51
+#: src/CdekShippingMethod.php.php:170
 msgid "TIN"
 msgstr "ИНН"
 
-#: src/Checkout/InternationalOrderFields.php:49 src/CdekShippingMethod.php.php:170
+#: src/Checkout/InternationalOrderFields.php:61
+#: src/CdekShippingMethod.php.php:170
 msgid "Birthday"
 msgstr "Дата рождения"
 
@@ -115,13 +121,42 @@ msgstr "Правила для доставки курьером"
 msgid "Rules for delivery to pick-up"
 msgstr "Правила для доставки до ПВЗ/Постаматов"
 
-#: src/CdekShippingMethod:18 src/CdekShippingMethod:31
+#: src/CdekShippingMethod:18
+#: src/CdekShippingMethod:31
 msgid "Cdek Shipping"
 msgstr "Доставка СДЭК"
 
 #: src/CdekShippingMethod:19
 msgid "Official Shipping Method for Cdek"
 msgstr "Официальный метод доставки компанией СДЭК"
+
+#: src/Fieldsets/GeneralOrderFields.php:20
+msgid "Street address"
+msgstr "Адрес"
+
+#: src/Fieldsets/GeneralOrderFields.php:21
+msgid "House number and street name"
+msgstr "Улица и номер дома"
+
+#: src/Fieldsets/GeneralOrderFields.php:28
+msgid "Apartment, suite, unit, etc."
+msgstr "Квартира, корпус, строение и тп."
+
+#: src/Fieldsets/GeneralOrderFields.php:30
+msgid "Apartment, suite, unit, etc. (optional)"
+msgstr "Квартира, корпус, строение и тп. (опционально)"
+
+#: src/Fieldsets/GeneralOrderFields.php:37
+msgid "Phone"
+msgstr "Телефон"
+
+#: src/Fieldsets/GeneralOrderFields.php:46
+msgid "Town / City"
+msgstr "Город"
+
+#: src/Fieldsets/GeneralOrderFields.php:53
+msgid "First name"
+msgstr "Имя"
 
 #: src/Actions/GenerateBarcodeAction.php:35
 msgid ""
@@ -281,7 +316,8 @@ msgstr ""
 "При включенном режиме международных заказов, на странице чекаута появятся дополнительные поля:\n"
 "\r серия паспорта, номер паспорта, дата выдачи, отдел, ИНН, дата рождения."
 
-#: src/CdekShippingMethod.php.php:140 src/CdekShippingMethod.php.php:147
+#: src/CdekShippingMethod.php.php:140
+#: src/CdekShippingMethod.php.php:147
 msgid "True seller address"
 msgstr "Адрес истинного продавца"
 
