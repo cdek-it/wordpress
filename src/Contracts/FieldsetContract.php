@@ -33,7 +33,7 @@ abstract class FieldsetContract
         $def = static::FIELDS[$fieldName];
 
         if (!empty($def['label'])) {
-            $def['label'] = __($def['label'], 'cdekdelivery');
+            $def['label'] = esc_html__($def['label'], 'cdekdelivery');
         }
 
         return $def;
