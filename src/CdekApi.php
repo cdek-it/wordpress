@@ -2,7 +2,7 @@
 
 namespace Cdek;
 
-use Cdek\Contracts\TokenStorage;
+use Cdek\Contracts\TokenStorageContract;
 use Cdek\Enums\BarcodeFormat;
 use Cdek\Exceptions\CdekApiException;
 use Cdek\Exceptions\RestApiInvalidRequestException;
@@ -28,10 +28,10 @@ class CdekApi
     private string $clientSecret;
     private WC_Shipping_Method $deliveryMethod;
 
-    private TokenStorage $tokenStorage;
+    private TokenStorageContract $tokenStorage;
 
 
-    public function __construct(?int $shippingInstanceId = null, ?TokenStorage $tokenStorage = null)
+    public function __construct(?int $shippingInstanceId = null, ?TokenStorageContract $tokenStorage = null)
     {
         $this->deliveryMethod = Helper::getActualShippingMethod($shippingInstanceId);
         $this->apiUrl = $this->getApiUrl();

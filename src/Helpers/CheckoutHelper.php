@@ -7,12 +7,12 @@ namespace {
 
 namespace Cdek\Helpers {
 
-    use Cdek\Checkout\GeneralOrderFields;
-    use Cdek\Checkout\InternationalOrderFields;
-    use Cdek\Checkout\VirtualOrderFields;
     use Cdek\Config;
-    use Cdek\Contracts\FieldConstructorInterface;
+    use Cdek\Contracts\FieldsetContract;
     use Cdek\Exceptions\ShippingMethodNotFoundException;
+    use Cdek\Fieldsets\GeneralOrderFields;
+    use Cdek\Fieldsets\InternationalOrderFields;
+    use Cdek\Fieldsets\VirtualOrderFields;
     use Cdek\Helper;
     use Throwable;
     use WC_Order;
@@ -20,6 +20,13 @@ namespace Cdek\Helpers {
 
     class CheckoutHelper
     {
+        private const AVAILABLE_FIELDSETS
+            = [
+                GeneralOrderFields::class,
+                InternationalOrderFields::class,
+                VirtualOrderFields::class,
+            ];
+
         public static function getValueFromCurrentSession(string $valueName, string $defaultValue = null): ?string
         {
             try {
@@ -77,40 +84,38 @@ namespace Cdek\Helpers {
 
             $originalFields = $checkout->get_checkout_fields('billing');
 
-            $fieldsConstructor = self::getFieldConstructor();
+            foreach (self::AVAILABLE_FIELDSETS as $fieldset) {
+                $fieldsetInstance = new $fieldset;
 
-            //Восстанавливаем требуемые поля для чекаута и обязательность поля
-            foreach (
-                $fieldsConstructor->getFields() as $requiredField
-            ) {
-                if ($requiredField) {
-                    $fields['billing'][$requiredField] = $fields['billing'][$requiredField]
-                                                         ??
-                                                         $originalFields[$requiredField];
+                assert($fieldsetInstance instanceof FieldsetContract);
 
+                if (!$fieldsetInstance->isApplicable()) {
+                    continue;
                 }
-                if (isset($fields['billing'][$requiredField])) {
-                    $fields['billing'][$requiredField]['required'] = $requiredField;
-                }
-            }
 
-            if (Helper::getActualShippingMethod()->get_option('international_mode') === 'yes') {
-                foreach ((new InternationalOrderFields())->getFields() as $field => $arField) {
-                    $fields['billing'][$field] = $arField;
+                foreach ($fieldsetInstance->getFieldsNames() as $field) {
+                    if (empty($fields['billing'][$field])) {
+                        $fields['billing'][$field] = empty($originalFields[$field]) ?
+                            $fieldsetInstance->getFieldDefinition($field) : $originalFields[$field];
+                    }
+
+                    if($fieldsetInstance->isRequiredField($field)) {
+                        $fields['billing'][$field]['required'] = true;
+                    }
                 }
             }
 
             return $fields;
         }
 
+        public static function getFieldConstructor(): FieldsetContract
+        {
+            return WC()->cart->needs_shipping() ? new GeneralOrderFields : new VirtualOrderFields;
+        }
+
         public static function getMapAutoClose(): bool
         {
             return Helper::getActualShippingMethod()->get_option('map_auto_close') === 'yes';
-        }
-
-        public static function getFieldConstructor(): FieldConstructorInterface
-        {
-            return WC()->cart->needs_shipping() ? new GeneralOrderFields() : new VirtualOrderFields();
         }
     }
 }

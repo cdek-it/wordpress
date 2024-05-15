@@ -1,10 +1,10 @@
 <?php
 
-namespace Cdek\Checkout;
+namespace Cdek\Fieldsets;
 
-use Cdek\Contracts\FieldConstructorInterface;
+use Cdek\Contracts\FieldsetContract;
 
-class VirtualOrderFields implements FieldConstructorInterface
+class VirtualOrderFields implements FieldsetContract
 {
     const REQUIRED_FIELDS_PARAMS = [
         'billing_phone'      => true,
