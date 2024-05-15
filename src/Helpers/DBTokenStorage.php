@@ -3,19 +3,22 @@
 namespace Cdek\Helpers;
 
 use Cdek\CdekApi;
-use Cdek\Contracts\TokenStorage;
+use Cdek\Contracts\TokenStorageContract;
 use Cdek\Helper;
+use Cdek\Exceptions\CdekApiException;
 
-class DBTokenStorage extends TokenStorage
+class DBTokenStorage extends TokenStorageContract
 {
     private static string $tokenStatic = '';
     private static int $tokenExpStatic = 0;
 
-    final public static function flushCache(): void {
+    final public static function flushCache(): void
+    {
         Helper::getActualShippingMethod()->update_option('token', null);
     }
 
-    public function getToken(): string {
+    final public function getToken(): string
+    {
         $token = $this->getTokenFromCache();
 
         if (empty($token)) {
@@ -48,32 +51,35 @@ class DBTokenStorage extends TokenStorage
         if ($tokenExpSetting < time()) {
             return null;
         }
-        self::$tokenStatic = $decryptToken;
+        self::$tokenStatic    = $decryptToken;
         self::$tokenExpStatic = $tokenExpSetting;
         return $decryptToken;
     }
 
-    public function updateToken(): string {
-        $tokenApi = $this->fetchTokenFromApi();
-        $clientId = Helper::getActualShippingMethod()->get_option('client_id');
+    /**
+     * @throws \JsonException
+     */
+    private function getTokenExp(string $token): int
+    {
+        return json_decode(base64_decode(strtr(explode('.', $token)[1], '-_', '+/')), false, 512, JSON_THROW_ON_ERROR)->exp;
+    }
+
+    final public function updateToken(): string
+    {
+        $tokenApi     = $this->fetchTokenFromApi();
+        $clientId     = Helper::getActualShippingMethod()->get_option('client_id');
         $tokenEncrypt = $this->encryptToken($tokenApi, $clientId);
         Helper::getActualShippingMethod()->update_option('token', $tokenEncrypt);
-        self::$tokenStatic = $tokenApi;
+        self::$tokenStatic    = $tokenApi;
         self::$tokenExpStatic = $this->getTokenExp($tokenApi);
         return $tokenApi;
     }
 
     /**
-     * @throws \Cdek\Exceptions\CdekApiException
+     * @throws CdekApiException
      */
-    final public function fetchTokenFromApi() {
-        return (new CdekApi())->fetchToken();
-    }
-
-    private function getTokenExp($token)
+    final public function fetchTokenFromApi(): string
     {
-        $tokenData = explode('.', $token)[1];
-        $tokenObj = json_decode(base64_decode(strtr($tokenData, '-_', '+/')));
-        return $tokenObj->exp;
+        return (new CdekApi)->fetchToken();
     }
 }

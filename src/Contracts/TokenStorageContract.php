@@ -2,7 +2,7 @@
 
 namespace Cdek\Contracts;
 
-abstract class TokenStorage
+abstract class TokenStorageContract
 {
     private const CIPHER = 'AES-256-CBC';
 
