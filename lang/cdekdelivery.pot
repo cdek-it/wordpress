@@ -17,27 +17,27 @@ msgstr ""
 msgid "Order automation failed with error"
 msgstr ""
 
-#: src/Fieldsets/InternationalOrderFields.php:14
+#: src/Fieldsets/InternationalOrderFields.php:20
 msgid "Passport Series"
 msgstr ""
 
-#: src/Fieldsets/InternationalOrderFields.php:23
+#: src/Fieldsets/InternationalOrderFields.php:29
 msgid "Passport number"
 msgstr ""
 
-#: src/Fieldsets/InternationalOrderFields.php:33
+#: src/Fieldsets/InternationalOrderFields.php:39
 msgid "Passport date of issue"
 msgstr ""
 
-#: src/Fieldsets/InternationalOrderFields.php:39
+#: src/Fieldsets/InternationalOrderFields.php:45
 msgid "Passport organization"
 msgstr ""
 
-#: src/Fieldsets/InternationalOrderFields.php:45
+#: src/Fieldsets/InternationalOrderFields.php:51
 msgid "TIN"
 msgstr ""
 
-#: src/Fieldsets/InternationalOrderFields.php:55
+#: src/Fieldsets/InternationalOrderFields.php:61
 msgid "Birthday"
 msgstr ""
 
@@ -122,30 +122,30 @@ msgstr ""
 msgid "Official Shipping Method for Cdek"
 msgstr ""
 
-#: src/Fieldsets/GeneralOrderFields.php:14
+#: src/Fieldsets/GeneralOrderFields.php:20
 msgid "Street address"
 msgstr ""
 
-#: src/Fieldsets/GeneralOrderFields.php:15
+#: src/Fieldsets/GeneralOrderFields.php:21
 msgid "House number and street name"
 msgstr ""
 
-#: src/Fieldsets/GeneralOrderFields.php:22
+#: src/Fieldsets/GeneralOrderFields.php:28
 msgid "Apartment, suite, unit, etc."
 msgstr ""
 
-#: src/Fieldsets/GeneralOrderFields.php:24
+#: src/Fieldsets/GeneralOrderFields.php:30
 msgid "Apartment, suite, unit, etc. (optional)"
 msgstr ""
 
-#: src/Fieldsets/GeneralOrderFields.php:31
+#: src/Fieldsets/GeneralOrderFields.php:37
 msgid "Phone"
 msgstr ""
 
-#: src/Fieldsets/GeneralOrderFields.php:40
+#: src/Fieldsets/GeneralOrderFields.php:46
 msgid "Town / City"
 msgstr ""
 
-#: src/Fieldsets/GeneralOrderFields.php:47
+#: src/Fieldsets/GeneralOrderFields.php:53
 msgid "First name"
 msgstr ""

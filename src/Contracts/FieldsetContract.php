@@ -10,32 +10,30 @@ abstract class FieldsetContract
 
     final public function getFieldsNames(): array
     {
-        return array_keys(static::FIELDS);
+        return array_keys($this->getFields());
     }
+
+    abstract protected function getFields(): array;
 
     final public function isRequiredField(string $fieldName): bool
     {
-        if (!isset(static::FIELDS[$fieldName])) {
+        $fieldList = $this->getFields();
+        if (!isset($fieldList[$fieldName])) {
             throw new InvalidArgumentException('Field not found');
         }
 
-        return static::FIELDS[$fieldName]['required'] ?? false;
+        return $fieldList[$fieldName]['required'] ?? false;
     }
 
     abstract public function isApplicable(): bool;
 
     final public function getFieldDefinition(string $fieldName): array
     {
-        if (!isset(static::FIELDS[$fieldName])) {
+        $fieldList = $this->getFields();
+        if (!isset($fieldList[$fieldName])) {
             throw new InvalidArgumentException('Field not found');
         }
 
-        $def = static::FIELDS[$fieldName];
-
-        if (!empty($def['label'])) {
-            $def['label'] = esc_html__($def['label'], 'cdekdelivery');
-        }
-
-        return $def;
+        return $fieldList[$fieldName];
     }
 }

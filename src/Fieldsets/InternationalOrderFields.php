@@ -7,11 +7,17 @@ use Cdek\Helper;
 
 class InternationalOrderFields extends FieldsetContract
 {
-    protected const FIELDS
-        = [
+    final public function isApplicable(): bool
+    {
+        return Helper::getActualShippingMethod()->get_option('international_mode') === 'yes';
+    }
+
+    final protected function getFields(): array
+    {
+        return [
             'passport_series'        => [
                 'priority'          => 120,
-                'label'             => 'Passport Series',
+                'label'             => __('Passport Series', 'cdekdelivery'),
                 'required'          => true,
                 'custom_attributes' => [
                     'maxlength' => 4,
@@ -20,7 +26,7 @@ class InternationalOrderFields extends FieldsetContract
             ],
             'passport_number'        => [
                 'priority'          => 120,
-                'label'             => 'Passport number',
+                'label'             => __('Passport number', 'cdekdelivery'),
                 'required'          => true,
                 'custom_attributes' => [
                     'maxlength' => 6,
@@ -30,19 +36,19 @@ class InternationalOrderFields extends FieldsetContract
             'passport_date_of_issue' => [
                 'priority' => 120,
                 'type'     => 'date',
-                'label'    => 'Passport date of issue',
+                'label'    => __('Passport date of issue', 'cdekdelivery'),
                 'required' => true,
                 'class'    => ['form-row-wide'],
             ],
             'passport_organization'  => [
                 'priority' => 120,
-                'label'    => 'Passport organization',
+                'label'    => __('Passport organization', 'cdekdelivery'),
                 'required' => true,
                 'class'    => ['form-row-wide'],
             ],
             'tin'                    => [
                 'priority'          => 120,
-                'label'             => 'TIN',
+                'label'             => __('TIN', 'cdekdelivery'),
                 'required'          => true,
                 'custom_attributes' => [
                     'maxlength' => 12,
@@ -52,14 +58,10 @@ class InternationalOrderFields extends FieldsetContract
             'passport_date_of_birth' => [
                 'priority' => 120,
                 'type'     => 'date',
-                'label'    => 'Birthday',
+                'label'    => __('Birthday', 'cdekdelivery'),
                 'required' => true,
                 'class'    => ['form-row-wide'],
             ],
         ];
-
-    final public function isApplicable(): bool
-    {
-        return Helper::getActualShippingMethod()->get_option('international_mode') === 'yes';
     }
 }
