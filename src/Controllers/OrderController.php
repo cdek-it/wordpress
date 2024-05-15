@@ -41,12 +41,12 @@ namespace Cdek\Controllers {
                 'show_in_index'       => true,
                 'args'                => [
                     'id'       => [
-                        'description' => 'Номер заказа',
+                        'description' => __('Order number', 'cdekdelivery'),
                         'required'    => true,
                         'type'        => 'integer',
                     ],
                     'packages' => [
-                        'description' => 'Упаковки',
+                        'description' => __('Packages', 'cdekdelivery'),
                         'required'    => true,
                         'type'        => 'array',
                         'minItems'    => 1,
@@ -56,22 +56,22 @@ namespace Cdek\Controllers {
                             'additionalProperties' => false,
                             'properties'           => [
                                 'length' => [
-                                    'description' => 'Длина упаковки',
+                                    'description' => __('Packing length', 'cdekdelivery'),
                                     'required'    => true,
                                     'type'        => 'integer',
                                 ],
                                 'width'  => [
-                                    'description' => 'Ширина упаковки',
+                                    'description' => __('Packing width', 'cdekdelivery'),
                                     'required'    => true,
                                     'type'        => 'integer',
                                 ],
                                 'height' => [
-                                    'description' => 'Высота упаковки',
+                                    'description' => __('Packing height', 'cdekdelivery'),
                                     'required'    => true,
                                     'type'        => 'integer',
                                 ],
                                 'items'  => [
-                                    'description' => 'Товары в упаковке',
+                                    'description' => __('Products in packaging', 'cdekdelivery'),
                                     'required'    => false,
                                     'type'        => 'array',
                                     'minItems'    => 1,
@@ -79,12 +79,12 @@ namespace Cdek\Controllers {
                                         'type'       => 'object',
                                         'properties' => [
                                             'id' => [
-                                                'description' => 'ID товара',
+                                                'description' => __('Product ID', 'cdekdelivery'),
                                                 'required'    => true,
                                                 'type'        => 'integer',
                                             ],
                                             'quantity' => [
-                                                'description' => 'Количество товара в упаковке',
+                                                'description' => __('Quantity of goods in packaging', 'cdekdelivery'),
                                                 'required'    => true,
                                                 'type'        => 'integer',
                                             ],
@@ -104,7 +104,7 @@ namespace Cdek\Controllers {
                 'show_in_index'       => true,
                 'args'                => [
                     'id' => [
-                        'description' => 'Номер заказа',
+                        'description' => __('Order number', 'cdekdelivery'),
                         'required'    => true,
                         'type'        => 'integer',
                     ],

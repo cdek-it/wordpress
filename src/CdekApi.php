@@ -208,7 +208,7 @@ class CdekApi
         if (!$result) {
             return [
                 'success' => false,
-                'message' => __('В этом населенном пункте (НП) доступна доставка только для тарифов "от двери". Выберите другой НП, чтобы получить доступ к тарифам "от склада".', 'cdekdelivery'),
+                'message' => __("In this locality, delivery is available only for \"door-to-door\" tariffs. Select another locality to gain access to \"from warehouse\" tariffs.", 'cdekdelivery'),
             ];
         }
 

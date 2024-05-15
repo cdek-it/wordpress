@@ -80,12 +80,16 @@ namespace Cdek\UI {
             $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME);
             $pluginName        = Loader::getPluginName();
             echo '<div>
-                <h4>Не задан адрес отправки</h4>
-                <p>Выберите корректный адрес отправки в <a href="'.
-                 esc_url($settings_page_url).
-                 '">настройках</a> плагина '.
-                 esc_html($pluginName).
-                 '</p>
+                <h4>' . __("Shipping address not specified", 'cdekdelivery') . '</h4>
+                <p>' . str_replace(
+                    '<a>',
+                    '<a href="' . esc_url($settings_page_url) . '">',
+                    sprintf(
+                        __("Select the correct sending address in <a>the settings</a> plugin named %s", 'cdekdelivery'),
+                        esc_html($pluginName)
+                    )
+                ) .
+            '</p>
             </div>';
         }
 
@@ -94,13 +98,17 @@ namespace Cdek\UI {
             $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME);
             $pluginName        = Loader::getPluginName();
             echo '<div>
-                <h4>Не задан адрес отправки</h4>
-                <p>Выберите корректный адрес отправки в <a href="'.
-                 esc_url($settings_page_url).
-                 '">настройках</a> плагина '.
-                 esc_html($pluginName).
-                 '</p>
-            </div>';
+                <h4>' . __("Shipping address not specified", 'cdekdelivery') . '</h4>
+                <p>' . str_replace(
+                    '<a>',
+                    '<a href="' . esc_url($settings_page_url) . '">',
+                    sprintf(
+                        __("Select the correct sending address in <a>the settings</a> plugin named %s", 'cdekdelivery'),
+                        esc_html($pluginName)
+                    )
+                ) .
+                '</p>
+                </div>';
         }
 
         public static function noAuthMetaBox(): void
@@ -108,10 +116,17 @@ namespace Cdek\UI {
             $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME);
             $pluginName        = Loader::getPluginName();
             echo '<div>
-                <h4>Авторизация не пройдена</h4>
-                <p>Введите корректные идентификатор и секретный ключ клиента в <a href="'.esc_url($settings_page_url)
-                 .'">настройках</a> плагина ' . esc_html($pluginName).'</p>
-            </div>';
+                <h4>' . __("Authorization failed", 'cdekdelivery') . '</h4>
+                <p>' . str_replace(
+                    '<a>',
+                    '<a href="' . esc_url($settings_page_url) . '">',
+                    sprintf(
+                        __("Enter the correct client ID and secret key in <a>the settings</a> plugin named %s", 'cdekdelivery'),
+                        esc_html($pluginName)
+                    )
+                ) .
+                 '</p>
+                </div>';
         }
 
         public static function createOrderMetaBox($post): void
@@ -166,8 +181,9 @@ namespace Cdek\UI {
         public static function notAvailableEditOrderData(): void
         {
             echo '<div class="notice notice-warning"><p>
-                <strong>CDEKDelivery:</strong> Редактирование заказа недоступно из-за смены статуса заказа в системе 
-                CDEK
+                <strong>CDEKDelivery:</strong> '. __(
+                    "Editing the order is not available due to a change in the order status in the CDEK system",
+                    'cdekdelivery') . '
             </p></div>';
         }
 

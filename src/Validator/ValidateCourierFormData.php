@@ -16,7 +16,13 @@ namespace Cdek\Validator {
         {
 
             if (empty($data['date'])) {
-                return new Validate(false, 'Дата ожидания курьера не выбрана');
+                return new Validate(
+                    false,
+                    __(
+                        "The courier waiting date has not been selected",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             $current = new DateTime();
@@ -26,34 +32,76 @@ namespace Cdek\Validator {
 
             $dateUnix = strtotime($data['date']);
             if ($dateUnix < $currentDateUnix) {
-                return new Validate(false, 'Дата ожидания курьера не может быть раньше текущей даты');
+                return new Validate(
+                    false,
+                    __(
+                        "The courier waiting date cannot be earlier than the current date",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             if ($dateUnix > $currentDate31DaysLater) {
-                return new Validate(false, 'Дата ожидания курьера не может быть позднее на 31 текущей даты');
+                return new Validate(
+                    false,
+                    __(
+                        "The courier waiting date cannot be later than the 31st of the current date",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             if (empty($data['starttime']) || empty($data['endtime'])) {
-                return new Validate(false, 'Время ожидания курьера не выбрано');
+                return new Validate(
+                    false,
+                    __(
+                        "No courier waiting time selected",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             $currentStartTimeUnix = strtotime($data['starttime']);
             $currentEndTimeUnix = strtotime($data['endtime']);
 
             if ($currentStartTimeUnix >= $currentEndTimeUnix) {
-                return new Validate(false, 'Начало времени ожидания курьера не может начинаться позже времени окончания');
+                return new Validate(
+                    false,
+                    __(
+                        "The start of the courier waiting time cannot start later than the end time",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             if (empty($data['name'])) {
-                return new Validate(false, 'ФИО обязательно для заполнения');
+                return new Validate(
+                    false,
+                    __(
+                        "FIO is required",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             if (empty($data['phone'])) {
-                return new Validate(false, 'Телефон обязателен для заполнения');
+                return new Validate(
+                    false,
+                    __(
+                        "Phone is required",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             if (empty($data['address'])) {
-                return new Validate(false, 'Адрес обязателен для заполнения');
+                return new Validate(
+                    false,
+                    __(
+                        "Address is required",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             return new Validate(true);
@@ -62,39 +110,93 @@ namespace Cdek\Validator {
         public static function validatePackage($data): Validate
         {
             if (empty($data['desc'])) {
-                return new Validate(false, 'Описание груза обязательно для заполнения');
+                return new Validate(
+                    false,
+                    __(
+                        "Cargo description is required",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             if (empty($data['weight'])) {
-                return new Validate(false, 'Вес обязателен для заполнения');
+                return new Validate(
+                    false,
+                    __(
+                        "Weight is required",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             if (!is_numeric($data['weight'])) {
-                return new Validate(false, 'Вес должен быть числом');
+                return new Validate(
+                    false,
+                    __(
+                        "Weight must be a number",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             if (empty($data['length'])) {
-                return new Validate(false, 'Длина обязателена для заполнения');
+                return new Validate(
+                    false,
+                    __(
+                        "Length is required",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             if (!is_numeric($data['length'])) {
-                return new Validate(false, 'Длина должена быть числом');
+                return new Validate(
+                    false,
+                    __(
+                        "Length must be a number",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             if (empty($data['width'])) {
-                return new Validate(false, 'Ширина обязателена для заполнения');
+                return new Validate(
+                    false,
+                    __(
+                        "Width is required",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             if (!is_numeric($data['width'])) {
-                return new Validate(false, 'Ширина должна быть числом');
+                return new Validate(
+                    false,
+                    __(
+                        "Width must be a number",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             if (empty($data['height'])) {
-                return new Validate(false, 'Высота обязателена для заполнения');
+                return new Validate(
+                    false,
+                    __(
+                        "Height is required",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             if (!is_numeric($data['height'])) {
-                return new Validate(false, 'Высота должена быть числом');
+                return new Validate(
+                    false,
+                    __(
+                        "Height must be a number",
+                        'cdekdelivery'
+                    )
+                );
             }
 
             return new Validate(true);
