@@ -12,7 +12,6 @@ namespace Cdek\Helpers {
     use Cdek\Exceptions\ShippingMethodNotFoundException;
     use Cdek\Fieldsets\GeneralOrderFields;
     use Cdek\Fieldsets\InternationalOrderFields;
-    use Cdek\Fieldsets\VirtualOrderFields;
     use Cdek\Helper;
     use Throwable;
     use WC_Order;
@@ -24,13 +23,12 @@ namespace Cdek\Helpers {
             = [
                 GeneralOrderFields::class,
                 InternationalOrderFields::class,
-                VirtualOrderFields::class,
             ];
 
         public static function getValueFromCurrentSession(string $valueName, string $defaultValue = null): ?string
         {
             try {
-                $cdekValue = WC()->session->get(Config::DELIVERY_NAME . "_$valueName");
+                $cdekValue = WC()->session->get(Config::DELIVERY_NAME."_$valueName");
                 if (!empty($cdekValue)) {
                     return $cdekValue;
                 }
@@ -99,7 +97,7 @@ namespace Cdek\Helpers {
                             $fieldsetInstance->getFieldDefinition($field) : $originalFields[$field];
                     }
 
-                    if($fieldsetInstance->isRequiredField($field)) {
+                    if ($fieldsetInstance->isRequiredField($field)) {
                         $fields['billing'][$field]['required'] = true;
                     }
                 }

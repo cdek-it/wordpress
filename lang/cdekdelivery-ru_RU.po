@@ -19,27 +19,27 @@ msgstr "Ошибка автоматизации заказа: %s"
 msgid "Order automation failed with error"
 msgstr "Ошибка автоматизации заказа"
 
-#: src/Checkout/InternationalOrderFields.php:18
+#: src/Fieldsets/InternationalOrderFields.php:14
 msgid "Passport Series"
 msgstr "Серия паспорта"
 
-#: src/Checkout/InternationalOrderFields.php:25
+#: src/Fieldsets/InternationalOrderFields.php:23
 msgid "Passport number"
 msgstr "Номер паспорта"
 
-#: src/Checkout/InternationalOrderFields.php:33
+#: src/Fieldsets/InternationalOrderFields.php:33
 msgid "Passport date of issue"
 msgstr "Дата выдачи паспорта"
 
-#: src/Checkout/InternationalOrderFields.php:37
+#: src/Fieldsets/InternationalOrderFields.php:39
 msgid "Passport organization"
 msgstr "Орган выдачи паспорта"
 
-#: src/Checkout/InternationalOrderFields.php:41
+#: src/Fieldsets/InternationalOrderFields.php:45
 msgid "TIN"
 msgstr "ИНН"
 
-#: src/Checkout/InternationalOrderFields.php:49
+#: src/Fieldsets/InternationalOrderFields.php:55
 msgid "Birthday"
 msgstr "Дата рождения"
 
@@ -120,3 +120,31 @@ msgstr "Доставка СДЭК"
 #: src/CdekShippingMethod:19
 msgid "Official Shipping Method for Cdek"
 msgstr "Официальный метод доставки компанией СДЭК"
+
+#: src/Fieldsets/GeneralOrderFields.php:14
+msgid "Street address"
+msgstr "Адрес"
+
+#: src/Fieldsets/GeneralOrderFields.php:15
+msgid "House number and street name"
+msgstr "Улица и номер дома"
+
+#: src/Fieldsets/GeneralOrderFields.php:22
+msgid "Apartment, suite, unit, etc."
+msgstr "Квартира, корпус и тп."
+
+#: src/Fieldsets/GeneralOrderFields.php:24
+msgid "Apartment, suite, unit, etc. (optional)"
+msgstr "Квартира, корпус и тп. (опционально)"
+
+#: src/Fieldsets/GeneralOrderFields.php:31
+msgid "Phone"
+msgstr "Телефон"
+
+#: src/Fieldsets/GeneralOrderFields.php:40
+msgid "Town / City"
+msgstr "Город"
+
+#: src/Fieldsets/GeneralOrderFields.php:47
+msgid "First name"
+msgstr "Имя"
