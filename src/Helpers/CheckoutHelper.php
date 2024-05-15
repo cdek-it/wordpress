@@ -106,11 +106,6 @@ namespace Cdek\Helpers {
             return $fields;
         }
 
-        public static function getFieldConstructor(): FieldsetContract
-        {
-            return WC()->cart->needs_shipping() ? new GeneralOrderFields : new VirtualOrderFields;
-        }
-
         public static function getMapAutoClose(): bool
         {
             return Helper::getActualShippingMethod()->get_option('map_auto_close') === 'yes';
