@@ -32,9 +32,8 @@ namespace Cdek\Actions {
             $order = json_decode($this->api->getOrder($cdekUuid), true);
 
             if (!isset($order['entity'])) {
-                echo 'Не удалось получить сведения о заказе. 
-        Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
-        и введите габариты упаковки повторно.';
+                _e("Failed to retrieve order information.\n\r To solve the problem, try re-creating the order.\n\r Click the \"Cancel\" button and enter the package dimensions again.",
+                   'cdekdelivery');
                 exit();
             }
 
@@ -59,9 +58,8 @@ namespace Cdek\Actions {
             $barcode = json_decode($this->api->createBarcode($order['entity']['uuid']), true);
 
             if (!isset($barcode['entity'])) {
-                echo 'Не удалось создать ШК. 
-        Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку "Отменить"
-        и введите габариты упаковки повторно.';
+                _e("Failed to create Barcode. \n\r To solve the problem, try re-creating the order. Click the \"Cancel\" button \n\r and enter the package dimensions again.",
+                   'cdekdelivery');
                 exit();
             }
 
@@ -77,16 +75,16 @@ namespace Cdek\Actions {
                 }
 
                 if (!isset($barcodeInfo['entity']) || end($barcodeInfo['entity']['statuses'])['code'] === 'INVALID') {
-                    echo 'Не удалось создать ШК. 
-        Для решения проблемы, попробуй повторно запросить ШК.';
+                    _e("Failed to create Barcode.\n\r To solve the problem, try requesting Barcode again.", 'cdekdelivery');
                     exit();
                 }
 
                 sleep(Config::GRAPHICS_TIMEOUT_SEC);
             }
 
-            echo 'Запрос на ШК был отправлен, но ответ по нему не пришел.
-        Для решения проблемы, попробуй подождать 1 час и попробуй запросить ШК еще раз.';
+            _e("A request to Barcode was sent, but no response was received. \n\r To solve the problem, try to wait 1 hour and try to request the Barcode again.",
+               'cdekdelivery');
+
             exit();
         }
     }
