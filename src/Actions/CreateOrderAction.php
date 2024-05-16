@@ -51,10 +51,10 @@ namespace Cdek\Actions {
             try{
                 Helper::validateCdekPhoneNumber($recipientNumber, $countryCode);
             } catch (Throwable $e){
-                Note::send($order->get_id(), sprintf(__('Incorrect phone number: %1$s', 'cdekdelivery'), $recipientNumber));
+                Note::send($order->get_id(), sprintf(__(/* translators: 1: Recipient phone number */'Incorrect phone number: %1$s', 'cdekdelivery'), $recipientNumber));
                 return [
                     'state'   => false,
-                    'message' => sprintf(__('Incorrect phone number: %1$s', 'cdekdelivery'), $recipientNumber),
+                    'message' => sprintf(__(/* translators: 1: Recipient phone number */'Incorrect phone number: %1$s', 'cdekdelivery'), $recipientNumber),
                 ];
             }
 
