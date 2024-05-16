@@ -45,23 +45,12 @@ namespace Cdek\Actions {
                 'pvz_code'    => $shippingMethod->get_meta(MetaKeys::OFFICE_CODE) ?: $postOrderData['pvz_code'] ?: null,
             ];
 
-            $countryCode = trim(($order->get_shipping_country() ?: $order->get_billing_country()) ?? 'RU');
-            $recipientNumber = $order->get_shipping_phone() ?: $order->get_billing_phone();
-
-            try{
-                Helper::validateCdekPhoneNumber($recipientNumber, $countryCode);
-            } catch (Throwable $e){
-                Note::send($order->get_id(), sprintf(__(/* translators: 1: Recipient phone number */'Incorrect phone number: %1$s', 'cdekdelivery'), $recipientNumber));
-                return [
-                    'state'   => false,
-                    'message' => sprintf(__(/* translators: 1: Recipient phone number */'Incorrect phone number: %1$s', 'cdekdelivery'), $recipientNumber),
-                ];
-            }
-
-            $param             = $this->buildRequestData($order, $postOrderData);
-            $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
 
             try {
+                
+                $param             = $this->buildRequestData($order, $postOrderData);
+                $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
+
                 $orderData = $this->api->createOrder($param);
 
                 sleep(1);
@@ -107,6 +96,19 @@ namespace Cdek\Actions {
 
         private function buildRequestData(WC_Order $order, $postOrderData): array
         {
+            $countryCode = trim(($order->get_shipping_country() ?: $order->get_billing_country()) ?? 'RU');
+            $recipientNumber = trim($order->get_shipping_phone() ?: $order->get_billing_phone());
+
+            try{
+                Helper::validateCdekPhoneNumber($recipientNumber, $countryCode);
+            } catch (Throwable $e){
+                Note::send($order->get_id(), sprintf(__(/* translators: 1: Recipient phone number */'Incorrect phone number: %1$s', 'cdekdelivery'), $recipientNumber));
+                return [
+                    'state'   => false,
+                    'message' => sprintf(__(/* translators: 1: Recipient phone number */'Incorrect phone number: %1$s', 'cdekdelivery'), $recipientNumber),
+                ];
+            }
+
             $deliveryMethod = Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
                                                                             ->get_data()['instance_id']);
 
@@ -143,7 +145,7 @@ namespace Cdek\Actions {
                                 ($order->get_shipping_last_name() ?: $order->get_billing_last_name()),
                     'email'  => $order->get_billing_email(),
                     'phones' => [
-                        'number' => $order->get_shipping_phone() ?: $order->get_billing_phone()
+                        'number' => trim($order->get_shipping_phone() ?: $order->get_billing_phone()),
                     ],
                 ],
             ];
