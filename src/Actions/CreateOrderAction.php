@@ -16,6 +16,7 @@ namespace Cdek\Actions {
     use Cdek\MetaKeys;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
+    use Cdek\Note;
     use Exception;
     use Throwable;
     use WC_Order;
@@ -43,6 +44,19 @@ namespace Cdek\Actions {
                 'type'        => Tariff::getTariffType($tariffCode),
                 'pvz_code'    => $shippingMethod->get_meta(MetaKeys::OFFICE_CODE) ?: $postOrderData['pvz_code'] ?: null,
             ];
+
+            $countryCode = trim(($order->get_shipping_country() ?: $order->get_billing_country()) ?? 'RU');
+            $recipientNumber = $order->get_shipping_phone() ?: $order->get_billing_phone();
+
+            try{
+                Helper::validateCdekPhoneNumber($recipientNumber, $countryCode);
+            } catch (Throwable $e){
+                Note::send($order->get_id(), sprintf(__('Incorrect phone number: %1$s', 'cdekdelivery'), $recipientNumber));
+                return [
+                    'state'   => false,
+                    'message' => sprintf(__('Incorrect phone number: %1$s', 'cdekdelivery'), $recipientNumber),
+                ];
+            }
 
             $param             = $this->buildRequestData($order, $postOrderData);
             $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
@@ -129,7 +143,7 @@ namespace Cdek\Actions {
                                 ($order->get_shipping_last_name() ?: $order->get_billing_last_name()),
                     'email'  => $order->get_billing_email(),
                     'phones' => [
-                        'number' => $order->get_shipping_phone() ?: $order->get_billing_phone(),
+                        'number' => $order->get_shipping_phone() ?: $order->get_billing_phone()
                     ],
                 ],
             ];

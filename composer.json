@@ -21,7 +21,8 @@
   },
   "require": {
     "php": "^7.4",
-    "composer/installers": "~2.0"
+    "composer/installers": "~2.0",
+    "giggsey/libphonenumber-for-php": "^8.13"
   },
   "require-dev": {
     "roave/security-advisories": "dev-latest"

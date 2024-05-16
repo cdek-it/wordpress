@@ -8,7 +8,9 @@ namespace {
 namespace Cdek {
 
     use Cdek\Model\Tariff;
+    use Cdek\Exceptions\PhoneNotValidException;
     use DateTime;
+    use libphonenumber\PhoneNumberUtil;
     use RuntimeException;
     use Throwable;
     use function WC;
@@ -114,5 +116,12 @@ namespace Cdek {
             return !($cdekStatuses[0]['code'] !== 'CREATED' && $cdekStatuses[0]['code'] !== 'INVALID');
         }
 
+        public static function validateCdekPhoneNumber(string $shippingRecipientPhone, string $countryCode = null): void
+        {
+            $phoneNumUtil = PhoneNumberUtil::getInstance();
+            if (!$phoneNumUtil->isValidNumber($phoneNumUtil->parse($shippingRecipientPhone, $countryCode))) {
+                throw new PhoneNotValidException($shippingRecipientPhone, $countryCode);
+            }
+        }
     }
 }
