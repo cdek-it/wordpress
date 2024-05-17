@@ -55,8 +55,7 @@ namespace Cdek\Validator {
             try {
                 Helper::validateCdekPhoneNumber($phone, $country);
             } catch (\Throwable $e) {
-                wc_add_notice(sprintf(/* translators: 1: Recipient phone number */__('Incorrect phone number: %1$s',
-                                                                                     'cdekdelivery'), $phone), 'error');
+                wc_add_notice($e->getMessage(), 'error');
             }
         }
     }

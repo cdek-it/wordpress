@@ -12,9 +12,11 @@ namespace Cdek\Exceptions {
 
         public function __construct(string $invalidPhone, string $countryCode)
         {
-            parent::__construct('Incorrect phone number', 'cdek_error.phone.validation', [
+            parent::__construct(sprintf(/* translators: 1: Recipient phone number */__('Incorrect phone number: %1$s',
+                'cdekdelivery'), $invalidPhone), 'cdek_error.phone.validation', 
+            [
                 'phone' => $invalidPhone,
-                'setCountry' => $countryCode
+                'setCountry' => $countryCode,
             ], false);
         }
     }

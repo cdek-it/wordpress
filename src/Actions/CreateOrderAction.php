@@ -17,6 +17,7 @@ namespace Cdek\Actions {
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
     use Cdek\Note;
+    use Cdek\Exceptions\PhoneNotValidException;
     use Exception;
     use Throwable;
     use WC_Order;
@@ -44,7 +45,6 @@ namespace Cdek\Actions {
                 'type'        => Tariff::getTariffType($tariffCode),
                 'pvz_code'    => $shippingMethod->get_meta(MetaKeys::OFFICE_CODE) ?: $postOrderData['pvz_code'] ?: null,
             ];
-
 
             try {
                 
@@ -80,6 +80,16 @@ namespace Cdek\Actions {
                     'available' => $actionOrderAvailable,
                     'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
                 ];
+
+            } catch(PhoneNotValidException $e) {
+                Note::send($order->get_id(), sprintf(__(/* translators: 1: error */'Cdek shipping error: %1$s', 
+                    'cdekdelivery'), $e->getMessage()));
+                    
+                return [
+                        'state'   => false,
+                        'message' => $e->getMessage(),
+                    ];
+
             } catch (Throwable $e) {
                 if ($attempt < 1 || $attempt > 5) {
                     throw $e;
@@ -98,17 +108,8 @@ namespace Cdek\Actions {
         {
             $countryCode = trim(($order->get_shipping_country() ?: $order->get_billing_country()) ?? 'RU');
             $recipientNumber = trim($order->get_shipping_phone() ?: $order->get_billing_phone());
-
-            try{
-                Helper::validateCdekPhoneNumber($recipientNumber, $countryCode);
-            } catch (Throwable $e){
-                Note::send($order->get_id(), sprintf(__(/* translators: 1: Recipient phone number */'Incorrect phone number: %1$s', 'cdekdelivery'), $recipientNumber));
-                return [
-                    'state'   => false,
-                    'message' => sprintf(__(/* translators: 1: Recipient phone number */'Incorrect phone number: %1$s', 'cdekdelivery'), $recipientNumber),
-                ];
-            }
-
+            Helper::validateCdekPhoneNumber($recipientNumber, $countryCode);
+            
             $deliveryMethod = Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
                                                                             ->get_data()['instance_id']);
 
