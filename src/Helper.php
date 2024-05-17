@@ -63,6 +63,7 @@ namespace Cdek {
             $serviceTrying    = $deliveryMethod->get_option('services_trying_on') === 'yes';
             $servicePartDevil = $deliveryMethod->get_option('services_part_deliv') === 'yes';
             $serviceList      = [];
+
             if (!Tariff::isTariffToPostamat($tariffId) && Tariff::isTariffModeIM($tariffId)) {
                 if ($serviceBanAttachmentInspectionEnabled && !$serviceTrying && !$servicePartDevil) {
                     $serviceList[] = [
