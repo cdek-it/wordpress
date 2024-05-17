@@ -61,6 +61,11 @@ msgstr "Карта ПВЗ от СДЭК"
 msgid "Choose pick-up"
 msgstr "Выберите ПВЗ"
 
+#: build/cdek-checkout-map.js:1
+#, fuzzy
+msgid "Re-select pick-up"
+msgstr "Повторно выбрать ПВЗ"
+
 #: src/Validator/CheckoutProcessValidator.php:36
 msgid "Failed to determine locality in %1$s %2$s"
 msgstr "Не удалось определить населенный пункт %1$s %2$s"
