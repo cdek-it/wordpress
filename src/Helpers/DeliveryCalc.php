@@ -66,9 +66,9 @@ namespace Cdek\Helpers {
             unset($deliveryParam['packages']['weight_orig_unit']);
 
             if ($this->method->get_option('insurance') === 'yes') {
-                $deliveryParam['selected_services'][0] = [
+                $deliveryParam['services'][] = [
                     'code'      => 'INSURANCE',
-                    'parameter' => (int) $package['cart_subtotal'],
+                    'parameter' => (int) $package['contents_cost'],
                 ];
             }
 
@@ -86,7 +86,7 @@ namespace Cdek\Helpers {
                             return $carry;
                         }
 
-                        if ($item['to'] >= $package['cart_subtotal'] || $item['to'] === null) {
+                        if ($item['to'] >= $package['contents_cost'] || $item['to'] === null) {
                             return $item;
                         }
 
@@ -151,6 +151,7 @@ namespace Cdek\Helpers {
 
             $api            = $this->api;
             $deliveryMethod = $this->method;
+
             $this->rates    = array_map(static function ($tariff) use (
                 $priceRules,
                 $api,

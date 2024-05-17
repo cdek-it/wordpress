@@ -175,8 +175,8 @@ class CdekApi
             'tariff_code'   => $deliveryParam['tariff_code'],
             'to_location'   => $deliveryParam['to'],
             'packages'      => $deliveryParam['packages'],
-            'services'      => array_key_exists('selected_services',
-                                                $deliveryParam) ? $deliveryParam['selected_services'] : [],
+            'services'      => array_key_exists('services',
+                                                $deliveryParam) ? $deliveryParam['services'] : [],
         ];
 
         return HttpClient::sendCdekRequest($url, 'POST', $this->tokenStorage->getToken(), $request);
