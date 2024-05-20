@@ -30,7 +30,7 @@
     "giggsey/libphonenumber-for-php": "^8.13"
   },
   "require-dev": {
-    "wp-cli/wp-cli": "^2.5",
+    "wp-cli/i18n-command": "^2.5",
     "roave/security-advisories": "dev-latest"
   },
   "config": {
