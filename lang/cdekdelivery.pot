@@ -159,47 +159,33 @@ msgstr ""
 
 #: src/Actions/GenerateBarcodeAction.php:61
 msgid ""
-"Failed to create Barcode.To solve the problem, try re-creating the order. Click the \"Cancel\" button \n"
+"Failed to create Barcode.To solve the problem, try re-creating the order. Click the Cancel button \n"
 "and enter the package dimensions again."
 msgstr ""
 
 #: src/Actions/GenerateBarcodeAction.php:78
 msgid ""
 "Failed to create Barcode.\n"
-"\r To solve the problem, try requesting Barcode again."
+"To solve the problem, try requesting Barcode again."
 msgstr ""
 
 #: src/Actions/GenerateBarcodeAction.php:85
 msgid "A request to Barcode was sent, but no response was received.\n"
-"\r To solve the problem, try to wait 1 hour"
- "\r and try to request the Barcode again."
+"To solve the problem, try to wait 1 hour"
+"and try to request the Barcode again."
 msgstr ""
-
 
 #: src/Actions/GenerateWaybillAction.php:33
-msgid ""
-"Failed to retrieve order information. \n"
-"\r To solve the problem, try re-creating the order. Click the \"Cancel\" button \n"
-"\r and re-enter the package dimensions."
+#: src/Actions/GenerateWaybillAction.php:54
+msgid "Failed to create receipt.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)"
 msgstr ""
 
-#: src/Actions/GenerateWaybillAction.php:53
-msgid ""
-"Failed to create receipt.\n"
-"\r To solve the problem, try re-creating the order. Click the \"Cancel\" button \n"
-"\r and re-enter the package dimensions."
+#: src/Actions/GenerateWaybillAction.php:75
+msgid "Failed to create receipt.\nRequest a receipt again"
 msgstr ""
 
-#: src/Actions/GenerateWaybillAction.php:72
-msgid ""
-"Failed to create receipt.\n"
-"\r To solve the problem, try requesting a receipt again."
-msgstr ""
-
-#: src/Actions/GenerateWaybillAction.php:81
-msgid ""
-"A request for a receipt was sent, but no response was received. \n"
-"\r To resolve the problem, try waiting 1 hour and try requesting a receipt again."
+#: src/Actions/GenerateWaybillAction.php:85
+msgid "A request for a receipt was sent, but no response was received.\nWait for 1 hour before trying again"
 msgstr ""
 
 #: src/Actions/RecalculateShippingAction.php:81

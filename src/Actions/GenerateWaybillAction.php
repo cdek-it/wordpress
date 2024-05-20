@@ -9,7 +9,6 @@ namespace Cdek\Actions {
 
     use Cdek\CdekApi;
     use Cdek\Config;
-    use Cdek\Model\OrderMetaData;
 
     class GenerateWaybillAction
     {
@@ -20,64 +19,71 @@ namespace Cdek\Actions {
             $this->api = new CdekApi;
         }
 
-        public function __invoke(string $orderUuid): void
+        public function __invoke(string $orderUuid): array
         {
-            ini_set('max_execution_time',
-                    30 +
-                    Config::GRAPHICS_FIRST_SLEEP +
-                    Config::GRAPHICS_TIMEOUT_SEC * Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS);
+            ini_set('max_execution_time', 30 +
+                                          Config::GRAPHICS_FIRST_SLEEP +
+                                          Config::GRAPHICS_TIMEOUT_SEC * Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS);
 
             $order = json_decode($this->api->getOrder($orderUuid), true);
 
             if (!isset($order['entity'])) {
-                _e("Failed to retrieve order information. \n\r To solve the problem, try re-creating the order. Click the \"Cancel\" button \n\r and re-enter the package dimensions.",
-                   'cdekdelivery');
-                exit();
+                return [
+                    'success' => false,
+                    'message' => esc_html__("Failed to create receipt.\nTo solve the problem, try re-creating the order.\nYou may need to cancel existing one (if that button exists)",
+                                            'cdekdelivery'),
+                ];
             }
 
             if (isset($order['related_entities'])) {
                 foreach ($order['related_entities'] as $entity) {
                     if ($entity['type'] === 'waybill' && isset($entity['url'])) {
-                        header("Content-type:application/pdf");
-                        echo $this->api->getFileByLink($entity['url']);
-                        exit();
+                        return [
+                            'success' => true,
+                            'data'    => esc_html(base64_encode($this->api->getFileByLink($entity['url']))),
+                        ];
                     }
                 }
             }
 
-            $waybill = json_decode($this->api->createWaybill($order['entity']['uuid']), true);
+            $waybill = json_decode($this->api->createWaybill($order['entity']['uuid']), true, 512, JSON_THROW_ON_ERROR);
 
             if (!isset($waybill['entity'])) {
-                _e("Failed to create receipt. \n\r To solve the problem, try re-creating the order. Click the \"Cancel\" button \n\r and re-enter the package dimensions.",
-                   'cdekdelivery');
-                exit();
+                return [
+                    'success' => false,
+                    'message' => esc_html__("Failed to create receipt.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)",
+                                            'cdekdelivery'),
+                ];
             }
 
             sleep(Config::GRAPHICS_FIRST_SLEEP);
 
             for ($i = 0; $i < Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS; $i++) {
-                $waybillInfo = json_decode($this->api->getWaybill($waybill['entity']['uuid']), true);
+                $waybillInfo = json_decode($this->api->getWaybill($waybill['entity']['uuid']), true, 512,
+                                           JSON_THROW_ON_ERROR);
 
                 if (isset($waybillInfo['entity']['url'])) {
-                    header('Content-type: application/pdf');
-                    echo $this->api->getFileByLink($waybillInfo['entity']['url']);
-                    exit();
+                    return [
+                        'success' => true,
+                        'data'    => esc_html(base64_encode($this->api->getFileByLink($waybillInfo['entity']['url']))),
+                    ];
                 }
 
                 if (!isset($waybillInfo['entity']) || end($waybillInfo['entity']['statuses'])['code'] === 'INVALID') {
-                    _e("Failed to create receipt. \n
-                    \r To solve the problem, try requesting a receipt again",
-                       'cdekdelivery');
-                    exit();
+                    return [
+                        'success' => false,
+                        'message' => esc_html__("Failed to create receipt.\nRequest a receipt again", 'cdekdelivery'),
+                    ];
                 }
 
                 sleep(Config::GRAPHICS_TIMEOUT_SEC);
             }
 
-            _e("A request for a receipt was sent, but no response was received. \n\r To resolve the problem, try waiting 1 hour and try requesting a receipt again.",
-               'cdekdelivery');
-
-            exit();
+            return [
+                'success' => false,
+                'message' => esc_html__("A request for a receipt was sent, but no response was received.\nWait for 1 hour before trying again",
+                                        'cdekdelivery'),
+            ];
         }
     }
 }
