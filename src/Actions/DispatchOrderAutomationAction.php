@@ -11,8 +11,10 @@ use WC_Order;
 
 class DispatchOrderAutomationAction
 {
-    public function __invoke(int $orderId, $posted_data, WC_Order $order): void
+    public function __invoke(int $orderId): void
     {
+        $order = wc_get_order($orderId);
+
         try {
             $shipping = CheckoutHelper::getOrderShippingMethod($order);
         } catch (ShippingMethodNotFoundException $exception) {
