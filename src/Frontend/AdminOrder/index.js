@@ -1,18 +1,29 @@
+'use strict';
 import $ from 'jquery';
 import './styles/main.scss';
 import apiFetch from '@wordpress/api-fetch';
 
-$(document).ready(function() {
+$(document).ready(() => {
     let packageList = [];
 
     checkOrderAvailable();
+
     function checkOrderAvailable() {
-        const dataStatusAvailable = $('#cdek-status-block').data('status-available');
+        const dataStatusAvailable = $('#cdek-status-block')
+          .data('status-available');
         if (dataStatusAvailable !== undefined && !dataStatusAvailable) {
-            $('#order_data').find('input[name="order_date"]').attr('disabled', true);
-            $('#order_data').find('input[name="order_date_hour"]').attr('disabled', true);
-            $('#order_data').find('input[name="order_date_minute"]').attr('disabled', true);
-            $('#order_data').find('select[name="customer_user"]').attr('disabled', true);
+            $('#order_data')
+              .find('input[name="order_date"]')
+              .attr('disabled', true);
+            $('#order_data')
+              .find('input[name="order_date_hour"]')
+              .attr('disabled', true);
+            $('#order_data')
+              .find('input[name="order_date_minute"]')
+              .attr('disabled', true);
+            $('#order_data')
+              .find('select[name="customer_user"]')
+              .attr('disabled', true);
             $('#order_data').find('a[class="edit_address"]').hide();
         }
     }
@@ -56,8 +67,44 @@ $(document).ready(function() {
         }
     });
 
+    $('#cdek-order-waybill, #cdek-order-barcode').click(function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const loader = $('#cdek-loader');
+
+        loader.show();
+
+        apiFetch({ method: 'GET', url: e.target.href }).then(resp => {
+            if (!resp.success) {
+                alert(resp.message);
+                return;
+            }
+
+            const binaryString = window.atob(resp.data);
+            const uint8Array = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                uint8Array[i] = binaryString.charCodeAt(i);
+            }
+            const dataUrl = window.URL.createObjectURL(
+              new Blob([uint8Array], { type: 'application/pdf' }));
+
+            const a = window.document.createElement('a');
+            a.target = '_blank';
+            a.href = dataUrl;
+            window.document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            setTimeout(() => URL.revokeObjectURL(dataUrl), 200);
+        })
+          .catch(e => console.error(e))
+          .finally(() => loader.hide());
+    });
+
     $('#send_package').click(function(e) {
-        $('#cdek-loader').show();
+        const loader = $('#cdek-loader');
+        loader.show();
 
         apiFetch({
             method: 'POST', url: e.target.dataset.action, data: {
@@ -67,19 +114,20 @@ $(document).ready(function() {
           .then(resp => {
               if (!resp.state) {
                   $('#cdek-create-order-error').text(resp.message).show();
-              } else {
-                  if (resp.door) {
-                      $('#cdek-courier-result-block').hide();
-                      $('#cdek-order-courier').show();
-                  }
-                  $('#cdek-create-order-form').hide();
-                  $('#cdek-order-number').html(`№ <b>${resp.code}</b>`);
-                  $('#cdek-order-number-input').val(resp.code);
-                  $('#cdek-info-order').show();
+                  return;
               }
+
+              if (resp.door) {
+                  $('#cdek-courier-result-block').hide();
+                  $('#cdek-order-courier').show();
+              }
+              $('#cdek-create-order-form').hide();
+              $('#cdek-order-number').html(`№ <b>${resp.code}</b>`);
+              $('#cdek-order-number-input').val(resp.code);
+              $('#cdek-info-order').show();
           })
           .catch(e => console.error(e))
-          .finally(() => $('#cdek-loader').hide());
+          .finally(() => loader.hide());
     });
 
     function checkFullPackage() {
@@ -164,7 +212,8 @@ $(document).ready(function() {
                       $('#cdek-courier-result-block').hide();
                       $('#cdek-order-courier').show();
                   }
-                  $('#cdek-status-block').data('status-available', resp.available);
+                  $('#cdek-status-block')
+                    .data('status-available', resp.available);
                   checkOrderAvailable();
                   $('#cdek-order-status-block').html(resp.statuses);
                   $('#cdek-create-order-form').hide();
@@ -251,14 +300,15 @@ $(document).ready(function() {
         }).catch(e => console.error(e)).finally(() => $('#cdek-loader').hide());
     });
 
-    $('#cdek-info-order').on('click', '#cdek-order-status-btn', function(event) {
-        let statusList = $('#cdek-order-status-list');
-        let arrowUp = $('#cdek-btn-arrow-up');
-        let arrowDown = $('#cdek-btn-arrow-down');
+    $('#cdek-info-order')
+      .on('click', '#cdek-order-status-btn', function(event) {
+          let statusList = $('#cdek-order-status-list');
+          let arrowUp = $('#cdek-btn-arrow-up');
+          let arrowDown = $('#cdek-btn-arrow-down');
 
-        statusList.toggle();
-        arrowUp.toggle(!statusList.is(':visible'));
-        arrowDown.toggle(statusList.is(':visible'));
-    })
+          statusList.toggle();
+          arrowUp.toggle(!statusList.is(':visible'));
+          arrowDown.toggle(statusList.is(':visible'));
+      });
 
 });

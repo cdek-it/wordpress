@@ -11,6 +11,11 @@
     {
       "name": "Alex V",
       "email": "a.viarvelskii@cdek.ru",
+      "role": "Maintainer"
+    },
+    {
+      "name": "Demin",
+      "email": "demin.sv@cdek.ru",
       "role": "Contributor"
     }
   ],
@@ -25,6 +30,7 @@
     "giggsey/libphonenumber-for-php": "^8.13"
   },
   "require-dev": {
+    "wp-cli/wp-cli": "^2.5",
     "roave/security-advisories": "dev-latest"
   },
   "config": {
@@ -36,6 +42,12 @@
     "platform": {
       "php": "7.4"
     }
+  },
+  "scripts": {
+    "dumplang": [
+      "vendor/bin/wp --allow-root make-mo lang lang",
+      "vendor/bin/wp --allow-root make-json --no-purge lang lang"
+    ]
   },
   "repositories": [
     {

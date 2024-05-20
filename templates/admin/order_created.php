@@ -28,11 +28,11 @@ if (!$orderNumber) { ?>style="display: none" <?php
                 </div>
                 <p id="cdek-order-number">№ <b><?php
                         echo esc_html($orderNumber) ?></b></p>
-                <a id="cdek-order-waybill" target="_blank"
+                <a id="cdek-order-waybill"
                    href="<?php
                    echo esc_url(UrlHelper::buildRest("order/$orderIdWP/waybill")) ?>">Получить
-                    квитанцию</a>
-                <a id="cdek-order-barcode" target="_blank"
+                    накладную</a>
+                <a id="cdek-order-barcode"
                    href="<?php
                    echo esc_url(UrlHelper::buildRest("order/$orderIdWP/barcode")) ?>">Получить ШК</a>
                 <?php

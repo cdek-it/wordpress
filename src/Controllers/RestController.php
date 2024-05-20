@@ -23,18 +23,21 @@ namespace Cdek\Controllers {
             return new WP_REST_Response(['state' => (new CdekApi)->checkAuth()], 200);
         }
 
-        public static function getWaybill(WP_REST_Request $request): void
+        /**
+         * @throws \JsonException
+         */
+        public static function getWaybill(WP_REST_Request $request): WP_REST_Response
         {
-            (new GenerateWaybillAction)(OrderMetaData::getMetaByOrderId($request->get_param('id'))['order_uuid']
-                                        ??
-                                        '');
+            return new WP_REST_Response((new GenerateWaybillAction)(OrderMetaData::getMetaByOrderId($request->get_param('id'))['order_uuid']
+                                                                    ??
+                                                                    ''));
         }
 
-        public static function getBarcode(WP_REST_Request $request): void
+        public static function getBarcode(WP_REST_Request $request): WP_REST_Response
         {
-            (new GenerateBarcodeAction)(OrderMetaData::getMetaByOrderId($request->get_param('id'))['order_uuid']
-                                        ??
-                                        '');
+            return new WP_REST_Response((new GenerateBarcodeAction)(OrderMetaData::getMetaByOrderId($request->get_param('id'))['order_uuid']
+                                                                    ??
+                                                                    ''));
         }
 
         public function __invoke(): void
