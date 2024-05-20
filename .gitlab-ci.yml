@@ -27,8 +27,7 @@ build_tag:
     - sed -i "s/\(Version:\)\( *\).*/\1\2${RELEASE_VERSION}/" cdek.php
     - sed -i "s/\(Stable tag:\)\( *\).*/\1\2${RELEASE_VERSION}/" readme.txt
     - composer i -a
-    - vendor/bin/wp i18n --allow-root make-mo lang lang
-    - vendor/bin/wp i18n --allow-root make-json --no-purge lang lang
+    - composer dumplang
     - yarn set version berry
     - yarn
     - yarn build
