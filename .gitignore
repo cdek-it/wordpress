@@ -44,3 +44,5 @@ assets/js/cdek-widget.umd.js
 
 lang/*.mo
 lang/*.json
+
+.wp-env.override.json

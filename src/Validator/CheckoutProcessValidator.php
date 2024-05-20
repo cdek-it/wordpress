@@ -9,9 +9,10 @@ namespace Cdek\Validator {
 
     use Cdek\CdekApi;
     use Cdek\Config;
+    use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Model\Tariff;
-    use Cdek\Helper;
+    use Throwable;
 
     class CheckoutProcessValidator
     {
@@ -30,10 +31,10 @@ namespace Cdek\Validator {
                 return;
             }
 
-            $city  = CheckoutHelper::getValueFromCurrentSession('city');
-            $state = CheckoutHelper::getValueFromCurrentSession('postcode');
+            $city    = CheckoutHelper::getValueFromCurrentSession('city');
+            $state   = CheckoutHelper::getValueFromCurrentSession('postcode');
             $country = CheckoutHelper::getValueFromCurrentSession('country');
-            $phone = CheckoutHelper::getValueFromCurrentSession('phone');
+            $phone   = CheckoutHelper::getValueFromCurrentSession('phone');
 
             $cityCode = $api->getCityCode($city, $state);
             if ($cityCode === -1) {
@@ -42,7 +43,7 @@ namespace Cdek\Validator {
                     $state),  'error');
             }
 
-            $tariffCode = explode('_', $shippingMethodIdSelected)[2];
+            $tariffCode = explode(':', $shippingMethodIdSelected)[1];
             if (Tariff::isTariffToOffice($tariffCode)) {
                 $pvzCode = CheckoutHelper::getValueFromCurrentSession('pvz_code');
                 if (empty($pvzCode)) {
@@ -54,7 +55,7 @@ namespace Cdek\Validator {
 
             try {
                 Helper::validateCdekPhoneNumber($phone, $country);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 wc_add_notice($e->getMessage(), 'error');
             }
         }
