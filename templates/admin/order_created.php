@@ -31,7 +31,7 @@ if (!$orderNumber) { ?>style="display: none" <?php
                 <a id="cdek-order-waybill"
                    href="<?php
                    echo esc_url(UrlHelper::buildRest("order/$orderIdWP/waybill")) ?>">Получить
-                    квитанцию</a>
+                    накладную</a>
                 <a id="cdek-order-barcode"
                    href="<?php
                    echo esc_url(UrlHelper::buildRest("order/$orderIdWP/barcode")) ?>">Получить ШК</a>

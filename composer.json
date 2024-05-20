@@ -49,7 +49,7 @@
       "vendor/bin/wp --allow-root make-json --no-purge lang lang"
     ]
   },
-    "repositories": [
+  "repositories": [
     {
       "type": "composer",
       "url": "https://repo.cdek.ru/artifactory/api/composer/cdek-php"

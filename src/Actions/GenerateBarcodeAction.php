@@ -11,7 +11,6 @@ namespace Cdek\Actions {
     use Cdek\Config;
     use Cdek\Enums\BarcodeFormat;
     use Cdek\Helper;
-    use Cdek\Model\OrderMetaData;
 
     class GenerateBarcodeAction
     {
@@ -22,19 +21,20 @@ namespace Cdek\Actions {
             $this->api = new CdekApi;
         }
 
-        public function __invoke(string $cdekUuid): void
+        public function __invoke(string $cdekUuid): array
         {
-            ini_set('max_execution_time',
-                    30 +
-                    Config::GRAPHICS_FIRST_SLEEP +
-                    Config::GRAPHICS_TIMEOUT_SEC * Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS);
+            ini_set('max_execution_time', 30 +
+                                          Config::GRAPHICS_FIRST_SLEEP +
+                                          Config::GRAPHICS_TIMEOUT_SEC * Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS);
 
             $order = json_decode($this->api->getOrder($cdekUuid), true);
 
             if (!isset($order['entity'])) {
-                _e("Failed to retrieve order information.\n\r To solve the problem, try re-creating the order.\n\r Click the \"Cancel\" button and enter the package dimensions again.",
-                   'cdekdelivery');
-                exit();
+                return [
+                    'success' => false,
+                    'message' => esc_html__("Failed to create waybill.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)",
+                                            'cdekdelivery'),
+                ];
             }
 
             if (isset($order['related_entities'])) {
@@ -48,9 +48,10 @@ namespace Cdek\Actions {
                             continue;
                         }
 
-                        header('Content-type: application/pdf');
-                        echo $this->api->getFileByLink($entity['url']);
-                        exit();
+                        return [
+                            'success' => true,
+                            'data'    => esc_html(base64_encode($this->api->getFileByLink($entity['url']))),
+                        ];
                     }
                 }
             }
@@ -58,9 +59,11 @@ namespace Cdek\Actions {
             $barcode = json_decode($this->api->createBarcode($order['entity']['uuid']), true);
 
             if (!isset($barcode['entity'])) {
-                _e("Failed to create Barcode. \n\r To solve the problem, try re-creating the order. Click the \"Cancel\" button \n\r and enter the package dimensions again.",
-                   'cdekdelivery');
-                exit();
+                return [
+                    'success' => false,
+                    'message' => esc_html__("Failed to create waybill.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)",
+                                            'cdekdelivery'),
+                ];
             }
 
             sleep(Config::GRAPHICS_FIRST_SLEEP);
@@ -69,23 +72,27 @@ namespace Cdek\Actions {
                 $barcodeInfo = json_decode($this->api->getBarcode($barcode['entity']['uuid']), true);
 
                 if (isset($barcodeInfo['entity']['url'])) {
-                    header('Content-type: application/pdf');
-                    echo $this->api->getFileByLink($barcodeInfo['entity']['url']);
-                    exit();
+                    return [
+                        'success' => true,
+                        'data'    => esc_html(base64_encode($this->api->getFileByLink($barcodeInfo['entity']['url']))),
+                    ];
                 }
 
                 if (!isset($barcodeInfo['entity']) || end($barcodeInfo['entity']['statuses'])['code'] === 'INVALID') {
-                    _e("Failed to create Barcode.\n\r To solve the problem, try requesting Barcode again.", 'cdekdelivery');
-                    exit();
+                    return [
+                        'success' => false,
+                        'message' => esc_html__("Failed to create barcode.\nTry again", 'cdekdelivery'),
+                    ];
                 }
 
                 sleep(Config::GRAPHICS_TIMEOUT_SEC);
             }
 
-            _e("A request to Barcode was sent, but no response was received. \n\r To solve the problem, try to wait 1 hour and try to request the Barcode again.",
-               'cdekdelivery');
-
-            exit();
+            return [
+                'success' => false,
+                'message' => esc_html__("A request for a barcode was sent, but no response was received.\nWait for 1 hour before trying again",
+                                        'cdekdelivery'),
+            ];
         }
     }
 }

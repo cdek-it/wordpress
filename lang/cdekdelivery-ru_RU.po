@@ -163,52 +163,31 @@ msgstr "Город"
 msgid "First name"
 msgstr "Имя"
 
-#: src/Actions/GenerateBarcodeAction.php:35
-msgid ""
-"Failed to retrieve order information.\n"
-"\r To solve the problem, try re-creating the order.\n"
-"\r Click the \"Cancel\" button and enter the package dimensions again."
-msgstr ""
-"Не удалось получить сведения о заказе.\n"
-"\r Для решения проблемы, попробуй пересоздать заказ.\n"
-"\r Нажмите кнопку \"Отменить\" и введите габариты упаковки повторно."
+#: src/Actions/GenerateBarcodeAction.php:36
+#: src/Actions/GenerateBarcodeAction.php:64
+msgid "Failed to create waybill.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)"
+msgstr "Не удалось создать шк.\nНеобходимо попробовать пересоздать заказ.\nВозможно, потребуется отменить существующий (если такая кнопка есть)"
 
-#: src/Actions/GenerateBarcodeAction.php:61
-msgid ""
-"Failed to create Barcode.To solve the problem, try re-creating the order. Click the Cancel button \n"
-"and enter the package dimensions again."
-msgstr ""
-"Не удалось создать ШК. \n"
-"Для решения проблемы, попробуй пересоздать заказ. Нажмите кнопку Отменить и введите габариты упаковки повторно."
+#: src/Actions/GenerateBarcodeAction.php:84
+msgid "Failed to create barcode.\nTry again"
+msgstr "Не удалось создать шк.\nНеобходимо попробовать еще раз"
 
-#: src/Actions/GenerateBarcodeAction.php:78
-msgid ""
-"Failed to create Barcode.\n"
-"\r To solve the problem, try requesting Barcode again."
-msgstr ""
-"Не удалось создать ШК.\n"
-"\r Для решения проблемы, попробуй повторно запросить ШК."
-
-#: src/Actions/GenerateBarcodeAction.php:85
-msgid "A request to Barcode was sent, but no response was received.\n"
-"To solve the problem, try to wait 1 hour"
- "and try to request the Barcode again."
-msgstr ""
-"Запрос на ШК был отправлен, но ответ по нему не пришел.\n"
-"Для решения проблемы, попробуй подождать 1 час\r и попробуй запросить ШК еще раз."
+#: src/Actions/GenerateBarcodeAction.php:93
+msgid "A request for a barcode was sent, but no response was received.\nWait for 1 hour before trying again"
+msgstr "Запрос на шк был отправлен, но ответ по нему не пришел.\nНеобходимо подождать 1 час перед повторной попыткой"
 
 #: src/Actions/GenerateWaybillAction.php:33
 #: src/Actions/GenerateWaybillAction.php:54
-msgid "Failed to create receipt.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)"
-msgstr "Не удалось создать квитанцию.\nНеобходимо попробовать пересоздать заказ.\nВозможно, потребуется отменить существующий (если такая кнопка есть)"
+msgid "Failed to create waybill.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)"
+msgstr "Не удалось создать накладную.\nНеобходимо попробовать пересоздать заказ.\nВозможно, потребуется отменить существующий (если такая кнопка есть)"
 
 #: src/Actions/GenerateWaybillAction.php:75
-msgid "Failed to create receipt.\nRequest a receipt again"
-msgstr "Не удалось создать квитанцию.\nНеобходимо повторно запросить квитанцию"
+msgid "Failed to create waybill.\nTry again"
+msgstr "Не удалось создать накладную.\nНеобходимо попробовать еще раз"
 
 #: src/Actions/GenerateWaybillAction.php:85
-msgid "A request for a receipt was sent, but no response was received.\nWait for 1 hour before trying again"
-msgstr "Запрос на квитанцию был отправлен, но ответ по нему не пришел.\nНеобходимо подождать 1 час перед повторной попыткой"
+msgid "A request for a waybill was sent, but no response was received.\nWait for 1 hour before trying again"
+msgstr "Запрос на накладную был отправлен, но ответ по нему не пришел.\nНеобходимо подождать 1 час перед повторной попыткой"
 
 #: src/Actions/RecalculateShippingAction.php:81
 msgid "The selected CDEK tariff is not available with the specified parameters. Available tariffs with codes: "

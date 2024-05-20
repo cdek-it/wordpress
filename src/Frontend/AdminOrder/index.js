@@ -1,8 +1,9 @@
+'use strict';
 import $ from 'jquery';
 import './styles/main.scss';
 import apiFetch from '@wordpress/api-fetch';
 
-$(document).ready(function() {
+$(document).ready(() => {
     let packageList = [];
 
     checkOrderAvailable();
@@ -66,7 +67,7 @@ $(document).ready(function() {
         }
     });
 
-    $('#cdek-order-waybill').click(function(e) {
+    $('#cdek-order-waybill, #cdek-order-barcode').click(function(e) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -74,13 +75,28 @@ $(document).ready(function() {
 
         loader.show();
 
-        apiFetch({
-            method: 'GET', url: e.target.href,
-        }).then(resp => {
-            if(!resp.status){
+        apiFetch({ method: 'GET', url: e.target.href }).then(resp => {
+            if (!resp.success) {
                 alert(resp.message);
                 return;
             }
+
+            const binaryString = window.atob(resp.data);
+            const uint8Array = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                uint8Array[i] = binaryString.charCodeAt(i);
+            }
+            const dataUrl = window.URL.createObjectURL(
+              new Blob([uint8Array], { type: 'application/pdf' }));
+
+            const a = window.document.createElement('a');
+            a.target = '_blank';
+            a.href = dataUrl;
+            window.document.body.appendChild(a);
+            a.click();
+            a.remove();
+
+            setTimeout(() => URL.revokeObjectURL(dataUrl), 200);
         })
           .catch(e => console.error(e))
           .finally(() => loader.hide());

@@ -30,7 +30,7 @@ namespace Cdek\Actions {
             if (!isset($order['entity'])) {
                 return [
                     'success' => false,
-                    'message' => esc_html__("Failed to create receipt.\nTo solve the problem, try re-creating the order.\nYou may need to cancel existing one (if that button exists)",
+                    'message' => esc_html__("Failed to create waybill.\nTo solve the problem, try re-creating the order.\nYou may need to cancel existing one (if that button exists)",
                                             'cdekdelivery'),
                 ];
             }
@@ -51,7 +51,7 @@ namespace Cdek\Actions {
             if (!isset($waybill['entity'])) {
                 return [
                     'success' => false,
-                    'message' => esc_html__("Failed to create receipt.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)",
+                    'message' => esc_html__("Failed to create waybill.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)",
                                             'cdekdelivery'),
                 ];
             }
@@ -72,7 +72,7 @@ namespace Cdek\Actions {
                 if (!isset($waybillInfo['entity']) || end($waybillInfo['entity']['statuses'])['code'] === 'INVALID') {
                     return [
                         'success' => false,
-                        'message' => esc_html__("Failed to create receipt.\nRequest a receipt again", 'cdekdelivery'),
+                        'message' => esc_html__("Failed to create waybill.\nTry again", 'cdekdelivery'),
                     ];
                 }
 
@@ -81,7 +81,7 @@ namespace Cdek\Actions {
 
             return [
                 'success' => false,
-                'message' => esc_html__("A request for a receipt was sent, but no response was received.\nWait for 1 hour before trying again",
+                'message' => esc_html__("A request for a waybill was sent, but no response was received.\nWait for 1 hour before trying again",
                                         'cdekdelivery'),
             ];
         }
