@@ -31,7 +31,7 @@ namespace Cdek\UI {
 
             $city = $api->getCityCode($cityInput, $postcodeInput);
 
-            if($city === -1){
+            if ($city === -1) {
                 $city = $api->getCityCode($cityInput, '');
             }
 
@@ -50,13 +50,14 @@ namespace Cdek\UI {
                 return false;
             }
 
-            $shippingMethodIdSelected = wc_get_chosen_shipping_method_ids()[0];
+            $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods', []);
 
-            if ($shippingMethodCurrent->get_id() !== $shippingMethodIdSelected) {
+            if (empty($shippingMethodIdSelected[0]) ||
+                $shippingMethodCurrent->get_id() !== $shippingMethodIdSelected[0]) {
                 return false;
             }
 
-            $tariffCode = explode('_', $shippingMethodIdSelected)[2];
+            $tariffCode = explode(':', $shippingMethodIdSelected[0])[1];
 
             return Tariff::isTariffToOffice($tariffCode);
         }
