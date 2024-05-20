@@ -16,6 +16,8 @@ namespace Cdek\Actions {
     use Cdek\MetaKeys;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
+    use Cdek\Note;
+    use Cdek\Exceptions\PhoneNotValidException;
     use Exception;
     use Throwable;
     use WC_Order;
@@ -44,10 +46,11 @@ namespace Cdek\Actions {
                 'pvz_code'    => $shippingMethod->get_meta(MetaKeys::OFFICE_CODE) ?: $postOrderData['pvz_code'] ?: null,
             ];
 
-            $param             = $this->buildRequestData($order, $postOrderData);
-            $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
-
             try {
+                
+                $param             = $this->buildRequestData($order, $postOrderData);
+                $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
+
                 $orderData = $this->api->createOrder($param);
 
                 sleep(1);
@@ -77,6 +80,16 @@ namespace Cdek\Actions {
                     'available' => $actionOrderAvailable,
                     'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
                 ];
+
+            } catch(PhoneNotValidException $e) {
+                Note::send($order->get_id(), sprintf(__(/* translators: 1: error */'Cdek shipping error: %1$s', 
+                    'cdekdelivery'), $e->getMessage()));
+                    
+                return [
+                        'state'   => false,
+                        'message' => $e->getMessage(),
+                    ];
+
             } catch (Throwable $e) {
                 if ($attempt < 1 || $attempt > 5) {
                     throw $e;
@@ -93,6 +106,10 @@ namespace Cdek\Actions {
 
         private function buildRequestData(WC_Order $order, $postOrderData): array
         {
+            $countryCode = trim(($order->get_shipping_country() ?: $order->get_billing_country()) ?? 'RU');
+            $recipientNumber = trim($order->get_shipping_phone() ?: $order->get_billing_phone());
+            Helper::validateCdekPhoneNumber($recipientNumber, $countryCode);
+            
             $deliveryMethod = Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
                                                                             ->get_data()['instance_id']);
 
@@ -129,7 +146,7 @@ namespace Cdek\Actions {
                                 ($order->get_shipping_last_name() ?: $order->get_billing_last_name()),
                     'email'  => $order->get_billing_email(),
                     'phones' => [
-                        'number' => $order->get_shipping_phone() ?: $order->get_billing_phone(),
+                        'number' => trim($order->get_shipping_phone() ?: $order->get_billing_phone()),
                     ],
                 ],
             ];

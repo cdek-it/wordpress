@@ -11,6 +11,7 @@ namespace Cdek\Validator {
     use Cdek\Config;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Model\Tariff;
+    use Cdek\Helper;
 
     class CheckoutProcessValidator
     {
@@ -31,6 +32,8 @@ namespace Cdek\Validator {
 
             $city  = CheckoutHelper::getValueFromCurrentSession('city');
             $state = CheckoutHelper::getValueFromCurrentSession('postcode');
+            $country = CheckoutHelper::getValueFromCurrentSession('country');
+            $phone = CheckoutHelper::getValueFromCurrentSession('phone');
 
             $cityCode = $api->getCityCode($city, $state);
             if ($cityCode === -1) {
@@ -47,6 +50,12 @@ namespace Cdek\Validator {
                 }
             } elseif (empty(CheckoutHelper::getValueFromCurrentSession('address_1'))) {
                 wc_add_notice(__('No shipping address.', 'cdekdelivery'), 'error');
+            }
+
+            try {
+                Helper::validateCdekPhoneNumber($phone, $country);
+            } catch (\Throwable $e) {
+                wc_add_notice($e->getMessage(), 'error');
             }
         }
     }

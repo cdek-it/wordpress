@@ -689,3 +689,11 @@ msgstr ""
 #: src/Validator/ValidateCourierFormData.php:196
 msgid "Height must be a number"
 msgstr ""
+
+#: src/Exceptions/PhoneNotValidException.php:15
+msgid "Incorrect phone number: %1$s"
+msgstr ""
+
+#: src/Actions/CreateOrderAction.php:85
+msgid "Cdek shipping error: %1$s"
+msgstr ""

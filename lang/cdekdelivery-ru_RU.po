@@ -721,3 +721,11 @@ msgstr "Высота обязательна для заполнения"
 #: src/Validator/ValidateCourierFormData.php:196
 msgid "Height must be a number"
 msgstr "Высота должна быть числом"
+
+#: src/Exceptions/PhoneNotValidException.php:15
+msgid "Incorrect phone number: %1$s"
+msgstr "Некорректный номер телефона: %1$s"
+
+#: src/Actions/CreateOrderAction.php:85
+msgid "Cdek shipping error: %1$s"
+msgstr "Ошибка оформления сдек: %1$s"
