@@ -669,7 +669,7 @@ msgid "Order created"
 msgstr ""
 
 #: templates/admin/order_created.php:33
-msgid "Get \n\r invoice"
+msgid "Get invoice"
 msgstr ""
 
 #: templates/admin/order_created.php:36
@@ -685,11 +685,11 @@ msgid "Application number"
 msgstr ""
 
 #: templates/admin/order_created.php:55
-msgid "Cancel \n\r the application"
+msgid "Cancel the application"
 msgstr ""
 
 #: templates/admin/order_created.php:72
-msgid "Cancel \n\r the order"
+msgid "Cancel the order"
 msgstr ""
 
 #: templates/admin/call_courier_form.php:19

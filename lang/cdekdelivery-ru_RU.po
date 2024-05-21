@@ -688,8 +688,8 @@ msgid "Order created"
 msgstr "Заказ создан"
 
 #: templates/admin/order_created.php:33
-msgid "Get \n\r invoice"
-msgstr "Получить \n\r накладную"
+msgid "Get invoice"
+msgstr "Получить накладную"
 
 #: templates/admin/order_created.php:36
 msgid "Get barcode"
@@ -704,12 +704,12 @@ msgid "Application number"
 msgstr "Номер заявки"
 
 #: templates/admin/order_created.php:55
-msgid "Cancel \n\r the application"
-msgstr "Отменить \n\r заявку"
+msgid "Cancel the application"
+msgstr "Отменить заявку"
 
 #: templates/admin/order_created.php:72
-msgid "Cancel \n\r the order"
-msgstr "Отменить \n\r заказ"
+msgid "Cancel the order"
+msgstr "Отменить заказ"
 
 #: templates/admin/call_courier_form.php:19
 msgid "Courier waiting date"

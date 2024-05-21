@@ -30,7 +30,7 @@ if (!$orderNumber) { ?>style="display: none" <?php
                         echo esc_html($orderNumber) ?></b></p>
                 <a id="cdek-order-waybill"
                    href="<?php
-                   echo esc_url(UrlHelper::buildRest("order/$orderIdWP/waybill")) ?>"><?php _e("Get \n\r invoice", 'cdekdelivery') ?></a>
+                   echo esc_url(UrlHelper::buildRest("order/$orderIdWP/waybill")) ?>"><?php _e("Get invoice", 'cdekdelivery') ?></a>
                 <a id="cdek-order-barcode"
                    href="<?php
                    echo esc_url(UrlHelper::buildRest("order/$orderIdWP/barcode")) ?>"><?php _e('Get barcode', 'cdekdelivery') ?></a>
@@ -52,7 +52,7 @@ if (!$orderNumber) { ?>style="display: none" <?php
                     echo esc_html($courierNumber) ?></p>
                 <p id="cdek-courier-delete"
                    data-action="<?php
-                   echo esc_url(UrlHelper::buildRest("order/$orderIdWP/courier/delete")) ?>"><?php _e("Cancel \n\r the application", 'cdekdelivery') ?></p>
+                   echo esc_url(UrlHelper::buildRest("order/$orderIdWP/courier/delete")) ?>"><?php _e("Cancel the application", 'cdekdelivery') ?></p>
             </div>
 
             <div id="call-courier-form">
@@ -69,7 +69,7 @@ if (!$orderNumber) { ?>style="display: none" <?php
             <p id="cdek-delete-order-error" class="form-field form-field-wide wc-order-status"
                style="display: none"></p>
             <a id="delete-order-btn" href="<?php
-            echo esc_url(UrlHelper::buildRest("order/$orderIdWP/delete")) ?>"><?php _e("Cancel \n\r the order", 'cdekdelivery') ?></a>
+            echo esc_url(UrlHelper::buildRest("order/$orderIdWP/delete")) ?>"><?php _e("Cancel the order", 'cdekdelivery') ?></a>
         </div>
         <?php
     } ?>
