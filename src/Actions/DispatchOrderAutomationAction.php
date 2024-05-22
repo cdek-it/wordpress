@@ -38,7 +38,7 @@ class DispatchOrderAutomationAction
         }
 
         as_schedule_single_action(time() + 60 * 5, Config::ORDER_AUTOMATION_HOOK_NAME, [
-            $orderId,
+            $order->get_id(),
             1,
         ], 'cdekdelivery');
     }
