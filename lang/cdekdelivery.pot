@@ -9,14 +9,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "X-Domain: official-cdek\n"
 
-#: src/Actions/DispatchOrderAutomationAction.php:39
-msgid "Order automation failed with error: %s"
-msgstr ""
-
-#: src/Actions/DispatchOrderAutomationAction.php:36
-msgid "Order automation failed with error"
-msgstr ""
-
 #: src/Fieldsets/InternationalOrderFields.php:20
 msgid "Passport Series"
 msgstr ""

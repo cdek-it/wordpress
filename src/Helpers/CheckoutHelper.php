@@ -16,6 +16,7 @@ namespace Cdek\Helpers {
     use Throwable;
     use WC_Order;
     use WC_Order_Item;
+    use WC_Order_Item_Shipping;
 
     class CheckoutHelper
     {
@@ -66,14 +67,18 @@ namespace Cdek\Helpers {
             }
         }
 
-        public static function getOrderShippingMethod(WC_Order $order): WC_Order_Item
+        public static function getOrderShippingMethod(WC_Order $order): WC_Order_Item_Shipping
         {
-            $shippingMethodArray = $order->get_items('shipping');
+            $shippingMethodArray = $order->get_shipping_methods();
             if (empty($shippingMethodArray)) {
                 throw new ShippingMethodNotFoundException('Order don\'t have shipping methods');
             }
 
-            return array_shift($shippingMethodArray);
+            $method = array_shift($shippingMethodArray);
+
+            assert($method instanceof WC_Order_Item_Shipping);
+
+            return $method;
         }
 
         public static function restoreCheckoutFields(array $fields): array

@@ -1,14 +1,8 @@
 const defaultConfig = require('@wordpress/scripts/config/webpack.config');
 const WooCommerceDependencyExtractionWebpackPlugin = require(
   '@woocommerce/dependency-extraction-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const { resolve } = require('path');
 const CopyPlugin = require('copy-webpack-plugin');
-
-// Remove SASS rule from the default config so we can define our own.
-const defaultRules = defaultConfig.module.rules.filter((rule) => {
-    return String(rule.test) !== String(/\.(sc|sa)ss$/);
-});
 
 module.exports = {
     ...defaultConfig, entry: {
@@ -22,24 +16,9 @@ module.exports = {
           'CheckoutMapShortcode', 'index.js'),
         'cdek-create-order': resolve(process.cwd(), 'src', 'Frontend',
           'AdminOrder', 'index.js'),
-    }, module: {
-        ...defaultConfig.module, rules: [
-            ...defaultRules, {
-                test: /\.(sc|sa)ss$/, exclude: /node_modules/, use: [
-                    MiniCssExtractPlugin.loader,
-                    { loader: 'css-loader', options: { importLoaders: 1 } },
-                    {
-                        loader: 'sass-loader', options: {
-                            sassOptions: {
-                                includePaths: ['src/Frontend/**/style'],
-                            },
-                        },
-                    }],
-            }],
     }, plugins: [
         ...defaultConfig.plugins.filter((plugin) => plugin.constructor.name !==
-          'DependencyExtractionWebpackPlugin' && plugin.constructor.name !==
-          'MiniCSSExtractPlugin'),
+          'DependencyExtractionWebpackPlugin'),
         new WooCommerceDependencyExtractionWebpackPlugin({
             requestToExternal: r => (r === '@cdek-it/widget')
               ? 'CDEKWidget'
@@ -47,9 +26,6 @@ module.exports = {
             requestToHandle: r => (r === '@cdek-it/widget')
               ? 'cdek-widget'
               : undefined,
-        }),
-        new MiniCssExtractPlugin({
-            filename: `[name].css`,
         }),
         new CopyPlugin({
             patterns: [
