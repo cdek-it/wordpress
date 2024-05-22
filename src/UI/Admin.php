@@ -14,7 +14,6 @@ namespace Cdek\UI {
 
     class Admin
     {
-
         public static function addPluginLinks(array $links): array
         {
             array_unshift($links, '<a href="'.
@@ -50,6 +49,7 @@ namespace Cdek\UI {
 
         public static function registerAdminScripts(): void
         {
+            // Not on an Orders page.
             if (!isset($_GET['tab']) || $_GET['tab'] !== 'shipping') {
                 return;
             }
@@ -65,6 +65,13 @@ namespace Cdek\UI {
 
         public static function registerOrderScripts(): void
         {
+            global $plugin_page, $pagenow;
+
+            // Not on an Orders page.
+            if ('admin.php' !== $pagenow || 0 !== strpos($plugin_page, 'wc-orders')) {
+                return;
+            }
+
             Helper::enqueueScript('cdek-admin-create-order', 'cdek-create-order', true);
         }
 

@@ -15,8 +15,8 @@ class CdekShippingMethod extends WC_Shipping_Method
         parent::__construct($instance_id);
         $this->id                 = Config::DELIVERY_NAME;
         $this->instance_id        = absint($instance_id);
-        $this->method_title       = __('Cdek Shipping', 'cdekdelivery');
-        $this->method_description = __('Official Shipping Method for Cdek', 'cdekdelivery');
+        $this->method_title       = esc_html__('CDEK Shipping', 'cdekdelivery');
+        $this->method_description = esc_html__('Official Shipping Method for Cdek', 'cdekdelivery');
         $this->supports           = [
             'settings',
             'shipping-zones',
@@ -28,7 +28,7 @@ class CdekShippingMethod extends WC_Shipping_Method
 
     final public function init(): void
     {
-        $this->title = __('CDEK Shipping', 'cdekdelivery');
+        $this->title = esc_html__('CDEK Shipping', 'cdekdelivery');
         $this->init_settings();
         add_action('woocommerce_update_options_shipping_'.$this->id, [$this, 'process_admin_options']);
         $this->init_form_fields();
@@ -38,11 +38,11 @@ class CdekShippingMethod extends WC_Shipping_Method
     {
         $this->instance_form_fields = [
             'use_delivery_price_rules' => [
-                'title' => __('Use delivery amount display rules for a zone', 'cdekdelivery'),
+                'title' => esc_html__('Use delivery amount display rules for a zone', 'cdekdelivery'),
                 'type'  => 'checkbox',
             ],
             'delivery_price_rules'     => [
-                'title' => __('Rules for displaying the delivery amount', 'cdekdelivery'),
+                'title' => esc_html__('Rules for displaying the delivery amount', 'cdekdelivery'),
                 'label' => '',
                 'type'  => 'hidden',
             ],
@@ -51,27 +51,27 @@ class CdekShippingMethod extends WC_Shipping_Method
         $this->form_fields = [
             'auth_block_name'                => [
                 'title' => '<h3 style="text-align: center;">' .
-                           __('Authorization', 'cdekdelivery') .
+                           esc_html__('Authorization', 'cdekdelivery') .
                            '</h3>',
                 'type'  => 'title',
                 'class' => 'cdek_setting_block_name',
             ],
             'test_mode'                      => [
-                'title'       => __('Test mode', 'cdekdelivery'),
+                'title'       => esc_html__('Test mode', 'cdekdelivery'),
                 'type'        => 'checkbox',
                 'default'     => false,
                 'desc_tip'    => true,
-                'description' => __('When enabled, the test API is used', 'cdekdelivery'),
+                'description' => esc_html__('When enabled, the test API is used', 'cdekdelivery'),
             ],
             'client_id'                      => [
-                'title'             => __('Identifier', 'cdekdelivery'),
+                'title'             => esc_html__('Identifier', 'cdekdelivery'),
                 'type'              => 'text',
                 'custom_attributes' => [
                     'required' => true,
                 ],
             ],
             'client_secret'                  => [
-                'title'             => __('The secret key', 'cdekdelivery'),
+                'title'             => esc_html__('The secret key', 'cdekdelivery'),
                 'type'              => 'text',
                 'custom_attributes' => [
                     'required' => true,
@@ -79,46 +79,46 @@ class CdekShippingMethod extends WC_Shipping_Method
             ],
             'yandex_map_api_key'             => [
                 'type'              => 'text',
-                'title'             => __('Yandex map key', 'cdekdelivery'),
+                'title'             => esc_html__('Yandex map key', 'cdekdelivery'),
                 'description'       => str_replace(
                     '<a>',
                     '<a rel="noopener nofollower" href="https://yandex.ru/dev/jsapi-v2-1/doc/ru/#get-api-key" target="_blank">',
-                    __('Yandex API access key. The generation process is described on <a>the page</a>', 'cdekdelivery')
+                    esc_html__('Yandex API access key. The generation process is described on <a>the page</a>', 'cdekdelivery')
                 ),
                 'custom_attributes' => [
                     'required' => true,
                 ],
             ],
             'seller_block_name'              => [
-                'title' => '<h3 style="text-align: center;">' . __('Client', 'cdekdelivery') . '</h3>',
+                'title' => '<h3 style="text-align: center;">' . esc_html__('Client', 'cdekdelivery') . '</h3>',
                 'type'  => 'title',
                 'class' => 'cdek_setting_block_name',
             ],
             'seller_company'                 => [
-                'title'             => __('Company name', 'cdekdelivery'),
+                'title'             => esc_html__('Company name', 'cdekdelivery'),
                 'type'              => 'text',
                 'custom_attributes' => [
                     'required' => true,
                 ],
             ],
             'seller_name'                    => [
-                'title'             => __('FIO', 'cdekdelivery'),
+                'title'             => esc_html__('Full name', 'cdekdelivery'),
                 'type'              => 'text',
                 'custom_attributes' => [
                     'required' => true,
                 ],
             ],
             'seller_phone'                   => [
-                'title'             => __('Phone', 'cdekdelivery'),
+                'title'             => esc_html__('Phone', 'cdekdelivery'),
                 'type'              => 'text',
                 'desc_tip'          => true,
-                'description'       => __('Must be transmitted in international format: country code (for Russia +7) and the number itself (10 or more digits)', 'cdekdelivery'),
+                'description'       => esc_html__('Must be transmitted in international format: country code (for Russia +7) and the number itself (10 or more digits)', 'cdekdelivery'),
                 'custom_attributes' => [
                     'required' => true,
                 ],
             ],
             'seller_email'                   => [
-                'title'             => __('Company email address', 'cdekdelivery'),
+                'title'             => esc_html__('Company email address', 'cdekdelivery'),
                 'type'              => 'text',
                 'custom_attributes' => [
                     'required' => true,
@@ -126,56 +126,56 @@ class CdekShippingMethod extends WC_Shipping_Method
                 ],
             ],
             'international_title'            => [
-                'title' => __('International orders', 'cdekdelivery'),
+                'title' => esc_html__('International orders', 'cdekdelivery'),
                 'type'  => 'title',
             ],
             'international_mode'             => [
-                'title'       => __('Enable international order mode', 'cdekdelivery'),
+                'title'       => esc_html__('Enable international order mode', 'cdekdelivery'),
                 'type'        => 'checkbox',
                 'desc_tip'    => true,
-                'description' => __("When the international orders mode is enabled, additional fields will appear on the checkout page:\n\r passport series, passport number, date of issue, department, TIN, date of birth.", 'cdekdelivery'),
+                'description' => esc_html__("When the international orders mode is enabled, additional fields will appear on the checkout page:\n\r passport series, passport number, date of issue, department, TIN, date of birth.", 'cdekdelivery'),
                 'default'     => 'no',
             ],
             'seller_address'                 => [
-                'title'       => __('True seller address', 'cdekdelivery'),
+                'title'       => esc_html__('True seller address', 'cdekdelivery'),
                 'type'        => 'text',
                 'desc_tip'    => true,
-                'description' => __("Address of the actual seller. Used when printing invoices to display the address of the present\n\r seller of the product or trade name. For international orders", 'cdekdelivery'),
+                'description' => esc_html__("Address of the actual seller. Used when printing invoices to display the address of the present\n\r seller of the product or trade name. For international orders", 'cdekdelivery'),
             ],
             'shipper_name'                   => [
-                'title'       =>  __('Shipper', 'cdekdelivery'),
+                'title'       =>  esc_html__('Shipper', 'cdekdelivery'),
                 'type'        => 'text',
                 'desc_tip'    => true,
-                'description' => __('Shipper`s company name for international orders', 'cdekdelivery'),
+                'description' => esc_html__('Shipper`s company name for international orders', 'cdekdelivery'),
             ],
             'shipper_address'                => [
-                'title'       => __('Shipper`s address', 'cdekdelivery'),
+                'title'       => esc_html__('Shipper`s address', 'cdekdelivery'),
                 'type'        => 'text',
                 'desc_tip'    => true,
-                'description' => __('Shipping company address for international orders', 'cdekdelivery'),
+                'description' => esc_html__('Shipping company address for international orders', 'cdekdelivery'),
             ],
             'passport_series'                => [
-                'title' => __('Passport Series', 'cdekdelivery'),
+                'title' => esc_html__('Passport Series', 'cdekdelivery'),
                 'type'  => 'text',
             ],
             'passport_number'                => [
-                'title'             => __('Passport number', 'cdekdelivery'),
+                'title'             => esc_html__('Passport number', 'cdekdelivery'),
                 'type'              => 'text',
                 'custom_attributes' => [
                     'pattern' => '\d*',
                 ],
             ],
             'passport_date_of_issue'         => [
-                'title'       => __('Passport date of issue', 'cdekdelivery'),
+                'title'       => esc_html__('Passport date of issue', 'cdekdelivery'),
                 'type'        => 'date',
                 'date_format' => 'd.m.Y',
             ],
             'passport_organization'          => [
-                'title' => __('Passport organization', 'cdekdelivery'),
+                'title' => esc_html__('Passport organization', 'cdekdelivery'),
                 'type'  => 'text',
             ],
             'tin'                            => [
-                'title'             => __('TIN', 'cdekdelivery'),
+                'title'             => esc_html__('TIN', 'cdekdelivery'),
                 'type'              => 'text',
                 'desc_tip'          => true,
                 'custom_attributes' => [
@@ -183,7 +183,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 ],
             ],
             'passport_date_of_birth'         => [
-                'title'       => __('Birthday', 'cdekdelivery'),
+                'title'       => esc_html__('Birthday', 'cdekdelivery'),
                 'type'        => 'date',
                 'date_format' => 'd.m.Y',
             ],
@@ -406,7 +406,7 @@ class CdekShippingMethod extends WC_Shipping_Method
         return $option;
     }
 
-    public function calculate_shipping($package = []): void
+   final public function calculate_shipping($package = []): void
     {
         $deliveryCalc = new DeliveryCalc($this->get_instance_id());
         if (!$deliveryCalc->calculate($package)) {

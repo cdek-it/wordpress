@@ -83,7 +83,7 @@ namespace Cdek\Actions {
 
             } catch (PhoneNotValidException $e) {
                 Note::send($order->get_id(),
-                           sprintf(__(/* translators: 1: error */ 'Cdek shipping error: %1$s', 'cdekdelivery'),
+                           sprintf(__(/* translators: 1: error message */ 'Cdek shipping error: %1$s', 'cdekdelivery'),
                                    $e->getMessage()));
 
                 return [

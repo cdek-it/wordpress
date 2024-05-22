@@ -5,11 +5,11 @@ defined('ABSPATH') or exit;
 /** @var $actionOrderAvailable */
 
 if (empty($cdekStatuses)) { ?>
-    <p><?php _e("No order statuses found. Try reloading the page later", 'cdekdelivery') ?></p>
+    <p><?php esc_html_e('No order statuses found. Try reloading the page later', 'cdekdelivery') ?></p>
     <?php
 } else { ?>
     <p id="cdek-status-block" data-status-available="<?php
-    echo esc_attr((int) $actionOrderAvailable) ?>"><?php _e("Order statuses", 'cdekdelivery') ?></p>
+    echo esc_attr((int) $actionOrderAvailable) ?>"><?php esc_html_e('Order statuses', 'cdekdelivery') ?></p>
     <hr>
     <div class="cdek-order-status-elem-time"><?php
         echo esc_html($cdekStatuses[0]['time']) ?></div>
@@ -32,4 +32,4 @@ if (empty($cdekStatuses)) { ?>
         } ?>
     </div>
     <?php
-} ?>
+}

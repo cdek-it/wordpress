@@ -79,7 +79,7 @@ namespace Cdek\Blocks {
         {
             return [
                 'points' => [
-                    'description' => 'JSONifiend array of available CDEK offices',
+                    'description' => esc_html__('JSONifiend array of available CDEK offices', 'cdekdelivery'),
                     'type'        => 'string',
                     'readonly'    => true,
                     'context'     => ['view', 'edit'],
@@ -91,7 +91,7 @@ namespace Cdek\Blocks {
         {
             return [
                 'office_code' => [
-                    'description' => 'Code of selected CDEK office for delivery',
+                    'description' => esc_html__('Code of selected CDEK office for delivery', 'cdekdelivery'),
                     'type'        => ['string', 'null'],
                     'readonly'    => true,
                     'context'     => ['view', 'edit'],
@@ -121,8 +121,8 @@ namespace Cdek\Blocks {
 
         public function initialize(): void
         {
-            Helper::enqueueScript('cdek-checkout-map-block-frontend', 'cdek-checkout-map-block-frontend');
-            Helper::enqueueScript('cdek-checkout-map-block-editor', 'cdek-checkout-map-block', true);
+            Helper::enqueueScript('cdek-checkout-map-block-frontend', 'cdek-checkout-map-block-frontend', false, true);
+            Helper::enqueueScript('cdek-checkout-map-block-editor', 'cdek-checkout-map-block', false, true);
         }
 
         public function get_script_handles(): array

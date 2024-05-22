@@ -26,7 +26,7 @@ namespace Cdek\UI {
                 echo '<div class="notice notice-info is-dismissible"><p> ' .
                      sprintf(
                          __(
-                             "CDEKDelivery: The selected weight unit %s is not supported by this plugin.\n\rYou can use the default value for product dimensions.\n\rYou can also contact plugin support for more information.\n\rOtherwise, the unit of measurement will be automatically treated as grams.",
+                             "CDEKDelivery: The selected weight unit %s is not supported by this plugin.\nYou can use the default value for product dimensions.\nYou can also contact plugin support for more information.\nOtherwise, the unit of measurement will be automatically treated as grams.",
                              'cdekdelivery'
                          ),
                         esc_html($measurement)

@@ -19,7 +19,8 @@ use Cdek\Helpers\UrlHelper;
 if (!$orderNumber) { ?>style="display: none" <?php
 } ?>>
     <div>
-        <h3 style="margin-bottom: 0"><?php _e('Order created', 'cdekdelivery') ?></h3>
+        <h3 style="margin-bottom: 0"><?php
+            esc_html_e('Order created', 'cdekdelivery') ?></h3>
         <div id="cdek-order-number-block">
             <div>
                 <div id="cdek-order-status-block">
@@ -30,14 +31,17 @@ if (!$orderNumber) { ?>style="display: none" <?php
                         echo esc_html($orderNumber) ?></b></p>
                 <a id="cdek-order-waybill"
                    href="<?php
-                   echo esc_url(UrlHelper::buildRest("order/$orderIdWP/waybill")) ?>"><?php _e("Get invoice", 'cdekdelivery') ?></a>
+                   echo esc_url(UrlHelper::buildRest("order/$orderIdWP/waybill")) ?>"><?php
+                    esc_html_e('Get waybill', 'cdekdelivery') ?></a>
                 <a id="cdek-order-barcode"
                    href="<?php
-                   echo esc_url(UrlHelper::buildRest("order/$orderIdWP/barcode")) ?>"><?php _e('Get barcode', 'cdekdelivery') ?></a>
+                   echo esc_url(UrlHelper::buildRest("order/$orderIdWP/barcode")) ?>"><?php
+                    esc_html_e('Get barcode', 'cdekdelivery') ?></a>
                 <?php
                 if ($actionOrderAvailable) { ?>
                     <p id="cdek-order-courier">
-                        <?php _e('Call the courier', 'cdekdelivery') ?></p>
+                        <?php
+                        esc_html_e('Call the courier', 'cdekdelivery') ?></p>
                     <?php
                 } ?>
             </div>
@@ -48,11 +52,13 @@ if (!$orderNumber) { ?>style="display: none" <?php
             } else { ?> style="margin-top: 10px;" <?php
             } ?>>
                 <hr>
-                <p id="cdek-courier-info"><?php _e('Application number', 'cdekdelivery') ?>: <?php
+                <p id="cdek-courier-info"><?php
+                    esc_html_e('Request number', 'cdekdelivery') ?>: <?php
                     echo esc_html($courierNumber) ?></p>
                 <p id="cdek-courier-delete"
                    data-action="<?php
-                   echo esc_url(UrlHelper::buildRest("order/$orderIdWP/courier/delete")) ?>"><?php _e("Cancel the application", 'cdekdelivery') ?></p>
+                   echo esc_url(UrlHelper::buildRest("order/$orderIdWP/courier/delete")) ?>"><?php
+                    esc_html_e("Cancel the courier request", 'cdekdelivery') ?></p>
             </div>
 
             <div id="call-courier-form">
@@ -69,7 +75,8 @@ if (!$orderNumber) { ?>style="display: none" <?php
             <p id="cdek-delete-order-error" class="form-field form-field-wide wc-order-status"
                style="display: none"></p>
             <a id="delete-order-btn" href="<?php
-            echo esc_url(UrlHelper::buildRest("order/$orderIdWP/delete")) ?>"><?php _e("Cancel the order", 'cdekdelivery') ?></a>
+            echo esc_url(UrlHelper::buildRest("order/$orderIdWP/delete")) ?>"><?php
+                esc_html_e("Cancel the order", 'cdekdelivery') ?></a>
         </div>
         <?php
     } ?>

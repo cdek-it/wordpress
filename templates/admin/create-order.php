@@ -19,4 +19,3 @@ if ($hasPackages) {
     include 'form_package.php';
 }
 include 'order_created.php';
-?>
