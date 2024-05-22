@@ -9,6 +9,7 @@ namespace Cdek\Actions {
 
     use Cdek\CdekApi;
     use Cdek\Config;
+    use Cdek\Exceptions\PhoneNotValidException;
     use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\StringHelper;
@@ -17,7 +18,6 @@ namespace Cdek\Actions {
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
     use Cdek\Note;
-    use Cdek\Exceptions\PhoneNotValidException;
     use Exception;
     use Throwable;
     use WC_Order;
@@ -47,7 +47,7 @@ namespace Cdek\Actions {
             ];
 
             try {
-                
+
                 $param             = $this->buildRequestData($order, $postOrderData);
                 $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
 
@@ -81,14 +81,15 @@ namespace Cdek\Actions {
                     'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
                 ];
 
-            } catch(PhoneNotValidException $e) {
-                Note::send($order->get_id(), sprintf(__(/* translators: 1: error */'Cdek shipping error: %1$s', 
-                    'cdekdelivery'), $e->getMessage()));
-                    
+            } catch (PhoneNotValidException $e) {
+                Note::send($order->get_id(),
+                           sprintf(__(/* translators: 1: error */ 'Cdek shipping error: %1$s', 'cdekdelivery'),
+                                   $e->getMessage()));
+
                 return [
-                        'state'   => false,
-                        'message' => $e->getMessage(),
-                    ];
+                    'state'   => false,
+                    'message' => $e->getMessage(),
+                ];
 
             } catch (Throwable $e) {
                 if ($attempt < 1 || $attempt > 5) {
@@ -106,10 +107,10 @@ namespace Cdek\Actions {
 
         private function buildRequestData(WC_Order $order, $postOrderData): array
         {
-            $countryCode = trim(($order->get_shipping_country() ?: $order->get_billing_country()) ?? 'RU');
+            $countryCode     = trim(($order->get_shipping_country() ?: $order->get_billing_country()) ?? 'RU');
             $recipientNumber = trim($order->get_shipping_phone() ?: $order->get_billing_phone());
             Helper::validateCdekPhoneNumber($recipientNumber, $countryCode);
-            
+
             $deliveryMethod = Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
                                                                             ->get_data()['instance_id']);
 
@@ -171,7 +172,7 @@ namespace Cdek\Actions {
                 $param['from_location'] = [
                     'postal_code'  => $address['postal'] ?? null,
                     'city'         => $address['city'],
-                    'address'      => $address['city'],
+                    'address'      => $address['city'].($address['address'] ? ", {$address['address']}" : ''),
                     'country_code' => $address['country'] ?? 'RU',
                 ];
             }
