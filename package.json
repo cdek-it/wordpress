@@ -16,35 +16,35 @@
     "env": "wp-env start --update"
   },
   "dependencies": {
-    "@cdek-it/widget": "^3.10.0",
-    "@woocommerce/data": "^4.1.0",
-    "@woocommerce/dependency-extraction-webpack-plugin": "^3.0.0",
-    "@woocommerce/eslint-plugin": "^2.2.0",
-    "@woocommerce/settings": "^1.0.0",
-    "@wordpress/api-fetch": "^6.54.0",
-    "@wordpress/block-editor": "^12.25.0",
-    "@wordpress/data": "^9.27.0",
-    "@wordpress/element": "^5.34.0",
-    "@wordpress/env": "^9.9.0",
-    "@wordpress/i18n": "^4.57.0",
-    "@wordpress/icons": "^9.48.0",
-    "@wordpress/prettier-config": "^3.14.0",
-    "@wordpress/scripts": "^27.8.0",
-    "@wordpress/url": "^3.58.0",
-    "jquery": "^3.7.1",
-    "lodash": "^4.17.21",
-    "moment": "^2.30.1",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "@cdek-it/widget": "^3.10",
+    "@woocommerce/data": "^4.1",
+    "@woocommerce/settings": "^1.0",
+    "@wordpress/api-fetch": "^6.54",
+    "@wordpress/block-editor": "^12.25",
+    "@wordpress/data": "^9.27",
+    "@wordpress/element": "^5.34",
+    "@wordpress/env": "^9.9",
+    "@wordpress/i18n": "^4.57",
+    "@wordpress/icons": "^9.48",
+    "@wordpress/prettier-config": "^3.14",
+    "@wordpress/scripts": "^27.8",
+    "@wordpress/url": "^3.58",
+    "jquery": "^3.7",
+    "lodash": "^4.17",
+    "moment": "^2.30",
+    "react": "^18.3",
+    "react-dom": "^18.3"
   },
   "devDependencies": {
-    "@playwright/test": "^1.43.1",
-    "mini-css-extract-plugin": "^2.9.0",
-    "prettier": "^3.2.5",
-    "webpack": "^5.91.0"
+    "@playwright/test": "^1.43",
+    "@woocommerce/dependency-extraction-webpack-plugin": "^3.0",
+    "@woocommerce/eslint-plugin": "^2.2",
+    "mini-css-extract-plugin": "^2.9",
+    "prettier": "^3.2",
+    "webpack": "^5.91"
   },
   "volta": {
-    "node": "21.7.3",
+    "node": "20.13.1",
     "yarn": "4.2.2"
   }
 }
