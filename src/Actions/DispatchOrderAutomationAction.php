@@ -14,9 +14,9 @@ class DispatchOrderAutomationAction
     /**
      * @param int|WC_Order $orderId
      */
-    public function __invoke($orderId): void
+    public function __invoke($orderId, $postedData, ?WC_Order $originalOrder = null): void
     {
-        $order = is_int($orderId) ? wc_get_order($orderId) : $orderId;
+        $order = $originalOrder ?? (is_int($orderId) ? wc_get_order($orderId) : $orderId);
 
         assert($order instanceof WC_Order, 'Order must be instance of WC_Order');
 
