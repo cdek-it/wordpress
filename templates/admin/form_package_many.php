@@ -15,10 +15,10 @@ use Cdek\Helpers\UrlHelper;
 if ($orderNumber): ?>style="display: none" <?php
 endif ?> >
     <div id="setting_block">
-        <h3>Габариты упаковки №1</h3>
+        <h3><?php _e("Packaging dimensions", 'cdekdelivery') ?> №1</h3>
         <div style="display: flex">
             <select id="selected_product">
-                <option value="-1">Выберите товар</option>
+                <option value="-1"><?php _e("Select product", 'cdekdelivery') ?></option>
                 <?php
                 foreach ($items as $key => $item): ?>
                     <option value="<?php
@@ -49,15 +49,15 @@ endif ?> >
         </div>
         <div id="package_parameters">
             <p class="form-field form-field-wide wc-order-status">
-                <label for="package_length">Длина см</label>
+                <label for="package_length"><?php _e("Length in cm", 'cdekdelivery') ?></label>
                 <input name="package_length" type="text">
             </p>
             <p class="form-field form-field-wide wc-order-status">
-                <label for="package_width">Ширина см</label>
+                <label for="package_width"><?php _e("Width in cm", 'cdekdelivery') ?></label>
                 <input name="package_width" type="text">
             </p>
             <p class="form-field form-field-wide wc-order-status">
-                <label for="package_height">Высота см</label>
+                <label for="package_height"><?php _e("Height in cm", 'cdekdelivery') ?></label>
                 <input name="package_height" type="text">
             </p>
         </div>
@@ -69,7 +69,7 @@ endif ?> >
 
     <div id="save_package_btn_block">
         <p class="form-field form-field-wide wc-order-status">
-            <button id="save_package" type="button" class="button refund-items">Сохранить</button>
+            <button id="save_package" type="button" class="button refund-items"><?php _e("Save", 'cdekdelivery') ?></button>
         </p>
     </div>
 
@@ -77,8 +77,7 @@ endif ?> >
         <p class="form-field form-field-wide wc-order-status">
             <button id="send_package" type="button" class="button refund-items"
                     data-action="<?php
-                    echo esc_url(UrlHelper::buildRest("/order/$orderIdWP/create")) ?>">Создать
-                заказ
+                    echo esc_url(UrlHelper::buildRest("/order/$orderIdWP/create")) ?>"><?php _e("Create\r\n an order", 'cdekdelivery') ?>
             </button>
         </p>
     </div>

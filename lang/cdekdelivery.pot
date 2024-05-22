@@ -49,6 +49,50 @@ msgstr ""
 msgid "Re-select pick-up"
 msgstr ""
 
+#: build/cdek-checkout-map.js:1
+msgid "CDEK was unable to load the list of available pickup points, please select another delivery method"
+msgstr ""
+
+#: build/cdek-checkout-map.js:1
+msgid "There are no CDEK pick-up points available in this direction, please select another delivery method"
+msgstr ""
+
+#: build/cdek-create-order.js:1
+msgid "Package"
+msgstr ""
+
+#: build/cdek-create-order.js:1
+msgid "Packing length not specified"
+msgstr ""
+
+#: build/cdek-create-order.js:1
+msgid "Packing width not specified"
+msgstr ""
+
+#: build/cdek-create-order.js:1
+msgid "Packing height not specified"
+msgstr ""
+
+#: build/cdek-create-order.js:1
+msgid "Products not added to packaging"
+msgstr ""
+
+#: build/cdek-admin-settings.js:1
+msgid "Error receiving token. Make sure the integration keys are correct"
+msgstr ""
+
+#: build/cdek-admin-settings.js:1
+msgid "Selected pickup point"
+msgstr ""
+
+#: build/cdek-admin-settings.js:1
+msgid "Selected address"
+msgstr ""
+
+#: build/cdek-admin-settings.js:1
+msgid "Not selected"
+msgstr ""
+
 #: src/UI/Admin.php:23
 msgid "Settings"
 msgstr ""
@@ -131,6 +175,8 @@ msgid "Apartment, suite, unit, etc. (optional)"
 msgstr ""
 
 #: src/Fieldsets/GeneralOrderFields.php:37
+#: src/CdekShippingMethod.php:111
+#: templates/admin/call_courier_form.php:49
 msgid "Phone"
 msgstr ""
 
@@ -178,275 +224,271 @@ msgid ""
 "tariffs."
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:41
+#: src/CdekShippingMethod.php:41
 msgid "Use delivery amount display rules for a zone"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:45
-#: src/CdekShippingMethod.php.php:350
+#: src/CdekShippingMethod.php:45
+#: src/CdekShippingMethod.php:350
 msgid "Rules for displaying the delivery amount"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:53
+#: src/CdekShippingMethod.php:53
 msgid "Authorization"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:53
+#: src/CdekShippingMethod.php:53
 msgid "Test mode"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:64
+#: src/CdekShippingMethod.php:64
 msgid "When enabled, the test API is used"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:67
+#: src/CdekShippingMethod.php:67
 msgid "Identifier"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:74
+#: src/CdekShippingMethod.php:74
 msgid "The secret key"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:82
+#: src/CdekShippingMethod.php:82
 msgid "Yandex map key"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:83
+#: src/CdekShippingMethod.php:83
 msgid "Yandex API access key. The generation process is described on "
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:85
+#: src/CdekShippingMethod.php:85
 msgid "the page"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:92
+#: src/CdekShippingMethod.php:92
 msgid "Client"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:97
+#: src/CdekShippingMethod.php:97
 msgid "Company name"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:104
+#: src/CdekShippingMethod.php:104
 msgid "FIO"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:111
-msgid "Phone"
-msgstr ""
-
-#: src/CdekShippingMethod.php.php:114
+#: src/CdekShippingMethod.php:114
 msgid "Must be transmitted in international format: country code (for Russia +7) and the number itself (10 or more digits)"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:120
+#: src/CdekShippingMethod.php:120
 msgid "Company email address"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:120
+#: src/CdekShippingMethod.php:120
 msgid "International orders"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:132
+#: src/CdekShippingMethod.php:132
 msgid "Enable international order mode"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:135
+#: src/CdekShippingMethod.php:135
 msgid ""
 "When the international orders mode is enabled, additional fields will appear on the checkout page:\n"
 "\r passport series, passport number, date of issue, department, TIN, date of birth."
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:140 src/CdekShippingMethod.php.php:147
+#: src/CdekShippingMethod.php:140 src/CdekShippingMethod.php:147
 msgid "True seller address"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:143
+#: src/CdekShippingMethod.php:143
 msgid ""
 "Address of the actual seller. Used when printing invoices to display the address of the present\n"
 "\r seller of the product or trade name. For international orders"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:145
+#: src/CdekShippingMethod.php:145
 msgid "Shipper"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:150
+#: src/CdekShippingMethod.php:150
 msgid "Shipper`s company name for international orders"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:153
+#: src/CdekShippingMethod.php:153
 msgid "Shipper`s address"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:156
+#: src/CdekShippingMethod.php:156
 msgid "Shipping company address for international orders"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:190
+#: src/CdekShippingMethod.php:190
 msgid "Delivery"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:195
+#: src/CdekShippingMethod.php:195
 msgid "Automatically create orders in CDEK"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:197
+#: src/CdekShippingMethod.php:197
 msgid "If you have information about the dimensions and correctly filled in shipping addresses, the CDEK invoice will be created automatically"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:200
+#: src/CdekShippingMethod.php:200
 msgid "Tariff"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:204
+#: src/CdekShippingMethod.php:204
 msgid "To select multiple tariffs, hold down the \"CTRL\" key and select tariffs with the left mouse button."
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:208
+#: src/CdekShippingMethod.php:208
 msgid "Change tariff name"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:210
+#: src/CdekShippingMethod.php:210
 msgid ""
 "In the list of tariffs in the field \"Tariffs\" the tariff code is indicated in brackets.\n"
 "\r To change the name of the tariff, an entry in the code-name format is added to the field; for multiple changes,\n"
 "\r tariffs are separated by a semicolon, for example, an entry that will change the name of tariff 136 and 137 looks like this:"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:211
+#: src/CdekShippingMethod.php:211
 msgid "136-Delivery to pick-up point; 137-Delivery by courier"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:212
+#: src/CdekShippingMethod.php:212
 msgid "If the value is not specified, the tariff names will be standard."
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:215
+#: src/CdekShippingMethod.php:215
 msgid "Multi-seater"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:218
+#: src/CdekShippingMethod.php:218
 msgid ""
 "When the 'Multi-seat' mode is enabled, the detailed order page will display\n"
 "\r the ability to create several packages for one order and distribute goods among the created packages"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:222
+#: src/CdekShippingMethod.php:222
 msgid "Add days for delivery"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:225
+#: src/CdekShippingMethod.php:225
 msgid "Number of days will be added to the estimated delivery time"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:233
+#: src/CdekShippingMethod.php:233
 msgid "Close the map after selecting pick-up"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:236
+#: src/CdekShippingMethod.php:236
 msgid "If this setting is enabled, then after selecting a pick-up point on the checkout page, the card will automatically close."
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:241
+#: src/CdekShippingMethod.php:241
 msgid "Select addresses to send on the map"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:253
+#: src/CdekShippingMethod.php:253
 msgid "Dimensions"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:258
+#: src/CdekShippingMethod.php:258
 msgid "Default weight of one item in"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:262
+#: src/CdekShippingMethod.php:262
 msgid "All goods must have their weight indicated, if there are goods without %s a specified weight, then for such goods the value from this field will be substituted. %s This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings."
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:275
+#: src/CdekShippingMethod.php:275
 msgid "Item length"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:276
+#: src/CdekShippingMethod.php:276
 msgid "Default product length in cm"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:286
+#: src/CdekShippingMethod.php:286
 msgid "Item width"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:287
+#: src/CdekShippingMethod.php:287
 msgid "Default product width in cm"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:297
+#: src/CdekShippingMethod.php:297
 msgid "Item height"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:298
+#: src/CdekShippingMethod.php:298
 msgid "Default product height in cm"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:308
+#: src/CdekShippingMethod.php:308
 msgid "Product dimensions on/off"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:309
+#: src/CdekShippingMethod.php:309
 msgid "Force the use of product dimensions (length, width and height) by default for all products"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:315
+#: src/CdekShippingMethod.php:315
 msgid "Services"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:320
+#: src/CdekShippingMethod.php:320
 msgid "Prohibition of inspection of attachment"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:321
+#: src/CdekShippingMethod.php:321
 msgid "This service is not available for tariffs to the parcel locker and is only available to clients with an IM type agreement.\n"
 "\r Also, the prohibition on inspecting the attachment does not work when the services of fitting at home and partial delivery are included."
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:326
+#: src/CdekShippingMethod.php:326
 msgid "Trying on"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:332
+#: src/CdekShippingMethod.php:332
 msgid "Partial delivery"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:338
+#: src/CdekShippingMethod.php:338
 msgid "Delivery cost"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:343
+#: src/CdekShippingMethod.php:343
 msgid "Insurance"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:344
+#: src/CdekShippingMethod.php:344
 msgid "Add insurance quote to shipping cost"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:347
+#: src/CdekShippingMethod.php:347
 msgid "Calculated based on the amount of goods in the order"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:355
+#: src/CdekShippingMethod.php:355
 msgid "Cash on delivery settings"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:357
+#: src/CdekShippingMethod.php:357
 msgid "Cash on delivery settings are applied only when sending an order from the admin\n"
 "\r panels and for the user on the checkout page are not displayed"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:343
+#: src/CdekShippingMethod.php:343
 msgid "Extra charge on order as a percentage"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:360
+#: src/CdekShippingMethod.php:360
 msgid "Calculated from the cost of the order.\n"
 "\r Changes the total amount on the receipt."
 "%s The surcharge will only appear on the receipt."
@@ -454,55 +496,55 @@ msgid "Calculated from the cost of the order.\n"
 "\r about extra charges when sending by cash on delivery."
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:343
+#: src/CdekShippingMethod.php:343
 msgid "The surcharge will only appear on the receipt."
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:343
+#: src/CdekShippingMethod.php:343
 msgid "Therefore, it is recommended to inform the user on the checkout page\n"
 "\r about extra charges when sending by cash on delivery."
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:343
+#: src/CdekShippingMethod.php:343
 msgid "Print settings"
 msgstr ""
 
-#: src/CdekShippingMethod.php.php:343
+#: src/CdekShippingMethod.php:343
 msgid "Barcode format"
 msgstr ""
 
 #: src/Controllers/CourierController.php:56
 #: src/Controllers/CourierController.php:70
-#: src/Controllers/OrderController.php.php:70
-#: src/Controllers/OrderController.php.php:107
+#: src/Controllers/OrderController.php:70
+#: src/Controllers/OrderController.php:107
 msgid "Order number"
 msgstr ""
 
-#: src/Controllers/OrderController.php.php:44
+#: src/Controllers/OrderController.php:44
 msgid "Packages"
 msgstr ""
 
-#: src/Controllers/OrderController.php.php:59
+#: src/Controllers/OrderController.php:59
 msgid "Packing length"
 msgstr ""
 
-#: src/Controllers/OrderController.php.php:64
+#: src/Controllers/OrderController.php:64
 msgid "Packing width"
 msgstr ""
 
-#: src/Controllers/OrderController.php.php:69
+#: src/Controllers/OrderController.php:69
 msgid "Packing height"
 msgstr ""
 
-#: src/Controllers/OrderController.php.php:74
+#: src/Controllers/OrderController.php:74
 msgid "Products in packaging"
 msgstr ""
 
-#: src/Controllers/OrderController.php.php:82
+#: src/Controllers/OrderController.php:82
 msgid "Product ID"
 msgstr ""
 
-#: src/Controllers/OrderController.php.php:87
+#: src/Controllers/OrderController.php:87
 msgid "Quantity of goods in packaging"
 msgstr ""
 
@@ -662,4 +704,125 @@ msgstr ""
 
 #: src/Actions/CreateOrderAction.php:85
 msgid "Cdek shipping error: %1$s"
+msgstr ""
+
+#: templates/admin/order_created.php:22
+msgid "Order created"
+msgstr ""
+
+#: templates/admin/order_created.php:33
+msgid "Get invoice"
+msgstr ""
+
+#: templates/admin/order_created.php:36
+msgid "Get barcode"
+msgstr ""
+
+#: templates/admin/order_created.php:40
+msgid "Call the courier"
+msgstr ""
+
+#: templates/admin/order_created.php:51
+msgid "Application number"
+msgstr ""
+
+#: templates/admin/order_created.php:55
+msgid "Cancel the application"
+msgstr ""
+
+#: templates/admin/order_created.php:72
+msgid "Cancel the order"
+msgstr ""
+
+#: templates/admin/call_courier_form.php:19
+msgid "Courier waiting date"
+msgstr ""
+
+#: templates/admin/call_courier_form.php:25
+msgid "Courier waiting time"
+msgstr ""
+
+#: templates/admin/call_courier_form.php:26
+msgid "from"
+msgstr ""
+
+#: templates/admin/call_courier_form.php:26
+msgid "to"
+msgstr ""
+
+#: templates/admin/call_courier_form.php:55
+msgid "The city is taken from the plugin settings. In the \"Address\" field, enter only the street, house, apartment"
+msgstr ""
+
+#: templates/admin/call_courier_form.php:57
+msgid "Comment"
+msgstr ""
+
+#: templates/admin/call_courier_form.php:60
+msgid "Description of cargo"
+msgstr ""
+
+#: templates/admin/call_courier_form.php:65
+msgid "For \"From warehouse\" tariffs, you can send several orders at once.\n"
+"\rTherefore, the dimensions may differ from those indicated when creating the order.\n"
+"\rFor \"From Door\" tariffs, you can duplicate those that were specified when creating the order"
+msgstr ""
+
+#: templates/admin/call_courier_form.php:68
+msgid "Weight in kg"
+msgstr ""
+
+#: templates/admin/call_courier_form.php:69
+#: templates/admin/form_package.php:20
+#: templates/admin/form_package_many.php:52
+msgid "Length in cm"
+msgstr ""
+
+#: templates/admin/call_courier_form.php:70
+#: templates/admin/form_package.php:24
+#: templates/admin/form_package_many.php:56
+msgid "Width in cm"
+msgstr ""
+
+#: templates/admin/call_courier_form.php:71
+#: templates/admin/form_package.php:28
+#: templates/admin/form_package_many.php:60
+msgid "Height in cm"
+msgstr ""
+
+#: templates/admin/call_courier_form.php:76
+msgid "Call required"
+msgstr ""
+
+#: templates/admin/call_courier_form.php:80
+msgid "Send"
+msgstr ""
+
+#: templates/admin/form_package.php:17
+msgid "Packaging dimensions"
+msgstr ""
+
+#: templates/admin/form_package.php:17
+msgid "Send an order to CDEK"
+msgstr ""
+
+#: templates/admin/form_package_many.php:21
+msgid "Select product"
+msgstr ""
+
+#: templates/admin/form_package_many.php:72
+msgid "Save"
+msgstr ""
+
+#: templates/admin/form_package_many.php:72
+msgid "Create\r"
+"\n an order"
+msgstr ""
+
+#: templates/admin/status_list.php:8
+msgid "No order statuses found. Try reloading the page later"
+msgstr ""
+
+#: templates/admin/status_list.php:12
+msgid "Order statuses"
 msgstr ""

@@ -1,4 +1,5 @@
 'use strict';
+import {__} from '@wordpress/i18n';
 import $ from 'jquery';
 import './styles/main.scss';
 import apiFetch from '@wordpress/api-fetch';
@@ -53,7 +54,7 @@ $(document).ready(() => {
             packageList.push(packageData);
 
             let packageInfo = '';
-            packageInfo = `Упаковка №${packageList.length} (${packageData.length}х${packageData.width}х${packageData.height}):`;
+            packageInfo = `${__('Package', 'cdekdelivery')} №${packageList.length} (${packageData.length}х${packageData.width}х${packageData.height}):`;
 
             packageData.items.forEach(function(item) {
                 packageInfo += `${item.name} х${item.quantity}, `;
@@ -141,19 +142,19 @@ $(document).ready(() => {
 
     function checkForm(packageData) {
         if (packageData.length === '') {
-            alert('Не задана длина упаковки');
+            alert(__('Packing length not specified', 'cdekdelivery'));
             return false;
         }
         if (packageData.width === '') {
-            alert('Не задана ширина упаковки');
+            alert(__('Packing width not specified', 'cdekdelivery'));
             return false;
         }
         if (packageData.height === '') {
-            alert('Не задана высота упаковки');
+            alert(__('Packing height not specified', 'cdekdelivery'));
             return false;
         }
         if (packageData.items.length === 0) {
-            alert('Не добавлены товары в упаковку');
+            alert(__('Products not added to packaging', 'cdekdelivery'));
             return false;
         }
         return true;

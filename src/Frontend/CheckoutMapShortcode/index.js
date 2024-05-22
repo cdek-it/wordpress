@@ -87,13 +87,14 @@ $(document.body)
       if (typeof points !== 'object') {
           console.error('[CDEK_MAP] backend points not object');
           closeMap(el,
-            'CDEK не смог загрузить список доступных ПВЗ, выберите другой метод доставки');
+                   __('CDEK was unable to load the list of available pickup points, please select another delivery method', 'cdekdelivery'));
 
           return;
       } else if (!points.length) {
           console.warn('[CDEK_MAP] backend points are empty');
           closeMap(el,
-            'По данному направлению нет доступных пунктов выдачи CDEK, выберите другой метод доставки');
+                   __('There are no CDEK pick-up points available in this direction, please select another delivery method')
+                   );
 
           return;
       }

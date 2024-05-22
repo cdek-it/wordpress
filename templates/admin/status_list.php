@@ -5,11 +5,11 @@ defined('ABSPATH') or exit;
 /** @var $actionOrderAvailable */
 
 if (empty($cdekStatuses)) { ?>
-    <p>Статусы заказа не найдены. Попробуйте перезагрузить страницу позднее</p>
+    <p><?php _e("No order statuses found. Try reloading the page later", 'cdekdelivery') ?></p>
     <?php
 } else { ?>
     <p id="cdek-status-block" data-status-available="<?php
-    echo esc_attr((int) $actionOrderAvailable) ?>">Статусы заказа</p>
+    echo esc_attr((int) $actionOrderAvailable) ?>"><?php _e("Order statuses", 'cdekdelivery') ?></p>
     <hr>
     <div class="cdek-order-status-elem-time"><?php
         echo esc_html($cdekStatuses[0]['time']) ?></div>
