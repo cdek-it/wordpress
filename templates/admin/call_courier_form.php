@@ -62,7 +62,7 @@ use Cdek\Helpers\UrlHelper;
             <div style="display: inline-flex; margin-top: 5px; align-items: center;">
                 <p style="margin: auto"><?php _e("Dimensions", 'cdekdelivery') ?></p>
                 <?php
-                echo wc_help_tip(__("For \"From warehouse\" tariffs, you can send several orders at once.\n\rTherefore, the dimensions may differ from those indicated when creating the order.\n\rFor \"From Door\" tariffs, you can duplicate those that were specified when creating the order.", 'cdekdelivery')); ?>
+                echo wc_help_tip(__("For \"From warehouse\" tariffs, you can send several orders at once. Therefore, the dimensions may differ from those indicated when creating the order. For \"From Door\" tariffs, you can duplicate those that were specified when creating the order.", 'cdekdelivery')); ?>
             </div>
 
             <input id="cdek-courier-weight" type="number" min="0" placeholder="<?php _e("Weight in kg", 'cdekdelivery') ?>">

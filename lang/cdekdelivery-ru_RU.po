@@ -740,12 +740,12 @@ msgid "Description of cargo"
 msgstr "Описание груза"
 
 #: templates/admin/call_courier_form.php:65
-msgid "For \"From warehouse\" tariffs, you can send several orders at once.\n"
-"\rTherefore, the dimensions may differ from those indicated when creating the order.\n"
-"\rFor \"From Door\" tariffs, you can duplicate those that were specified when creating the order"
-msgstr "Для тарифов \"От склада\" можно отправить сразу несколько заказов.\n"
-"\rПоэтому габариты могут отличаться от тех что указывались при создании заказа.\n"
-"\rДля тарифов \"От двери\" можно продублировать те что указывались при создании заказа"
+msgid "For \"From warehouse\" tariffs, you can send several orders at once. "
+"Therefore, the dimensions may differ from those indicated when creating the order. "
+"For \"From Door\" tariffs, you can duplicate those that were specified when creating the order"
+msgstr "Для тарифов \"От склада\" можно отправить сразу несколько заказов. "
+"Поэтому габариты могут отличаться от тех что указывались при создании заказа. "
+"Для тарифов \"От двери\" можно продублировать те что указывались при создании заказа"
 
 #: templates/admin/call_courier_form.php:68
 msgid "Weight in kg"
