@@ -49,14 +49,56 @@ msgid "Pickups map from CDEK"
 msgstr "Карта ПВЗ от СДЭК"
 
 #: build/cdek-checkout-map-block-frontend.js:1
-#, fuzzy
 msgid "Choose pick-up"
 msgstr "Выберите ПВЗ"
 
 #: build/cdek-checkout-map.js:1
-#, fuzzy
 msgid "Re-select pick-up"
 msgstr "Повторно выбрать ПВЗ"
+
+#: build/cdek-checkout-map.js:1
+msgid "CDEK was unable to load the list of available pickup points, please select another delivery method"
+msgstr "CDEK не смог загрузить список доступных ПВЗ, выберите другой метод доставки"
+
+#: build/cdek-checkout-map.js:1
+msgid "There are no CDEK pick-up points available in this direction, please select another delivery method"
+msgstr "По данному направлению нет доступных пунктов выдачи CDEK, выберите другой метод доставки"
+
+#: build/cdek-create-order.js:1
+msgid "Package"
+msgstr "Упаковка"
+
+#: build/cdek-create-order.js:1
+msgid "Packing length not specified"
+msgstr "Не задана длина упаковки"
+
+#: build/cdek-create-order.js:1
+msgid "Packing width not specified"
+msgstr "Не задана ширина упаковки"
+
+#: build/cdek-create-order.js:1
+msgid "Packing height not specified"
+msgstr "Не задана высота упаковки"
+
+#: build/cdek-create-order.js:1
+msgid "Products not added to packaging"
+msgstr "Не добавлены товары в упаковку"
+
+#: build/cdek-admin-settings.js:1
+msgid "Error receiving token. Make sure the integration keys are correct"
+msgstr "Ошибка при получении токена. Убедитесь, что ключи интеграции верны"
+
+#: build/cdek-admin-settings.js:1
+msgid "Selected pickup point"
+msgstr "Выбранный ПВЗ"
+
+#: build/cdek-admin-settings.js:1
+msgid "Selected address"
+msgstr "Выбранный адрес"
+
+#: build/cdek-admin-settings.js:1
+msgid "Not selected"
+msgstr "Не выбран"
 
 #: src/Validator/CheckoutProcessValidator.php:36
 msgid "Failed to determine locality in %1$s %2$s"

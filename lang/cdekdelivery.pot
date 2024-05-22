@@ -49,6 +49,50 @@ msgstr ""
 msgid "Re-select pick-up"
 msgstr ""
 
+#: build/cdek-checkout-map.js:1
+msgid "CDEK was unable to load the list of available pickup points, please select another delivery method"
+msgstr ""
+
+#: build/cdek-checkout-map.js:1
+msgid "There are no CDEK pick-up points available in this direction, please select another delivery method"
+msgstr ""
+
+#: build/cdek-create-order.js:1
+msgid "Package"
+msgstr ""
+
+#: build/cdek-create-order.js:1
+msgid "Packing length not specified"
+msgstr ""
+
+#: build/cdek-create-order.js:1
+msgid "Packing width not specified"
+msgstr ""
+
+#: build/cdek-create-order.js:1
+msgid "Packing height not specified"
+msgstr ""
+
+#: build/cdek-create-order.js:1
+msgid "Products not added to packaging"
+msgstr ""
+
+#: build/cdek-admin-settings.js:1
+msgid "Error receiving token. Make sure the integration keys are correct"
+msgstr ""
+
+#: build/cdek-admin-settings.js:1
+msgid "Selected pickup point"
+msgstr ""
+
+#: build/cdek-admin-settings.js:1
+msgid "Selected address"
+msgstr ""
+
+#: build/cdek-admin-settings.js:1
+msgid "Not selected"
+msgstr ""
+
 #: src/UI/Admin.php:23
 msgid "Settings"
 msgstr ""

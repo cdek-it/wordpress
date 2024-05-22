@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import {__} from '@wordpress/i18n';
 import cdekWidget from '@cdek-it/widget';
 import './styles/main.scss';
 import { createRoot, render } from '@wordpress/element';
@@ -8,7 +9,7 @@ $.getJSON(window.cdek_admin_settings.api.check_auth)
  .done(() => $('.token-wrong').remove())
  .fail((jqxhr) => {
      console.error(jqxhr);
-     $('p:contains(\'Custom Shipping Method for Cdek\')').after('<div class="cdek-error token-wrong">[CDEKDelivery] Ошибка при получении токена. Убедитесь, что ключи интеграции верны</div>');
+     $('p:contains(\'Custom Shipping Method for Cdek\')').after('<div class="cdek-error token-wrong">[CDEKDelivery] ' + __('Error receiving token. Make sure the integration keys are correct', 'cdekdelivery') + '</div>');
  });
 
 const showMap = () => {
@@ -16,8 +17,8 @@ const showMap = () => {
         .after('<div id="cdek-map-results"></div><div id="cdek-map"></div>');
 
     $('#cdek-map-results')
-        .append(`<div id="selected_office"><span class="icon office"></span><div><h5>Выбранный ПВЗ</h5><div class="result"></div></div></div>`)
-        .append(`<div id="selected_address"><div><h5>Выбранный адрес</h5><div class="result">Не выбран</div></div><span class="icon door"></span></div>`);
+        .append(`<div id="selected_office"><span class="icon office"></span><div><h5>${__('Selected pickup point', 'cdekdelivery')}</h5><div class="result"></div></div></div>`)
+        .append(`<div id="selected_address"><div><h5>${__('Selected address', 'cdekdelivery')}</h5><div class="result">${__('Not selected', 'cdekdelivery')}</div></div><span class="icon door"></span></div>`);
 
     const officeInput = $('input[name=woocommerce_official_cdek_pvz_code]');
     const doorInput = $('input[name=woocommerce_official_cdek_address]');
@@ -47,7 +48,7 @@ const showMap = () => {
         selectedOfficeDiv
             .removeClass('selected')
             .find('.result')
-            .html('Не выбран');
+            .html(__('Not selected', 'cdekdelivery'));
 
     };
 
@@ -73,7 +74,7 @@ const showMap = () => {
         selectedAddressDiv
             .removeClass('selected')
             .find('.result')
-            .html('Не выбран');
+            .html(__('Not selected', 'cdekdelivery'));
     };
 
     updateOfficeCode();
