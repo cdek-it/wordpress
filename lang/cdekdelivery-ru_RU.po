@@ -144,6 +144,8 @@ msgid "Apartment, suite, unit, etc. (optional)"
 msgstr "Квартира, корпус, строение и тп. (опционально)"
 
 #: src/Fieldsets/GeneralOrderFields.php:37
+#: src/CdekShippingMethod.php:111
+#: templates/admin/call_courier_form.php:49
 msgid "Phone"
 msgstr "Телефон"
 
@@ -157,6 +159,8 @@ msgstr "Имя"
 
 #: src/Actions/GenerateBarcodeAction.php:36
 #: src/Actions/GenerateBarcodeAction.php:64
+#: src/Actions/GenerateWaybillAction.php:33
+#: src/Actions/GenerateWaybillAction.php:54
 msgid "Failed to create waybill.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)"
 msgstr "Не удалось создать шк.\nНеобходимо попробовать пересоздать заказ.\nВозможно, потребуется отменить существующий (если такая кнопка есть)"
 
@@ -167,11 +171,6 @@ msgstr "Не удалось создать шк.\nНеобходимо попр�
 #: src/Actions/GenerateBarcodeAction.php:93
 msgid "A request for a barcode was sent, but no response was received.\nWait for 1 hour before trying again"
 msgstr "Запрос на шк был отправлен, но ответ по нему не пришел.\nНеобходимо подождать 1 час перед повторной попыткой"
-
-#: src/Actions/GenerateWaybillAction.php:33
-#: src/Actions/GenerateWaybillAction.php:54
-msgid "Failed to create waybill.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)"
-msgstr "Не удалось создать накладную.\nНеобходимо попробовать пересоздать заказ.\nВозможно, потребуется отменить существующий (если такая кнопка есть)"
 
 #: src/Actions/GenerateWaybillAction.php:75
 msgid "Failed to create waybill.\nTry again"
@@ -242,11 +241,6 @@ msgstr "Название компании"
 #: templates/admin/call_courier_form.php:48
 msgid "FIO"
 msgstr "ФИО"
-
-#: src/CdekShippingMethod.php:111
-#: templates/admin/call_courier_form.php:49
-msgid "Phone"
-msgstr "Телефон"
 
 #: src/CdekShippingMethod.php:114
 #: templates/admin/call_courier_form.php:51

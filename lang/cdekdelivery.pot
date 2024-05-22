@@ -131,6 +131,8 @@ msgid "Apartment, suite, unit, etc. (optional)"
 msgstr ""
 
 #: src/Fieldsets/GeneralOrderFields.php:37
+#: src/CdekShippingMethod.php:111
+#: templates/admin/call_courier_form.php:49
 msgid "Phone"
 msgstr ""
 
@@ -229,10 +231,6 @@ msgstr ""
 
 #: src/CdekShippingMethod.php:104
 msgid "FIO"
-msgstr ""
-
-#: src/CdekShippingMethod.php:111
-msgid "Phone"
 msgstr ""
 
 #: src/CdekShippingMethod.php:114
