@@ -33,7 +33,8 @@ build_tag:
     - yarn build
     - rm -rf node_modules
     - composer i -a
-    - composer dumplang
+    - vendor/bin/wp i18n --allow-root make-mo lang lang
+    - vendor/bin/wp i18n --allow-root make-json --no-purge lang lang
     - composer i -a --no-dev
     - rm -rf vendor/composer/installers
     - mkdir /cdek
@@ -74,7 +75,8 @@ build_custom:
     - yarn build
     - rm -rf node_modules
     - composer i -a
-    - composer dumplang
+    - vendor/bin/wp i18n --allow-root make-mo lang lang
+    - vendor/bin/wp i18n --allow-root make-json --no-purge lang lang
     - composer i -a --no-dev
     - rm -rf vendor/composer/installers
     - mkdir /cdek
