@@ -80,16 +80,15 @@ namespace Cdek\UI {
             $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME);
             $pluginName        = Loader::getPluginName();
             echo '<div>
-                <h4>' . __("Shipping address not specified", 'cdekdelivery') . '</h4>
-                <p>' . str_replace(
-                    '<a>',
-                    '<a href="' . esc_url($settings_page_url) . '">',
-                    sprintf(
-                        __("Select the correct sending address in <a>the settings</a> plugin named %s", 'cdekdelivery'),
-                        esc_html($pluginName)
-                    )
-                ) .
-            '</p>
+                <h4>'.
+                 esc_html__('Shipping address not specified', 'cdekdelivery').
+                 '</h4>
+                <p>'.
+                 str_replace('<a>', '<a href="'.esc_url($settings_page_url).'">',
+                             sprintf(esc_html__(/* translators: %s: Name of the plugin */ 'Select the correct sending address in <a>the settings</a> plugin named %s',
+                                                                                          'cdekdelivery'),
+                                 esc_html($pluginName))).
+                 '</p>
             </div>';
         }
 
@@ -98,16 +97,15 @@ namespace Cdek\UI {
             $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME);
             $pluginName        = Loader::getPluginName();
             echo '<div>
-                <h4>' . __("Shipping address not specified", 'cdekdelivery') . '</h4>
-                <p>' . str_replace(
-                    '<a>',
-                    '<a href="' . esc_url($settings_page_url) . '">',
-                    sprintf(
-                        __("Select the correct sending address in <a>the settings</a> plugin named %s", 'cdekdelivery'),
-                        esc_html($pluginName)
-                    )
-                ) .
-                '</p>
+                <h4>'.
+                 esc_html__('Shipping address not specified', 'cdekdelivery').
+                 '</h4>
+                <p>'.
+                 str_replace('<a>', '<a href="'.esc_url($settings_page_url).'">',
+                             sprintf(esc_html__(/* translators: %s: Name of the plugin */ 'Select the correct sending address in <a>the settings</a> plugin named %s',
+                                                                                          'cdekdelivery'),
+                                 esc_html($pluginName))).
+                 '</p>
                 </div>';
         }
 
@@ -116,15 +114,14 @@ namespace Cdek\UI {
             $settings_page_url = admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME);
             $pluginName        = Loader::getPluginName();
             echo '<div>
-                <h4>' . __("Authorization failed", 'cdekdelivery') . '</h4>
-                <p>' . str_replace(
-                    '<a>',
-                    '<a href="' . esc_url($settings_page_url) . '">',
-                    sprintf(
-                        __("Enter the correct client ID and secret key in <a>the settings</a> plugin named %s", 'cdekdelivery'),
-                        esc_html($pluginName)
-                    )
-                ) .
+                <h4>'.
+                 esc_html__('Authorization failed', 'cdekdelivery').
+                 '</h4>
+                <p>'.
+                 str_replace('<a>', '<a href="'.esc_url($settings_page_url).'">',
+                             sprintf(esc_html__(/* translators: %s: Name of the plugin */ 'Enter the correct client ID and secret key in <a>the settings</a> plugin named %s',
+                                                                                          'cdekdelivery'),
+                                 esc_html($pluginName))).
                  '</p>
                 </div>';
         }
@@ -181,9 +178,10 @@ namespace Cdek\UI {
         public static function notAvailableEditOrderData(): void
         {
             echo '<div class="notice notice-warning"><p>
-                <strong>CDEKDelivery:</strong> '. __(
-                    "Editing the order is not available due to a change in the order status in the CDEK system",
-                    'cdekdelivery') . '
+                <strong>CDEKDelivery:</strong> '.
+                 esc_html__('Editing the order is not available due to a change in the order status in the CDEK system',
+                    'cdekdelivery').
+                 '
             </p></div>';
         }
 

@@ -15,10 +15,10 @@ use Cdek\Helpers\UrlHelper;
 if ($orderNumber): ?>style="display: none" <?php
 endif ?> >
     <div id="setting_block">
-        <h3><?php _e("Packaging dimensions", 'cdekdelivery') ?> №1</h3>
+        <h3><?php esc_html_e("Packaging dimensions", 'cdekdelivery') ?> №1</h3>
         <div style="display: flex">
             <select id="selected_product">
-                <option value="-1"><?php _e("Select product", 'cdekdelivery') ?></option>
+                <option value="-1"><?php esc_html_e("Select product", 'cdekdelivery') ?></option>
                 <?php
                 foreach ($items as $key => $item): ?>
                     <option value="<?php
@@ -49,15 +49,15 @@ endif ?> >
         </div>
         <div id="package_parameters">
             <p class="form-field form-field-wide wc-order-status">
-                <label for="package_length"><?php _e("Length in cm", 'cdekdelivery') ?></label>
+                <label for="package_length"><?php esc_html_e('Length in cm', 'cdekdelivery') ?></label>
                 <input name="package_length" type="text">
             </p>
             <p class="form-field form-field-wide wc-order-status">
-                <label for="package_width"><?php _e("Width in cm", 'cdekdelivery') ?></label>
+                <label for="package_width"><?php esc_html_e('Width in cm', 'cdekdelivery') ?></label>
                 <input name="package_width" type="text">
             </p>
             <p class="form-field form-field-wide wc-order-status">
-                <label for="package_height"><?php _e("Height in cm", 'cdekdelivery') ?></label>
+                <label for="package_height"><?php esc_html_e('Height in cm', 'cdekdelivery') ?></label>
                 <input name="package_height" type="text">
             </p>
         </div>
@@ -69,7 +69,7 @@ endif ?> >
 
     <div id="save_package_btn_block">
         <p class="form-field form-field-wide wc-order-status">
-            <button id="save_package" type="button" class="button refund-items"><?php _e("Save", 'cdekdelivery') ?></button>
+            <button id="save_package" type="button" class="button refund-items"><?php esc_html_e('Save', 'cdekdelivery') ?></button>
         </p>
     </div>
 
@@ -77,7 +77,7 @@ endif ?> >
         <p class="form-field form-field-wide wc-order-status">
             <button id="send_package" type="button" class="button refund-items"
                     data-action="<?php
-                    echo esc_url(UrlHelper::buildRest("/order/$orderIdWP/create")) ?>"><?php _e("Create\r\n an order", 'cdekdelivery') ?>
+                    echo esc_url(UrlHelper::buildRest("/order/$orderIdWP/create")) ?>"><?php esc_html_e('Create an order', 'cdekdelivery') ?>
             </button>
         </p>
     </div>

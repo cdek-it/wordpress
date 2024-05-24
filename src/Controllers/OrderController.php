@@ -41,12 +41,12 @@ namespace Cdek\Controllers {
                 'show_in_index'       => true,
                 'args'                => [
                     'id'       => [
-                        'description' => __('Order number', 'cdekdelivery'),
+                        'description' => esc_html__('Order number', 'cdekdelivery'),
                         'required'    => true,
                         'type'        => 'integer',
                     ],
                     'packages' => [
-                        'description' => __('Packages', 'cdekdelivery'),
+                        'description' => esc_html__('Packages', 'cdekdelivery'),
                         'required'    => true,
                         'type'        => 'array',
                         'minItems'    => 1,
@@ -56,22 +56,22 @@ namespace Cdek\Controllers {
                             'additionalProperties' => false,
                             'properties'           => [
                                 'length' => [
-                                    'description' => __('Packing length', 'cdekdelivery'),
+                                    'description' => esc_html__('Packing length', 'cdekdelivery'),
                                     'required'    => true,
                                     'type'        => 'integer',
                                 ],
                                 'width'  => [
-                                    'description' => __('Packing width', 'cdekdelivery'),
+                                    'description' => esc_html__('Packing width', 'cdekdelivery'),
                                     'required'    => true,
                                     'type'        => 'integer',
                                 ],
                                 'height' => [
-                                    'description' => __('Packing height', 'cdekdelivery'),
+                                    'description' => esc_html__('Packing height', 'cdekdelivery'),
                                     'required'    => true,
                                     'type'        => 'integer',
                                 ],
                                 'items'  => [
-                                    'description' => __('Products in packaging', 'cdekdelivery'),
+                                    'description' => esc_html__('Products in packaging', 'cdekdelivery'),
                                     'required'    => false,
                                     'type'        => 'array',
                                     'minItems'    => 1,
@@ -79,12 +79,12 @@ namespace Cdek\Controllers {
                                         'type'       => 'object',
                                         'properties' => [
                                             'id' => [
-                                                'description' => __('Product ID', 'cdekdelivery'),
+                                                'description' => esc_html__('Product ID', 'cdekdelivery'),
                                                 'required'    => true,
                                                 'type'        => 'integer',
                                             ],
                                             'quantity' => [
-                                                'description' => __('Quantity of goods in packaging', 'cdekdelivery'),
+                                                'description' => esc_html__('Quantity of goods in packaging', 'cdekdelivery'),
                                                 'required'    => true,
                                                 'type'        => 'integer',
                                             ],
@@ -104,7 +104,7 @@ namespace Cdek\Controllers {
                 'show_in_index'       => true,
                 'args'                => [
                     'id' => [
-                        'description' => __('Order number', 'cdekdelivery'),
+                        'description' => esc_html__('Order number', 'cdekdelivery'),
                         'required'    => true,
                         'type'        => 'integer',
                     ],

@@ -162,7 +162,7 @@ msgstr "Правила для доставки до ПВЗ/Постаматов"
 
 #: src/CdekShippingMethod:18
 #: src/CdekShippingMethod:31
-msgid "Cdek Shipping"
+msgid "CDEK Shipping"
 msgstr "Доставка СДЭК"
 
 #: src/CdekShippingMethod:19
@@ -281,7 +281,7 @@ msgstr "Название компании"
 
 #: src/CdekShippingMethod.php:104
 #: templates/admin/call_courier_form.php:48
-msgid "FIO"
+msgid "Full name"
 msgstr "ФИО"
 
 #: src/CdekShippingMethod.php:114

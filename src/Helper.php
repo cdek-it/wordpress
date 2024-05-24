@@ -7,8 +7,8 @@ namespace {
 
 namespace Cdek {
 
-    use Cdek\Model\Tariff;
     use Cdek\Exceptions\PhoneNotValidException;
+    use Cdek\Model\Tariff;
     use DateTime;
     use libphonenumber\PhoneNumberUtil;
     use RuntimeException;
@@ -17,8 +17,12 @@ namespace Cdek {
 
     class Helper
     {
-        public static function enqueueScript(string $handle, string $fileName, bool $hasStyles = false): void
-        {
+        public static function enqueueScript(
+            string $handle,
+            string $fileName,
+            bool $hasStyles = false,
+            bool $justRegister = false
+        ): void {
             $script_asset_path = Loader::getPluginPath()."/build/$fileName.asset.php";
 
             $script_asset = file_exists($script_asset_path) ? require $script_asset_path : [
@@ -26,8 +30,13 @@ namespace Cdek {
                 'version'      => Loader::getPluginVersion(),
             ];
 
-            wp_enqueue_script($handle, Loader::getPluginUrl()."build/$fileName.js", $script_asset['dependencies'],
-                              $script_asset['version'], true);
+            if ($justRegister) {
+                wp_register_script($handle, Loader::getPluginUrl()."build/$fileName.js", $script_asset['dependencies'],
+                                   $script_asset['version'], true);
+            } else {
+                wp_enqueue_script($handle, Loader::getPluginUrl()."build/$fileName.js", $script_asset['dependencies'],
+                                  $script_asset['version'], true);
+            }
 
             if ($hasStyles) {
                 wp_enqueue_style($handle, Loader::getPluginUrl()."build/$fileName.css", [], Loader::getPluginVersion());

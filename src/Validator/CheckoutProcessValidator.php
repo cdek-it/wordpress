@@ -38,19 +38,19 @@ namespace Cdek\Validator {
 
             $cityCode = $api->getCityCode($city, $state);
             if ($cityCode === -1) {
-                wc_add_notice(sprintf(/* translators: 1: Name of a city 2: ZIP code */ __('Failed to determine locality in %1$s %2$s',
-                                                                                          'cdekdelivery'), $city,
-                    $state),  'error');
+                wc_add_notice(      sprintf(/* translators: 1: Name of a city 2: ZIP code */ esc_html__('Failed to determine locality in %1$s %2$s',
+                                                                                                        'cdekdelivery'),
+                    $city, $state), 'error');
             }
 
             $tariffCode = explode(':', $shippingMethodIdSelected)[1];
             if (Tariff::isTariffToOffice($tariffCode)) {
                 $pvzCode = CheckoutHelper::getValueFromCurrentSession('pvz_code');
                 if (empty($pvzCode)) {
-                    wc_add_notice(__('Order pickup point not selected.', 'cdekdelivery'), 'error');
+                    wc_add_notice(esc_html__('Order pickup point not selected.', 'cdekdelivery'), 'error');
                 }
             } elseif (empty(CheckoutHelper::getValueFromCurrentSession('address_1'))) {
-                wc_add_notice(__('No shipping address.', 'cdekdelivery'), 'error');
+                wc_add_notice(esc_html__('No shipping address.', 'cdekdelivery'), 'error');
             }
 
             try {

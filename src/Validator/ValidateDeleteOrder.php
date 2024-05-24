@@ -16,21 +16,16 @@ namespace Cdek\Validator {
         {
             if ($delete->requests[0]->state === 'INVALID') {
 
-                $message = sprintf(
-                    __("An attempt to delete order number \n\r%s \n\rfailed with an error. Error code: \n\r %s", 'cdekdelivery'),
-                    $orderNumber, $delete->requests[0]->errors[0]->code);
+                $message
+                    = sprintf(esc_html__(/* translators: %s: Order number */ 'An attempt to delete order number %s failed with an error. Error code: %s',
+                                                                             'cdekdelivery'), $orderNumber,
+                    $delete->requests[0]->errors[0]->code);
                 Note::send($orderId, $message);
 
-                return new Validate(
-                    false,
-                    sprintf(
-                        __(
-                            "An error occurred while deleting the order. Order number \n\r%s \n\r was not deleted.",
-                            'cdekdelivery'
-                        ),
-                        $orderNumber
-                    )
-                );
+                return new Validate(false,
+                                    sprintf(esc_html__(/* translators: %s: Order number */ 'An error occurred while deleting the order. Order number %s was not deleted.',
+                                                                                           'cdekdelivery'),
+                                        $orderNumber));
             }
 
             return new Validate(true);

@@ -151,7 +151,7 @@ msgstr ""
 
 #: src/CdekShippingMethod:18
 #: src/CdekShippingMethod:31
-msgid "Cdek Shipping"
+msgid "CDEK Shipping"
 msgstr ""
 
 #: src/CdekShippingMethod:19
@@ -274,7 +274,8 @@ msgid "Company name"
 msgstr ""
 
 #: src/CdekShippingMethod.php:104
-msgid "FIO"
+#: templates/admin/call_courier_form.php:48
+msgid "Full name"
 msgstr ""
 
 #: src/CdekShippingMethod.php:114

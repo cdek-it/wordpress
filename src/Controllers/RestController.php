@@ -55,7 +55,7 @@ namespace Cdek\Controllers {
                 'show_in_index'       => true,
                 'args'                => [
                     'id' => [
-                        'description' => 'CDEK Order ID',
+                        'description' => esc_html__('CDEK Order ID', 'cdekdelivery'),
                         'required'    => true,
                         'type'        => 'number',
                     ],
@@ -69,7 +69,7 @@ namespace Cdek\Controllers {
                 'show_in_index'       => true,
                 'args'                => [
                     'id' => [
-                        'description' => 'CDEK Order ID',
+                        'description' => esc_html__('CDEK Order ID', 'cdekdelivery'),
                         'required'    => true,
                         'type'        => 'number',
                     ],

@@ -62,8 +62,11 @@ namespace Cdek\Actions {
                 self::$addedError = true;
                 $availableTariffs = implode(', ', $e->getData());
                 echo '<div class="cdek-error">' .
-                     __("The selected CDEK tariff is not available with the specified parameters. Available tariffs with codes: ", 'cdekdelivery') .
-                     esc_html($availableTariffs).
+                     sprintf(
+                         /* translators: %s tariff codes  */
+                         esc_html__('The selected CDEK tariff is not available with the specified parameters. Available tariffs with codes: %s', 'cdekdelivery'),
+                         esc_html($availableTariffs)
+                     ) .
                      '</div>';
             }
         }
