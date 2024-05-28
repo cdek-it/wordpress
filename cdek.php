@@ -2,7 +2,7 @@
 /**
  * Plugin Name: CDEKDelivery
  * Plugin URI: https://www.cdek.ru/ru/integration/modules/33
- * Description: Интеграция доставки CDEK
+ * Description: CDEK delivery integration for WooCommerce
  * Version: dev
  * Requires at least: 6.0
  * Text Domain: cdekdelivery

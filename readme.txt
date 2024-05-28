@@ -7,7 +7,7 @@ Tested up to: 6.5
 Stable tag: dev
 License: GPLv3
 
-Интеграция с доставкой от CDEK для вашего магазина WooCommerce.
+Integration with CDEK delivery for your WooCommerce store.
 
 == Description ==
 
