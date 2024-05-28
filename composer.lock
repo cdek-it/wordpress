@@ -4,19 +4,14 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "70abf713f431a1016012fe677d351ca9",
+    "content-hash": "c96c3dcdff3bb84169a45cd5621e80ee",
     "packages": [
         {
             "name": "composer/installers",
             "version": "v2.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/composer/installers.git",
-                "reference": "c29dc4b93137acb82734f672c37e029dfbd95b35"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/composer/installers/c29dc4b93137acb82734f672c37e029dfbd95b35",
+                "url": "https://repo.cdek.ru/repository/cdek-php/composer/installers/v2.2.0/composer-installers-v2.2.0.zip",
                 "reference": "c29dc4b93137acb82734f672c37e029dfbd95b35",
                 "shasum": ""
             },
@@ -134,33 +129,14 @@
                 "issues": "https://github.com/composer/installers/issues",
                 "source": "https://github.com/composer/installers/tree/v2.2.0"
             },
-            "funding": [
-                {
-                    "url": "https://packagist.com",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/composer",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/composer/composer",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2022-08-20T06:45:11+00:00"
         },
         {
             "name": "giggsey/libphonenumber-for-php",
             "version": "8.13.37",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/giggsey/libphonenumber-for-php.git",
-                "reference": "536c747ff1af433dddc615b26b9674047e013076"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/giggsey/libphonenumber-for-php/536c747ff1af433dddc615b26b9674047e013076",
+                "url": "https://repo.cdek.ru/repository/cdek-php/giggsey/libphonenumber-for-php/8.13.37/giggsey-libphonenumber-for-php-8.13.37.zip",
                 "reference": "536c747ff1af433dddc615b26b9674047e013076",
                 "shasum": ""
             },
@@ -227,14 +203,9 @@
         {
             "name": "giggsey/locale",
             "version": "2.6",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/giggsey/Locale.git",
-                "reference": "37874fa473131247c348059fb7b8985efc18b5ea"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/giggsey/Locale/37874fa473131247c348059fb7b8985efc18b5ea",
+                "url": "https://repo.cdek.ru/repository/cdek-php/giggsey/locale/2.6/giggsey-locale-2.6.zip",
                 "reference": "37874fa473131247c348059fb7b8985efc18b5ea",
                 "shasum": ""
             },
@@ -280,14 +251,9 @@
         {
             "name": "symfony/polyfill-mbstring",
             "version": "v1.29.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "9773676c8a1bb1f8d4340a62efe641cf76eda7ec"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/symfony/polyfill-mbstring/9773676c8a1bb1f8d4340a62efe641cf76eda7ec",
+                "url": "https://repo.cdek.ru/repository/cdek-php/symfony/polyfill-mbstring/v1.29.0/symfony-polyfill-mbstring-v1.29.0.zip",
                 "reference": "9773676c8a1bb1f8d4340a62efe641cf76eda7ec",
                 "shasum": ""
             },
@@ -340,20 +306,6 @@
             "support": {
                 "source": "https://github.com/symfony/polyfill-mbstring/tree/v1.29.0"
             },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2024-01-29T20:11:03+00:00"
         }
     ],
@@ -361,14 +313,9 @@
         {
             "name": "eftec/bladeone",
             "version": "3.52",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/EFTEC/BladeOne.git",
-                "reference": "a19bf66917de0b29836983db87a455a4f6e32148"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/EFTEC/BladeOne/a19bf66917de0b29836983db87a455a4f6e32148",
+                "url": "https://repo.cdek.ru/repository/cdek-php/eftec/bladeone/3.52/eftec-bladeone-3.52.zip",
                 "reference": "a19bf66917de0b29836983db87a455a4f6e32148",
                 "shasum": ""
             },
@@ -418,14 +365,9 @@
         {
             "name": "gettext/gettext",
             "version": "v4.8.12",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-gettext/Gettext.git",
-                "reference": "11af89ee6c087db3cf09ce2111a150bca5c46e12"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/php-gettext/Gettext/11af89ee6c087db3cf09ce2111a150bca5c46e12",
+                "url": "https://repo.cdek.ru/repository/cdek-php/gettext/gettext/v4.8.12/gettext-gettext-v4.8.12.zip",
                 "reference": "11af89ee6c087db3cf09ce2111a150bca5c46e12",
                 "shasum": ""
             },
@@ -479,33 +421,14 @@
                 "issues": "https://github.com/oscarotero/Gettext/issues",
                 "source": "https://github.com/php-gettext/Gettext/tree/v4.8.12"
             },
-            "funding": [
-                {
-                    "url": "https://paypal.me/oscarotero",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/oscarotero",
-                    "type": "github"
-                },
-                {
-                    "url": "https://www.patreon.com/misteroom",
-                    "type": "patreon"
-                }
-            ],
             "time": "2024-05-18T10:25:07+00:00"
         },
         {
             "name": "gettext/languages",
             "version": "2.10.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/php-gettext/Languages.git",
-                "reference": "4d61d67fe83a2ad85959fe6133d6d9ba7dddd1ab"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/php-gettext/Languages/4d61d67fe83a2ad85959fe6133d6d9ba7dddd1ab",
+                "url": "https://repo.cdek.ru/repository/cdek-php/gettext/languages/2.10.0/gettext-languages-2.10.0.zip",
                 "reference": "4d61d67fe83a2ad85959fe6133d6d9ba7dddd1ab",
                 "shasum": ""
             },
@@ -556,29 +479,14 @@
                 "issues": "https://github.com/php-gettext/Languages/issues",
                 "source": "https://github.com/php-gettext/Languages/tree/2.10.0"
             },
-            "funding": [
-                {
-                    "url": "https://paypal.me/mlocati",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/mlocati",
-                    "type": "github"
-                }
-            ],
             "time": "2022-10-18T15:00:10+00:00"
         },
         {
             "name": "mck89/peast",
             "version": "v1.16.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/mck89/peast.git",
-                "reference": "2791b08ffcc1862fe18eef85675da3aa58c406fe"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/mck89/peast/2791b08ffcc1862fe18eef85675da3aa58c406fe",
+                "url": "https://repo.cdek.ru/repository/cdek-php/mck89/peast/v1.16.2/mck89-peast-v1.16.2.zip",
                 "reference": "2791b08ffcc1862fe18eef85675da3aa58c406fe",
                 "shasum": ""
             },
@@ -619,14 +527,9 @@
         {
             "name": "mustache/mustache",
             "version": "v2.14.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/bobthecow/mustache.php.git",
-                "reference": "e62b7c3849d22ec55f3ec425507bf7968193a6cb"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/bobthecow/mustache.php/e62b7c3849d22ec55f3ec425507bf7968193a6cb",
+                "url": "https://repo.cdek.ru/repository/cdek-php/mustache/mustache/v2.14.2/mustache-mustache-v2.14.2.zip",
                 "reference": "e62b7c3849d22ec55f3ec425507bf7968193a6cb",
                 "shasum": ""
             },
@@ -668,15 +571,10 @@
         {
             "name": "roave/security-advisories",
             "version": "dev-latest",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "7a1a6552ac2f0fd7131d2552be221f2dd6eb19fa"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/Roave/SecurityAdvisories/7a1a6552ac2f0fd7131d2552be221f2dd6eb19fa",
-                "reference": "7a1a6552ac2f0fd7131d2552be221f2dd6eb19fa",
+                "url": "https://repo.cdek.ru/repository/cdek-php/roave/security-advisories/dev-latest/roave-security-advisories-dev-latest.zip",
+                "reference": "70a844b0ba76ca3dafc6ca03ceae8ef7d3b60a13",
                 "shasum": ""
             },
             "conflict": {
@@ -1191,7 +1089,7 @@
                 "silverstripe/admin": "<1.13.19|>=2,<2.1.8",
                 "silverstripe/assets": ">=1,<1.11.1",
                 "silverstripe/cms": "<4.11.3",
-                "silverstripe/comments": ">=1.3,<1.9.99|>=2,<2.9.99|>=3,<3.1.1",
+                "silverstripe/comments": ">=1.3,<3.1.1",
                 "silverstripe/forum": "<=0.6.1|>=0.7,<=0.7.3",
                 "silverstripe/framework": "<4.13.39|>=5,<5.1.11",
                 "silverstripe/graphql": ">=2,<2.0.5|>=3,<3.8.2|>=4,<4.3.7|>=5,<5.1.3",
@@ -1340,6 +1238,7 @@
                 "villagedefrance/opencart-overclocked": "<=1.11.1",
                 "vova07/yii2-fileapi-widget": "<0.1.9",
                 "vrana/adminer": "<4.8.1",
+                "vufind/vufind": ">=2,<9.1.1",
                 "waldhacker/hcaptcha": "<2.1.2",
                 "wallabag/tcpdf": "<6.2.22",
                 "wallabag/wallabag": "<2.6.7",
@@ -1424,7 +1323,6 @@
                 "zfr/zfr-oauth2-server-module": "<0.1.2",
                 "zoujingli/thinkadmin": "<=6.1.53"
             },
-            "default-branch": true,
             "type": "metapackage",
             "license": [
                 "MIT"
@@ -1449,29 +1347,14 @@
                 "issues": "https://github.com/Roave/SecurityAdvisories/issues",
                 "source": "https://github.com/Roave/SecurityAdvisories/tree/latest"
             },
-            "funding": [
-                {
-                    "url": "https://github.com/Ocramius",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/roave/security-advisories",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2024-05-20T21:04:23+00:00"
+            "time": "2024-05-27T19:04:58+00:00"
         },
         {
             "name": "symfony/deprecation-contracts",
             "version": "v2.5.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/deprecation-contracts.git",
-                "reference": "80d075412b557d41002320b96a096ca65aa2c98d"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/symfony/deprecation-contracts/80d075412b557d41002320b96a096ca65aa2c98d",
+                "url": "https://repo.cdek.ru/repository/cdek-php/symfony/deprecation-contracts/v2.5.3/symfony-deprecation-contracts-v2.5.3.zip",
                 "reference": "80d075412b557d41002320b96a096ca65aa2c98d",
                 "shasum": ""
             },
@@ -1511,33 +1394,14 @@
             "support": {
                 "source": "https://github.com/symfony/deprecation-contracts/tree/v2.5.3"
             },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2023-01-24T14:02:46+00:00"
         },
         {
             "name": "symfony/finder",
             "version": "v5.4.39",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/finder.git",
-                "reference": "f6a96e4fcd468a25fede16ee665f50ced856bd0a"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/symfony/finder/f6a96e4fcd468a25fede16ee665f50ced856bd0a",
+                "url": "https://repo.cdek.ru/repository/cdek-php/symfony/finder/v5.4.39/symfony-finder-v5.4.39.zip",
                 "reference": "f6a96e4fcd468a25fede16ee665f50ced856bd0a",
                 "shasum": ""
             },
@@ -1573,33 +1437,14 @@
             "support": {
                 "source": "https://github.com/symfony/finder/tree/v5.4.39"
             },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2024-04-18T08:26:06+00:00"
         },
         {
             "name": "symfony/polyfill-php80",
             "version": "v1.29.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/polyfill-php80.git",
-                "reference": "87b68208d5c1188808dd7839ee1e6c8ec3b02f1b"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/symfony/polyfill-php80/87b68208d5c1188808dd7839ee1e6c8ec3b02f1b",
+                "url": "https://repo.cdek.ru/repository/cdek-php/symfony/polyfill-php80/v1.29.0/symfony-polyfill-php80-v1.29.0.zip",
                 "reference": "87b68208d5c1188808dd7839ee1e6c8ec3b02f1b",
                 "shasum": ""
             },
@@ -1652,33 +1497,14 @@
             "support": {
                 "source": "https://github.com/symfony/polyfill-php80/tree/v1.29.0"
             },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
             "time": "2024-01-29T20:11:03+00:00"
         },
         {
             "name": "wp-cli/i18n-command",
             "version": "2.6.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/wp-cli/i18n-command.git",
-                "reference": "7538d684d4f06b0e10c8a0166ce4e6d9e1687aa1"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/wp-cli/i18n-command/7538d684d4f06b0e10c8a0166ce4e6d9e1687aa1",
+                "url": "https://repo.cdek.ru/repository/cdek-php/wp-cli/i18n-command/2.6.1/wp-cli-i18n-command-2.6.1.zip",
                 "reference": "7538d684d4f06b0e10c8a0166ce4e6d9e1687aa1",
                 "shasum": ""
             },
@@ -1739,14 +1565,9 @@
         {
             "name": "wp-cli/mustangostang-spyc",
             "version": "0.6.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/wp-cli/spyc.git",
-                "reference": "6aa0b4da69ce9e9a2c8402dab8d43cf32c581cc7"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/wp-cli/spyc/6aa0b4da69ce9e9a2c8402dab8d43cf32c581cc7",
+                "url": "https://repo.cdek.ru/repository/cdek-php/wp-cli/mustangostang-spyc/0.6.3/wp-cli-mustangostang-spyc-0.6.3.zip",
                 "reference": "6aa0b4da69ce9e9a2c8402dab8d43cf32c581cc7",
                 "shasum": ""
             },
@@ -1789,14 +1610,9 @@
         {
             "name": "wp-cli/php-cli-tools",
             "version": "v0.11.22",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/wp-cli/php-cli-tools.git",
-                "reference": "a6bb94664ca36d0962f9c2ff25591c315a550c51"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/wp-cli/php-cli-tools/a6bb94664ca36d0962f9c2ff25591c315a550c51",
+                "url": "https://repo.cdek.ru/repository/cdek-php/wp-cli/php-cli-tools/v0.11.22/wp-cli-php-cli-tools-v0.11.22.zip",
                 "reference": "a6bb94664ca36d0962f9c2ff25591c315a550c51",
                 "shasum": ""
             },
@@ -1851,14 +1667,9 @@
         {
             "name": "wp-cli/wp-cli",
             "version": "v2.10.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/wp-cli/wp-cli.git",
-                "reference": "a339dca576df73c31af4b4d8054efc2dab9a0685"
-            },
             "dist": {
                 "type": "zip",
-                "url": "https://repo.cdek.ru:443/artifactory/api/composer/cdek-php/vcs-dists/zip/wp-cli/wp-cli/a339dca576df73c31af4b4d8054efc2dab9a0685",
+                "url": "https://repo.cdek.ru/repository/cdek-php/wp-cli/wp-cli/v2.10.0/wp-cli-wp-cli-v2.10.0.zip",
                 "reference": "a339dca576df73c31af4b4d8054efc2dab9a0685",
                 "shasum": ""
             },

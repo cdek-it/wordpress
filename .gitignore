@@ -46,3 +46,4 @@ lang/*.mo
 lang/*.json
 
 .wp-env.override.json
+/cdek.zip

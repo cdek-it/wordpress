@@ -56,6 +56,9 @@ class CdekApi
         return Config::API_URL;
     }
 
+    /**
+     * @throws \Cdek\Exceptions\CdekApiException
+     */
     final public function checkAuth(): bool
     {
         return (bool)$this->tokenStorage->getToken();
@@ -63,6 +66,7 @@ class CdekApi
 
     /**
      * @throws \Cdek\Exceptions\CdekApiException
+     * @throws \JsonException
      */
     public function fetchToken(): string
     {
@@ -88,6 +92,10 @@ class CdekApi
                                         ]));
     }
 
+    /**
+     * @throws \JsonException
+     * @throws \Cdek\Exceptions\CdekApiException
+     */
     final public function getOrder(string $uuid)
     {
         $url = $this->apiUrl . self::ORDERS_PATH . $uuid;
@@ -97,6 +105,7 @@ class CdekApi
 
     /**
      * @throws \Cdek\Exceptions\RestApiInvalidRequestException
+     * @throws \Cdek\Exceptions\CdekApiException
      */
     public function createOrder(array $params)
     {
@@ -114,11 +123,18 @@ class CdekApi
         return $result;
     }
 
+    /**
+     * @throws \Cdek\Exceptions\CdekApiException
+     */
     public function getFileByLink($link)
     {
         return HttpClient::sendCdekRequest($link, 'GET', $this->tokenStorage->getToken(), null, true)['body'];
     }
 
+    /**
+     * @throws \JsonException
+     * @throws \Cdek\Exceptions\CdekApiException
+     */
     public function createWaybill($orderUuid)
     {
         $url = $this->apiUrl . self::WAYBILL_PATH;
@@ -126,6 +142,10 @@ class CdekApi
         return HttpClient::sendCdekRequest($url, 'POST', $this->tokenStorage->getToken(), ['orders' => ['order_uuid' => $orderUuid]]);
     }
 
+    /**
+     * @throws \JsonException
+     * @throws \Cdek\Exceptions\CdekApiException
+     */
     public function createBarcode($orderUuid)
     {
         return HttpClient::sendCdekRequest($this->apiUrl . self::BARCODE_PATH, 'POST', $this->tokenStorage->getToken(), [
@@ -134,16 +154,28 @@ class CdekApi
         ]);
     }
 
+    /**
+     * @throws \JsonException
+     * @throws \Cdek\Exceptions\CdekApiException
+     */
     public function getBarcode($uuid)
     {
         return HttpClient::sendCdekRequest($this->apiUrl . self::BARCODE_PATH . $uuid, 'GET', $this->tokenStorage->getToken());
     }
 
+    /**
+     * @throws \JsonException
+     * @throws \Cdek\Exceptions\CdekApiException
+     */
     public function getWaybill($uuid)
     {
         return HttpClient::sendCdekRequest($this->apiUrl . self::WAYBILL_PATH . $uuid, 'GET', $this->tokenStorage->getToken());
     }
 
+    /**
+     * @throws \JsonException
+     * @throws \Cdek\Exceptions\CdekApiException
+     */
     public function deleteOrder($uuid)
     {
         $url = $this->apiUrl . self::ORDERS_PATH . $uuid;
@@ -151,6 +183,10 @@ class CdekApi
         return HttpClient::sendCdekRequest($url, 'DELETE', $this->tokenStorage->getToken());
     }
 
+    /**
+     * @throws \JsonException
+     * @throws \Cdek\Exceptions\CdekApiException
+     */
     public function calculateTariffList($deliveryParam)
     {
         $url = $this->apiUrl . self::CALC_LIST_PATH;
@@ -165,6 +201,10 @@ class CdekApi
         return HttpClient::sendCdekRequest($url, 'POST', $this->tokenStorage->getToken(), $request);
     }
 
+    /**
+     * @throws \Cdek\Exceptions\CdekApiException
+     * @throws \JsonException
+     */
     public function calculateTariff($deliveryParam)
     {
         $url = $this->apiUrl . self::CALC_PATH;
@@ -182,6 +222,10 @@ class CdekApi
         return HttpClient::sendCdekRequest($url, 'POST', $this->tokenStorage->getToken(), $request);
     }
 
+    /**
+     * @throws \JsonException
+     * @throws \Cdek\Exceptions\CdekApiException
+     */
     public function getCityCode(string $city, ?string $postcode): int
     {
         $url = $this->apiUrl . self::REGION_PATH;
@@ -191,7 +235,9 @@ class CdekApi
             $city .= ' микрорайон';
         }
 
-        $cityData = json_decode(HttpClient::sendCdekRequest($url, 'GET', $this->tokenStorage->getToken(), ['city' => $city, 'postal_code' => $postcode]));
+        $cityData = json_decode(HttpClient::sendCdekRequest($url, 'GET', $this->tokenStorage->getToken(),
+                                                            ['city' => $city, 'postal_code' => $postcode]), false, 512,
+            JSON_THROW_ON_ERROR);
 
         if (empty($cityData)) {
             return -1;
@@ -200,6 +246,10 @@ class CdekApi
         return $cityData[0]->code;
     }
 
+    /**
+     * @throws \Cdek\Exceptions\CdekApiException
+     * @throws \JsonException
+     */
     public function getOffices($filter)
     {
         $url = $this->apiUrl . self::PVZ_PATH;
@@ -208,23 +258,35 @@ class CdekApi
         if (!$result) {
             return [
                 'success' => false,
-                'message' => __("In this locality, delivery is available only for \"door-to-door\" tariffs. Select another locality to gain access to \"from warehouse\" tariffs.", 'cdekdelivery'),
+                'message' => esc_html__("In this locality, delivery is available only for \"door-to-door\" tariffs. Select another locality to gain access to \"from warehouse\" tariffs.", 'cdekdelivery'),
             ];
         }
 
         return $result;
     }
 
+    /**
+     * @throws \JsonException
+     * @throws \Cdek\Exceptions\CdekApiException
+     */
     public function callCourier($param)
     {
         return HttpClient::sendCdekRequest($this->apiUrl . self::CALL_COURIER, 'POST', $this->tokenStorage->getToken(), $param);
     }
 
+    /**
+     * @throws \Cdek\Exceptions\CdekApiException
+     * @throws \JsonException
+     */
     public function courierInfo($uuid)
     {
         return HttpClient::sendCdekRequest($this->apiUrl . self::CALL_COURIER . '/' . $uuid, 'GET', $this->tokenStorage->getToken());
     }
 
+    /**
+     * @throws \Cdek\Exceptions\CdekApiException
+     * @throws \JsonException
+     */
     public function callCourierDelete($uuid)
     {
         return HttpClient::sendCdekRequest($this->apiUrl . self::CALL_COURIER . '/' . $uuid,

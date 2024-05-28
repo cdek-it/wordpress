@@ -30,8 +30,8 @@
     "giggsey/libphonenumber-for-php": "^8.13"
   },
   "require-dev": {
-    "wp-cli/i18n-command": "^2.5",
-    "roave/security-advisories": "dev-latest"
+    "roave/security-advisories": "dev-latest",
+    "wp-cli/i18n-command": "^2.5"
   },
   "config": {
     "sort-packages": true,
@@ -43,6 +43,19 @@
       "php": "7.4"
     }
   },
+  "archive": {
+    "exclude": [
+      "blueprint",
+      ".*",
+      "src/Frontend",
+      "node_modules",
+      "vendor/composer/installers",
+      "composer.*",
+      "package.json",
+      "yarn.lock",
+      "webpack.config.js"
+    ]
+  },
   "scripts": {
     "dumplang": [
       "vendor/bin/wp --allow-root make-mo lang lang",
@@ -52,7 +65,7 @@
   "repositories": [
     {
       "type": "composer",
-      "url": "https://repo.cdek.ru/artifactory/api/composer/cdek-php"
+      "url": "https://repo.cdek.ru/repository/cdek-php"
     },
     {
       "packagist.org": false

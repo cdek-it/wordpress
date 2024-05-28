@@ -17,6 +17,10 @@ class DBTokenStorage extends TokenStorageContract
         Helper::getActualShippingMethod()->update_option('token', null);
     }
 
+    /**
+     * @throws \JsonException
+     * @throws \Cdek\Exceptions\CdekApiException
+     */
     final public function getToken(): string
     {
         $token = $this->getTokenFromCache();
@@ -64,6 +68,9 @@ class DBTokenStorage extends TokenStorageContract
         return json_decode(base64_decode(strtr(explode('.', $token)[1], '-_', '+/')), false, 512, JSON_THROW_ON_ERROR)->exp;
     }
 
+    /**
+     * @throws \Cdek\Exceptions\CdekApiException
+     */
     final public function updateToken(): string
     {
         $tokenApi     = $this->fetchTokenFromApi();

@@ -19,8 +19,8 @@
 
 defined('ABSPATH') or exit;
 
-if (file_exists(__DIR__.'/vendor/autoload.php')) {
-    require __DIR__.'/vendor/autoload.php';
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require __DIR__ . '/vendor/autoload.php';
 }
 
 if (!class_exists(\Cdek\Loader::class)) {

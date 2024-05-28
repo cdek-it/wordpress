@@ -28,6 +28,10 @@ namespace Cdek\Helpers {
             $this->api    = new CdekApi;
         }
 
+        /**
+         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws \JsonException
+         */
         final public function calculate(array $package, bool $addTariffsToOffice = true): bool
         {
             if (!$this->api->checkAuth()) {

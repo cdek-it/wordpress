@@ -15,16 +15,17 @@ namespace Cdek\Exceptions {
         protected $code = 'cdek_error';
         private ?array $data;
 
-        public function __construct(string $message = "",
-                                    string $code = 'cdek_error',
-                                    ?array  $data = null,
-                                    bool   $stopPropagation = true)
-        {
-            $this->code = $code;
-            $this->data = $data;
+        public function __construct(
+            string $message = '',
+            string $code = 'cdek_error',
+            ?array $data = null,
+            bool $stopPropagation = true
+        ) {
+            $this->code    = $code;
+            $this->data    = $data ?? [];
             $this->message = $message;
 
-            if ($stopPropagation) {
+            if ($stopPropagation && defined('REST_REQUEST')) {
                 wp_die($this->getWpError());
             }
 
@@ -35,6 +36,7 @@ namespace Cdek\Exceptions {
         {
             $error = new WP_Error('cdek_error', 'Error happened at CDEKDelivery');
             $error->add($this->code, $this->message, $this->data);
+
             return $error;
         }
 
