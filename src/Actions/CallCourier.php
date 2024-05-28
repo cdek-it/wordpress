@@ -103,8 +103,7 @@ namespace Cdek\Actions {
                           $intakeNumber, $courierObj->entity->uuid);
             Note::send($orderId, $message);
 
-            $validate = new Validate(true, sprintf(esc_html__(/* translators: %s: uuid of application*/'Request number: 
-            %s', 'cdekdelivery'), $intakeNumber));
+            $validate = new Validate(true, sprintf(esc_html__(/* translators: %s: uuid of application*/'Request number: %s', 'cdekdelivery'), $intakeNumber));
 
             return $validate->response();
         }
