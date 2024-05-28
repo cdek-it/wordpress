@@ -32,7 +32,7 @@ namespace Cdek\Actions {
             if (!isset($order['entity'])) {
                 return [
                     'success' => false,
-                    'message' => esc_html__("Failed to create waybill.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)",
+                    'message' => esc_html__("Failed to create barcode.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)",
                                             'cdekdelivery'),
                 ];
             }
@@ -61,7 +61,7 @@ namespace Cdek\Actions {
             if (!isset($barcode['entity'])) {
                 return [
                     'success' => false,
-                    'message' => esc_html__("Failed to create waybill.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)",
+                    'message' => esc_html__("Failed to create barcode.\nTry re-creating the order.\nYou may need to cancel existing one (if that button exists)",
                                             'cdekdelivery'),
                 ];
             }
