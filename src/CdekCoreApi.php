@@ -57,7 +57,7 @@ class CdekCoreApi
             'POST',
             $this->generalTokenStorage->getToken(),
             [
-                'site_name' => get_bloginfo('name'),
+                'name' => get_bloginfo('name'),
                 'url' => [
                     'rest'  => rest_url(),
                     'home'  => home_url(),
