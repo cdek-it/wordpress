@@ -49,7 +49,28 @@ class CdekShippingMethod extends WC_Shipping_Method
             ],
         ];
 
-        $this->form_fields = [
+        $reindexCreated = $this->get_option('cdek_start_reindex');
+
+        if($reindexCreated == 'Y'){
+            $arReindex = [];
+        }else{
+            $settings_page_url = admin_url('admin-post.php?action=reindex_orders&data=all');
+            $arReindex = [
+                'reindex_orders' => [
+                    'title'             => '<a style="text-decoration: none; padding: 5px; border: 1px solid; background-color: #fff;" href="' . $settings_page_url . '">' .
+                                           __('Reindex order', 'cdekdelivery') . '</a>',
+                    'type'              => 'text',
+                    'hidden'            => true,
+                    'class'             => 'cdek_setting_block_button',
+                    'custom_attributes' => [
+                        'hidden'  => 'hidden',
+                        'onClick' => 'javascript::void(0)',
+                    ],
+                ],
+            ];
+        }
+
+        $this->form_fields = $arReindex + [
             'auth_block_name'                    => [
                 'title' => '<h3 style="text-align: center;">'.esc_html__('Authorization', 'cdekdelivery').'</h3>',
                 'type'  => 'title',

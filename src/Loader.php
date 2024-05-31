@@ -15,6 +15,7 @@ namespace Cdek {
     use Cdek\Actions\ProcessWoocommerceCreateShippingAction;
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
+    use Cdek\Actions\Schedule\ReindexOrders;
     use Cdek\Blocks\CheckoutMapBlock;
     use Cdek\Controllers\CourierController;
     use Cdek\Controllers\LocationController;
@@ -175,6 +176,10 @@ namespace Cdek {
             add_action('woocommerce_before_order_itemmeta', new AdminShippingFields, 10, 2);
 
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, new CreateOrderAction, 10, 2);
+
+            add_action('admin_post_reindex_orders', [ReindexOrders::class, 'initOrdersSend']);
+
+            add_action('get_reindex_orders', [ReindexOrders::class, 'getReindexOrders']);
 
             (new CdekWidget)();
             (new Admin)();
