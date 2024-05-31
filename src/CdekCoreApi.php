@@ -31,27 +31,6 @@ class CdekCoreApi
 
     public function fetchShopToken()
     {
-        $body = json_decode(
-            HttpCoreClient::sendCdekRequest(
-                $this->getAuthUrl(),
-                'POST',
-                $this->generalTokenStorage->getToken()
-            ),
-            true
-        )['body'];
-
-        if ($body === null || isset($body['error_description']) || isset($body['error'])) {
-            throw new CdekApiException('[CDEKDelivery] Failed to get shop token',
-                                       'cdek_error.shop_token.auth',
-                                       $body,
-                                       true);
-        }
-
-        return $body['token'];
-    }
-
-    private function getStoreUuid()
-    {
         $response = HttpCoreClient::sendCdekRequest(
             $this->apiUrl . self::SHOP,
             'POST',
@@ -75,14 +54,32 @@ class CdekCoreApi
 
         $body = json_decode($response, true)['body'];
 
-        if(empty($body) || $body['error']){
+        if(empty($body) || empty($body['id']) || $body['error']){
             throw new CdekApiException('[CDEKDelivery] Failed to get shop uuid',
                                        'cdek_error.uuid.auth',
                                        $response,
                                        true);
         }
 
-        return $body['uuid'];
+        sleep(5);
+
+        $body = json_decode(
+            HttpCoreClient::sendCdekRequest(
+                sprintf($this->apiUrl . self::TOKEN_PATH, $body['id']),
+                'POST',
+                $this->generalTokenStorage->getToken()
+            ),
+            true
+        )['body'];
+
+        if ($body === null || isset($body['error_description']) || isset($body['error'])) {
+            throw new CdekApiException('[CDEKDelivery] Failed to get shop token',
+                                       'cdek_error.shop_token.auth',
+                                       $body,
+                                       true);
+        }
+
+        return $body['token'];
     }
 
     public function reindexOrders($orders)
@@ -97,11 +94,6 @@ class CdekCoreApi
             'GET',
             $this->tokenCoreStorage->getToken()
         );
-    }
-
-    private function getAuthUrl(): string
-    {
-        return sprintf($this->apiUrl . self::TOKEN_PATH, $this->getStoreUuid());
     }
 
     private function getApiUrl(): string

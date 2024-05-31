@@ -149,16 +149,6 @@ namespace Cdek\UI {
             $orderNumber = $orderData['order_number'] ?? null;
             $orderUuid   = $orderData['order_uuid'] ?? null;
 
-//            if(empty($orderData['uuid_confirmed']) && self::confirmOrderUuid($orderNumber, $orderUuid)){
-//                OrderMetaData::updateMetaByOrderId(
-//                    $orderIdWP,
-//                    [
-//                        'order_uuid' => $orderUuid,
-//                        'uuid_confirmed' => true
-//                    ]
-//                );
-//            }
-
             try {
                 $cdekStatuses         = Helper::getCdekOrderStatuses($orderUuid);
                 $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
@@ -194,31 +184,6 @@ namespace Cdek\UI {
                  '
             </p></div>';
         }
-
-//        public static function confirmOrderUuid($orderNumber, &$orderUuid)
-//        {
-//            if(strpos($orderNumber, '-') !== false){
-//                $orderUuid = self::reCreateOrderUuid($orderNumber);
-//
-//                return !empty($orderUuid);
-//            }
-//
-//            return false;
-//        }
-//
-//        private static function reCreateOrderUuid(string $orderNumber, int $iteration = 1)
-//        {
-//            sleep(1);
-//
-//            if ($iteration === 5) {
-//                return null;
-//            }
-//
-//            $orderInfoJson = (new CdekApi())->getOrderByNumber($orderNumber);
-//            $orderInfo     = json_decode($orderInfoJson, true);
-//
-//            return $orderInfo['entity']['uuid'] ?? self::reCreateOrderUuid($orderNumber, $iteration + 1);
-//        }
 
         public function __invoke(): void
         {
