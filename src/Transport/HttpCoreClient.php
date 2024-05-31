@@ -22,7 +22,6 @@ namespace Cdek\Transport {
         {
             $config = [
                 'headers' => [
-                    'Content-Type'     => 'application/json',
                     'Authorization'    => $token
                 ],
                 'timeout' => 60,
@@ -45,7 +44,6 @@ namespace Cdek\Transport {
                         'method'       => $method,
                         'Content-Type' => 'application/json',
                         'headers' => [
-                            'Content-Type'     => 'application/json',
                             'X-App-Name'       => 'wordpress',
                             'X-App-Version'    => Loader::getPluginVersion(),
                             'X-User-Locale'    => get_user_locale(),

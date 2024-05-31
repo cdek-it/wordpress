@@ -9,9 +9,9 @@ use Cdek\Transport\HttpCoreClient;
 
 class CdekCoreApi
 {
-    private const TOKEN_PATH = 'cms/wordpress/shop/%s/token';
-    private const REINDEX_ORDERS = 'cms/wordpress/full-sync';
-    private const SHOP = 'cms/wordpress/shop';
+    private const TOKEN_PATH = 'shop/%s/token';
+    private const REINDEX_ORDERS = 'full-sync';
+    private const SHOP = 'shop';
     private string $apiUrl;
     private CdekShippingMethod $deliveryMethod;
     private TokenStorageContract $generalTokenStorage;
@@ -99,7 +99,7 @@ class CdekCoreApi
     private function getApiUrl(): string
     {
         if ($this->deliveryMethod->get_option('test_mode') === 'yes') {
-            return $_ENV['CDEK_REST_CORE_API'] ?? Config::TEST_API_CORE_URL;
+            return $_ENV['CDEK_REST_CORE_API'] ?? Config::API_CORE_URL;
         }
 
         return Config::API_CORE_URL;

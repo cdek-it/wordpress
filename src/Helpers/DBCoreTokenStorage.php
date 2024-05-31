@@ -2,6 +2,7 @@
 
 namespace Cdek\Helpers;
 
+use Cdek\Cache\FileCache;
 use Cdek\CdekCoreApi;
 use Cdek\Contracts\TokenStorageContract;
 use Cdek\Exceptions\CdekApiException;
@@ -9,6 +10,7 @@ use Cdek\Helper;
 
 class DBCoreTokenStorage extends TokenStorageContract
 {
+    const CACHE_FILE_NAME = '.cache';
     private static string $tokenStatic = '';
     private static int $tokenExpStatic = 0;
 
@@ -39,20 +41,14 @@ class DBCoreTokenStorage extends TokenStorageContract
 
     private function getTokenFromSettings(): ?string
     {
-        $tokenSetting = Helper::getActualShippingMethod()->get_option('core_token');
-        if (empty($tokenSetting)) {
+        $cache = (new FileCache(self::CACHE_FILE_NAME))->getVars();
+
+        if (empty($cache['token'])) {
             return null;
         }
-        $decryptToken = $this->decryptToken($tokenSetting, Helper::getActualShippingMethod()->get_option('client_id'));
-        if (empty($decryptToken)) {
-            return null;
-        }
-        $tokenExpSetting = $this->getTokenExp($decryptToken);
-        if ($tokenExpSetting < time()) {
-            return null;
-        }
-        self::$tokenStatic    = $decryptToken;
-        self::$tokenExpStatic = $tokenExpSetting;
+
+        $decryptToken = $cache['token'];
+        self::$tokenStatic = $decryptToken;
         return $decryptToken;
     }
 
@@ -67,9 +63,14 @@ class DBCoreTokenStorage extends TokenStorageContract
     final public function updateToken(): string
     {
         $tokenApi     = $this->fetchTokenFromApi();
-        $clientId     = Helper::getActualShippingMethod()->get_option('client_id');
-        $tokenEncrypt = $this->encryptToken($tokenApi, $clientId);
-        Helper::getActualShippingMethod()->update_option('core_token', $tokenEncrypt);
+
+        $cache = new FileCache(self::CACHE_FILE_NAME);
+        $cache->putVars(
+            [
+                'token' => $tokenApi
+            ]
+        );
+
         self::$tokenStatic    = $tokenApi;
         self::$tokenExpStatic = $this->getTokenExp($tokenApi);
         return $tokenApi;

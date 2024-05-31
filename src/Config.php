@@ -13,10 +13,11 @@ namespace Cdek {
         public const META_KEY = 'order_data';
         public const ORDER_META_BOX_KEY = 'official_cdek_order';
         public const ORDER_AUTOMATION_HOOK_NAME = 'cdekdelivery_automation';
-        public const API_URL = 'https://api.cdek.ru/v2/';
-        public const TEST_API_URL = 'https://api.edu.cdek.ru/v2/';
-        public const API_CORE_URL = 'https://api.cdek.ru/v2/'; //todo change to current url
-        public const TEST_API_CORE_URL = 'localhost:9939'; //todo change to current url
+        public const API_CORE_URL = 'https://api.cdek.ru/';
+        public const API_VERSION = 'v2/';
+        public const CMS_VERSION = 'wordpress/';
+        public const API_URL = 'https://api.cdek.ru/' . self::API_VERSION;
+        public const TEST_API_URL = 'https://api.edu.cdek.ru/' . self::API_VERSION;
         public const TEST_CLIENT_ID = 'EMscd6r9JnFiQ3bLoyjJY6eM78JrJceI';
         public const TEST_CLIENT_SECRET = 'PjLZkKBHEiLK3YsjtNrt3TGNG0ahs3kG';
         public const GRAPHICS_TIMEOUT_SEC = 60;
