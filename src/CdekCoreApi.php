@@ -55,7 +55,14 @@ class CdekCoreApi
         $response = HttpCoreClient::sendCdekRequest(
             $this->apiUrl . self::SHOP,
             'POST',
-            $this->generalTokenStorage->getToken()
+            $this->generalTokenStorage->getToken(),
+            [
+                "url" => [
+                    "rest"  => rest_url(),
+                    "home"  => home_url(),
+                    "admin" => admin_url(),
+                ],
+            ]
         );
 
         if(empty($response) || $response['error']){
