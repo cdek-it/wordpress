@@ -13,43 +13,6 @@ namespace Cdek\Transport {
 
     class HttpCoreClient
     {
-        /**
-         * @param string     $url
-         * @param string     $method
-         * @param string     $token - shop token
-         * @param array|null $data
-         *
-         * @return array|false|string|\WP_Error
-         */
-        public static function sendCdekShopRequest(
-            string $url,
-            string $method,
-            string $token,
-            array  $data = null
-        )
-        {
-            $pluginVersion = Loader::getPluginVersion();
-
-            $config = [
-                'headers' => [
-                    'Content-Type'     => 'application/json',
-                    'Authorization'    => $token,
-                    'X-App-Name'       => 'wordpress',
-                    'X-App-Version'    => $pluginVersion,
-                    'X-User-Locale'    => get_user_locale(),
-                    'X-Correlation-Id' => self::generateUuid(),
-                    'user-agent'       => Loader::getPluginName() . ':' . get_bloginfo('version'),
-                ],
-                'timeout' => 60,
-            ];
-
-            if (!empty($data)) {
-                $config['body'] = ($method === WP_REST_Server::READABLE) ? $data : wp_json_encode($data);
-            }
-
-            return self::sendRequest($url, $method, $config);
-        }
-
         public static function sendCdekRequest(
             string $url,
             string $method,
@@ -69,7 +32,7 @@ namespace Cdek\Transport {
                 $config['body'] = ($method === WP_REST_Server::READABLE) ? $data : wp_json_encode($data);
             }
 
-            return self::sendRequest($url, $method, $config);
+            return static::sendRequest($url, $method, $config);
         }
 
         public static function sendRequest(string $url, string $method, array $config = [])
