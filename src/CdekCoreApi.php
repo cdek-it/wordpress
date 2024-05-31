@@ -65,7 +65,7 @@ class CdekCoreApi
             ]
         );
 
-        if(empty($response) || $response['error']){
+        if(empty($response['success'])){
             throw new CdekApiException('[CDEKDelivery] Failed to get shop uuid',
                                        'cdek_error.uuid.auth',
                                        $response,
