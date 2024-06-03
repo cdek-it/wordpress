@@ -212,7 +212,10 @@ namespace Cdek {
 
             foreach ($arTaskClasses as $arTaskClass){
                 if($arTaskClass instanceof TaskContract){
-                    add_action($arTaskClass::getName(), [$arTaskClass, 'init']);
+                    add_action(
+                        Config::DELIVERY_NAME . '_' . Config::TASK_PREFIX . '_' . $arTaskClass::getName(),
+                        [$arTaskClass, 'init']
+                    );
                 }
             }
         }

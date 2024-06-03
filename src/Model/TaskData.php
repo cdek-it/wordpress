@@ -2,6 +2,8 @@
 
 namespace Cdek\Model;
 
+use Cdek\Config;
+
 class TaskData
 {
     const TASK_COLLECT_ORPHANED_ORDERS = 'collect_orphaned-orders';
@@ -40,7 +42,7 @@ class TaskData
                 as_schedule_cron_action(
                     $this->time,
                     $this->schedule,
-                    $this->name,
+                    Config::DELIVERY_NAME . '_' . Config::TASK_PREFIX . '_' . $this->name,
                     $this->metaData,
                     '',
                     true
@@ -49,7 +51,7 @@ class TaskData
         } else {
             as_enqueue_async_action(
                 $this->time,
-                $this->name,
+                Config::DELIVERY_NAME . '_' . Config::TASK_PREFIX . '_' . $this->name,
                 $this->metaData
             );
         }

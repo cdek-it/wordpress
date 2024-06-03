@@ -10,6 +10,7 @@ namespace Cdek {
     class Config
     {
         public const DELIVERY_NAME = 'official_cdek';
+        public const TASK_PREFIX = 'cdek';
         public const META_KEY = 'order_data';
         public const ORDER_META_BOX_KEY = 'official_cdek_order';
         public const ORDER_AUTOMATION_HOOK_NAME = 'cdekdelivery_automation';
