@@ -16,6 +16,7 @@ namespace Cdek {
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
     use Cdek\Actions\Schedule\ReindexOrders;
+    use Cdek\Actions\Schedule\TaskManager;
     use Cdek\Blocks\CheckoutMapBlock;
     use Cdek\Controllers\CourierController;
     use Cdek\Controllers\LocationController;
@@ -177,9 +178,24 @@ namespace Cdek {
 
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, new CreateOrderAction, 10, 2);
 
-            add_action('admin_post_reindex_orders', [ReindexOrders::class, 'initOrdersSend']);
+//            add_action('admin_post_reindex_orders', [ReindexOrders::class, 'initOrdersSend']);
+//
+//            add_action('get_reindex_orders', [ReindexOrders::class, 'getReindexOrders']);
 
-            add_action('get_reindex_orders', [ReindexOrders::class, 'getReindexOrders']);
+            if ( false === as_has_scheduled_action('cdek_task_manager') ) {
+                as_schedule_recurring_action(
+                    strtotime('tomorrow'),
+                    DAY_IN_SECONDS,
+                    'cdek_task_manager',
+                    [],
+                    '',
+                    true
+                );
+            }
+
+            add_action( 'init', 'cdek_task_manager' );
+
+            add_action('cdek_task_manager', [TaskManager::class, 'init']);
 
             (new CdekWidget)();
             (new Admin)();

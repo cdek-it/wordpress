@@ -11,6 +11,7 @@ class CdekCoreApi
 {
     private const TOKEN_PATH = 'shop/%s/token';
     private const REINDEX_ORDERS = 'full-sync';
+    private const TASKS = 'tasks';
     private const SHOP = 'shop';
     private string $apiUrl;
     private CdekShippingMethod $deliveryMethod;
@@ -42,7 +43,7 @@ class CdekCoreApi
                     'home'  => home_url(),
                     'admin' => admin_url(),
                 ],
-            ]
+            ],
         );
 
         if(empty($response['success'])){
@@ -67,9 +68,9 @@ class CdekCoreApi
             HttpCoreClient::sendCdekRequest(
                 sprintf($this->apiUrl . self::TOKEN_PATH, $body['id']),
                 'POST',
-                $this->generalTokenStorage->getToken()
+                $this->generalTokenStorage->getToken(),
             ),
-            true
+            true,
         )['body'];
 
         if ($body === null || isset($body['error_description']) || isset($body['error'])) {
@@ -82,18 +83,30 @@ class CdekCoreApi
         return $body['token'];
     }
 
+    public function taskManager()
+    {
+        return HttpCoreClient::sendCdekRequest($this->getShopApiUrl() . '/' .  self::TASKS, 'GET',
+                                               $this->tokenCoreStorage->getToken());
+    }
+
     public function reindexOrders($orders)
     {
-        return HttpCoreClient::sendCdekRequest($this->apiUrl . self::REINDEX_ORDERS, 'PUT', $this->tokenCoreStorage->getToken(), $orders);
+        return HttpCoreClient::sendCdekRequest($this->getShopApiUrl() . '/' .  self::REINDEX_ORDERS, 'PUT',
+                                               $this->tokenCoreStorage->getToken(), $orders);
     }
 
     public function checkUpdateOrders()
     {
         return HttpCoreClient::sendCdekRequest(
-            $this->apiUrl . self::REINDEX_ORDERS,
+            $this->getShopApiUrl() . '/' .  self::REINDEX_ORDERS,
             'GET',
-            $this->tokenCoreStorage->getToken()
+            $this->tokenCoreStorage->getToken(),
         );
+    }
+
+    private function getShopApiUrl()
+    {
+        return $this->apiUrl . $this->tokenCoreStorage->getPath();
     }
 
     private function getApiUrl(): string

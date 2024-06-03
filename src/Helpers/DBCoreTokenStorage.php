@@ -13,6 +13,7 @@ class DBCoreTokenStorage extends TokenStorageContract
     const CACHE_FILE_NAME = '.cache';
     private static string $tokenStatic = '';
     private static int $tokenExpStatic = 0;
+    private static string $apiUrlString = '';
 
     final public static function flushCache(): void
     {
@@ -32,6 +33,19 @@ class DBCoreTokenStorage extends TokenStorageContract
         }
 
         return 'Bearer ' . $token;
+    }
+
+    public function getPath()
+    {
+        if(isset(static::$apiUrlString)){
+            return static::$apiUrlString;
+        }
+
+        $token = $this->getToken();
+
+        $arToken = explode('.', $token);
+
+        return json_decode(base64_decode($arToken[count($arToken) - 1]))['token'];
     }
 
     private function getTokenFromCache(): ?string
@@ -67,8 +81,8 @@ class DBCoreTokenStorage extends TokenStorageContract
         $cache = new FileCache(self::CACHE_FILE_NAME);
         $cache->putVars(
             [
-                'token' => $tokenApi
-            ]
+                'token' => $tokenApi,
+            ],
         );
 
         self::$tokenStatic    = $tokenApi;
