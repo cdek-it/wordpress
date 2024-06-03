@@ -37,7 +37,7 @@ class TaskData
         $this->time += 5 * 60;
         if ($this->schedule) {
             if (false === as_has_scheduled_action($this->name)) {
-                as_schedule_recurring_action(
+                as_schedule_cron_action(
                     $this->time,
                     $this->schedule,
                     $this->name,
@@ -47,10 +47,10 @@ class TaskData
                 );
             }
         } else {
-            as_schedule_single_action(
+            as_enqueue_async_action(
                 $this->time,
                 $this->name,
-                $this->metaData,
+                $this->metaData
             );
         }
     }

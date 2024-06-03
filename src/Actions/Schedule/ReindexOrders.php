@@ -10,96 +10,39 @@ namespace Cdek\Actions\Schedule {
 
     use Cdek\CdekCoreApi;
     use Cdek\CdekShippingMethod;
+    use Cdek\Contracts\TaskContract;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Validate;
 
-    class ReindexOrders
+    class ReindexOrders extends TaskContract
     {
-        private CdekCoreApi $api;
         private array $orders;
-        private Validate $error;
         private array $responseOrders = [];
+        private Validate $error;
 
-        public function __construct()
+        public static function getName(): string
         {
-            $this->api = new CdekCoreApi();
+            return 'restore-order-uuids';
         }
 
-        public static function initOrdersSend()
+        public static function init($metaData = [])
         {
-            $reindex = new self();
-
-            $reindex->run();
-
-            status_header(200);
-
-            exit("Server received '{$_REQUEST['data']}' from your browser.");
-        }
-
-        public static function getReindexOrders()
-        {
-            $reindex = new self();
-
-            $reindex->checkReindexOrders();
-            $reindex->writeReindexOrders();
-
-        }
-
-        public function run()
-        {
-            (new CdekShippingMethod())->update_option('cdek_start_reindex', 'Y');
-
-            $this->getOrders();
-            $this->exchangeOrders();
-
-            if(isset($this->error)){
-
-                status_header(500);
-
-                exit($this->error->message);
-
-            }
-
-            if (false === as_has_scheduled_action('get_reindex_orders') ) {
-                wp_schedule_single_event(
-                    strtotime('tomorrow'),
-                    'get_reindex_orders'
-                );
-            }
-        }
-
-        protected function checkReindexOrders()
-        {
-            $response = $this->api->checkUpdateOrders();
-            $exchangeObj = json_decode($response, true);
-
-            if(property_exists($exchangeObj, 'errors') || empty($exchangeObj['body']['orders'])){
-                $this->error =
-                    new Validate(
-                        false,
-                        __('An error occurred while creating request. Try again later', 'cdekdelivery'),
-                    );
-
+            if(empty($metaData)){
                 return;
             }
 
-            $this->responseOrders = $exchangeObj['body']['orders'];
-
-            if(empty($response['body']['completed'])){
-                wp_schedule_single_event(
-                    time() + 60 * 5,
-                    'get_reindex_orders'
-                );
-            }
+            $reindexOrders = new self();
+            $reindexOrders->setResponseOrders($metaData['orders']);
+            $reindexOrders->start();
         }
 
-        protected function writeReindexOrders()
+        public function start()
         {
             if(empty($this->responseOrders)){
                 return;
             }
 
-            $this->getOrders();
+            $this->initOrders();
 
             foreach ($this->orders as $orderId){
                 $orderIndex = array_search($orderId, array_column($this->responseOrders, 'order_id'));
@@ -114,14 +57,13 @@ namespace Cdek\Actions\Schedule {
                     $orderId,
                     [
                         'order_number' => $responseOrder['order_number'],
-                        'order_uuid' => $responseOrder['order_uuid']
-                    ]
+                        'order_uuid' => $responseOrder['order_uuid'],
+                    ],
                 );
             }
-
         }
 
-        protected function getOrders()
+        protected function initOrders()
         {
             $query = new \WC_Order_Query(
                 [
@@ -136,20 +78,9 @@ namespace Cdek\Actions\Schedule {
             }
         }
 
-        protected function exchangeOrders()
+        public function setResponseOrders($orders)
         {
-            $response = $this->api->reindexOrders($this->orders);
-            $exchangeObj = json_decode($response, true);
-
-            if (property_exists($exchangeObj, 'errors') || $exchangeObj['response']['code'] !== 202) {
-                $this->error =
-                    new Validate(
-                        false,
-                        __('An error occurred while creating request. Try again later', 'cdekdelivery'),
-                    );
-            }
-
+            $this->responseOrders = $orders;
         }
-
     }
 }

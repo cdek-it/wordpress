@@ -15,15 +15,18 @@ namespace Cdek {
     use Cdek\Actions\ProcessWoocommerceCreateShippingAction;
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
+    use Cdek\Actions\Schedule\CollectOrders;
     use Cdek\Actions\Schedule\ReindexOrders;
     use Cdek\Actions\Schedule\TaskManager;
     use Cdek\Blocks\CheckoutMapBlock;
+    use Cdek\Contracts\TaskContract;
     use Cdek\Controllers\CourierController;
     use Cdek\Controllers\LocationController;
     use Cdek\Controllers\OrderController;
     use Cdek\Controllers\RestController;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\DataWPScraber;
+    use Cdek\Model\TaskData;
     use Cdek\UI\Admin;
     use Cdek\UI\AdminNotices;
     use Cdek\UI\AdminShippingFields;
@@ -83,6 +86,17 @@ namespace Cdek {
             }
 
             self::checkRequirements();
+
+            if (as_has_scheduled_action('cdek_task_manager') === false) {
+                as_schedule_recurring_action(
+                    strtotime('tomorrow'),
+                    DAY_IN_SECONDS,
+                    'cdek_task_manager',
+                    [],
+                    '',
+                    true,
+                );
+            }
         }
 
         /**
@@ -178,30 +192,29 @@ namespace Cdek {
 
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, new CreateOrderAction, 10, 2);
 
-//            add_action('admin_post_reindex_orders', [ReindexOrders::class, 'initOrdersSend']);
-//
-//            add_action('get_reindex_orders', [ReindexOrders::class, 'getReindexOrders']);
-
-            if ( false === as_has_scheduled_action('cdek_task_manager') ) {
-                as_schedule_recurring_action(
-                    strtotime('tomorrow'),
-                    DAY_IN_SECONDS,
-                    'cdek_task_manager',
-                    [],
-                    '',
-                    true
-                );
-            }
-
-            add_action('init', 'cdek_task_manager');
-
             add_action('cdek_task_manager', [TaskManager::class, 'init']);
+
+            self::registerTasks();
 
             (new CdekWidget)();
             (new Admin)();
             (new Frontend)();
             (new MetaBoxes)();
             (new AdminNotices)();
+        }
+
+        private static function registerTasks()
+        {
+            $arTaskClasses = [
+                ReindexOrders::class,
+                CollectOrders::class
+            ];
+
+            foreach ($arTaskClasses as $arTaskClass){
+                if($arTaskClass instanceof TaskContract){
+                    add_action($arTaskClass::getName(), [$arTaskClass, 'init']);
+                }
+            }
         }
 
         private static function declareCompatibility(): void

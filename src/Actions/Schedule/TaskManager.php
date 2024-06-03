@@ -3,6 +3,7 @@
 namespace Cdek\Actions\Schedule;
 
 use Cdek\CdekCoreApi;
+use Cdek\Contracts\TaskContract;
 use Cdek\Model\TaskData;
 
 class TaskManager
@@ -19,7 +20,7 @@ class TaskManager
         $this->initTasks();
     }
 
-    public function init()
+    public static function init()
     {
         $taskManager = new self();
         $taskManager->startTasksWork();

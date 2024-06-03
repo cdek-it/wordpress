@@ -6,35 +6,17 @@ use Cdek\Loader;
 
 class FileCache
 {
-    const FILE_EXT = '.php';
-
-    public static  $enable = true;
-    public static  $path = '/cache';
-    private static $keys = [];
+    private static array $store;
     private string $file;
 
     public function __construct($fileName)
     {
         $this->file = $fileName;
     }
-    public static function get($name)
-    {
-        if (self::$enable) {
-            $file = Loader::getPluginPath() . self::$path . '/' . $name . self::FILE_EXT;
-            if (file_exists($file)) {
-                return file_get_contents($file);
-            } else {
-                self::$keys[] = $name;
-                return false;
-            }
-        } else {
-            return '';
-        }
-    }
 
     public function getVars()
     {
-        return require_once(Loader::getPluginPath() . '/' . $this->file . self::FILE_EXT);
+        return self::$store[$this->file] ?? self::$store[$this->file] = require_once(Loader::getPluginPath() . DIRECTORY_SEPARATOR . $this->file);
     }
 
     public function putVars($vars)
@@ -43,7 +25,7 @@ class FileCache
             return;
         }
 
-        $logFile = fopen( Loader::getPluginPath() . '/' . $this->file . self::FILE_EXT, 'w+');
+        $logFile = fopen( Loader::getPluginPath() . DIRECTORY_SEPARATOR . $this->file, 'w+');
         $content = '<?php return [';
 
         $this->recurseContent($content, $vars);
@@ -55,55 +37,23 @@ class FileCache
 
     private function recurseContent(&$content, $vars)
     {
+        $countVars = count($vars);
+        $i = 0;
+
         foreach ($vars as $key => $var){
+            $i++;
             if(is_array($var)){
                 $content .= '"' . $key . '" => [';
                 $this->recurseContent($content, $var);
-                $content .= '],';
+                $content .= ']';
             }else{
-                $content .= '"' . $key . '" => "' . $var  . '",';
+                $content .= '"' . $key . '" => "' . $var  . '"';
             }
 
-        }
-    }
-
-    public static function set($content)
-    {
-        if (self::$enable) {
-            $name = array_pop(self::$keys);
-            $dir  = Loader::getPluginPath() . self::$path . '/';
-            if (!is_dir($dir)) {
-                @mkdir($dir, 0777, true);
+            if($i < $countVars){
+                $content .= ',';
             }
-            file_put_contents($dir . '/' . $name . self::FILE_EXT, $content);
-        }
 
-        return $content;
-    }
-
-    public static function begin($name)
-    {
-        if ($content = self::get($name)) {
-            echo $content;
-            return false;
-        } else {
-            ob_start();
-            return true;
-        }
-    }
-
-    public static function end()
-    {
-        echo self::set(ob_get_clean());
-    }
-
-    public static function clear()
-    {
-        $dir = Loader::getPluginPath() . self::$path;
-        foreach (glob($dir . '/*') as $file) {
-            if (is_file($file)) {
-                unlink($file);
-            }
         }
     }
 }

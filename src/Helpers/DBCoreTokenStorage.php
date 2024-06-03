@@ -10,7 +10,7 @@ use Cdek\Helper;
 
 class DBCoreTokenStorage extends TokenStorageContract
 {
-    const CACHE_FILE_NAME = '.cache';
+    const CACHE_FILE_NAME = '.cache.php';
     private static string $tokenStatic = '';
     private static int $tokenExpStatic = 0;
     private static string $apiUrlString = '';
