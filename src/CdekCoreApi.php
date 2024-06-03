@@ -83,10 +83,10 @@ class CdekCoreApi
         return $body['token'];
     }
 
-    public function taskManager()
+    public function taskManager($data = null)
     {
         return HttpCoreClient::sendCdekRequest($this->getShopApiUrl() . '/' .  self::TASKS, 'GET',
-                                               $this->tokenCoreStorage->getToken());
+                                               $this->tokenCoreStorage->getToken(), $data);
     }
 
     public function reindexOrders($orders)

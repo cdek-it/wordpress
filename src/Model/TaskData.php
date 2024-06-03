@@ -4,15 +4,19 @@ namespace Cdek\Model;
 
 class TaskData
 {
+    const TASK_COLLECT_ORPHANED_ORDERS = 'collect_orphaned-orders';
+    const TASK_RESTORE_ORDER_UUIDS = 'restore-order-uuids';
+
     const AVAILABLE_TASKS = [
-        'collect_orphaned-orders',
-        'restore-order-uuids',
+        self::TASK_COLLECT_ORPHANED_ORDERS,
+        self::TASK_RESTORE_ORDER_UUIDS,
     ];
 
     private $id;
     private $name;
     private $schedule;
     private $metaData;
+    private $time;
 
     public function __construct($requestData)
     {
@@ -21,14 +25,34 @@ class TaskData
         $this->schedule = $requestData['schedule'];
         $this->metaData = [];
 
-        if(!empty($requestData['meta'])){
+        if (!empty($requestData['meta'])) {
             $this->metaData = $requestData['meta'];
         }
+
+        $this->time = time();
     }
 
     public function createTaskWork()
     {
-        //todo logic of work task
+        $this->time += 5 * 60;
+        if ($this->schedule) {
+            if (false === as_has_scheduled_action($this->name)) {
+                as_schedule_recurring_action(
+                    $this->time,
+                    $this->schedule,
+                    $this->name,
+                    $this->metaData,
+                    '',
+                    true
+                );
+            }
+        } else {
+            as_schedule_single_action(
+                $this->time,
+                $this->name,
+                $this->metaData,
+            );
+        }
     }
 
     /**

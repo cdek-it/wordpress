@@ -193,7 +193,7 @@ namespace Cdek {
                 );
             }
 
-            add_action( 'init', 'cdek_task_manager' );
+            add_action('init', 'cdek_task_manager');
 
             add_action('cdek_task_manager', [TaskManager::class, 'init']);
 
