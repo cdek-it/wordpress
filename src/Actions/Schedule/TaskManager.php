@@ -10,7 +10,6 @@ class TaskManager
 {
     private array $responseData = [];
     private array $responseCursor;
-    private TaskData $task;
     private array $taskCollection;
     private ?array $errorCollection;
 

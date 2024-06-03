@@ -17,8 +17,8 @@ class TaskData
     private $id;
     private $name;
     private $schedule;
-    private $metaData;
-    private $time;
+    private ?array $metaData;
+    private int $time;
 
     public function __construct($requestData)
     {
@@ -37,22 +37,23 @@ class TaskData
     public function createTaskWork()
     {
         $this->time += 5 * 60;
-        if ($this->schedule) {
-            if (false === as_has_scheduled_action($this->name)) {
+
+        if ($this->isScheduleTask()) {
+            if (false === as_has_scheduled_action($this->getName())) {
                 as_schedule_cron_action(
                     $this->time,
-                    $this->schedule,
-                    Config::DELIVERY_NAME . '_' . Config::TASK_PREFIX . '_' . $this->name,
-                    $this->metaData,
+                    $this->getSchedule(),
+                    Config::DELIVERY_NAME . '_' . Config::TASK_PREFIX . '_' . $this->getName(),
+                    $this->getMetaData(),
                     '',
-                    true
+                    true,
                 );
             }
         } else {
             as_enqueue_async_action(
                 $this->time,
-                Config::DELIVERY_NAME . '_' . Config::TASK_PREFIX . '_' . $this->name,
-                $this->metaData
+                Config::DELIVERY_NAME . '_' . Config::TASK_PREFIX . '_' . $this->getName(),
+                $this->getMetaData(),
             );
         }
     }
@@ -92,6 +93,11 @@ class TaskData
     public function isAvailableTask()
     {
         return in_array($this->name, self::AVAILABLE_TASKS);
+    }
+
+    public function isScheduleTask()
+    {
+        return !empty($this->schedule);
     }
 
 }
