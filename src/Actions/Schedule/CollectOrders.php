@@ -9,11 +9,13 @@ use Cdek\Model\Validate;
 class CollectOrders extends TaskContract
 {
     private CdekCoreApi $api;
+    private string $taskId;
     private array $orders;
     private Validate $error;
 
-    public function __construct()
+    public function __construct($taskId)
     {
+        $this->taskId = $taskId;
         $this->api = new CdekCoreApi();
     }
 
@@ -24,7 +26,10 @@ class CollectOrders extends TaskContract
 
     public static function init($metaData = [])
     {
-        $reindexOrders = new self();
+        if(empty($metaData['task_id'])){
+            return;
+        }
+        $reindexOrders = new self($metaData['task_id']);
         $reindexOrders->start();
     }
 
@@ -44,9 +49,28 @@ class CollectOrders extends TaskContract
             ],
         );
 
-        foreach ($query->get_orders() as $orderId) {
+        $pagination = $this->getTaskMeta($this->taskId)['pagination'];
+
+        if(!empty($pagination)){
+            $query->set('page', $pagination['page']);
+        }else{
+            $pagination['page'] = 1;
+        }
+
+        $count = count($query->get_orders());
+
+        $query->set('limit', self::ORDERS_LIMIT);
+
+        $arOrders = $query->get_orders();
+
+        foreach ($arOrders as $orderId) {
             $this->orders[] = $orderId;
         }
+
+        $this->reportResult(
+            ceil($count/self::ORDERS_LIMIT),
+            $pagination['page']
+        );
     }
 
     private function exchangeOrders()

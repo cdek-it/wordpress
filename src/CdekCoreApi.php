@@ -104,6 +104,11 @@ class CdekCoreApi
         );
     }
 
+    public function addHeaders(array $addHeaders): void
+    {
+        HttpCoreClient::addHeaders($addHeaders);
+    }
+
     private function getShopApiUrl()
     {
         return $this->apiUrl . $this->tokenCoreStorage->getPath();

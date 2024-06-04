@@ -6,18 +6,9 @@ use Cdek\Config;
 
 class TaskData
 {
-    const TASK_COLLECT_ORPHANED_ORDERS = 'collect_orphaned-orders';
-    const TASK_RESTORE_ORDER_UUIDS = 'restore-order-uuids';
-
-    const AVAILABLE_TASKS = [
-        self::TASK_COLLECT_ORPHANED_ORDERS,
-        self::TASK_RESTORE_ORDER_UUIDS,
-    ];
-
     private $id;
     private $name;
     private $schedule;
-    private ?array $metaData;
     private int $time;
 
     public function __construct($requestData)
@@ -25,11 +16,6 @@ class TaskData
         $this->id = $requestData['id'];
         $this->name = $requestData['name'];
         $this->schedule = $requestData['schedule'];
-        $this->metaData = [];
-
-        if (!empty($requestData['meta'])) {
-            $this->metaData = $requestData['meta'];
-        }
 
         $this->time = time();
     }
@@ -44,7 +30,7 @@ class TaskData
                     $this->time,
                     $this->getSchedule(),
                     Config::DELIVERY_NAME . '_' . Config::TASK_PREFIX . '_' . $this->getName(),
-                    $this->getMetaData(),
+                    ['task_id' => $this->getId()],
                     '',
                     true,
                 );
@@ -53,7 +39,7 @@ class TaskData
             as_enqueue_async_action(
                 $this->time,
                 Config::DELIVERY_NAME . '_' . Config::TASK_PREFIX . '_' . $this->getName(),
-                $this->getMetaData(),
+                ['task_id' => $this->getId()],
             );
         }
     }
@@ -80,19 +66,6 @@ class TaskData
     public function getSchedule()
     {
         return $this->schedule;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getMetaData()
-    {
-        return $this->metaData;
-    }
-
-    public function isAvailableTask()
-    {
-        return in_array($this->name, self::AVAILABLE_TASKS);
     }
 
     public function isScheduleTask()

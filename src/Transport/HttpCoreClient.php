@@ -13,6 +13,13 @@ namespace Cdek\Transport {
 
     class HttpCoreClient
     {
+        private static array $addHeaders = [];
+
+        public static function addHeaders(array $addHeaders)
+        {
+            self::$addHeaders = $addHeaders;
+        }
+
         public static function sendCdekRequest(
             string $url,
             string $method,
@@ -22,7 +29,7 @@ namespace Cdek\Transport {
         {
             $config = [
                 'headers' => [
-                    'Authorization'    => $token
+                    'Authorization'    => $token,
                 ],
                 'timeout' => 60,
             ];
@@ -49,11 +56,15 @@ namespace Cdek\Transport {
                             'X-User-Locale'    => get_user_locale(),
                             'X-Correlation-Id' => self::generateUuid(),
                             'user-agent'       => Loader::getPluginName() . ':' . get_bloginfo('version'),
-                        ],
+                        ] + self::$addHeaders,
                         'timeout' => 60,
                     ],
                 ),
             );
+
+            if(!empty(self::$addHeaders)){
+                self::$addHeaders = [];
+            }
 
             if (is_array($resp)) {
                 return $resp;

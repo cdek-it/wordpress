@@ -15,18 +15,14 @@ namespace Cdek {
     use Cdek\Actions\ProcessWoocommerceCreateShippingAction;
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
-    use Cdek\Actions\Schedule\CollectOrders;
-    use Cdek\Actions\Schedule\ReindexOrders;
-    use Cdek\Actions\Schedule\TaskManager;
+    use Cdek\Managers\TaskManager;
     use Cdek\Blocks\CheckoutMapBlock;
-    use Cdek\Contracts\TaskContract;
     use Cdek\Controllers\CourierController;
     use Cdek\Controllers\LocationController;
     use Cdek\Controllers\OrderController;
     use Cdek\Controllers\RestController;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\DataWPScraber;
-    use Cdek\Model\TaskData;
     use Cdek\UI\Admin;
     use Cdek\UI\AdminNotices;
     use Cdek\UI\AdminShippingFields;
@@ -87,11 +83,11 @@ namespace Cdek {
 
             self::checkRequirements();
 
-            if (as_has_scheduled_action('cdek_task_manager') === false) {
-                as_schedule_recurring_action(
-                    strtotime('tomorrow'),
+            if (as_has_scheduled_action(Config::TASK_MANAGER_HOOK_NAME) === false) {
+                as_schedule_cron_action(
+                    time(),
                     DAY_IN_SECONDS,
-                    'cdek_task_manager',
+                    Config::TASK_MANAGER_HOOK_NAME,
                     [],
                     '',
                     true,
@@ -192,32 +188,13 @@ namespace Cdek {
 
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, new CreateOrderAction, 10, 2);
 
-            add_action('cdek_task_manager', [TaskManager::class, 'init']);
-
-            self::registerTasks();
+            TaskManager::registerTasks();
 
             (new CdekWidget)();
             (new Admin)();
             (new Frontend)();
             (new MetaBoxes)();
             (new AdminNotices)();
-        }
-
-        private static function registerTasks()
-        {
-            $arTaskClasses = [
-                ReindexOrders::class,
-                CollectOrders::class
-            ];
-
-            foreach ($arTaskClasses as $arTaskClass){
-                if($arTaskClass instanceof TaskContract){
-                    add_action(
-                        Config::DELIVERY_NAME . '_' . Config::TASK_PREFIX . '_' . $arTaskClass::getName(),
-                        [$arTaskClass, 'init']
-                    );
-                }
-            }
         }
 
         private static function declareCompatibility(): void

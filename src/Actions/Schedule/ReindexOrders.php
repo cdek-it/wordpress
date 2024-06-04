@@ -16,9 +16,15 @@ namespace Cdek\Actions\Schedule {
 
     class ReindexOrders extends TaskContract
     {
+        private string $taskId;
         private array $orders;
-        private array $responseOrders = [];
         private Validate $error;
+
+        public function __construct(string $taskId)
+        {
+            $this->taskId = $taskId;
+            $this->initTaskData($taskId);
+        }
 
         public static function getName(): string
         {
@@ -27,31 +33,30 @@ namespace Cdek\Actions\Schedule {
 
         public static function init($metaData = [])
         {
-            if(empty($metaData)){
+            if(empty($metaData['task_id'])){
                 return;
             }
 
-            $reindexOrders = new self();
-            $reindexOrders->setResponseOrders($metaData['orders']);
+            $reindexOrders = new static($metaData['task_id']);
             $reindexOrders->start();
         }
 
         public function start()
         {
-            if(empty($this->responseOrders)){
+            if(empty($this->getTaskMeta($this->taskId)['orders'])){
                 return;
             }
 
             $this->initOrders();
 
             foreach ($this->orders as $orderId){
-                $orderIndex = array_search($orderId, array_column($this->responseOrders, 'order_id'));
+                $orderIndex = array_search($orderId, array_column($this->getTaskMeta($this->taskId)['orders'], 'order_id'));
 
                 if(empty($orderIndex)){
                     continue;
                 }
 
-                $responseOrder = $this->responseOrders[$orderIndex];
+                $responseOrder = $this->getTaskMeta($this->taskId)['orders'][$orderIndex];
 
                 OrderMetaData::updateMetaByOrderId(
                     $orderId,
@@ -70,17 +75,20 @@ namespace Cdek\Actions\Schedule {
                     'orderby' => 'id',
                     'order'   => 'ASC',
                     'return'  => 'ids',
-                ],
+                ]
             );
+
+            $pagination = $this->getTaskMeta($this->taskId)['pagination'];
+
+            if(!empty($pagination)){
+                $query->set('page', $pagination['page']);
+            }
+
+            $query->set('limit', self::ORDERS_LIMIT);
 
             foreach ($query->get_orders() as $orderId) {
                 $this->orders[] = $orderId;
             }
-        }
-
-        public function setResponseOrders($orders)
-        {
-            $this->responseOrders = $orders;
         }
     }
 }
