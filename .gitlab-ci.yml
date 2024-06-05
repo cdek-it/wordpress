@@ -23,7 +23,6 @@ build_tag:
     - sed -i "s/\(Version:\)\( *\).*/\1\2${RELEASE_VERSION}/" cdek.php
     - sed -i "s/\(Stable tag:\)\( *\).*/\1\2${RELEASE_VERSION}/" readme.txt
     - sed -i "s/\(Project-Id-Version:\)\( *\).*/\1\2CDEKDelivery ${RELEASE_VERSION}/" lang/cdekdelivery.pot
-    - yarn set version berry
     - yarn
     - yarn build
     - rm -rf node_modules
