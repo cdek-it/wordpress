@@ -10,10 +10,7 @@ class Uninstaller
     {
         foreach (TaskManager::getTasksHooks() as $hook){
             if (as_has_scheduled_action($hook) !== false) {
-                wp_unschedule_event(
-                    time(),
-                    $hook
-                );
+                as_unschedule_action($hook);
             }
         }
     }

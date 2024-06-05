@@ -10,13 +10,12 @@ class CollectOrders extends TaskContract
 {
     const ORDERS_LIMIT = 10000;
     private CdekCoreApi $api;
-    private string $taskId;
     private array $orders;
     private Validate $error;
 
     public function __construct($taskId)
     {
-        $this->taskId = $taskId;
+        parent::__construct($taskId);
         $this->api = new CdekCoreApi();
     }
 
@@ -37,7 +36,6 @@ class CollectOrders extends TaskContract
     public function start()
     {
         $this->initOrders();
-        $this->exchangeOrders();
     }
 
     protected function initOrders()
@@ -46,46 +44,21 @@ class CollectOrders extends TaskContract
             [
                 'orderby' => 'id',
                 'order'   => 'ASC',
-                'return'  => 'ids',
+                'paginate'   => true,
+                'limit' => self::ORDERS_LIMIT,
+                'return'  => 'ids'
             ],
         );
 
-        $pagination = $this->getTaskMeta($this->taskId)['pagination'];
+        for ($page = 1, $maxPages = 1; $page <= $maxPages; $page++){
+            $query->set('page', $page);
+            $result = $query->get_orders();
 
-        if(!empty($pagination)){
-            $query->set('page', $pagination['page']);
-        }else{
-            $pagination['page'] = 1;
+            $maxPages = $result->max_num_pages;
+
+            $this->addPageHeaders($maxPages, $page);
+
+            $this->sendTaskData($result['orders']);
         }
-
-        $count = count($query->get_orders());
-
-        $query->set('limit', self::ORDERS_LIMIT);
-
-        $arOrders = $query->get_orders();
-
-        foreach ($arOrders as $orderId) {
-            $this->orders[] = $orderId;
-        }
-
-        $this->reportResult(
-            ceil($count/self::ORDERS_LIMIT),
-            $pagination['page']
-        );
-    }
-
-    private function exchangeOrders()
-    {
-        $response = $this->api->reindexOrders($this->orders);
-        $exchangeObj = json_decode($response, true);
-
-        if (property_exists($exchangeObj, 'errors') || $exchangeObj['response']['code'] !== 202) {
-            $this->error =
-                new Validate(
-                    false,
-                    __('An error occurred while creating request. Try again later', 'cdekdelivery'),
-                );
-        }
-
     }
 }

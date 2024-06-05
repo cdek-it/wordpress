@@ -21,6 +21,7 @@ class TaskManager extends TaskContract
 
     public function __construct()
     {
+        parent::__construct('task_manager');
         $this->getResponse();
         $this->initTasks();
     }
@@ -50,7 +51,7 @@ class TaskManager extends TaskContract
 
     public function getErrors(): array
     {
-        return self::$errorCollection['task_manager'];
+        return self::$errorCollection[$this->taskId];
     }
 
 
@@ -100,16 +101,16 @@ class TaskManager extends TaskContract
         if (
             $decodeResponse['error']
         ) {
-            self::$errorCollection['task_manager'][] = $decodeResponse['error'];
+            self::$errorCollection[$this->taskId][] = $decodeResponse['error'];
         }
 
         if (empty($response['cursor'])) {
-            self::$errorCollection['task_manager'][] = 'Cursor data not found';
+            self::$errorCollection[$this->taskId][] = 'Cursor data not found';
         }
 
         if (empty($this->errorCollection)) {
-            self::$taskData['task_manager'] = $response['data'];
-            self::$responseCursor['task_manager'] = $response['cursor'];
+            self::$taskData[$this->taskId] = $response['data'];
+            self::$responseCursor[$this->taskId] = $response['cursor'];
         }
     }
 
@@ -119,7 +120,7 @@ class TaskManager extends TaskContract
             return;
         }
 
-        foreach (self::$taskData['task_manager'] as $data) {
+        foreach (self::$taskData[$this->taskId] as $data) {
             $this->taskCollection[] = new TaskData($data);
         }
     }

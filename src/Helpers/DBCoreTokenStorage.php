@@ -59,17 +59,9 @@ class DBCoreTokenStorage extends TokenStorageContract
         return $decryptToken;
     }
 
-    /**
-     * @throws \JsonException
-     */
-    private function getTokenExp(string $token): int
-    {
-        return json_decode(base64_decode(strtr(explode('.', $token)[1], '-_', '+/')), false, 512, JSON_THROW_ON_ERROR)->exp;
-    }
-
     final public function updateToken(): string
     {
-        $tokenApi     = $this->fetchTokenFromApi();
+        $tokenApi = $this->fetchTokenFromApi();
 
         $cache = new FileCache(FileCache::CACHE_FILE_NAME);
         $cache->putVars(

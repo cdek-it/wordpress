@@ -17,14 +17,13 @@ namespace Cdek\Actions\Schedule {
     class ReindexOrders extends TaskContract
     {
         const ORDERS_LIMIT = 10000;
-        private string $taskId;
         private array $orders;
         private Validate $error;
 
         public function __construct(string $taskId)
         {
-            $this->taskId = $taskId;
-            $this->initTaskData($taskId);
+            parent::__construct($taskId);
+            $this->initTaskData();
         }
 
         public static function getName(): string
@@ -44,20 +43,20 @@ namespace Cdek\Actions\Schedule {
 
         public function start()
         {
-            if(empty($this->getTaskMeta($this->taskId)['orders'])){
+            if(empty($this->getTaskMeta())){
                 return;
             }
 
             $this->initOrders();
 
             foreach ($this->orders as $orderId){
-                $orderIndex = array_search($orderId, array_column($this->getTaskMeta($this->taskId)['orders'], 'order_id'));
+                $orderIndex = array_search($orderId, array_column($this->getTaskMeta()['orders'], 'order_id'));
 
                 if(empty($orderIndex)){
                     continue;
                 }
 
-                $responseOrder = $this->getTaskMeta($this->taskId)['orders'][$orderIndex];
+                $responseOrder = $this->getTaskMeta()['orders'][$orderIndex];
 
                 OrderMetaData::updateMetaByOrderId(
                     $orderId,
@@ -76,16 +75,9 @@ namespace Cdek\Actions\Schedule {
                     'orderby' => 'id',
                     'order'   => 'ASC',
                     'return'  => 'ids',
+                    'post__in'    => array_keys($this->getTaskMeta()),
                 ]
             );
-
-            $pagination = $this->getTaskMeta($this->taskId)['pagination'];
-
-            if(!empty($pagination)){
-                $query->set('page', $pagination['page']);
-            }
-
-            $query->set('limit', self::ORDERS_LIMIT);
 
             foreach ($query->get_orders() as $orderId) {
                 $this->orders[] = $orderId;

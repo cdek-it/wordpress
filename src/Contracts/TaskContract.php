@@ -8,17 +8,19 @@ use Cdek\Model\TaskData;
 
 abstract class TaskContract
 {
+    public function __construct(string $taskId)
+    {
+        $this->taskId = $taskId;
+    }
     protected static array $errorCollection = [];
     protected static array $taskData = [];
     protected static array $responseCursor = [];
     protected array $headers = [];
+    protected string $taskId;
 
     abstract protected static function getName(): string;
     abstract public static function init();
-    public function getHeaders()
-    {
-        return $this->headers;
-    }
+
     public static function registerAction(): void
     {
         add_action(
@@ -28,55 +30,64 @@ abstract class TaskContract
             1,
         );
     }
-    protected function getTaskMeta(string $taskId): array
+    protected function getTaskMeta(): array
     {
-        if(empty(self::$taskData[$taskId])){
-            $this->initTaskData($taskId);
+        if(empty(self::$taskData[$this->taskId])){
+            $this->initTaskData($this->taskId);
         }
 
-        return self::$taskData[$taskId]['meta'];
+        return self::$taskData[$this->taskId]['meta'];
     }
-    protected function getTaskCursor(string $taskId): array
+    protected function getTaskCursor(): array
     {
-        if(empty(self::$responseCursor[$taskId])){
-            $this->initTaskData($taskId);
+        if(empty(self::$responseCursor[$this->taskId])){
+            $this->initTaskData($this->taskId);
         }
 
-        return self::$responseCursor[$taskId]['meta'];
+        return self::$responseCursor[$this->taskId]['meta'];
     }
-    protected function reportResult(int $totalPages, int $currentPage)
+    protected function addPageHeaders(int $totalPages, int $currentPage)
     {
         $this->headers = [
             'X-Total-Pages' => $totalPages,
-            'X-Current-Page' => $currentPage,
+            'X-Current-Page' => $currentPage
         ];
     }
 
-    protected function initTaskData(string $taskId): void
+    protected function initTaskData($data = null): void
     {
         $cdekCoreApi = new CdekCoreApi();
 
-        if(!empty($this->getHeaders())){
-            $cdekCoreApi->addHeaders($this->getHeaders());
-        }
+        $this->initData($cdekCoreApi->taskInfo($this->taskId, $data));
+    }
 
-        $response = $cdekCoreApi->taskManager($taskId);
+    protected function sendTaskData($data)
+    {
+        $cdekCoreApi = new CdekCoreApi();
 
+        $cdekCoreApi->addHeaders($data);
+
+        $this->initData($cdekCoreApi->sendTaskData($this->taskId, $data));
+    }
+
+    private function initData($response)
+    {
         $decodeResponse = json_decode($response, true);
 
         if(
             $decodeResponse['error']
         ){
-            self::$errorCollection[$taskId][] = $decodeResponse['error'];
+            self::$errorCollection[$this->taskId][] = $decodeResponse['error'];
         }
 
         if(empty($response['cursor'])){
-            self::$errorCollection[$taskId][] = 'Cursor data not found';
+            self::$errorCollection[$this->taskId][] = 'Cursor data not found';
         }
 
         if(empty(self::$errorCollection)){
-            self::$taskData[$taskId] = new TaskData(reset($response['data']));
-            self::$responseCursor[$taskId] = $response['cursor'];
+            self::$taskData[$this->taskId] = new TaskData(reset($response['data']));
+            self::$responseCursor[$this->taskId] = $response['cursor'];
         }
+
     }
 }

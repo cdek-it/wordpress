@@ -17,6 +17,10 @@ class FileCache
 
     public function getVars()
     {
+        if(!file_exists(Loader::getPluginPath() . DIRECTORY_SEPARATOR . $this->file)){
+            return null;
+        }
+
         return self::$store[$this->file] ?? self::$store[$this->file] = require_once(Loader::getPluginPath() . DIRECTORY_SEPARATOR . $this->file);
     }
 

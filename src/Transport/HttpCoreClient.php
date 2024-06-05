@@ -13,14 +13,14 @@ namespace Cdek\Transport {
 
     class HttpCoreClient
     {
-        private static array $addHeaders = [];
+        private array $addHeaders = [];
 
-        public static function addHeaders(array $addHeaders)
+        public function addHeaders(array $addHeaders)
         {
-            self::$addHeaders = $addHeaders;
+            $this->addHeaders = $addHeaders;
         }
 
-        public static function sendCdekRequest(
+        public function sendCdekRequest(
             string $url,
             string $method,
             string $token,
@@ -34,14 +34,15 @@ namespace Cdek\Transport {
                 'timeout' => 60,
             ];
 
+
             if (!empty($data)) {
-                $config['body'] = ($method === WP_REST_Server::READABLE) ? $data : wp_json_encode($data);
+                $config['body'] = ($method === WP_REST_Server::READABLE) ? $data : json_encode($data);
             }
 
             return static::sendRequest($url, $method, $config);
         }
 
-        public static function sendRequest(string $url, string $method, array $config = [])
+        public function sendRequest(string $url, string $method, array $config = [])
         {
             $resp = wp_remote_request(
                 $url,
@@ -51,20 +52,16 @@ namespace Cdek\Transport {
                         'method'       => $method,
                         'Content-Type' => 'application/json',
                         'headers' => [
-                            'X-App-Name'       => 'wordpress',
-                            'X-App-Version'    => Loader::getPluginVersion(),
-                            'X-User-Locale'    => get_user_locale(),
-                            'X-Correlation-Id' => self::generateUuid(),
-                            'user-agent'       => Loader::getPluginName() . '_' . get_bloginfo('version'),
-                        ] + self::$addHeaders,
+                                         'X-App-Name'       => 'wordpress',
+                                         'X-App-Version'    => Loader::getPluginVersion(),
+                                         'X-User-Locale'    => get_user_locale(),
+                                         'X-Correlation-Id' => self::generateUuid(),
+                                         'user-agent'       => Loader::getPluginName() . '_' . get_bloginfo('version'),
+                                     ] + $this->addHeaders,
                         'timeout' => 60,
                     ],
-                ),
+                )
             );
-
-            if(!empty(self::$addHeaders)){
-                self::$addHeaders = [];
-            }
 
             if (is_array($resp)) {
                 return $resp;
