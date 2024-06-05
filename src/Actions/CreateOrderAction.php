@@ -53,7 +53,7 @@ namespace Cdek\Actions {
 
                 $orderData = $this->api->createOrder($param);
 
-                sleep(1);
+                sleep(5);
 
                 $cdekNumber = $this->getCdekOrderNumber($orderData['entity']['uuid']);
 
