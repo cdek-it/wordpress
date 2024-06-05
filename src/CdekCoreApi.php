@@ -46,14 +46,16 @@ class CdekCoreApi
             ],
         );
 
-        if(empty($response['success'])){
+        $arResponse = json_decode($response, true);
+
+        if(empty($arResponse['success'])){
             throw new CdekApiException('[CDEKDelivery] Failed to get shop uuid',
                                        'cdek_error.uuid.auth',
                                        $response,
                                        true);
         }
 
-        $body = json_decode($response, true)['body'];
+        $body = $arResponse['body'];
 
         if(empty($body) || empty($body['id']) || $body['error']){
             throw new CdekApiException('[CDEKDelivery] Failed to get shop uuid',
@@ -61,8 +63,6 @@ class CdekCoreApi
                                        $response,
                                        true);
         }
-
-        sleep(5);
 
         $body = json_decode(
             HttpCoreClient::sendCdekRequest(
@@ -95,15 +95,6 @@ class CdekCoreApi
                                                $this->tokenCoreStorage->getToken(), $orders);
     }
 
-    public function checkUpdateOrders()
-    {
-        return HttpCoreClient::sendCdekRequest(
-            $this->getShopApiUrl() . '/' .  self::REINDEX_ORDERS,
-            'GET',
-            $this->tokenCoreStorage->getToken(),
-        );
-    }
-
     public function addHeaders(array $addHeaders): void
     {
         HttpCoreClient::addHeaders($addHeaders);
@@ -116,10 +107,6 @@ class CdekCoreApi
 
     private function getApiUrl(): string
     {
-        if ($this->deliveryMethod->get_option('test_mode') === 'yes') {
-            return $_ENV['CDEK_REST_CORE_API'] ?? Config::API_CORE_URL;
-        }
-
         return Config::API_CORE_URL;
     }
 }

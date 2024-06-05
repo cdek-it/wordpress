@@ -6,6 +6,7 @@ use Cdek\Loader;
 
 class FileCache
 {
+    const CACHE_FILE_NAME = '.cache.php';
     private static array $store;
     private string $file;
 
@@ -26,34 +27,9 @@ class FileCache
         }
 
         $logFile = fopen( Loader::getPluginPath() . DIRECTORY_SEPARATOR . $this->file, 'w+');
-        $content = '<?php return [';
-
-        $this->recurseContent($content, $vars);
-        $content .= '];';
+        $content = '<?php return ' . var_export($vars, true) . ';' . PHP_EOL;
 
         fwrite($logFile, $content);
         fclose($logFile);
-    }
-
-    private function recurseContent(&$content, $vars)
-    {
-        $countVars = count($vars);
-        $i = 0;
-
-        foreach ($vars as $key => $var){
-            $i++;
-            if(is_array($var)){
-                $content .= '"' . $key . '" => [';
-                $this->recurseContent($content, $var);
-                $content .= ']';
-            }else{
-                $content .= '"' . $key . '" => "' . $var  . '"';
-            }
-
-            if($i < $countVars){
-                $content .= ',';
-            }
-
-        }
     }
 }

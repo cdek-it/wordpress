@@ -8,7 +8,6 @@ use Cdek\Model\TaskData;
 
 abstract class TaskContract
 {
-    const ORDERS_LIMIT = 10000;
     protected static array $errorCollection = [];
     protected static array $taskData = [];
     protected static array $responseCursor = [];

@@ -55,7 +55,7 @@ namespace Cdek\Transport {
                             'X-App-Version'    => Loader::getPluginVersion(),
                             'X-User-Locale'    => get_user_locale(),
                             'X-Correlation-Id' => self::generateUuid(),
-                            'user-agent'       => Loader::getPluginName() . ':' . get_bloginfo('version'),
+                            'user-agent'       => Loader::getPluginName() . '_' . get_bloginfo('version'),
                         ] + self::$addHeaders,
                         'timeout' => 60,
                     ],

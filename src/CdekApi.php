@@ -104,17 +104,6 @@ class CdekApi
     }
 
     /**
-     * @throws \JsonException
-     * @throws \Cdek\Exceptions\CdekApiException
-     */
-    final public function getOrderByNumber(string $orderNumber)
-    {
-        $url = $this->apiUrl . self::ORDERS_PATH . '?cdek_number=' . $orderNumber;
-
-        return HttpClient::sendCdekRequest($url, 'GET', $this->tokenStorage->getToken());
-    }
-
-    /**
      * @throws \Cdek\Exceptions\RestApiInvalidRequestException
      * @throws \Cdek\Exceptions\CdekApiException
      */

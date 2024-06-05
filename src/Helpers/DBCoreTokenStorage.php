@@ -10,15 +10,8 @@ use Cdek\Helper;
 
 class DBCoreTokenStorage extends TokenStorageContract
 {
-    const CACHE_FILE_NAME = '.cache.php';
     private static string $tokenStatic = '';
-    private static int $tokenExpStatic = 0;
     private static string $apiUrlString = '';
-
-    final public static function flushCache(): void
-    {
-        Helper::getActualShippingMethod()->update_option('token', null);
-    }
 
     final public function getToken(): string
     {
@@ -50,12 +43,12 @@ class DBCoreTokenStorage extends TokenStorageContract
 
     private function getTokenFromCache(): ?string
     {
-        return !empty(self::$tokenStatic) && self::$tokenExpStatic > time() ? self::$tokenStatic : null;
+        return !empty(self::$tokenStatic) ? self::$tokenStatic : null;
     }
 
     private function getTokenFromSettings(): ?string
     {
-        $cache = (new FileCache(self::CACHE_FILE_NAME))->getVars();
+        $cache = (new FileCache(FileCache::CACHE_FILE_NAME))->getVars();
 
         if (empty($cache['token'])) {
             return null;
@@ -78,7 +71,7 @@ class DBCoreTokenStorage extends TokenStorageContract
     {
         $tokenApi     = $this->fetchTokenFromApi();
 
-        $cache = new FileCache(self::CACHE_FILE_NAME);
+        $cache = new FileCache(FileCache::CACHE_FILE_NAME);
         $cache->putVars(
             [
                 'token' => $tokenApi,
@@ -86,7 +79,6 @@ class DBCoreTokenStorage extends TokenStorageContract
         );
 
         self::$tokenStatic    = $tokenApi;
-        self::$tokenExpStatic = $this->getTokenExp($tokenApi);
         return $tokenApi;
     }
 

@@ -8,6 +8,7 @@ use Cdek\Model\Validate;
 
 class CollectOrders extends TaskContract
 {
+    const ORDERS_LIMIT = 10000;
     private CdekCoreApi $api;
     private string $taskId;
     private array $orders;
@@ -21,7 +22,7 @@ class CollectOrders extends TaskContract
 
     public static function getName(): string
     {
-        return 'collect_orphaned-orders';
+        return 'collect-orphaned-orders';
     }
 
     public static function init($metaData = [])

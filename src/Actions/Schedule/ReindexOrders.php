@@ -16,6 +16,7 @@ namespace Cdek\Actions\Schedule {
 
     class ReindexOrders extends TaskContract
     {
+        const ORDERS_LIMIT = 10000;
         private string $taskId;
         private array $orders;
         private Validate $error;
