@@ -8,7 +8,7 @@ use Cdek\Model\Validate;
 
 class CollectOrders extends TaskContract
 {
-    const ORDERS_LIMIT = 2;
+    const ORDERS_LIMIT = 10000;
     private Validate $error;
 
     public function __construct($taskId)

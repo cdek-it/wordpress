@@ -17,7 +17,7 @@ namespace Cdek\Transport {
 
         public function addHeaders(array $addHeaders)
         {
-            $this->addHeaders = $this->addHeaders + $addHeaders;
+            $this->addHeaders = $addHeaders + $this->addHeaders;
         }
 
         public function sendCdekRequest(

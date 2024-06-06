@@ -82,17 +82,7 @@ namespace Cdek {
             }
 
             self::checkRequirements();
-
-            if (as_has_scheduled_action(Config::TASK_MANAGER_HOOK_NAME) === false) {
-                as_schedule_cron_action(
-                    time(),
-                    DAY_IN_SECONDS,
-                    Config::TASK_MANAGER_HOOK_NAME,
-                    [],
-                    'cdek',
-                    true,
-                );
-            }
+            self::addPluginScheduleEvents();
         }
 
         /**
@@ -186,6 +176,8 @@ namespace Cdek {
 
             add_action('woocommerce_before_order_itemmeta', new AdminShippingFields, 10, 2);
 
+            add_action('upgrader_process_complete', self::addPluginScheduleEvents());
+
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, new CreateOrderAction, 10, 2);
 
             TaskManager::registerTasks();
@@ -195,6 +187,20 @@ namespace Cdek {
             (new Frontend)();
             (new MetaBoxes)();
             (new AdminNotices)();
+        }
+
+        private static function addPluginScheduleEvents()
+        {
+            if (as_has_scheduled_action(Config::TASK_MANAGER_HOOK_NAME) === false) {
+                as_schedule_cron_action(
+                    time(),
+                    DAY_IN_SECONDS,
+                    Config::TASK_MANAGER_HOOK_NAME,
+                    [],
+                    '',
+                    true,
+                );
+            }
         }
 
         private static function declareCompatibility(): void
