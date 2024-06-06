@@ -16,7 +16,6 @@ namespace Cdek\Actions\Schedule {
 
     class ReindexOrders extends TaskContract
     {
-        const ORDERS_LIMIT = 10000;
         private array $orders;
         private Validate $error;
 
@@ -72,7 +71,7 @@ namespace Cdek\Actions\Schedule {
                     'order'   => 'ASC',
                     'return'  => 'ids',
                     'post__in'    => array_column($this->getTaskMeta(), 'external_id'),
-                ]
+                ],
             );
 
             foreach ($query->get_orders()->orders as $orderId) {

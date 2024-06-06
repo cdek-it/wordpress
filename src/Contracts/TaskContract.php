@@ -4,10 +4,15 @@ namespace Cdek\Contracts;
 
 use Cdek\CdekCoreApi;
 use Cdek\Config;
+use Cdek\Exceptions\CdekApiException;
 use Cdek\Model\TaskData;
 
 abstract class TaskContract
 {
+    const FINISH_STATUS = 201;
+    const RESTART_STATUS = 202;
+    const UNKNOWN_METHOD = 404;
+    const FATAL_ERRORS = [500, 502, 503];
     protected cdekCoreApi $cdekCoreApi;
 
     public function __construct(string $taskId)
@@ -18,8 +23,8 @@ abstract class TaskContract
     protected static array $errorCollection = [];
     protected static array $taskData = [];
     protected static array $responseCursor = [];
-    protected array $headers = [];
     protected string $taskId;
+    protected int $status;
 
     abstract protected static function getName(): string;
     abstract public static function init($taskId);
@@ -62,6 +67,27 @@ abstract class TaskContract
 
     private function initData($response)
     {
+        $this->status = $response['status'];
+
+        if(
+            !in_array(
+                $this->status,
+                [self::FINISH_STATUS, self::RESTART_STATUS],
+            )
+        ){
+            if(in_array($this->status, self::FATAL_ERRORS)){
+                $this->postponeTask();
+                return;
+            }else{
+                throw new CdekApiException('[CDEKDelivery] Failed to get core api response',
+                                           'cdek_error.core.response',
+                                           $response,
+                                           true);
+
+            }
+
+        }
+
         $decodeResponse = json_decode($response['body'], true);
 
         if(
@@ -78,6 +104,10 @@ abstract class TaskContract
             self::$taskData[$this->taskId] = new TaskData(reset($response['data']));
             self::$responseCursor[$this->taskId] = $response['cursor'];
         }
+    }
 
+    protected function postponeTask()
+    {
+        //todo finish that and start next one later
     }
 }
