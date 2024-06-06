@@ -10,8 +10,10 @@ use Cdek\Helper;
 
 class DBCoreTokenStorage extends TokenStorageContract
 {
+    private static string $tokenAdmin = '';
     private static string $tokenStatic = '';
-    private static string $apiUrlString = '';
+    private static string $tokenFrontend = '';
+    private static string $apiUrlString;
 
     final public function getToken(): string
     {
@@ -34,11 +36,19 @@ class DBCoreTokenStorage extends TokenStorageContract
             return static::$apiUrlString;
         }
 
+        $cache = (new FileCache(FileCache::CACHE_FILE_NAME))->getVars();
+
+        if (!empty($cache['end_point'])) {
+            return static::$apiUrlString = $cache['end_point'];
+        }
+
         $token = $this->getToken();
 
         $arToken = explode('.', $token);
 
-        return json_decode(base64_decode($arToken[count($arToken) - 1]))['token'];
+        $token = json_decode(base64_decode($arToken[count($arToken) - 1]), true);
+
+        return static::$apiUrlString = $token['endpoint'];
     }
 
     private function getTokenFromCache(): ?string
@@ -50,34 +60,36 @@ class DBCoreTokenStorage extends TokenStorageContract
     {
         $cache = (new FileCache(FileCache::CACHE_FILE_NAME))->getVars();
 
-        if (empty($cache['token'])) {
+        if (empty($cache['tokens'])) {
             return null;
         }
 
-        $decryptToken = $cache['token'];
-        self::$tokenStatic = $decryptToken;
-        return $decryptToken;
+        self::$tokenAdmin = $cache['tokens']['admin'];
+        self::$tokenStatic = $cache['tokens']['common'];
+        self::$tokenFrontend = $cache['tokens']['frontend'];
+        return self::$tokenStatic;
     }
 
     final public function updateToken(): string
     {
         $tokenApi = $this->fetchTokenFromApi();
 
-        $cache = new FileCache(FileCache::CACHE_FILE_NAME);
-        $cache->putVars(
-            [
-                'token' => $tokenApi,
-            ],
-        );
+        self::$tokenAdmin = $tokenApi['tokens']['admin'];
+        self::$tokenStatic = $tokenApi['tokens']['common'];
+        self::$tokenFrontend = $tokenApi['tokens']['frontend'];
 
-        self::$tokenStatic    = $tokenApi;
-        return $tokenApi;
+        $tokenApi['end_point'] = $this->getPath();
+
+        $cache = new FileCache(FileCache::CACHE_FILE_NAME);
+        $cache->putVars($tokenApi);
+
+        return self::$tokenStatic;
     }
 
     /**
      * @throws CdekApiException
      */
-    final public function fetchTokenFromApi(): string
+    final public function fetchTokenFromApi(): array
     {
         return (new CdekCoreApi)->fetchShopToken();
     }

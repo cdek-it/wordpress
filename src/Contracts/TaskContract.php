@@ -8,8 +8,11 @@ use Cdek\Model\TaskData;
 
 abstract class TaskContract
 {
+    protected cdekCoreApi $cdekCoreApi;
+
     public function __construct(string $taskId)
     {
+        $this->cdekCoreApi = new CdekCoreApi();
         $this->taskId = $taskId;
     }
     protected static array $errorCollection = [];
@@ -19,7 +22,7 @@ abstract class TaskContract
     protected string $taskId;
 
     abstract protected static function getName(): string;
-    abstract public static function init();
+    abstract public static function init($taskId);
 
     public static function registerAction(): void
     {
@@ -46,42 +49,29 @@ abstract class TaskContract
 
         return self::$responseCursor[$this->taskId]['meta'];
     }
-    protected function addPageHeaders(int $totalPages, int $currentPage)
-    {
-        $this->headers = [
-            'X-Total-Pages' => $totalPages,
-            'X-Current-Page' => $currentPage
-        ];
-    }
 
     protected function initTaskData($data = null): void
     {
-        $cdekCoreApi = new CdekCoreApi();
-
-        $this->initData($cdekCoreApi->taskInfo($this->taskId, $data));
+        $this->initData($this->cdekCoreApi->taskInfo($this->taskId, $data));
     }
 
     protected function sendTaskData($data)
     {
-        $cdekCoreApi = new CdekCoreApi();
-
-        $cdekCoreApi->addHeaders($data);
-
-        $this->initData($cdekCoreApi->sendTaskData($this->taskId, $data));
+        $this->initData($this->cdekCoreApi->sendTaskData($this->taskId, $data));
     }
 
     private function initData($response)
     {
-        $decodeResponse = json_decode($response, true);
+        $decodeResponse = json_decode($response['body'], true);
 
         if(
-            $decodeResponse['error']
+            empty($decodeResponse['success'])
         ){
-            self::$errorCollection[$this->taskId][] = $decodeResponse['error'];
+            self::$errorCollection[$this->taskId][] = __('Request to api was failed', 'cdekdelivery');
         }
 
         if(empty($response['cursor'])){
-            self::$errorCollection[$this->taskId][] = 'Cursor data not found';
+            self::$errorCollection[$this->taskId][] = __('Cursor data not found', 'cdekdelivery');
         }
 
         if(empty(self::$errorCollection)){

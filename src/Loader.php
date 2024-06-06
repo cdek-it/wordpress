@@ -77,7 +77,7 @@ namespace Cdek {
          */
         public static function activate(): void
         {
-            if (!current_user_can('activate_plugins')) {
+            if (!current_user_can('activate_plugins') || as_has_scheduled_action(Config::TASK_MANAGER_HOOK_NAME) === false) {
                 return;
             }
 
@@ -89,7 +89,7 @@ namespace Cdek {
                     DAY_IN_SECONDS,
                     Config::TASK_MANAGER_HOOK_NAME,
                     [],
-                    '',
+                    'cdek',
                     true,
                 );
             }

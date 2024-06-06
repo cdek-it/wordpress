@@ -10,9 +10,9 @@ use WpOrg\Requests\Exception;
 
 class CdekCoreApi
 {
-    private const TOKEN_PATH = 'api/cms/wordpress/shop/%s/token';
+    private const TOKEN_PATH = 'cms/wordpress/shops/%s/token';
     private const SHOP = 'cms/wordpress/shops';
-    private const TASKS = 'cms/wordpress/tasks';
+    private const TASKS = 'wordpress/tasks';
     private string $apiUrl;
     private TokenStorageContract $generalTokenStorage;
     private TokenStorageContract $tokenCoreStorage;
@@ -45,7 +45,7 @@ class CdekCoreApi
             ],
         );
 
-        if(empty($response['success'])){
+        if(empty($response['body'])){
             throw new CdekApiException('[CDEKDelivery] Failed to get shop uuid',
                                        'cdek_error.uuid.auth',
                                        $response,
@@ -54,30 +54,29 @@ class CdekCoreApi
 
         $body = json_decode($response['body'], true);
 
-        if(empty($body) || empty($body['id']) || $body['error']){
+        if(empty($body) || empty($body['data']['id'])){
             throw new CdekApiException('[CDEKDelivery] Failed to get shop uuid',
                                        'cdek_error.uuid.auth',
                                        $response,
                                        true);
         }
 
-        $body = json_decode(
-            $this->coreClient->sendCdekRequest(
-                sprintf($this->apiUrl . self::TOKEN_PATH, $body['id']),
-                'POST',
-                $this->generalTokenStorage->getToken(),
-            ),
-            true,
-        )['body'];
+        $response = $this->coreClient->sendCdekRequest(
+            sprintf($this->apiUrl . self::TOKEN_PATH, $body['data']['id']),
+            'POST',
+            $this->generalTokenStorage->getToken(),
+        );
 
-        if ($body === null || isset($body['error_description']) || isset($body['error'])) {
+        $body = json_decode($response['body'],true);
+
+        if ($body === null || !$body['success'] || empty($body['data'])) {
             throw new CdekApiException('[CDEKDelivery] Failed to get shop token',
                                        'cdek_error.shop_token.auth',
                                        $body,
                                        true);
         }
 
-        return $body['token'];
+        return ['tokens' => $body['data']];
     }
 
     public function taskManager($data = null)
@@ -98,14 +97,19 @@ class CdekCoreApi
                                                $this->tokenCoreStorage->getToken(), $data);
     }
 
-    public function addHeaders(array $addHeaders): void
+    public function addPageHeaders(int $totalPages, int $currentPage)
     {
-        $this->coreClient->addHeaders($addHeaders);
+        $this->coreClient->addHeaders(
+            [
+                'X-Total-Pages' => $totalPages,
+                'X-Current-Page' => $currentPage
+            ]
+        );
     }
 
     private function getShopApiUrl()
     {
-        return $this->apiUrl . $this->tokenCoreStorage->getPath();
+        return $this->tokenCoreStorage->getPath();
     }
 
     private function getApiUrl(): string

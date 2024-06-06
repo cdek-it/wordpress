@@ -29,17 +29,16 @@ class TaskData
                 as_schedule_cron_action(
                     $this->time,
                     $this->getSchedule(),
-                    Config::DELIVERY_NAME . '_' . Config::TASK_PREFIX . '_' . $this->getName(),
-                    ['task_id' => $this->getId()],
+                    sprintf('%s-%s', Config::TASK_MANAGER_HOOK_NAME, static::getName()),
+                    [$this->getId()],
                     '',
                     true,
                 );
             }
         } else {
             as_enqueue_async_action(
-                $this->time,
-                Config::DELIVERY_NAME . '_' . Config::TASK_PREFIX . '_' . $this->getName(),
-                ['task_id' => $this->getId()],
+                sprintf('%s-%s', Config::TASK_MANAGER_HOOK_NAME, static::getName()),
+                [$this->getId()]
             );
         }
     }

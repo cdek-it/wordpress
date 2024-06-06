@@ -17,7 +17,7 @@ namespace Cdek\Transport {
 
         public function addHeaders(array $addHeaders)
         {
-            $this->addHeaders = $addHeaders;
+            $this->addHeaders = $this->addHeaders + $addHeaders;
         }
 
         public function sendCdekRequest(
@@ -29,9 +29,8 @@ namespace Cdek\Transport {
         {
             $config = [
                 'headers' => [
-                    'Authorization'    => $token,
+                    'Authorization' => $token,
                 ],
-                'timeout' => 60,
             ];
 
 
@@ -49,18 +48,18 @@ namespace Cdek\Transport {
                 array_merge(
                     $config,
                     [
-                        'method'       => $method,
-                        'Content-Type' => 'application/json',
+                        'method'  => $method,
                         'headers' => [
+                                         'Content-Type'     => 'application/json',
                                          'X-App-Name'       => 'wordpress',
                                          'X-App-Version'    => Loader::getPluginVersion(),
                                          'X-User-Locale'    => get_user_locale(),
                                          'X-Correlation-Id' => self::generateUuid(),
-                                         'user-agent'       => Loader::getPluginName() . '_' . get_bloginfo('version'),
-                                     ] + $this->addHeaders,
+                                         'user-agent'       => 'wp/' . get_bloginfo('version'),
+                                     ] + $this->addHeaders + $config['headers'] ?? [],
                         'timeout' => 60,
                     ],
-                )
+                ),
             );
 
             if (is_array($resp)) {

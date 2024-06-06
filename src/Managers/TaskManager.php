@@ -19,16 +19,16 @@ class TaskManager extends TaskContract
 
     private array $taskCollection;
 
-    public function __construct()
+    public function __construct($taskId)
     {
-        parent::__construct('task_manager');
+        parent::__construct($taskId);
         $this->getResponse();
         $this->initTasks();
     }
 
-    public static function init(): void
+    public static function init($taskId = 'task_manager'): void
     {
-        $taskManager = new self();
+        $taskManager = new self($taskId);
         $taskManager->startTasksWork();
     }
 
@@ -58,8 +58,8 @@ class TaskManager extends TaskContract
     public static function registerTasks(): void
     {
         foreach (self::TASK_CLASSES as $arTaskClass) {
-            if ($arTaskClass instanceof TaskContract) {
-                $arTaskClass::registerAction();
+            if ('\\' . $arTaskClass instanceof TaskContract) {
+                '\\' . $arTaskClass::registerAction();
             }
         }
     }
@@ -67,7 +67,7 @@ class TaskManager extends TaskContract
     public static function getTasksHooks()
     {
         return array_map(
-            static fn(TaskContract $class) => $class::getName() === static::getName() ?
+            static fn($class) => $class::getName() === static::getName() ?
                 static::getName() :
                 sprintf('%s-%s',
                         Config::TASK_MANAGER_HOOK_NAME,
@@ -82,7 +82,7 @@ class TaskManager extends TaskContract
         if (!in_array(
             $task->getName(),
             array_map(
-                static fn(TaskContract $class) => $class::getName(),
+                static fn($class) => $class::getName(),
                 self::TASK_CLASSES,
             ),
         )
@@ -96,7 +96,7 @@ class TaskManager extends TaskContract
     private function getResponse(): void
     {
         $response = (new CdekCoreApi())->taskManager();
-        $decodeResponse = json_decode($response, true);
+        $decodeResponse = json_decode($response['body'], true);
 
         if (
             $decodeResponse['error']
@@ -104,13 +104,13 @@ class TaskManager extends TaskContract
             self::$errorCollection[$this->taskId][] = $decodeResponse['error'];
         }
 
-        if (empty($response['cursor'])) {
+        if (empty($decodeResponse['cursor'])) {
             self::$errorCollection[$this->taskId][] = 'Cursor data not found';
         }
 
         if (empty($this->errorCollection)) {
-            self::$taskData[$this->taskId] = $response['data'];
-            self::$responseCursor[$this->taskId] = $response['cursor'];
+            self::$taskData[$this->taskId] = $decodeResponse['data'];
+            self::$responseCursor[$this->taskId] = $decodeResponse['cursor'];
         }
     }
 

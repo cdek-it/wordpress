@@ -31,13 +31,9 @@ namespace Cdek\Actions\Schedule {
             return 'restore-order-uuids';
         }
 
-        public static function init($metaData = [])
+        public static function init($taskId)
         {
-            if(empty($metaData['task_id'])){
-                return;
-            }
-
-            $reindexOrders = new static($metaData['task_id']);
+            $reindexOrders = new static($taskId);
             $reindexOrders->start();
         }
 
@@ -50,13 +46,13 @@ namespace Cdek\Actions\Schedule {
             $this->initOrders();
 
             foreach ($this->orders as $orderId){
-                $orderIndex = array_search($orderId, array_column($this->getTaskMeta()['orders'], 'order_id'));
+                $orderIndex = array_search($orderId, array_column($this->getTaskMeta(), 'external_id'));
 
                 if(empty($orderIndex)){
                     continue;
                 }
 
-                $responseOrder = $this->getTaskMeta()['orders'][$orderIndex];
+                $responseOrder = $this->getTaskMeta()[$orderIndex];
 
                 OrderMetaData::updateMetaByOrderId(
                     $orderId,
@@ -75,11 +71,11 @@ namespace Cdek\Actions\Schedule {
                     'orderby' => 'id',
                     'order'   => 'ASC',
                     'return'  => 'ids',
-                    'post__in'    => array_keys($this->getTaskMeta()),
+                    'post__in'    => array_column($this->getTaskMeta(), 'external_id'),
                 ]
             );
 
-            foreach ($query->get_orders() as $orderId) {
+            foreach ($query->get_orders()->orders as $orderId) {
                 $this->orders[] = $orderId;
             }
         }

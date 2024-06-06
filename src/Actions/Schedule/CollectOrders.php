@@ -8,15 +8,12 @@ use Cdek\Model\Validate;
 
 class CollectOrders extends TaskContract
 {
-    const ORDERS_LIMIT = 10000;
-    private CdekCoreApi $api;
-    private array $orders;
+    const ORDERS_LIMIT = 2;
     private Validate $error;
 
     public function __construct($taskId)
     {
         parent::__construct($taskId);
-        $this->api = new CdekCoreApi();
     }
 
     public static function getName(): string
@@ -24,41 +21,48 @@ class CollectOrders extends TaskContract
         return 'collect-orphaned-orders';
     }
 
-    public static function init($metaData = [])
+    public static function init($taskId)
     {
-        if(empty($metaData['task_id'])){
-            return;
-        }
-        $reindexOrders = new self($metaData['task_id']);
+        $reindexOrders = new self($taskId);
         $reindexOrders->start();
     }
 
     public function start()
     {
-        $this->initOrders();
+        $this->reportOrders();
     }
 
-    protected function initOrders()
+    protected function reportOrders()
     {
         $query = new \WC_Order_Query(
             [
-                'orderby' => 'id',
-                'order'   => 'ASC',
-                'paginate'   => true,
-                'limit' => self::ORDERS_LIMIT,
-                'return'  => 'ids'
+                'orderby'  => 'id',
+                'order'    => 'ASC',
+                'paginate' => true,
+                'limit'    => self::ORDERS_LIMIT,
+                'return'   => 'ids',
             ],
         );
 
-        for ($page = 1, $maxPages = 1; $page <= $maxPages; $page++){
+        for ($page = 1, $maxPages = 1; $page <= $maxPages; $page++) {
             $query->set('page', $page);
             $result = $query->get_orders();
 
             $maxPages = $result->max_num_pages;
 
-            $this->addPageHeaders($maxPages, $page);
+            $this->cdekCoreApi->addPageHeaders($maxPages, $page);
 
-            $this->sendTaskData($result['orders']);
+            $this->sendTaskData(
+                [
+                    'status' => 'success',
+                    'result' => [
+                        'orders' => array_map(
+                            static fn($order) => (string)$order,
+                            $result->orders
+                        )
+                    ]
+                ]
+            );
         }
     }
 }
