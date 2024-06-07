@@ -21,12 +21,6 @@ class CollectOrders extends TaskContract
         return 'collect-orphaned-orders';
     }
 
-    public static function init($taskId)
-    {
-        $reindexOrders = new self($taskId);
-        $reindexOrders->start();
-    }
-
     public function start()
     {
         $this->reportOrders();

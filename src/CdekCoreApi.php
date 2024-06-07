@@ -23,7 +23,6 @@ class CdekCoreApi
         ?TokenStorageContract $tokenCoreStorage = null
     )
     {
-        $this->apiUrl = $this->getApiUrl();
         $this->coreClient = new HttpCoreClient();
         $this->generalTokenStorage = $tokenStorage ?? new DBTokenStorage();
         $this->tokenCoreStorage = $tokenCoreStorage ?? new DBCoreTokenStorage();
@@ -32,7 +31,7 @@ class CdekCoreApi
     public function fetchShopToken()
     {
         $response = $this->coreClient->sendCdekRequest(
-            $this->apiUrl . self::SHOP,
+            Config::API_CORE_URL . self::SHOP,
             'POST',
             $this->generalTokenStorage->getToken(),
             [
@@ -62,7 +61,7 @@ class CdekCoreApi
         }
 
         $response = $this->coreClient->sendCdekRequest(
-            sprintf($this->apiUrl . self::TOKEN_PATH, $body['data']['id']),
+            sprintf(Config::API_CORE_URL . self::TOKEN_PATH, $body['data']['id']),
             'POST',
             $this->generalTokenStorage->getToken(),
         );
@@ -110,10 +109,5 @@ class CdekCoreApi
     private function getShopApiUrl()
     {
         return $this->tokenCoreStorage->getPath();
-    }
-
-    private function getApiUrl(): string
-    {
-        return Config::API_CORE_URL;
     }
 }

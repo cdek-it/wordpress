@@ -30,12 +30,6 @@ namespace Cdek\Actions\Schedule {
             return 'restore-order-uuids';
         }
 
-        public static function init($taskId)
-        {
-            $reindexOrders = new static($taskId);
-            $reindexOrders->start();
-        }
-
         public function start()
         {
             if(empty($this->getTaskMeta())){

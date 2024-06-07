@@ -2,6 +2,7 @@
 
 namespace Cdek\Cache;
 
+use Cdek\Exceptions\CdekApiException;
 use Cdek\Loader;
 
 class FileCache
@@ -10,7 +11,7 @@ class FileCache
     private static array $store;
     private string $file;
 
-    public function __construct($fileName)
+    public function __construct($fileName = self::CACHE_FILE_NAME)
     {
         $this->file = $fileName;
     }
@@ -30,10 +31,33 @@ class FileCache
             return;
         }
 
+        if(!is_writable(Loader::getPluginPath())){
+            throw new CdekApiException('[CDEKDelivery] Failed check directory rights',
+                                       'cdek_error.cache.rights',
+                                       ['path' => Loader::getPluginPath()],
+                                       true);
+        }
+
+        $arPath = explode(DIRECTORY_SEPARATOR, $this->file);
+        unset($arPath[count($arPath) - 1]);
+
+        if(!is_writable(Loader::getPluginPath() . implode(DIRECTORY_SEPARATOR, $arPath))){
+            throw new CdekApiException('[CDEKDelivery] Failed check directory rights',
+                                       'cdek_error.cache.rights',
+                                       ['path' => Loader::getPluginPath() . implode(DIRECTORY_SEPARATOR, $arPath)],
+                                       true);
+        }
+
         $logFile = fopen( Loader::getPluginPath() . DIRECTORY_SEPARATOR . $this->file, 'w+');
+
         $content = '<?php return ' . var_export($vars, true) . ';' . PHP_EOL;
 
         fwrite($logFile, $content);
         fclose($logFile);
+    }
+
+    public function clear()
+    {
+        unlink(Loader::getPluginPath() . DIRECTORY_SEPARATOR . $this->file);
     }
 }

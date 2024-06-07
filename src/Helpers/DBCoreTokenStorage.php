@@ -14,6 +14,8 @@ class DBCoreTokenStorage extends TokenStorageContract
     private static string $tokenStatic = '';
     private static string $tokenFrontend = '';
     private static string $apiUrlString;
+    private static string $frontendUrlString;
+    private static string $adminUrlString;
 
     final public function getToken(): string
     {
@@ -36,19 +38,13 @@ class DBCoreTokenStorage extends TokenStorageContract
             return static::$apiUrlString;
         }
 
-        $cache = (new FileCache(FileCache::CACHE_FILE_NAME))->getVars();
+        $cache = (new FileCache())->getVars();
 
-        if (!empty($cache['end_point'])) {
-            return static::$apiUrlString = $cache['end_point'];
+        if (!empty($cache['end_point']['common'])) {
+            return static::$apiUrlString = $cache['end_point']['common'];
         }
 
-        $token = $this->getToken();
-
-        $arToken = explode('.', $token);
-
-        $token = json_decode(base64_decode($arToken[count($arToken) - 1]), true);
-
-        return static::$apiUrlString = $token['endpoint'];
+        return static::$apiUrlString = $this->getEndPointFromToken($this->getToken());
     }
 
     private function getTokenFromCache(): ?string
@@ -58,7 +54,7 @@ class DBCoreTokenStorage extends TokenStorageContract
 
     private function getTokenFromSettings(): ?string
     {
-        $cache = (new FileCache(FileCache::CACHE_FILE_NAME))->getVars();
+        $cache = (new FileCache())->getVars();
 
         if (empty($cache['tokens'])) {
             return null;
@@ -78,9 +74,11 @@ class DBCoreTokenStorage extends TokenStorageContract
         self::$tokenStatic = $tokenApi['tokens']['common'];
         self::$tokenFrontend = $tokenApi['tokens']['frontend'];
 
-        $tokenApi['end_point'] = $this->getPath();
+        $tokenApi['end_point']['admin'] = static::$adminUrlString = $this->getEndPointFromToken(self::$tokenAdmin);
+        $tokenApi['end_point']['common'] = static::$apiUrlString = $this->getEndPointFromToken(self::$tokenStatic);
+        $tokenApi['end_point']['frontend'] = static::$frontendUrlString = $this->getEndPointFromToken(self::$tokenFrontend);
 
-        $cache = new FileCache(FileCache::CACHE_FILE_NAME);
+        $cache = new FileCache();
         $cache->putVars($tokenApi);
 
         return self::$tokenStatic;
@@ -92,6 +90,13 @@ class DBCoreTokenStorage extends TokenStorageContract
     final public function fetchTokenFromApi(): array
     {
         return (new CdekCoreApi)->fetchShopToken();
+    }
+
+    private function getEndPointFromToken($token)
+    {
+        $arToken = explode('.', $token);
+
+        return json_decode(base64_decode($arToken[count($arToken) - 1]), true)['endpoint'];
     }
 
 }

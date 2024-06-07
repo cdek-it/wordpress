@@ -26,13 +26,7 @@ class TaskManager extends TaskContract
         $this->initTasks();
     }
 
-    public static function init($taskId = 'task_manager'): void
-    {
-        $taskManager = new self($taskId);
-        $taskManager->startTasksWork();
-    }
-
-    public function startTasksWork(): void
+    public function start(): void
     {
         foreach ($this->taskCollection as $task) {
             $this->startTask($task);

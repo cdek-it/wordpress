@@ -27,7 +27,14 @@ abstract class TaskContract
     protected int $status;
 
     abstract protected static function getName(): string;
-    abstract public static function init($taskId);
+
+    abstract function start();
+
+    public static function init($taskId = 'task_manager'): void
+    {
+        $taskManager = new static($taskId);
+        $taskManager->start();
+    }
 
     public static function registerAction(): void
     {
