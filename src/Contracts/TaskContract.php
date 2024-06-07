@@ -92,7 +92,6 @@ abstract class TaskContract
                                            true);
 
             }
-
         }
 
         $decodeResponse = json_decode($response['body'], true);
@@ -115,6 +114,26 @@ abstract class TaskContract
 
     protected function postponeTask()
     {
-        //todo finish that and start next one later
+        $hooks = as_get_scheduled_actions(
+            [
+                'hook' => sprintf('%s-%s', Config::TASK_MANAGER_HOOK_NAME, static::getName()),
+                'status' => \ActionScheduler_Store::STATUS_PENDING
+            ]
+        );
+
+        if(empty($hooks)){
+            return;
+        }
+
+        $hook = reset($hooks);
+
+        if(!$hook->get_schedule() instanceof \ActionScheduler_CronSchedule){
+            (new TaskData(
+                [
+                    'id' => $this->taskId,
+                    'name' => sprintf('%s-%s', Config::TASK_MANAGER_HOOK_NAME, static::getName())
+                ]
+            ))->createTaskWork();
+        }
     }
 }
