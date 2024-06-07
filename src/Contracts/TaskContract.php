@@ -67,9 +67,9 @@ abstract class TaskContract
         $this->initData($this->cdekCoreApi->taskInfo($this->taskId, $data));
     }
 
-    protected function sendTaskData($data)
+    protected function sendTaskData($data, $headers = [])
     {
-        $this->initData($this->cdekCoreApi->sendTaskData($this->taskId, $data));
+        $this->initData($this->cdekCoreApi->sendTaskData($this->taskId, $data, $headers));
     }
 
     private function initData($response)

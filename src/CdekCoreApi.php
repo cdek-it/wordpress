@@ -13,7 +13,6 @@ class CdekCoreApi
     private const TOKEN_PATH = 'cms/wordpress/shops/%s/token';
     private const SHOP = 'cms/wordpress/shops';
     private const TASKS = 'wordpress/tasks';
-    private string $apiUrl;
     private TokenStorageContract $generalTokenStorage;
     private TokenStorageContract $tokenCoreStorage;
     private HttpCoreClient $coreClient;
@@ -84,25 +83,20 @@ class CdekCoreApi
                                                $this->tokenCoreStorage->getToken(), $data);
     }
 
-    public function taskInfo($taskId, $data = null)
+    public function taskInfo($taskId, $data = null, $headers = [])
     {
         return $this->coreClient->sendCdekRequest($this->getShopApiUrl() . '/' .  self::TASKS . '/' . $taskId, 'GET',
                                                   $this->tokenCoreStorage->getToken(), $data);
     }
 
-    public function sendTaskData($taskId, $data)
+    public function sendTaskData($taskId, $data, $headers = [])
     {
-        return $this->coreClient->sendCdekRequest($this->getShopApiUrl() . '/' .  self::TASKS . '/' . $taskId, 'PUT',
-                                               $this->tokenCoreStorage->getToken(), $data);
-    }
-
-    public function addPageHeaders(int $totalPages, int $currentPage)
-    {
-        $this->coreClient->addHeaders(
-            [
-                'X-Total-Pages' => $totalPages,
-                'X-Current-Page' => $currentPage
-            ]
+        return $this->coreClient->sendCdekRequest(
+            $this->getShopApiUrl() . '/' .  self::TASKS . '/' . $taskId,
+            'PUT',
+            $this->tokenCoreStorage->getToken(),
+            $data,
+            $headers
         );
     }
 

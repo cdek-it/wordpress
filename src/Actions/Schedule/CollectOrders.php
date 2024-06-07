@@ -44,8 +44,6 @@ class CollectOrders extends TaskContract
 
             $maxPages = $result->max_num_pages;
 
-            $this->cdekCoreApi->addPageHeaders($maxPages, $page);
-
             $this->sendTaskData(
                 [
                     'status' => 'success',
@@ -55,6 +53,10 @@ class CollectOrders extends TaskContract
                             $result->orders
                         )
                     ]
+                ],
+                [
+                    'X-Total-Pages' => $maxPages,
+                    'X-Current-Page' => $page
                 ]
             );
         }

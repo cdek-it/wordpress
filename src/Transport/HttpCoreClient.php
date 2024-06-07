@@ -13,53 +13,41 @@ namespace Cdek\Transport {
 
     class HttpCoreClient
     {
-        private array $addHeaders = [];
-
-        public function addHeaders(array $addHeaders)
-        {
-            $this->addHeaders = $addHeaders + $this->addHeaders;
-        }
-
         public function sendCdekRequest(
             string $url,
             string $method,
             string $token,
-            array  $data = null
+            array  $data = null,
+            array  $headers = []
         )
         {
-            $config = [
-                'headers' => [
-                    'Authorization' => $token,
-                ],
-            ];
+            $config = [];
 
+            $headers['Authorization'] = $token;
 
             if (!empty($data)) {
                 $config['body'] = ($method === WP_REST_Server::READABLE) ? $data : json_encode($data);
             }
 
-            return static::sendRequest($url, $method, $config);
+            return self::sendRequest($url, $method, $config, $headers);
         }
 
-        public function sendRequest(string $url, string $method, array $config = [])
+        public function sendRequest(string $url, string $method, array $config = [], array $headers = [])
         {
             $resp = wp_remote_request(
                 $url,
-                array_merge(
-                    $config,
-                    [
-                        'method'  => $method,
-                        'headers' => [
-                                         'Content-Type'     => 'application/json',
-                                         'X-App-Name'       => 'wordpress',
-                                         'X-App-Version'    => Loader::getPluginVersion(),
-                                         'X-User-Locale'    => get_user_locale(),
-                                         'X-Correlation-Id' => self::generateUuid(),
-                                         'user-agent'       => 'wp/' . get_bloginfo('version'),
-                                     ] + $this->addHeaders + $config['headers'] ?? [],
-                        'timeout' => 60,
-                    ],
-                ),
+                [
+                    'method'  => $method,
+                    'headers' => [
+                                     'Content-Type'     => 'application/json',
+                                     'X-App-Name'       => 'wordpress',
+                                     'X-App-Version'    => Loader::getPluginVersion(),
+                                     'X-User-Locale'    => get_user_locale(),
+                                     'X-Correlation-Id' => self::generateUuid(),
+                                     'user-agent'       => 'wp/' . get_bloginfo('version'),
+                                 ] + $headers,
+                    'timeout' => 60,
+                ] + $config,
             );
 
             if (is_array($resp)) {
