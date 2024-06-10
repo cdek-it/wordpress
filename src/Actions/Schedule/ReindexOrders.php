@@ -30,13 +30,13 @@ namespace Cdek\Actions\Schedule {
 
         public function start()
         {
-            if(empty($this->getTaskMeta())){
+            if (empty($this->getTaskMeta())) {
                 return;
             }
 
             $this->initOrders();
 
-            foreach ($this->orders as $orderId){
+            foreach ($this->orders as $orderId) {
                 $orderIndex = array_search($orderId, array_column($this->getTaskMeta(), 'external_id'));
 
                 $responseOrder = $this->getTaskMeta()[$orderIndex];
@@ -45,7 +45,7 @@ namespace Cdek\Actions\Schedule {
                     $orderId,
                     [
                         'order_number' => $responseOrder['external_id'],
-                        'order_uuid' => $responseOrder['id'],
+                        'order_uuid'   => $responseOrder['id'],
                     ],
                 );
             }
@@ -53,7 +53,7 @@ namespace Cdek\Actions\Schedule {
             $this->sendTaskData(
                 [
                     'status' => 'success',
-                ]
+                ],
             );
         }
 
@@ -61,10 +61,10 @@ namespace Cdek\Actions\Schedule {
         {
             $query = new \WC_Order_Query(
                 [
-                    'orderby' => 'id',
-                    'order'   => 'ASC',
-                    'return'  => 'ids',
-                    'post__in'    => array_column($this->getTaskMeta(), 'external_id'),
+                    'orderby'  => 'id',
+                    'order'    => 'ASC',
+                    'return'   => 'ids',
+                    'post__in' => array_column($this->getTaskMeta(), 'external_id'),
                 ],
             );
 

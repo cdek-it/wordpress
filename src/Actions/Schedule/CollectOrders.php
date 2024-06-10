@@ -51,14 +51,14 @@ class CollectOrders extends TaskContract
                     'result' => [
                         'orders' => array_map(
                             static fn($order) => (string)$order,
-                            $result->orders
-                        )
-                    ]
+                            $result->orders,
+                        ),
+                    ],
                 ],
                 [
-                    'X-Total-Pages' => $maxPages,
-                    'X-Current-Page' => $page
-                ]
+                    'X-Total-Pages'  => $maxPages,
+                    'X-Current-Page' => $page,
+                ],
             );
         }
     }
