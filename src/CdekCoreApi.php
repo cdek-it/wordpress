@@ -1,12 +1,12 @@
 <?php
 
 namespace Cdek;
+
 use Cdek\Contracts\TokenStorageContract;
 use Cdek\Exceptions\CdekCoreApiException;
 use Cdek\Helpers\DBCoreTokenStorage;
 use Cdek\Helpers\DBTokenStorage;
 use Cdek\Transport\HttpCoreClient;
-use WpOrg\Requests\Exception;
 
 class CdekCoreApi
 {
@@ -45,18 +45,18 @@ class CdekCoreApi
 
         if(empty($response['body'])){
             throw new CdekCoreApiException('[CDEKDelivery] Failed to get shop uuid',
-                                       'cdek_error.uuid.auth',
-                                       $response,
-                                       true);
+                                           'cdek_error.uuid.auth',
+                                           $response,
+                                           true);
         }
 
         $body = json_decode($response['body'], true);
 
         if(empty($body) || empty($body['data']['id'])){
             throw new CdekCoreApiException('[CDEKDelivery] Failed to get shop uuid',
-                                       'cdek_error.uuid.auth',
-                                       $response,
-                                       true);
+                                           'cdek_error.uuid.auth',
+                                           $response,
+                                           true);
         }
 
         $response = $this->coreClient->sendCdekRequest(
@@ -69,9 +69,9 @@ class CdekCoreApi
 
         if ($body === null || !$body['success'] || empty($body['data'])) {
             throw new CdekCoreApiException('[CDEKDelivery] Failed to get shop token',
-                                       'cdek_error.shop_token.auth',
-                                       $body,
-                                       true);
+                                           'cdek_error.shop_token.auth',
+                                           $body,
+                                           true);
         }
 
         return ['tokens' => $body['data']];
@@ -80,13 +80,13 @@ class CdekCoreApi
     public function taskManager($data = null)
     {
         return $this->coreClient->sendCdekRequest($this->getShopApiUrl() . '/' .  self::TASKS, 'GET',
-                                               $this->tokenCoreStorage->getToken(), $data);
+                                                  $this->tokenCoreStorage->getToken(), $data);
     }
 
     public function taskInfo($taskId, $data = null, $headers = [])
     {
         return $this->coreClient->sendCdekRequest($this->getShopApiUrl() . '/' .  self::TASKS . '/' . $taskId, 'GET',
-                                                  $this->tokenCoreStorage->getToken(), $data);
+                                                  $this->tokenCoreStorage->getToken(), $data, $headers);
     }
 
     public function sendTaskData($taskId, $data, $headers = [])

@@ -8,15 +8,13 @@ namespace {
 
 namespace Cdek\Actions\Schedule {
 
-    use Cdek\CdekCoreApi;
-    use Cdek\CdekShippingMethod;
     use Cdek\Contracts\TaskContract;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Validate;
 
     class ReindexOrders extends TaskContract
     {
-        private array $orders;
+        private array $orders = [];
         private Validate $error;
 
         public function __construct(string $taskId)
@@ -41,20 +39,22 @@ namespace Cdek\Actions\Schedule {
             foreach ($this->orders as $orderId){
                 $orderIndex = array_search($orderId, array_column($this->getTaskMeta(), 'external_id'));
 
-                if(empty($orderIndex)){
-                    continue;
-                }
-
                 $responseOrder = $this->getTaskMeta()[$orderIndex];
 
                 OrderMetaData::updateMetaByOrderId(
                     $orderId,
                     [
-                        'order_number' => $responseOrder['order_number'],
-                        'order_uuid' => $responseOrder['order_uuid'],
+                        'order_number' => $responseOrder['external_id'],
+                        'order_uuid' => $responseOrder['id'],
                     ],
                 );
             }
+
+            $this->sendTaskData(
+                [
+                    'status' => 'success',
+                ]
+            );
         }
 
         protected function initOrders()
@@ -68,7 +68,7 @@ namespace Cdek\Actions\Schedule {
                 ],
             );
 
-            foreach ($query->get_orders()->orders as $orderId) {
+            foreach ($query->get_orders() as $orderId) {
                 $this->orders[] = $orderId;
             }
         }

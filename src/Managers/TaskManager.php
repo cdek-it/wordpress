@@ -28,6 +28,10 @@ class TaskManager extends TaskContract
 
     public function start(): void
     {
+        if(!isset($this->taskCollection)){
+            return;
+        }
+
         foreach ($this->taskCollection as $task) {
             $this->startTask($task);
         }

@@ -9,22 +9,23 @@ use Cdek\Model\TaskData;
 
 abstract class TaskContract
 {
+    const SUCCESS_STATUS = 200;
     const FINISH_STATUS = 201;
     const RESTART_STATUS = 202;
     const UNKNOWN_METHOD = 404;
     const FATAL_ERRORS = [500, 502, 503];
     protected cdekCoreApi $cdekCoreApi;
+    protected static array $errorCollection = [];
+    protected static array $taskData = [];
+    protected static array $responseCursor = [];
+    protected string $taskId;
+    protected ?int $status;
 
     public function __construct(string $taskId)
     {
         $this->cdekCoreApi = new CdekCoreApi();
         $this->taskId = $taskId;
     }
-    protected static array $errorCollection = [];
-    protected static array $taskData = [];
-    protected static array $responseCursor = [];
-    protected string $taskId;
-    protected int $status;
 
     abstract protected static function getName(): string;
 
@@ -48,53 +49,53 @@ abstract class TaskContract
     protected function getTaskMeta(): array
     {
         if(empty(self::$taskData[$this->taskId])){
-            $this->initTaskData($this->taskId);
+            $this->initTaskData();
         }
 
-        return self::$taskData[$this->taskId]['meta'];
+        return self::$taskData[$this->taskId]['meta'] ?? [];
     }
     protected function getTaskCursor(): array
     {
         if(empty(self::$responseCursor[$this->taskId])){
-            $this->initTaskData($this->taskId);
+            $this->initTaskData();
         }
 
         return self::$responseCursor[$this->taskId]['meta'];
     }
 
-    protected function initTaskData($data = null): void
+    protected function initTaskData(array $data = null): void
     {
         $this->initData($this->cdekCoreApi->taskInfo($this->taskId, $data));
     }
 
-    protected function sendTaskData($data, $headers = [])
+    protected function sendTaskData(array $data, $headers = [])
     {
         $this->initData($this->cdekCoreApi->sendTaskData($this->taskId, $data, $headers));
     }
 
     private function initData($response)
     {
-        $this->status = $response['status'];
+        $decodeResponse = json_decode($response['body'], true);
+
+        $this->status = $decodeResponse['status'];
 
         if(
             !in_array(
                 $this->status,
-                [self::FINISH_STATUS, self::RESTART_STATUS],
+                [self::FINISH_STATUS, self::RESTART_STATUS, self::SUCCESS_STATUS],
             )
         ){
             if(in_array($this->status, self::FATAL_ERRORS)){
                 $this->postponeTask();
                 return;
             }else{
-                throw new CdekCoreApiException('[CDEKDelivery] Failed to get core api response',
-                                           'cdek_error.core.response',
-                                           $response,
-                                           true);
+                throw new CdekCoreApiException('[CDEKDelivery] Failed to get core api response' . var_export($response, true),
+                                               'cdek_error.core.response',
+                                               $response,
+                                               true);
 
             }
         }
-
-        $decodeResponse = json_decode($response['body'], true);
 
         if(
             empty($decodeResponse['success'])
@@ -102,13 +103,9 @@ abstract class TaskContract
             self::$errorCollection[$this->taskId][] = __('Request to api was failed', 'cdekdelivery');
         }
 
-        if(empty($response['cursor'])){
-            self::$errorCollection[$this->taskId][] = __('Cursor data not found', 'cdekdelivery');
-        }
-
-        if(empty(self::$errorCollection)){
-            self::$taskData[$this->taskId] = new TaskData(reset($response['data']));
-            self::$responseCursor[$this->taskId] = $response['cursor'];
+        if(empty(self::$errorCollection[$this->taskId])){
+            self::$taskData[$this->taskId] = $decodeResponse['data'];
+            self::$responseCursor[$this->taskId] = $decodeResponse['cursor'];
         }
     }
 

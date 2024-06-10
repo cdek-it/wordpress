@@ -2,6 +2,7 @@
 
 namespace Cdek\Actions\Schedule;
 
+use Cdek\Cache\FileCache;
 use Cdek\CdekCoreApi;
 use Cdek\Contracts\TaskContract;
 use Cdek\Model\Validate;
