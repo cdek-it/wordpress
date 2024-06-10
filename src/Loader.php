@@ -82,7 +82,7 @@ namespace Cdek {
             }
 
             self::checkRequirements();
-            self::addPluginScheduleEvents();
+            TaskManager::addPluginScheduleEvents();
         }
 
         public static function deactivate()
@@ -186,7 +186,7 @@ namespace Cdek {
 
             add_action('woocommerce_before_order_itemmeta', new AdminShippingFields, 10, 2);
 
-            add_action('upgrader_process_complete', [__CLASS__, 'addPluginScheduleEvents']);
+            add_action('upgrader_process_complete', [TaskManager::class, 'addPluginScheduleEvents']);
 
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, new CreateOrderAction, 10, 2);
 
@@ -197,24 +197,6 @@ namespace Cdek {
             (new Frontend)();
             (new MetaBoxes)();
             (new AdminNotices)();
-        }
-
-        private static function addPluginScheduleEvents()
-        {
-            if (as_has_scheduled_action(Config::TASK_MANAGER_HOOK_NAME) !== false) {
-                as_unschedule_action(Config::TASK_MANAGER_HOOK_NAME);
-            }
-
-            $dateTime = new \DateTime('now + 1 hour');
-
-            as_schedule_cron_action(
-                time(),
-                $dateTime->format('i') . ' ' . $dateTime->format('H') . ' * * *',
-                Config::TASK_MANAGER_HOOK_NAME,
-                [],
-                '',
-                true,
-            );
         }
 
         private static function declareCompatibility(): void

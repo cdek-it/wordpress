@@ -6,7 +6,7 @@ use Cdek\Cache\FileCache;
 use Cdek\CdekCoreApi;
 use Cdek\Contracts\TokenStorageContract;
 use Cdek\Exceptions\CdekApiException;
-use Cdek\Helper;
+use Cdek\Exceptions\CdekCoreApiException;
 
 class DBCoreTokenStorage extends TokenStorageContract
 {
@@ -17,6 +17,12 @@ class DBCoreTokenStorage extends TokenStorageContract
     private static string $frontendUrlString;
     private static string $adminUrlString;
 
+    /**
+     * @return string
+     * @throws CdekApiException
+     * @throws CdekCoreApiException
+     * @throws \JsonException
+     */
     final public function getToken(): string
     {
         $token = $this->getTokenFromCache();
@@ -66,6 +72,12 @@ class DBCoreTokenStorage extends TokenStorageContract
         return self::$tokenStatic;
     }
 
+    /**
+     * @return string
+     * @throws CdekApiException
+     * @throws CdekCoreApiException
+     * @throws \JsonException
+     */
     final public function updateToken(): string
     {
         $tokenApi = $this->fetchTokenFromApi();
@@ -85,7 +97,10 @@ class DBCoreTokenStorage extends TokenStorageContract
     }
 
     /**
+     * @return array
      * @throws CdekApiException
+     * @throws CdekCoreApiException
+     * @throws \JsonException
      */
     final public function fetchTokenFromApi(): array
     {

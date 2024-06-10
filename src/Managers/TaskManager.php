@@ -7,6 +7,8 @@ use Cdek\Actions\Schedule\ReindexOrders;
 use Cdek\CdekCoreApi;
 use Cdek\Config;
 use Cdek\Contracts\TaskContract;
+use Cdek\Exceptions\CdekApiException;
+use Cdek\Exceptions\CdekCoreApiException;
 use Cdek\Model\TaskData;
 
 class TaskManager extends TaskContract
@@ -75,6 +77,25 @@ class TaskManager extends TaskContract
         );
     }
 
+    public static function addPluginScheduleEvents()
+    {
+        if (as_has_scheduled_action(Config::TASK_MANAGER_HOOK_NAME) !== false) {
+            as_unschedule_action(Config::TASK_MANAGER_HOOK_NAME);
+        }
+
+        $dateTime = new \DateTime('now + 1 hour');
+
+        as_schedule_cron_action(
+            time(),
+            $dateTime->format('i') . ' ' . $dateTime->format('H') . ' * * *',
+            Config::TASK_MANAGER_HOOK_NAME,
+            [],
+            '',
+            true,
+        );
+
+    }
+
     private function startTask(TaskData $task): void
     {
         if (!in_array(
@@ -93,7 +114,14 @@ class TaskManager extends TaskContract
 
     private function getResponse(): void
     {
-        $response = (new CdekCoreApi())->taskManager();
+        try {
+            $response = (new CdekCoreApi())->taskManager();
+        } catch (CdekCoreApiException $e) {
+            self::$errorCollection[$this->taskId][] = $e->getMessage();
+            static::addPluginScheduleEvents();
+            return;
+        }
+
         $decodeResponse = json_decode($response['body'], true);
 
         if (

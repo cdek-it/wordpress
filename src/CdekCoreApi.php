@@ -3,6 +3,7 @@
 namespace Cdek;
 
 use Cdek\Contracts\TokenStorageContract;
+use Cdek\Exceptions\CdekApiException;
 use Cdek\Exceptions\CdekCoreApiException;
 use Cdek\Helpers\DBCoreTokenStorage;
 use Cdek\Helpers\DBTokenStorage;
@@ -27,7 +28,13 @@ class CdekCoreApi
         $this->tokenCoreStorage = $tokenCoreStorage ?? new DBCoreTokenStorage();
     }
 
-    public function fetchShopToken()
+    /**
+     * @return array
+     * @throws CdekApiException
+     * @throws CdekCoreApiException
+     * @throws \JsonException
+     */
+    public function fetchShopToken(): array
     {
         $response = $this->coreClient->sendCdekRequest(
             Config::API_CORE_URL . self::SHOP,
@@ -77,19 +84,47 @@ class CdekCoreApi
         return ['tokens' => $body['data']];
     }
 
+    /**
+     * @param $data
+     *
+     * @return array|false|string|\WP_Error
+     * @throws CdekApiException
+     * @throws CdekCoreApiException
+     * @throws \JsonException
+     */
     public function taskManager($data = null)
     {
         return $this->coreClient->sendCdekRequest($this->getShopApiUrl() . '/' .  self::TASKS, 'GET',
                                                   $this->tokenCoreStorage->getToken(), $data);
     }
 
-    public function taskInfo($taskId, $data = null, $headers = [])
+    /**
+     * @param       $taskId
+     * @param null  $data
+     * @param array $headers
+     *
+     * @return array|false|string|\WP_Error
+     * @throws CdekApiException
+     * @throws CdekCoreApiException
+     * @throws \JsonException
+     */
+    public function taskInfo($taskId, $data = null, array $headers = [])
     {
         return $this->coreClient->sendCdekRequest($this->getShopApiUrl() . '/' .  self::TASKS . '/' . $taskId, 'GET',
                                                   $this->tokenCoreStorage->getToken(), $data, $headers);
     }
 
-    public function sendTaskData($taskId, $data, $headers = [])
+    /**
+     * @param       $taskId
+     * @param       $data
+     * @param array $headers
+     *
+     * @return array|false|string|\WP_Error
+     * @throws CdekApiException
+     * @throws CdekCoreApiException
+     * @throws \JsonException
+     */
+    public function sendTaskData($taskId, $data, array $headers = [])
     {
         return $this->coreClient->sendCdekRequest(
             $this->getShopApiUrl() . '/' .  self::TASKS . '/' . $taskId,
