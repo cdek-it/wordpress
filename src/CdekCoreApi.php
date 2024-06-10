@@ -2,7 +2,7 @@
 
 namespace Cdek;
 use Cdek\Contracts\TokenStorageContract;
-use Cdek\Exceptions\CdekApiException;
+use Cdek\Exceptions\CdekCoreApiException;
 use Cdek\Helpers\DBCoreTokenStorage;
 use Cdek\Helpers\DBTokenStorage;
 use Cdek\Transport\HttpCoreClient;
@@ -44,7 +44,7 @@ class CdekCoreApi
         );
 
         if(empty($response['body'])){
-            throw new CdekApiException('[CDEKDelivery] Failed to get shop uuid',
+            throw new CdekCoreApiException('[CDEKDelivery] Failed to get shop uuid',
                                        'cdek_error.uuid.auth',
                                        $response,
                                        true);
@@ -53,7 +53,7 @@ class CdekCoreApi
         $body = json_decode($response['body'], true);
 
         if(empty($body) || empty($body['data']['id'])){
-            throw new CdekApiException('[CDEKDelivery] Failed to get shop uuid',
+            throw new CdekCoreApiException('[CDEKDelivery] Failed to get shop uuid',
                                        'cdek_error.uuid.auth',
                                        $response,
                                        true);
@@ -68,7 +68,7 @@ class CdekCoreApi
         $body = json_decode($response['body'],true);
 
         if ($body === null || !$body['success'] || empty($body['data'])) {
-            throw new CdekApiException('[CDEKDelivery] Failed to get shop token',
+            throw new CdekCoreApiException('[CDEKDelivery] Failed to get shop token',
                                        'cdek_error.shop_token.auth',
                                        $body,
                                        true);

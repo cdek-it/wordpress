@@ -15,7 +15,6 @@ namespace Cdek {
     use Cdek\Actions\ProcessWoocommerceCreateShippingAction;
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
-    use Cdek\Cache\FileCache;
     use Cdek\Managers\TaskManager;
     use Cdek\Blocks\CheckoutMapBlock;
     use Cdek\Controllers\CourierController;

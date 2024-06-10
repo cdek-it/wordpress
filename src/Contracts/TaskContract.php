@@ -4,7 +4,7 @@ namespace Cdek\Contracts;
 
 use Cdek\CdekCoreApi;
 use Cdek\Config;
-use Cdek\Exceptions\CdekApiException;
+use Cdek\Exceptions\CdekCoreApiException;
 use Cdek\Model\TaskData;
 
 abstract class TaskContract
@@ -86,7 +86,7 @@ abstract class TaskContract
                 $this->postponeTask();
                 return;
             }else{
-                throw new CdekApiException('[CDEKDelivery] Failed to get core api response',
+                throw new CdekCoreApiException('[CDEKDelivery] Failed to get core api response',
                                            'cdek_error.core.response',
                                            $response,
                                            true);
