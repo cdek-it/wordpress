@@ -38,6 +38,12 @@ class DBCoreTokenStorage extends TokenStorageContract
         return 'Bearer ' . $token;
     }
 
+    /**
+     * @return mixed|string
+     * @throws CdekApiException
+     * @throws CdekCoreApiException
+     * @throws \JsonException
+     */
     public function getPath()
     {
         if(isset(static::$apiUrlString)){
