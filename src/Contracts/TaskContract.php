@@ -74,7 +74,7 @@ abstract class TaskContract
 
     protected function initData($response)
     {
-        if(in_array($this->cdekCoreApi->status, $this->cdekCoreApi::FATAL_ERRORS)){
+        if($this->cdekCoreApi->isServerError()){
             $this->postponeTask();
             return;
         }

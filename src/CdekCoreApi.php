@@ -16,7 +16,7 @@ class CdekCoreApi
     const FINISH_STATUS = 201;
     const HAS_NEXT_INFO_STATUS = 202;
     const UNKNOWN_METHOD = 404;
-    const FATAL_ERRORS = [500, 502, 503, 504];
+    const FATAL_ERRORS = 5;
     private const TOKEN_PATH = 'cms/wordpress/shops/%s/token';
     private const SHOP = 'cms/wordpress/shops';
     private const TASKS = 'wordpress/tasks';
@@ -142,10 +142,15 @@ class CdekCoreApi
             'PUT',
             $this->tokenCoreStorage->getToken(),
             $data,
-            $headers ? $headers->getHeaders() : []
+            $headers ? $headers->getHeaders() : [],
         );
 
         return $this->initData($response);
+    }
+
+    public function isServerError(): bool
+    {
+        return substr($this->status, 0, 1) == self::FATAL_ERRORS;
     }
 
     private function getShopApiUrl()
@@ -165,7 +170,7 @@ class CdekCoreApi
                 [self::FINISH_STATUS, self::HAS_NEXT_INFO_STATUS, self::SUCCESS_STATUS],
             )
             &&
-            !in_array($this->status, self::FATAL_ERRORS)
+            !$this->isServerError()
         ){
             throw new CdekCoreApiException('[CDEKDelivery] Failed to get core api response',
                                            'cdek_error.core.response',
