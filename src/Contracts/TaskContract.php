@@ -9,17 +9,11 @@ use Cdek\Model\TaskData;
 
 abstract class TaskContract
 {
-    const SUCCESS_STATUS = 200;
-    const FINISH_STATUS = 201;
-    const RESTART_STATUS = 202;
-    const UNKNOWN_METHOD = 404;
-    const FATAL_ERRORS = [500, 502, 503, 504];
     protected cdekCoreApi $cdekCoreApi;
     protected static array $errorCollection = [];
     protected static array $taskData = [];
     protected static array $responseCursor = [];
     protected string $taskId;
-    protected ?int $status;
 
     public function __construct(string $taskId)
     {
@@ -78,44 +72,22 @@ abstract class TaskContract
         $this->initData($this->cdekCoreApi->taskInfo($this->taskId, $data));
     }
 
-    protected function sendTaskData(array $data, $headers = [])
+    protected function initData($response)
     {
-        $this->initData($this->cdekCoreApi->sendTaskData($this->taskId, $data, $headers));
-    }
-
-    private function initData($response)
-    {
-        $decodeResponse = json_decode($response['body'], true);
-
-        $this->status = $decodeResponse['status'];
-
-        if(
-            !in_array(
-                $this->status,
-                [self::FINISH_STATUS, self::RESTART_STATUS, self::SUCCESS_STATUS],
-            )
-        ){
-            if(in_array($this->status, self::FATAL_ERRORS)){
-                $this->postponeTask();
-                return;
-            }else{
-                throw new CdekCoreApiException('[CDEKDelivery] Failed to get core api response',
-                                               'cdek_error.core.response',
-                                               $response,
-                                               true);
-
-            }
+        if(in_array($this->cdekCoreApi->status, $this->cdekCoreApi::FATAL_ERRORS)){
+            $this->postponeTask();
+            return;
         }
 
         if(
-            empty($decodeResponse['success'])
+            empty($response['success'])
         ){
             self::$errorCollection[$this->taskId][] = __('Request to api was failed', 'cdekdelivery');
         }
 
         if(empty(self::$errorCollection[$this->taskId])){
-            self::$taskData[$this->taskId] = $decodeResponse['data'];
-            self::$responseCursor[$this->taskId] = $decodeResponse['cursor'];
+            self::$taskData[$this->taskId] = $response['data'];
+            self::$responseCursor[$this->taskId] = $response['cursor'];
         }
     }
 

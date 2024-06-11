@@ -41,16 +41,17 @@ namespace Cdek\Actions\Schedule {
                 OrderMetaData::updateMetaByOrderId(
                     $arOrder['external_id'],
                     [
-                        'order_uuid'   => $arOrder['id'],
-                    ],
+                        'order_uuid'   => $arOrder['id']
+                    ]
                 );
             }
 
-            $this->sendTaskData(
+            $this->initData($this->cdekCoreApi->sendTaskData(
+                $this->taskId,
                 [
-                    'status' => 'success',
-                ],
-            );
+                    'status' => 'success'
+                ]
+            ));
         }
     }
 }

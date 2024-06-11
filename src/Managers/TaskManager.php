@@ -122,21 +122,13 @@ class TaskManager extends TaskContract
             return;
         }
 
-        $decodeResponse = json_decode($response['body'], true);
-
-        if (
-            $decodeResponse['error']
-        ) {
-            self::$errorCollection[$this->taskId][] = $decodeResponse['error'];
-        }
-
-        if (empty($decodeResponse['cursor'])) {
+        if (empty($response['cursor'])) {
             self::$errorCollection[$this->taskId][] = 'Cursor data not found';
         }
 
         if (empty($this->errorCollection)) {
-            self::$taskData[$this->taskId] = $decodeResponse['data'];
-            self::$responseCursor[$this->taskId] = $decodeResponse['cursor'];
+            self::$taskData[$this->taskId] = $response['data'];
+            self::$responseCursor[$this->taskId] = $response['cursor'];
         }
     }
 

@@ -7,13 +7,20 @@ use Cdek\Exceptions\CdekApiException;
 use Cdek\Exceptions\CdekCoreApiException;
 use Cdek\Helpers\DBCoreTokenStorage;
 use Cdek\Helpers\DBTokenStorage;
+use Cdek\Model\CoreApiHeadersData;
 use Cdek\Transport\HttpCoreClient;
 
 class CdekCoreApi
 {
+    const SUCCESS_STATUS = 200;
+    const FINISH_STATUS = 201;
+    const HAS_NEXT_INFO_STATUS = 202;
+    const UNKNOWN_METHOD = 404;
+    const FATAL_ERRORS = [500, 502, 503, 504];
     private const TOKEN_PATH = 'cms/wordpress/shops/%s/token';
     private const SHOP = 'cms/wordpress/shops';
     private const TASKS = 'wordpress/tasks';
+    public ?int $status;
     private TokenStorageContract $generalTokenStorage;
     private TokenStorageContract $tokenCoreStorage;
     private HttpCoreClient $coreClient;
@@ -94,8 +101,10 @@ class CdekCoreApi
      */
     public function taskManager($data = null)
     {
-        return $this->coreClient->sendCdekRequest($this->getShopApiUrl() . '/' .  self::TASKS, 'GET',
+        $response = $this->coreClient->sendCdekRequest($this->getShopApiUrl() . '/' .  self::TASKS, 'GET',
                                                   $this->tokenCoreStorage->getToken(), $data);
+
+        return $this->initData($response);
     }
 
     /**
@@ -108,35 +117,62 @@ class CdekCoreApi
      * @throws CdekCoreApiException
      * @throws \JsonException
      */
-    public function taskInfo($taskId, $data = null, array $headers = [])
+    public function taskInfo($taskId, $data = null, ?CoreApiHeadersData $headers = null)
     {
-        return $this->coreClient->sendCdekRequest($this->getShopApiUrl() . '/' .  self::TASKS . '/' . $taskId, 'GET',
+        $response = $this->coreClient->sendCdekRequest($this->getShopApiUrl() . '/' .  self::TASKS . '/' . $taskId, 'GET',
                                                   $this->tokenCoreStorage->getToken(), $data, $headers);
+
+        return $this->initData($response);
     }
 
     /**
      * @param       $taskId
      * @param       $data
-     * @param array $headers
+     * @param ?CoreApiHeadersData $headers
      *
      * @return array|false|string|\WP_Error
      * @throws CdekApiException
      * @throws CdekCoreApiException
      * @throws \JsonException
      */
-    public function sendTaskData($taskId, $data, array $headers = [])
+    public function sendTaskData($taskId, $data, ?CoreApiHeadersData $headers = null)
     {
-        return $this->coreClient->sendCdekRequest(
+        $response = $this->coreClient->sendCdekRequest(
             $this->getShopApiUrl() . '/' .  self::TASKS . '/' . $taskId,
             'PUT',
             $this->tokenCoreStorage->getToken(),
             $data,
-            $headers
+            $headers ? $headers->getHeaders() : []
         );
+
+        return $this->initData($response);
     }
 
     private function getShopApiUrl()
     {
         return $this->tokenCoreStorage->getPath();
+    }
+
+    private function initData($response)
+    {
+        $decodeResponse = json_decode($response['body'], true);
+
+        $this->status = $decodeResponse['status'];
+
+        if(
+            !in_array(
+                $this->status,
+                [self::FINISH_STATUS, self::HAS_NEXT_INFO_STATUS, self::SUCCESS_STATUS],
+            )
+            &&
+            !in_array($this->status, self::FATAL_ERRORS)
+        ){
+            throw new CdekCoreApiException('[CDEKDelivery] Failed to get core api response',
+                                           'cdek_error.core.response',
+                                           $response,
+                                           true);
+        }
+
+        return $decodeResponse;
     }
 }
