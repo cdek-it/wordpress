@@ -9,12 +9,12 @@ namespace {
 namespace Cdek\Actions\Schedule {
 
     use Cdek\Contracts\TaskContract;
+    use Cdek\Exceptions\CdekCoreApiException;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Validate;
 
     class ReindexOrders extends TaskContract
     {
-        private array $orders = [];
         private Validate $error;
 
         public function __construct(string $taskId)
@@ -31,21 +31,17 @@ namespace Cdek\Actions\Schedule {
         public function start()
         {
             if (empty($this->getTaskMeta())) {
-                return;
+                throw new CdekCoreApiException('[CDEKDelivery] Failed to get orders meta info',
+                                               'cdek_error.core.data',
+                                               $this->getTaskData(),
+                                               true);
             }
 
-            $this->initOrders();
-
-            foreach ($this->orders as $orderId) {
-                $orderIndex = array_search($orderId, array_column($this->getTaskMeta(), 'external_id'));
-
-                $responseOrder = $this->getTaskMeta()[$orderIndex];
-
+            foreach ($this->getTaskMeta() as $arOrder) {
                 OrderMetaData::updateMetaByOrderId(
-                    $orderId,
+                    $arOrder['external_id'],
                     [
-                        'order_number' => $responseOrder['external_id'],
-                        'order_uuid'   => $responseOrder['id'],
+                        'order_uuid'   => $arOrder['id'],
                     ],
                 );
             }
@@ -55,22 +51,6 @@ namespace Cdek\Actions\Schedule {
                     'status' => 'success',
                 ],
             );
-        }
-
-        protected function initOrders()
-        {
-            $query = new \WC_Order_Query(
-                [
-                    'orderby'  => 'id',
-                    'order'    => 'ASC',
-                    'return'   => 'ids',
-                    'post__in' => array_column($this->getTaskMeta(), 'external_id'),
-                ],
-            );
-
-            foreach ($query->get_orders() as $orderId) {
-                $this->orders[] = $orderId;
-            }
         }
     }
 }

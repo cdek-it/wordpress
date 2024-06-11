@@ -12,22 +12,12 @@ class CollectOrders extends TaskContract
     const ORDERS_LIMIT = 10000;
     private Validate $error;
 
-    public function __construct($taskId)
-    {
-        parent::__construct($taskId);
-    }
-
     public static function getName(): string
     {
         return 'collect-orphaned-orders';
     }
 
     public function start()
-    {
-        $this->reportOrders();
-    }
-
-    protected function reportOrders()
     {
         $query = new \WC_Order_Query(
             [

@@ -13,7 +13,7 @@ abstract class TaskContract
     const FINISH_STATUS = 201;
     const RESTART_STATUS = 202;
     const UNKNOWN_METHOD = 404;
-    const FATAL_ERRORS = [500, 502, 503];
+    const FATAL_ERRORS = [500, 502, 503, 504];
     protected cdekCoreApi $cdekCoreApi;
     protected static array $errorCollection = [];
     protected static array $taskData = [];
@@ -54,6 +54,16 @@ abstract class TaskContract
 
         return self::$taskData[$this->taskId]['meta'] ?? [];
     }
+
+    protected function getTaskData(): array
+    {
+        if(empty(self::$taskData[$this->taskId])){
+            $this->initTaskData();
+        }
+
+        return self::$taskData[$this->taskId] ?? [];
+    }
+
     protected function getTaskCursor(): array
     {
         if(empty(self::$responseCursor[$this->taskId])){
@@ -89,7 +99,7 @@ abstract class TaskContract
                 $this->postponeTask();
                 return;
             }else{
-                throw new CdekCoreApiException('[CDEKDelivery] Failed to get core api response' . var_export($response, true),
+                throw new CdekCoreApiException('[CDEKDelivery] Failed to get core api response',
                                                'cdek_error.core.response',
                                                $response,
                                                true);
@@ -114,8 +124,8 @@ abstract class TaskContract
         $hooks = as_get_scheduled_actions(
             [
                 'hook' => sprintf('%s-%s', Config::TASK_MANAGER_HOOK_NAME, static::getName()),
-                'status' => \ActionScheduler_Store::STATUS_PENDING
-            ]
+                'status' => \ActionScheduler_Store::STATUS_PENDING,
+            ],
         );
 
         if(empty($hooks)){
@@ -128,8 +138,8 @@ abstract class TaskContract
             (new TaskData(
                 [
                     'id' => $this->taskId,
-                    'name' => sprintf('%s-%s', Config::TASK_MANAGER_HOOK_NAME, static::getName())
-                ]
+                    'name' => sprintf('%s-%s', Config::TASK_MANAGER_HOOK_NAME, static::getName()),
+                ],
             ))->createTaskWork();
         }
     }

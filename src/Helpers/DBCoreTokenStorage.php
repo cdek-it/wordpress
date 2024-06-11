@@ -46,8 +46,8 @@ class DBCoreTokenStorage extends TokenStorageContract
 
         $cache = (new FileCache())->getVars();
 
-        if (!empty($cache['end_point']['common'])) {
-            return static::$apiUrlString = $cache['end_point']['common'];
+        if (!empty($cache['endpoint']['common'])) {
+            return static::$apiUrlString = $cache['endpoint']['common'];
         }
 
         return static::$apiUrlString = $this->getEndPointFromToken($this->getToken());
@@ -86,9 +86,9 @@ class DBCoreTokenStorage extends TokenStorageContract
         self::$tokenStatic = $tokenApi['tokens']['common'];
         self::$tokenFrontend = $tokenApi['tokens']['frontend'];
 
-        $tokenApi['end_point']['admin'] = static::$adminUrlString = $this->getEndPointFromToken(self::$tokenAdmin);
-        $tokenApi['end_point']['common'] = static::$apiUrlString = $this->getEndPointFromToken(self::$tokenStatic);
-        $tokenApi['end_point']['frontend'] = static::$frontendUrlString = $this->getEndPointFromToken(self::$tokenFrontend);
+        $tokenApi['endpoint']['admin'] = static::$adminUrlString = $this->getEndPointFromToken(self::$tokenAdmin);
+        $tokenApi['endpoint']['common'] = static::$apiUrlString = $this->getEndPointFromToken(self::$tokenStatic);
+        $tokenApi['endpoint']['frontend'] = static::$frontendUrlString = $this->getEndPointFromToken(self::$tokenFrontend);
 
         $cache = new FileCache();
         $cache->putVars($tokenApi);
