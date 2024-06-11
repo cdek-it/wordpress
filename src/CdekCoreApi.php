@@ -49,7 +49,7 @@ class CdekCoreApi
             $this->generalTokenStorage->getToken(),
             [
                 'name' => get_bloginfo('name'),
-                'url' => [
+                'url'  => [
                     'rest'  => rest_url(),
                     'home'  => home_url(),
                     'admin' => admin_url(),
@@ -57,19 +57,19 @@ class CdekCoreApi
             ],
         );
 
-        if(empty($response['body'])){
+        if (empty($response['body'])) {
             throw new CdekScheduledTaskException('[CDEKDelivery] Failed to get shop uuid',
-                                           'cdek_error.uuid.auth',
-                                           $response
+                                                 'cdek_error.uuid.auth',
+                                                 $response,
             );
         }
 
         $body = json_decode($response['body'], true);
 
-        if(empty($body) || empty($body['data']['id'])){
+        if (empty($body) || empty($body['data']['id'])) {
             throw new CdekScheduledTaskException('[CDEKDelivery] Failed to get shop uuid',
-                                           'cdek_error.uuid.auth',
-                                           $response
+                                                 'cdek_error.uuid.auth',
+                                                 $response,
             );
         }
 
@@ -79,12 +79,12 @@ class CdekCoreApi
             $this->generalTokenStorage->getToken(),
         );
 
-        $body = json_decode($response['body'],true);
+        $body = json_decode($response['body'], true);
 
         if ($body === null || !$body['success'] || empty($body['data'])) {
             throw new CdekScheduledTaskException('[CDEKDelivery] Failed to get shop token',
-                                           'cdek_error.shop_token.auth',
-                                           $body
+                                                 'cdek_error.shop_token.auth',
+                                                 $body,
             );
         }
 
@@ -101,8 +101,10 @@ class CdekCoreApi
      */
     public function taskManager($data = null)
     {
-        $response = $this->coreClient->sendCdekRequest($this->getShopApiUrl() . '/' .  self::TASKS, 'GET',
-                                                  $this->tokenCoreStorage->getToken(), $data);
+        $response = $this->coreClient->sendCdekRequest($this->getShopApiUrl() . '/' . self::TASKS,
+                                                       'GET',
+                                                       $this->tokenCoreStorage->getToken(),
+                                                       $data);
 
         return $this->initData($response);
     }
@@ -119,19 +121,20 @@ class CdekCoreApi
     public function taskInfo($taskId, CoreRequestData $data)
     {
         $response = $this->coreClient->sendCdekRequest(
-            $this->getShopApiUrl() . '/' .  self::TASKS . '/' . $taskId, 'GET',
+            $this->getShopApiUrl() . '/' . self::TASKS . '/' . $taskId,
+            'GET',
             $this->tokenCoreStorage->getToken(),
             [
                 'status' => $data->getStatus(),
-                'result' => $data->getData()
-            ]
+                'result' => $data->getData(),
+            ],
         );
 
         return $this->initData($response);
     }
 
     /**
-     * @param       $taskId
+     * @param                 $taskId
      * @param CoreRequestData $data
      *
      * @return array|false|string|\WP_Error
@@ -142,17 +145,17 @@ class CdekCoreApi
     public function sendTaskData($taskId, CoreRequestData $data)
     {
         $response = $this->coreClient->sendCdekRequest(
-            $this->getShopApiUrl() . '/' .  self::TASKS . '/' . $taskId,
+            $this->getShopApiUrl() . '/' . self::TASKS . '/' . $taskId,
             'PUT',
             $this->tokenCoreStorage->getToken(),
             [
                 'status' => $data->getStatus(),
-                'result' => $data->getData()
+                'result' => $data->getData(),
             ],
             [
                 'X-Current-Page' => $data->getCurrentPage(),
-                'X-Total-Pages' => $data->getTotalPages()
-            ]
+                'X-Total-Pages'  => $data->getTotalPages(),
+            ],
         );
 
         return $this->initData($response);
@@ -160,7 +163,7 @@ class CdekCoreApi
 
     public function isServerError(): bool
     {
-        return substr($this->status, 0, 1) == self::FATAL_ERRORS_FIRST_NUMBER;
+        return empty($this->status) || substr($this->status, 0, 1) == self::FATAL_ERRORS_FIRST_NUMBER;
     }
 
     private function getShopApiUrl()
@@ -172,20 +175,21 @@ class CdekCoreApi
     {
         $decodeResponse = json_decode($response['body'], true);
 
-        $this->status = $decodeResponse['status'];
+        $this->status = $decodeResponse['status'] ?? null;
 
-        if(
+        if (
             !in_array(
                 $this->status,
                 [self::FINISH_STATUS, self::HAS_NEXT_INFO_STATUS, self::SUCCESS_STATUS],
             )
             &&
             !$this->isServerError()
-        ){
-            throw new CdekScheduledTaskException('[CDEKDelivery] Failed to get core api response',
-                                           'cdek_error.core.response',
-                                           $response,
-                                           true);
+        ) {
+            throw new CdekScheduledTaskException(
+                '[CDEKDelivery] Failed to get core api response',
+                'cdek_error.core.response',
+                $response,
+            );
         }
 
         return $decodeResponse;
