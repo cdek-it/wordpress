@@ -8,7 +8,7 @@ use Cdek\CdekCoreApi;
 use Cdek\Config;
 use Cdek\Contracts\TaskContract;
 use Cdek\Exceptions\CdekApiException;
-use Cdek\Exceptions\CdekCoreApiException;
+use Cdek\Exceptions\CdekScheduledTaskException;
 use Cdek\Model\TaskData;
 
 class TaskManager extends TaskContract
@@ -116,7 +116,7 @@ class TaskManager extends TaskContract
     {
         try {
             $response = (new CdekCoreApi())->taskManager();
-        } catch (CdekCoreApiException $e) {
+        } catch (CdekScheduledTaskException $e) {
             self::$errorCollection[$this->taskId][] = $e->getMessage();
             static::addPluginScheduleEvents();
             return;

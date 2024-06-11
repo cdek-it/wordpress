@@ -6,7 +6,7 @@ use Cdek\Cache\FileCache;
 use Cdek\CdekCoreApi;
 use Cdek\Contracts\TokenStorageContract;
 use Cdek\Exceptions\CdekApiException;
-use Cdek\Exceptions\CdekCoreApiException;
+use Cdek\Exceptions\CdekScheduledTaskException;
 
 class DBCoreTokenStorage extends TokenStorageContract
 {
@@ -20,7 +20,7 @@ class DBCoreTokenStorage extends TokenStorageContract
     /**
      * @return string
      * @throws CdekApiException
-     * @throws CdekCoreApiException
+     * @throws CdekScheduledTaskException
      * @throws \JsonException
      */
     final public function getToken(): string
@@ -41,7 +41,7 @@ class DBCoreTokenStorage extends TokenStorageContract
     /**
      * @return mixed|string
      * @throws CdekApiException
-     * @throws CdekCoreApiException
+     * @throws CdekScheduledTaskException
      * @throws \JsonException
      */
     public function getPath()
@@ -81,7 +81,7 @@ class DBCoreTokenStorage extends TokenStorageContract
     /**
      * @return string
      * @throws CdekApiException
-     * @throws CdekCoreApiException
+     * @throws CdekScheduledTaskException
      * @throws \JsonException
      */
     final public function updateToken(): string
@@ -105,7 +105,7 @@ class DBCoreTokenStorage extends TokenStorageContract
     /**
      * @return array
      * @throws CdekApiException
-     * @throws CdekCoreApiException
+     * @throws CdekScheduledTaskException
      * @throws \JsonException
      */
     final public function fetchTokenFromApi(): array

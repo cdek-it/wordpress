@@ -9,7 +9,7 @@ namespace {
 namespace Cdek\Actions\Schedule {
 
     use Cdek\Contracts\TaskContract;
-    use Cdek\Exceptions\CdekCoreApiException;
+    use Cdek\Exceptions\CdekScheduledTaskException;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Validate;
 
@@ -31,10 +31,10 @@ namespace Cdek\Actions\Schedule {
         public function start()
         {
             if (empty($this->getTaskMeta())) {
-                throw new CdekCoreApiException('[CDEKDelivery] Failed to get orders meta info',
+                throw new CdekScheduledTaskException('[CDEKDelivery] Failed to get orders meta info',
                                                'cdek_error.core.data',
-                                               $this->getTaskData(),
-                                               true);
+                                               $this->getTaskData()
+                );
             }
 
             foreach ($this->getTaskMeta() as $arOrder) {

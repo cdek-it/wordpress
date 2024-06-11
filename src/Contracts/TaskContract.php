@@ -4,7 +4,7 @@ namespace Cdek\Contracts;
 
 use Cdek\CdekCoreApi;
 use Cdek\Config;
-use Cdek\Exceptions\CdekCoreApiException;
+use Cdek\Exceptions\CdekScheduledTaskException;
 use Cdek\Model\TaskData;
 
 abstract class TaskContract
