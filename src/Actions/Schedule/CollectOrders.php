@@ -2,10 +2,8 @@
 
 namespace Cdek\Actions\Schedule;
 
-use Cdek\Cache\FileCache;
-use Cdek\CdekCoreApi;
 use Cdek\Contracts\TaskContract;
-use Cdek\Model\CoreApiHeadersData;
+use Cdek\Model\CoreRequestData;
 use Cdek\Model\Validate;
 
 class CollectOrders extends TaskContract
@@ -38,18 +36,17 @@ class CollectOrders extends TaskContract
 
             $response = $this->cdekCoreApi->sendTaskData(
                 $this->taskId,
-                [
-                    'status' => 'success',
-                    'result' => [
+                new CoreRequestData(
+                    'success',
+                    [
                         'orders' => array_map(
                             static fn($order) => (string)$order,
                             $result->orders,
-                        ),
+                        )
                     ],
-                ],
-                (new CoreApiHeadersData())
-                    ->setCurrentPage($page)
-                    ->setTotalPages($maxPages)
+                    $page,
+                    $maxPages
+                )
             );
 
             $this->initData($response);

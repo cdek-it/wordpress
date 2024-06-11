@@ -4,7 +4,7 @@ namespace Cdek\Contracts;
 
 use Cdek\CdekCoreApi;
 use Cdek\Config;
-use Cdek\Exceptions\CdekScheduledTaskException;
+use Cdek\Model\CoreRequestData;
 use Cdek\Model\TaskData;
 
 abstract class TaskContract
@@ -69,7 +69,7 @@ abstract class TaskContract
 
     protected function initTaskData(array $data = null): void
     {
-        $this->initData($this->cdekCoreApi->taskInfo($this->taskId, $data));
+        $this->initData($this->cdekCoreApi->taskInfo($this->taskId, new CoreRequestData('success', $data)));
     }
 
     protected function initData($response)

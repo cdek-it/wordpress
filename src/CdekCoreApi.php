@@ -7,7 +7,7 @@ use Cdek\Exceptions\CdekApiException;
 use Cdek\Exceptions\CdekScheduledTaskException;
 use Cdek\Helpers\DBCoreTokenStorage;
 use Cdek\Helpers\DBTokenStorage;
-use Cdek\Model\CoreApiHeadersData;
+use Cdek\Model\CoreRequestData;
 use Cdek\Transport\HttpCoreClient;
 
 class CdekCoreApi
@@ -108,41 +108,51 @@ class CdekCoreApi
     }
 
     /**
-     * @param       $taskId
-     * @param null  $data
-     * @param array $headers
+     * @param                             $taskId
+     * @param CoreRequestData             $data
      *
      * @return array|false|string|\WP_Error
-     * @throws CdekApiException
-     * @throws CdekScheduledTaskException
+     * @throws \Cdek\Exceptions\CdekApiException
+     * @throws \Cdek\Exceptions\CdekScheduledTaskException
      * @throws \JsonException
      */
-    public function taskInfo($taskId, $data = null, ?CoreApiHeadersData $headers = null)
+    public function taskInfo($taskId, CoreRequestData $data)
     {
-        $response = $this->coreClient->sendCdekRequest($this->getShopApiUrl() . '/' .  self::TASKS . '/' . $taskId, 'GET',
-                                                  $this->tokenCoreStorage->getToken(), $data, $headers);
+        $response = $this->coreClient->sendCdekRequest(
+            $this->getShopApiUrl() . '/' .  self::TASKS . '/' . $taskId, 'GET',
+            $this->tokenCoreStorage->getToken(),
+            [
+                'status' => $data->getStatus(),
+                'result' => $data->getData()
+            ]
+        );
 
         return $this->initData($response);
     }
 
     /**
      * @param       $taskId
-     * @param       $data
-     * @param ?CoreApiHeadersData $headers
+     * @param CoreRequestData $data
      *
      * @return array|false|string|\WP_Error
      * @throws CdekApiException
      * @throws CdekScheduledTaskException
      * @throws \JsonException
      */
-    public function sendTaskData($taskId, $data, ?CoreApiHeadersData $headers = null)
+    public function sendTaskData($taskId, CoreRequestData $data)
     {
         $response = $this->coreClient->sendCdekRequest(
             $this->getShopApiUrl() . '/' .  self::TASKS . '/' . $taskId,
             'PUT',
             $this->tokenCoreStorage->getToken(),
-            $data,
-            $headers ? $headers->getHeaders() : [],
+            [
+                'status' => $data->getStatus(),
+                'result' => $data->getData()
+            ],
+            [
+                'X-Current-Page' => $data->getCurrentPage(),
+                'X-Total-Pages' => $data->getTotalPages()
+            ]
         );
 
         return $this->initData($response);

@@ -10,6 +10,7 @@ namespace Cdek\Actions\Schedule {
 
     use Cdek\Contracts\TaskContract;
     use Cdek\Exceptions\CdekScheduledTaskException;
+    use Cdek\Model\CoreRequestData;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Validate;
 
@@ -48,9 +49,7 @@ namespace Cdek\Actions\Schedule {
 
             $this->initData($this->cdekCoreApi->sendTaskData(
                 $this->taskId,
-                [
-                    'status' => 'success'
-                ]
+                new CoreRequestData('success')
             ));
         }
     }
