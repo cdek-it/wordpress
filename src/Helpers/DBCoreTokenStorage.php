@@ -50,7 +50,7 @@ class DBCoreTokenStorage extends TokenStorageContract
             return static::$apiUrlString;
         }
 
-        $cache = (new FileCache())->getVars();
+        $cache = FileCache::getVars();
 
         if (!empty($cache['endpoint']['common'])) {
             return static::$apiUrlString = $cache['endpoint']['common'];
@@ -66,7 +66,7 @@ class DBCoreTokenStorage extends TokenStorageContract
 
     private function getTokenFromSettings(): ?string
     {
-        $cache = (new FileCache())->getVars();
+        $cache = FileCache::getVars();
 
         if (empty($cache['tokens'])) {
             return null;
@@ -96,8 +96,7 @@ class DBCoreTokenStorage extends TokenStorageContract
         $tokenApi['endpoint']['common'] = static::$apiUrlString = $this->getEndPointFromToken(self::$tokenStatic);
         $tokenApi['endpoint']['frontend'] = static::$frontendUrlString = $this->getEndPointFromToken(self::$tokenFrontend);
 
-        $cache = new FileCache();
-        $cache->putVars($tokenApi);
+        FileCache::putVars($tokenApi);
 
         return self::$tokenStatic;
     }
