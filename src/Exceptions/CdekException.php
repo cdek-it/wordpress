@@ -13,7 +13,6 @@ namespace Cdek\Exceptions {
     abstract class CdekException extends Exception
     {
         protected $code = 'cdek_error';
-        protected bool $isSchedule = false;
         private ?array $data;
 
         public function __construct(
@@ -26,7 +25,7 @@ namespace Cdek\Exceptions {
             $this->data    = $data ?? [];
             $this->message = $message;
 
-            if ($stopPropagation && (defined('REST_REQUEST') || $this->isSchedule)) {
+            if ($stopPropagation && (defined('REST_REQUEST') || defined('DOING_CRON'))) {
                 wp_die($this->getWpError());
             }
 
