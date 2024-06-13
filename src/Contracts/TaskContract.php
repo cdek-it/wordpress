@@ -12,8 +12,7 @@ use Cdek\Model\TaskData;
 abstract class TaskContract
 {
     protected cdekCoreApi $cdekCoreApi;
-    protected static array $errorCollection = [];
-    protected array $taskMeta = [];
+    protected ?array $taskMeta = [];
     protected string $taskId;
 
     public function __construct(string $taskId)
@@ -79,9 +78,7 @@ abstract class TaskContract
             return;
         }
 
-        if(empty(self::$errorCollection[$this->taskId])){
-            $this->taskMeta = $response['data']['meta'];
-        }
+        $this->taskMeta = $response['data']['meta'];
     }
 
     protected function postponeTask(): void

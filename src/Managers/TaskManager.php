@@ -140,10 +140,6 @@ class TaskManager extends TaskContract
 
     private function initTasks(): void
     {
-        if (!empty(self::$errorCollection)) {
-            return;
-        }
-
         foreach ($this->taskData as $data) {
             $this->taskCollection[] = new TaskData($data);
         }
