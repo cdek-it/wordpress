@@ -7,7 +7,7 @@ use Cdek\Exceptions\CdekApiException;
 use Cdek\Exceptions\CdekScheduledTaskException;
 use Cdek\Helpers\DBCoreTokenStorage;
 use Cdek\Helpers\DBTokenStorage;
-use Cdek\Model\CoreRequestData;
+use Cdek\Model\TaskOutputData;
 use Cdek\Transport\HttpCoreClient;
 
 class CdekCoreApi
@@ -15,6 +15,7 @@ class CdekCoreApi
     const SUCCESS_STATUS = 200;
     const FINISH_STATUS = 201;
     const HAS_NEXT_INFO_STATUS = 202;
+    const EMPTY_ANSWER = 204;
     const UNKNOWN_METHOD = 404;
     const FATAL_ERRORS_FIRST_NUMBER = 5;
     private const TOKEN_PATH = 'cms/wordpress/shops/%s/token';
@@ -58,15 +59,15 @@ class CdekCoreApi
         );
 
         if (empty($response['body'])) {
-            throw new CdekScheduledTaskException('[CDEKDelivery] Failed to get shop uuid',
-                                                 'cdek_error.uuid.auth',
+            throw new CdekScheduledTaskException('[CDEKDelivery] Register shop failed',
+                                                 'cdek_error.register.shop',
                                                  $response,
             );
         }
 
         $body = json_decode($response['body'], true);
 
-        if (empty($body) || empty($body['data']['id'])) {
+        if (empty($body['data']['id'])) {
             throw new CdekScheduledTaskException('[CDEKDelivery] Failed to get shop uuid',
                                                  'cdek_error.uuid.auth',
                                                  $response,
@@ -111,14 +112,14 @@ class CdekCoreApi
 
     /**
      * @param                             $taskId
-     * @param CoreRequestData             $data
+     * @param TaskOutputData              $data
      *
      * @return array|false|string|\WP_Error
-     * @throws \Cdek\Exceptions\CdekApiException
-     * @throws \Cdek\Exceptions\CdekScheduledTaskException
+     * @throws CdekApiException
+     * @throws CdekScheduledTaskException
      * @throws \JsonException
      */
-    public function taskInfo($taskId, CoreRequestData $data)
+    public function taskInfo($taskId, TaskOutputData $data)
     {
         $response = $this->coreClient->sendCdekRequest(
             $this->getShopApiUrl() . '/' . self::TASKS . '/' . $taskId,
@@ -135,14 +136,14 @@ class CdekCoreApi
 
     /**
      * @param                 $taskId
-     * @param CoreRequestData $data
+     * @param TaskOutputData  $data
      *
      * @return array|false|string|\WP_Error
      * @throws CdekApiException
      * @throws CdekScheduledTaskException
      * @throws \JsonException
      */
-    public function sendTaskData($taskId, CoreRequestData $data)
+    public function sendTaskData($taskId, TaskOutputData $data)
     {
         $response = $this->coreClient->sendCdekRequest(
             $this->getShopApiUrl() . '/' . self::TASKS . '/' . $taskId,
@@ -163,35 +164,71 @@ class CdekCoreApi
 
     public function isServerError(): bool
     {
-        return empty($this->status) || substr($this->status, 0, 1) == self::FATAL_ERRORS_FIRST_NUMBER;
+        return empty($this->status) || str_starts_with($this->status, self::FATAL_ERRORS_FIRST_NUMBER);
     }
 
-    private function getShopApiUrl()
+    /**
+     * @return mixed|string
+     * @throws CdekApiException
+     * @throws CdekScheduledTaskException
+     * @throws \JsonException
+     */
+    private function getShopApiUrl(): string
     {
         return $this->tokenCoreStorage->getPath();
     }
 
-    private function initData($response)
+    /**
+     * @param $response
+     *
+     * @return array
+     * @throws CdekScheduledTaskException
+     */
+    private function initData($response): array
     {
         $decodeResponse = json_decode($response['body'], true);
 
-        $this->status = $decodeResponse['status'] ?? null;
+        $this->status = $response['response']['status'];
 
         if (
-            !in_array(
-                $this->status,
-                [self::FINISH_STATUS, self::HAS_NEXT_INFO_STATUS, self::SUCCESS_STATUS],
-            )
+            !$this->isSuccessStatus()
             &&
             !$this->isServerError()
+            ||
+            (
+                empty($decodeResponse['success'])
+                &&
+                $this->status !== self::EMPTY_ANSWER
+            )
         ) {
             throw new CdekScheduledTaskException(
                 '[CDEKDelivery] Failed to get core api response',
                 'cdek_error.core.response',
-                $response,
+                $response
             );
         }
 
         return $decodeResponse;
+    }
+
+    private function isSuccessStatus(): bool
+    {
+        if($this->status === self::SUCCESS_STATUS){
+            return true;
+        }
+
+        if($this->status === self::FINISH_STATUS){
+            return true;
+        }
+
+        if($this->status === self::HAS_NEXT_INFO_STATUS){
+            return true;
+        }
+
+        if($this->status === self::EMPTY_ANSWER){
+            return true;
+        }
+
+        return false;
     }
 }

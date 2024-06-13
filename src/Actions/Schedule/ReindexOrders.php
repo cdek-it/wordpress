@@ -9,8 +9,9 @@ namespace {
 namespace Cdek\Actions\Schedule {
 
     use Cdek\Contracts\TaskContract;
+    use Cdek\Exceptions\CdekApiException;
     use Cdek\Exceptions\CdekScheduledTaskException;
-    use Cdek\Model\CoreRequestData;
+    use Cdek\Model\TaskOutputData;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Validate;
 
@@ -29,12 +30,18 @@ namespace Cdek\Actions\Schedule {
             return 'restore-order-uuids';
         }
 
+        /**
+         * @return void
+         * @throws CdekApiException
+         * @throws CdekScheduledTaskException
+         * @throws \JsonException
+         */
         public function start()
         {
             if (empty($this->getTaskMeta())) {
-                throw new CdekScheduledTaskException('[CDEKDelivery] Failed to get orders meta info',
-                                               'cdek_error.core.data',
-                                               $this->getTaskData()
+                throw new CdekScheduledTaskException(
+                    '[CDEKDelivery] Failed to get orders meta info',
+                    'cdek_error.core.data',
                 );
             }
 
@@ -42,14 +49,14 @@ namespace Cdek\Actions\Schedule {
                 OrderMetaData::updateMetaByOrderId(
                     $arOrder['external_id'],
                     [
-                        'order_uuid'   => $arOrder['id']
-                    ]
+                        'order_uuid' => $arOrder['id'],
+                    ],
                 );
             }
 
             $this->initData($this->cdekCoreApi->sendTaskData(
                 $this->taskId,
-                new CoreRequestData('success')
+                new TaskOutputData('success'),
             ));
         }
     }

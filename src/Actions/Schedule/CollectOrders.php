@@ -3,13 +3,12 @@
 namespace Cdek\Actions\Schedule;
 
 use Cdek\Contracts\TaskContract;
-use Cdek\Model\CoreRequestData;
+use Cdek\Model\TaskOutputData;
 use Cdek\Model\Validate;
 
 class CollectOrders extends TaskContract
 {
     const ORDERS_LIMIT = 10000;
-    private Validate $error;
 
     public static function getName(): string
     {
@@ -36,12 +35,12 @@ class CollectOrders extends TaskContract
 
             $response = $this->cdekCoreApi->sendTaskData(
                 $this->taskId,
-                new CoreRequestData(
+                new TaskOutputData(
                     'success',
                     [
                         'orders' => array_map(
                             static fn($order) => (string)$order,
-                            $result->orders,
+                            $result->orders
                         )
                     ],
                     $page,

@@ -10,9 +10,9 @@ use Cdek\Exceptions\CdekScheduledTaskException;
 
 class DBCoreTokenStorage extends TokenStorageContract
 {
-    private static string $tokenAdmin = '';
-    private static string $tokenStatic = '';
-    private static string $tokenFrontend = '';
+    private static ?string $tokenAdmin = null;
+    private static ?string $tokenStatic = null;
+    private static ?string $tokenFrontend = null;
     private static string $apiUrlString;
     private static string $frontendUrlString;
     private static string $adminUrlString;
@@ -25,10 +25,10 @@ class DBCoreTokenStorage extends TokenStorageContract
      */
     final public function getToken(): string
     {
-        $token = $this->getTokenFromCache();
+        $token = self::$tokenStatic;
 
         if (empty($token)) {
-            $token = $this->getTokenFromSettings();
+            $token = $this->getTokenFromCache();
         }
 
         if (empty($token)) {
@@ -44,7 +44,7 @@ class DBCoreTokenStorage extends TokenStorageContract
      * @throws CdekScheduledTaskException
      * @throws \JsonException
      */
-    public function getPath()
+    public function getPath(): string
     {
         if(isset(static::$apiUrlString)){
             return static::$apiUrlString;
@@ -56,15 +56,19 @@ class DBCoreTokenStorage extends TokenStorageContract
             return static::$apiUrlString = $cache['endpoint']['common'];
         }
 
-        return static::$apiUrlString = $this->getEndPointFromToken($this->getToken());
+        $this->updateToken();
+
+        if(!isset(static::$apiUrlString)){
+            throw new CdekScheduledTaskException(
+                '[CDEKDelivery] Failed to get token path',
+                'cdek_error.token.path'
+            );
+        }
+
+        return static::$apiUrlString;
     }
 
     private function getTokenFromCache(): ?string
-    {
-        return !empty(self::$tokenStatic) ? self::$tokenStatic : null;
-    }
-
-    private function getTokenFromSettings(): ?string
     {
         $cache = FileCache::getVars();
 

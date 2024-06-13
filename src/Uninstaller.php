@@ -2,12 +2,12 @@
 
 namespace Cdek;
 
-use Cdek\Cache\FileCache;
+use Cdek\Actions\FlushTokenCacheAction;
 
 class Uninstaller
 {
     public function __invoke()
     {
-        FileCache::clear();
+        (new FlushTokenCacheAction)();
     }
 }

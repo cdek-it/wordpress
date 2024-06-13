@@ -9,7 +9,8 @@ class FileCache
 {
     const CACHE_FILE_NAME = '.cache.php';
     private static array $store;
-    public static function getVars()
+
+    public static function getVars(): ?array
     {
         if(!file_exists(Loader::getPluginPath() . DIRECTORY_SEPARATOR . self::CACHE_FILE_NAME)){
             return null;
@@ -18,17 +19,16 @@ class FileCache
         return self::$store[self::CACHE_FILE_NAME] ?? self::$store[self::CACHE_FILE_NAME] = require_once(Loader::getPluginPath() . DIRECTORY_SEPARATOR . self::CACHE_FILE_NAME);
     }
 
-    public static function putVars($vars)
+    /**
+     * @param $vars
+     *
+     * @return void
+     * @throws CdekApiException
+     */
+    public static function putVars($vars): void
     {
         if(empty($vars)){
             return;
-        }
-
-        if(!is_writable(Loader::getPluginPath())){
-            throw new CdekApiException('[CDEKDelivery] Failed check directory rights',
-                                       'cdek_error.cache.rights',
-                                       ['path' => Loader::getPluginPath()],
-                                       true);
         }
 
         if(file_exists(Loader::getPluginPath() . DIRECTORY_SEPARATOR . self::CACHE_FILE_NAME)){
@@ -36,6 +36,13 @@ class FileCache
                 throw new CdekApiException('[CDEKDelivery] Failed check directory rights',
                                            'cdek_error.cache.rights',
                                            ['path' => Loader::getPluginPath() . DIRECTORY_SEPARATOR . self::CACHE_FILE_NAME],
+                                           true);
+            }
+        }else{
+            if(!is_writable(Loader::getPluginPath())){
+                throw new CdekApiException('[CDEKDelivery] Failed check directory rights',
+                                           'cdek_error.cache.rights',
+                                           ['path' => Loader::getPluginPath()],
                                            true);
             }
         }
@@ -47,7 +54,10 @@ class FileCache
         fclose($logFile);
     }
 
-    public static function clear()
+    /**
+     * @return void
+     */
+    public static function clear(): void
     {
         unlink(Loader::getPluginPath() . DIRECTORY_SEPARATOR . self::CACHE_FILE_NAME);
     }

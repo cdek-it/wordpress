@@ -4,15 +4,16 @@ namespace Cdek\Contracts;
 
 use Cdek\CdekCoreApi;
 use Cdek\Config;
-use Cdek\Model\CoreRequestData;
+use Cdek\Exceptions\CdekApiException;
+use Cdek\Exceptions\CdekScheduledTaskException;
+use Cdek\Model\TaskOutputData;
 use Cdek\Model\TaskData;
 
 abstract class TaskContract
 {
     protected cdekCoreApi $cdekCoreApi;
     protected static array $errorCollection = [];
-    protected static array $taskData = [];
-    protected static array $responseCursor = [];
+    protected array $taskMeta = [];
     protected string $taskId;
 
     public function __construct(string $taskId)
@@ -40,58 +41,50 @@ abstract class TaskContract
             1,
         );
     }
+
+    /**
+     * @return array
+     * @throws CdekApiException
+     * @throws CdekScheduledTaskException
+     * @throws \JsonException
+     */
     protected function getTaskMeta(): array
     {
-        if(empty(self::$taskData[$this->taskId])){
+        if(empty($this->taskMeta)){
             $this->initTaskData();
         }
 
-        return self::$taskData[$this->taskId]['meta'] ?? [];
+        return $this->taskMeta ?? [];
     }
 
-    protected function getTaskData(): array
-    {
-        if(empty(self::$taskData[$this->taskId])){
-            $this->initTaskData();
-        }
-
-        return self::$taskData[$this->taskId] ?? [];
-    }
-
-    protected function getTaskCursor(): array
-    {
-        if(empty(self::$responseCursor[$this->taskId])){
-            $this->initTaskData();
-        }
-
-        return self::$responseCursor[$this->taskId]['meta'];
-    }
-
+    /**
+     * @throws CdekScheduledTaskException
+     * @throws CdekApiException
+     * @throws \JsonException
+     */
     protected function initTaskData(array $data = null): void
     {
-        $this->initData($this->cdekCoreApi->taskInfo($this->taskId, new CoreRequestData('success', $data)));
+        $this->initData($this->cdekCoreApi->taskInfo($this->taskId, new TaskOutputData('success', $data)));
     }
 
-    protected function initData($response)
+    /**
+     * @param $response
+     *
+     * @return void
+     */
+    protected function initData($response): void
     {
         if($this->cdekCoreApi->isServerError()){
             $this->postponeTask();
             return;
         }
 
-        if(
-            empty($response['success'])
-        ){
-            self::$errorCollection[$this->taskId][] = __('Request to api was failed', 'cdekdelivery');
-        }
-
         if(empty(self::$errorCollection[$this->taskId])){
-            self::$taskData[$this->taskId] = $response['data'];
-            self::$responseCursor[$this->taskId] = $response['cursor'];
+            $this->taskMeta = $response['data']['meta'];
         }
     }
 
-    protected function postponeTask()
+    protected function postponeTask(): void
     {
         $hooks = as_get_scheduled_actions(
             [

@@ -2,7 +2,7 @@
 
 namespace Cdek\Model;
 
-class CoreRequestData
+class TaskOutputData
 {
     private ?string $status;
     private ?array $data;

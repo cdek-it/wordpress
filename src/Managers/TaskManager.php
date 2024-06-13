@@ -20,7 +20,15 @@ class TaskManager extends TaskContract
     ];
 
     private array $taskCollection;
+    private array $taskData = [];
 
+    /**
+     * @param $taskId
+     *
+     * @throws CdekApiException
+     * @throws CdekScheduledTaskException
+     * @throws \JsonException
+     */
     public function __construct($taskId)
     {
         parent::__construct($taskId);
@@ -49,12 +57,6 @@ class TaskManager extends TaskContract
         add_action(static::getName(), [static::class, 'init']);
     }
 
-    public function getErrors(): array
-    {
-        return self::$errorCollection[$this->taskId];
-    }
-
-
     public static function registerTasks(): void
     {
         foreach (self::TASK_CLASSES as $arTaskClass) {
@@ -64,7 +66,7 @@ class TaskManager extends TaskContract
         }
     }
 
-    public static function getTasksHooks()
+    public static function getTasksHooks(): array
     {
         return array_map(
             static fn($class) => $class::getName() === static::getName() ?
@@ -77,7 +79,7 @@ class TaskManager extends TaskContract
         );
     }
 
-    public static function addPluginScheduleEvents()
+    public static function addPluginScheduleEvents(): void
     {
         if (as_has_scheduled_action(Config::TASK_MANAGER_HOOK_NAME) !== false) {
             as_unschedule_action(Config::TASK_MANAGER_HOOK_NAME);
@@ -102,8 +104,8 @@ class TaskManager extends TaskContract
             $task->getName(),
             array_map(
                 static fn($class) => $class::getName(),
-                self::TASK_CLASSES,
-            ),
+                self::TASK_CLASSES
+            )
         )
         ) {
             return;
@@ -112,23 +114,27 @@ class TaskManager extends TaskContract
         $task->createTaskWork();
     }
 
+    /**
+     * @return void
+     * @throws CdekApiException
+     * @throws CdekScheduledTaskException
+     * @throws \JsonException
+     */
     private function getResponse(): void
     {
         try {
             $response = (new CdekCoreApi())->taskManager();
         } catch (CdekScheduledTaskException $e) {
-            self::$errorCollection[$this->taskId][] = $e->getMessage();
             static::addPluginScheduleEvents();
-            return;
-        }
 
-        if (empty($response['cursor'])) {
-            self::$errorCollection[$this->taskId][] = 'Cursor data not found';
+            throw new CdekScheduledTaskException(
+                $e->getMessage(),
+                'cdek_error.task.manager'
+            );
         }
 
         if (empty($this->errorCollection)) {
-            self::$taskData[$this->taskId] = $response['data'];
-            self::$responseCursor[$this->taskId] = $response['cursor'];
+            $this->taskData = $response['data'];
         }
     }
 
@@ -138,7 +144,7 @@ class TaskManager extends TaskContract
             return;
         }
 
-        foreach (self::$taskData[$this->taskId] as $data) {
+        foreach ($this->taskData as $data) {
             $this->taskCollection[] = new TaskData($data);
         }
     }
