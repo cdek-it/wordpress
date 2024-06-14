@@ -45,7 +45,6 @@ abstract class TaskContract
     }
 
     /**
-     * @return array
      * @throws CdekApiException
      * @throws CdekScheduledTaskException
      * @throws \JsonException
@@ -70,11 +69,11 @@ abstract class TaskContract
     }
 
     /**
-     * @param $response
+     * @param array $response
      *
      * @return void
      */
-    protected function initData($response): void
+    protected function initData(array $response): void
     {
         if($this->cdekCoreApi->isServerError()){
             $this->postponeTask();
