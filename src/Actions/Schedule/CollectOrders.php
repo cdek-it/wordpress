@@ -4,7 +4,6 @@ namespace Cdek\Actions\Schedule;
 
 use Cdek\Contracts\TaskContract;
 use Cdek\Model\TaskOutputData;
-use Cdek\Model\Validate;
 
 class CollectOrders extends TaskContract
 {

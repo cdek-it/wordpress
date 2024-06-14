@@ -18,7 +18,6 @@ class DBCoreTokenStorage extends TokenStorageContract
     private static string $adminUrlString;
 
     /**
-     * @return string
      * @throws CdekApiException
      * @throws CdekScheduledTaskException
      * @throws \JsonException
@@ -39,7 +38,6 @@ class DBCoreTokenStorage extends TokenStorageContract
     }
 
     /**
-     * @return mixed|string
      * @throws CdekApiException
      * @throws CdekScheduledTaskException
      * @throws \JsonException
@@ -83,7 +81,6 @@ class DBCoreTokenStorage extends TokenStorageContract
     }
 
     /**
-     * @return string
      * @throws CdekApiException
      * @throws CdekScheduledTaskException
      * @throws \JsonException
@@ -106,7 +103,6 @@ class DBCoreTokenStorage extends TokenStorageContract
     }
 
     /**
-     * @return array
      * @throws CdekApiException
      * @throws CdekScheduledTaskException
      * @throws \JsonException

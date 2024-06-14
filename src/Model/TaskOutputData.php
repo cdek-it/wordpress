@@ -4,13 +4,13 @@ namespace Cdek\Model;
 
 class TaskOutputData
 {
-    private ?string $status;
+    private string $status;
     private ?array $data;
     private ?int $currentPage;
     private ?int $totalPages;
 
     public function __construct(
-        ?string $status,
+        string $status,
         ?array $data = null,
         ?int $currentPage = null,
         ?int $totalPages = null

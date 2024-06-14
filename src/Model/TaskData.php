@@ -11,7 +11,7 @@ class TaskData
     private $schedule;
     private int $time;
 
-    public function __construct($requestData)
+    public function __construct(array $requestData)
     {
         $this->id = $requestData['id'];
         $this->name = $requestData['name'];
@@ -24,7 +24,7 @@ class TaskData
     {
         $this->time += 5 * 60;
 
-        if ($this->isScheduleTask()) {
+        if ($this->isScheduledTask()) {
             if (false === as_has_scheduled_action($this->getName())) {
                 as_schedule_cron_action(
                     $this->time,
@@ -43,31 +43,22 @@ class TaskData
         }
     }
 
-    /**
-     * @return mixed
-     */
-    public function getId()
+    public function getId(): string
     {
         return $this->id;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return mixed
-     */
-    public function getSchedule()
+    public function getSchedule(): string
     {
         return $this->schedule;
     }
 
-    public function isScheduleTask()
+    public function isScheduledTask(): bool
     {
         return !empty($this->schedule);
     }

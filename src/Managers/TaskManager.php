@@ -22,8 +22,6 @@ class TaskManager
     private array $taskCursor = [];
 
     /**
-     * @param $taskId
-     *
      * @throws CdekApiException
      * @throws CdekScheduledTaskException
      * @throws \JsonException
@@ -123,7 +121,6 @@ class TaskManager
     }
 
     /**
-     * @return void
      * @throws CdekApiException
      * @throws CdekScheduledTaskException
      * @throws \JsonException
