@@ -13,13 +13,20 @@ namespace Cdek\Transport {
 
     class HttpCoreClient
     {
+        /**
+         * @param string     $url
+         * @param string     $method
+         * @param string     $token
+         * @param array|null $data
+         * @param array      $headers
+         */
         public function sendCdekRequest(
             string $url,
             string $method,
             string $token,
             array  $data = null,
             array  $headers = []
-        )
+        ): array
         {
             $config = [];
 
@@ -32,7 +39,13 @@ namespace Cdek\Transport {
             return self::sendRequest($url, $method, $config, $headers);
         }
 
-        public function sendRequest(string $url, string $method, array $config = [], array $headers = [])
+        /**
+         * @param string $url
+         * @param string $method
+         * @param array  $config
+         * @param array  $headers
+         */
+        public function sendRequest(string $url, string $method, array $config = [], array $headers = []): array
         {
             $resp = wp_remote_request(
                 $url,
@@ -60,7 +73,7 @@ namespace Cdek\Transport {
                 header("X-Requester-IP: $ip");
             }
 
-            return wp_json_encode(['error' => true, 'ip' => $ip]);
+            return ['error' => true, 'ip' => $ip];
         }
 
         private static function generateUuid(): string

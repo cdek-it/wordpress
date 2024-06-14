@@ -161,7 +161,7 @@ class CdekCoreApi
 
     public function isServerError(): bool
     {
-        return empty($this->status) || str_starts_with($this->status, self::FATAL_ERRORS_FIRST_NUMBER);
+        return empty($this->status) || strpos($this->status, self::FATAL_ERRORS_FIRST_NUMBER) === 0;
     }
 
     /**
@@ -175,12 +175,20 @@ class CdekCoreApi
     }
 
     /**
-     * @param $response
+     * @param array $response
      *
      * @throws CdekScheduledTaskException
      */
-    private function initData($response): array
+    private function initData(array $response): array
     {
+        if($response['error']){
+            throw new CdekScheduledTaskException(
+                '[CDEKDelivery] Failed to get core api response',
+                'cdek_error.core.response_error',
+                $response,
+            );
+        }
+
         $decodeResponse = json_decode($response['body'], true);
 
         $this->status = $response['response']['code'];
