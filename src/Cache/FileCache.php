@@ -20,12 +20,12 @@ class FileCache
     }
 
     /**
-     * @param $vars
+     * @param array|null $vars
      *
      * @return void
      * @throws CdekApiException
      */
-    public static function putVars($vars): void
+    public static function putVars(?array $vars): void
     {
         if(empty($vars)){
             return;
@@ -33,7 +33,7 @@ class FileCache
 
         if(file_exists(Loader::getPluginPath() . DIRECTORY_SEPARATOR . self::CACHE_FILE_NAME)){
             if(!is_writable(Loader::getPluginPath() . DIRECTORY_SEPARATOR . self::CACHE_FILE_NAME)){
-                throw new CdekApiException('[CDEKDelivery] Failed check directory rights',
+                throw new CdekApiException('[CDEKDelivery] Failed check file rights',
                                            'cdek_error.cache.rights',
                                            ['path' => Loader::getPluginPath() . DIRECTORY_SEPARATOR . self::CACHE_FILE_NAME],
                                            true);
@@ -54,9 +54,6 @@ class FileCache
         fclose($logFile);
     }
 
-    /**
-     * @return void
-     */
     public static function clear(): void
     {
         unlink(Loader::getPluginPath() . DIRECTORY_SEPARATOR . self::CACHE_FILE_NAME);

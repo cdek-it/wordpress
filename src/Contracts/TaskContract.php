@@ -23,14 +23,17 @@ abstract class TaskContract
 
     abstract protected static function getName(): string;
 
-    abstract function start();
+    abstract function start(): void;
 
-    public static function init($taskId = 'task_manager'): void
+    public static function init($taskId): void
     {
         $taskManager = new static($taskId);
         $taskManager->start();
     }
 
+    /**
+     * @return void
+     */
     public static function registerAction(): void
     {
         add_action(
@@ -78,7 +81,7 @@ abstract class TaskContract
             return;
         }
 
-        $this->taskMeta = $response['data']['meta'];
+        $this->taskMeta = $response['data']['meta'] ?? [];
     }
 
     protected function postponeTask(): void

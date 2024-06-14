@@ -37,7 +37,6 @@ class CdekCoreApi
     }
 
     /**
-     * @return array
      * @throws CdekApiException
      * @throws CdekScheduledTaskException
      * @throws \JsonException
@@ -61,7 +60,7 @@ class CdekCoreApi
         if (empty($response['body'])) {
             throw new CdekScheduledTaskException('[CDEKDelivery] Register shop failed',
                                                  'cdek_error.register.shop',
-                                                 $response,
+                                                 $response
             );
         }
 
@@ -93,33 +92,32 @@ class CdekCoreApi
     }
 
     /**
-     * @param $data
+     * @param string|null $next
      *
-     * @return array|false|string|\WP_Error
      * @throws CdekApiException
      * @throws CdekScheduledTaskException
      * @throws \JsonException
      */
-    public function taskManager($data = null)
+    public function taskManager(?string $next = null): array
     {
-        $response = $this->coreClient->sendCdekRequest($this->getShopApiUrl() . '/' . self::TASKS,
-                                                       'GET',
-                                                       $this->tokenCoreStorage->getToken(),
-                                                       $data);
+        $response = $this->coreClient->sendCdekRequest(
+            $this->getShopApiUrl() . '/' . self::TASKS . ($next === null ? '' : '?cursor=' . $next),
+            'GET',
+            $this->tokenCoreStorage->getToken(),
+        );
 
         return $this->initData($response);
     }
 
     /**
-     * @param                             $taskId
-     * @param TaskOutputData              $data
+     * @param string         $taskId
+     * @param TaskOutputData $data
      *
-     * @return array|false|string|\WP_Error
-     * @throws CdekApiException
-     * @throws CdekScheduledTaskException
+     * @throws \Cdek\Exceptions\CdekApiException
+     * @throws \Cdek\Exceptions\CdekScheduledTaskException
      * @throws \JsonException
      */
-    public function taskInfo($taskId, TaskOutputData $data)
+    public function taskInfo(string $taskId, TaskOutputData $data): array
     {
         $response = $this->coreClient->sendCdekRequest(
             $this->getShopApiUrl() . '/' . self::TASKS . '/' . $taskId,
@@ -135,15 +133,14 @@ class CdekCoreApi
     }
 
     /**
-     * @param                 $taskId
-     * @param TaskOutputData  $data
+     * @param string         $taskId
+     * @param TaskOutputData $data
      *
-     * @return array|false|string|\WP_Error
-     * @throws CdekApiException
-     * @throws CdekScheduledTaskException
+     * @throws \Cdek\Exceptions\CdekApiException
+     * @throws \Cdek\Exceptions\CdekScheduledTaskException
      * @throws \JsonException
      */
-    public function sendTaskData($taskId, TaskOutputData $data)
+    public function sendTaskData(string $taskId, TaskOutputData $data): array
     {
         $response = $this->coreClient->sendCdekRequest(
             $this->getShopApiUrl() . '/' . self::TASKS . '/' . $taskId,
@@ -168,7 +165,6 @@ class CdekCoreApi
     }
 
     /**
-     * @return mixed|string
      * @throws CdekApiException
      * @throws CdekScheduledTaskException
      * @throws \JsonException
@@ -181,14 +177,13 @@ class CdekCoreApi
     /**
      * @param $response
      *
-     * @return array
      * @throws CdekScheduledTaskException
      */
     private function initData($response): array
     {
         $decodeResponse = json_decode($response['body'], true);
 
-        $this->status = $response['response']['status'];
+        $this->status = $response['response']['code'];
 
         if (
             !$this->isSuccessStatus()
@@ -204,28 +199,28 @@ class CdekCoreApi
             throw new CdekScheduledTaskException(
                 '[CDEKDelivery] Failed to get core api response',
                 'cdek_error.core.response',
-                $response
+                $response,
             );
         }
 
-        return $decodeResponse;
+        return $decodeResponse ?? [];
     }
 
     private function isSuccessStatus(): bool
     {
-        if($this->status === self::SUCCESS_STATUS){
+        if ($this->status === self::SUCCESS_STATUS) {
             return true;
         }
 
-        if($this->status === self::FINISH_STATUS){
+        if ($this->status === self::FINISH_STATUS) {
             return true;
         }
 
-        if($this->status === self::HAS_NEXT_INFO_STATUS){
+        if ($this->status === self::HAS_NEXT_INFO_STATUS) {
             return true;
         }
 
-        if($this->status === self::EMPTY_ANSWER){
+        if ($this->status === self::EMPTY_ANSWER) {
             return true;
         }
 

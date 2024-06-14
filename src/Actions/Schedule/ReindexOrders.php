@@ -36,7 +36,7 @@ namespace Cdek\Actions\Schedule {
          * @throws CdekScheduledTaskException
          * @throws \JsonException
          */
-        public function start()
+        public function start(): void
         {
             if (empty($this->getTaskMeta())) {
                 throw new CdekScheduledTaskException(

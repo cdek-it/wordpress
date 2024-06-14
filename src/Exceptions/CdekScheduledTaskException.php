@@ -3,6 +3,7 @@
 namespace Cdek\Exceptions;
 class CdekScheduledTaskException extends \Cdek\Exceptions\CdekException
 {
+    protected bool $isSchedule = true;
     public function __construct(
         string $message,
         string $code = 'cdek_error',

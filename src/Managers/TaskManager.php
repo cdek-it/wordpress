@@ -11,16 +11,15 @@ use Cdek\Exceptions\CdekApiException;
 use Cdek\Exceptions\CdekScheduledTaskException;
 use Cdek\Model\TaskData;
 
-class TaskManager extends TaskContract
+class TaskManager
 {
     private const TASK_CLASSES = [
-        self::class,
         ReindexOrders::class,
         CollectOrders::class,
     ];
-
     private array $taskCollection;
     private array $taskData = [];
+    private array $taskCursor = [];
 
     /**
      * @param $taskId
@@ -29,9 +28,8 @@ class TaskManager extends TaskContract
      * @throws CdekScheduledTaskException
      * @throws \JsonException
      */
-    public function __construct($taskId)
+    public function __construct()
     {
-        parent::__construct($taskId);
         $this->getResponse();
         $this->initTasks();
     }
@@ -47,6 +45,12 @@ class TaskManager extends TaskContract
         }
     }
 
+    public static function init(): void
+    {
+        $taskManager = new self();
+        $taskManager->start();
+    }
+
     public static function getName(): string
     {
         return Config::TASK_MANAGER_HOOK_NAME;
@@ -59,8 +63,11 @@ class TaskManager extends TaskContract
 
     public static function registerTasks(): void
     {
+        self::registerAction();
+
         foreach (self::TASK_CLASSES as $arTaskClass) {
             if ('\\' . $arTaskClass instanceof TaskContract) {
+                /** @var TaskContract $arTaskClass */
                 '\\' . $arTaskClass::registerAction();
             }
         }
@@ -69,11 +76,11 @@ class TaskManager extends TaskContract
     public static function getTasksHooks(): array
     {
         return array_map(
-            static fn($class) => $class::getName() === static::getName() ?
-                static::getName() :
+            /** @var TaskContract $class */
+            static fn($class) =>
                 sprintf('%s-%s',
                         Config::TASK_MANAGER_HOOK_NAME,
-                        $class::getName(),
+                        $class::getName()
                 ),
             self::TASK_CLASSES,
         );
@@ -103,6 +110,7 @@ class TaskManager extends TaskContract
         if (!in_array(
             $task->getName(),
             array_map(
+                /** @var TaskContract $class */
                 static fn($class) => $class::getName(),
                 self::TASK_CLASSES
             )
@@ -123,7 +131,7 @@ class TaskManager extends TaskContract
     private function getResponse(): void
     {
         try {
-            $response = (new CdekCoreApi())->taskManager();
+            $response = (new CdekCoreApi())->taskManager($this->taskCursor['next'] ?? null);
         } catch (CdekScheduledTaskException $e) {
             static::addPluginScheduleEvents();
 
@@ -133,8 +141,26 @@ class TaskManager extends TaskContract
             );
         }
 
+        if(
+            !isset($response['cursor'])
+            ||
+            !array_key_exists('current', $response['cursor'])
+            ||
+            !array_key_exists('previous', $response['cursor'])
+            ||
+            !array_key_exists('next', $response['cursor'])
+            ||
+            !array_key_exists('count', $response['cursor'])
+        ){
+            throw new CdekScheduledTaskException('[CDEKDelivery] Not found cursor params',
+                                                 'cdek_error.cursor.params',
+                                                 $response,
+            );
+        }
+
         if (empty($this->errorCollection)) {
             $this->taskData = $response['data'];
+            $this->taskCursor = $response['cursor'];
         }
     }
 
@@ -142,6 +168,11 @@ class TaskManager extends TaskContract
     {
         foreach ($this->taskData as $data) {
             $this->taskCollection[] = new TaskData($data);
+        }
+
+        if(!empty($this->taskCursor['next'])){
+            $this->getResponse();
+            $this->initTasks();
         }
     }
 }

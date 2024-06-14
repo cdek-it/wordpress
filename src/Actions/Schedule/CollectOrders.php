@@ -15,7 +15,7 @@ class CollectOrders extends TaskContract
         return 'collect-orphaned-orders';
     }
 
-    public function start()
+    public function start(): void
     {
         $query = new \WC_Order_Query(
             [
