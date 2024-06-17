@@ -1,13 +1,18 @@
 <?php
 
-namespace Cdek;
+namespace {
+    defined('ABSPATH') or exit;
+}
 
-use Cdek\Actions\FlushTokenCacheAction;
+namespace Cdek {
 
-class Uninstaller
-{
-    public function __invoke()
+    use Cdek\Actions\FlushTokenCacheAction;
+
+    class Uninstaller
     {
-        (new FlushTokenCacheAction)();
+        public function __invoke()
+        {
+            (new FlushTokenCacheAction)();
+        }
     }
 }

@@ -1,53 +1,58 @@
 <?php
 
-namespace Cdek\Actions\Schedule;
+namespace {
+    defined('ABSPATH') or exit;
+}
 
-use Cdek\Contracts\TaskContract;
-use Cdek\Model\TaskOutputData;
+namespace Cdek\Actions\Schedule {
 
-class CollectOrders extends TaskContract
-{
-    const ORDERS_LIMIT = 10000;
+    use Cdek\Contracts\TaskContract;
+    use Cdek\Model\TaskOutputData;
 
-    public static function getName(): string
+    class CollectOrders extends TaskContract
     {
-        return 'collect-orphaned-orders';
-    }
+        const ORDERS_LIMIT = 10000;
 
-    public function start(): void
-    {
-        $query = new \WC_Order_Query(
-            [
-                'orderby'  => 'id',
-                'order'    => 'ASC',
-                'paginate' => true,
-                'limit'    => self::ORDERS_LIMIT,
-                'return'   => 'ids',
-            ],
-        );
+        public static function getName(): string
+        {
+            return 'collect-orphaned-orders';
+        }
 
-        for ($page = 1, $maxPages = 1; $page <= $maxPages; $page++) {
-            $query->set('page', $page);
-            $result = $query->get_orders();
-
-            $maxPages = $result->max_num_pages;
-
-            $response = $this->cdekCoreApi->sendTaskData(
-                $this->taskId,
-                new TaskOutputData(
-                    'success',
-                    [
-                        'orders' => array_map(
-                            static fn($order) => (string)$order,
-                            $result->orders
-                        )
-                    ],
-                    $page,
-                    $maxPages
-                )
+        public function start(): void
+        {
+            $query = new \WC_Order_Query(
+                [
+                    'orderby'  => 'id',
+                    'order'    => 'ASC',
+                    'paginate' => true,
+                    'limit'    => self::ORDERS_LIMIT,
+                    'return'   => 'ids',
+                ],
             );
 
-            $this->initData($response);
+            for ($page = 1, $maxPages = 1; $page <= $maxPages; $page++) {
+                $query->set('page', $page);
+                $result = $query->get_orders();
+
+                $maxPages = $result->max_num_pages;
+
+                $response = $this->cdekCoreApi->sendTaskData(
+                    $this->taskId,
+                    new TaskOutputData(
+                        'success',
+                        [
+                            'orders' => array_map(
+                                static fn($order) => (string)$order,
+                                $result->orders,
+                            )
+                        ],
+                        $page,
+                        $maxPages
+                    )
+                );
+
+                $this->initData($response);
+            }
         }
     }
 }

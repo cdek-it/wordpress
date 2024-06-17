@@ -13,6 +13,15 @@ namespace Cdek\Transport {
 
     class HttpClient
     {
+        /**
+         * @param string     $url
+         * @param string     $method
+         * @param string     $token
+         * @param array|null $data
+         * @param bool       $plain
+         *
+         * @return array|string
+         */
         public static function sendCdekRequest(
             string $url,
             string $method,
@@ -35,6 +44,14 @@ namespace Cdek\Transport {
             return self::sendRequest($url, $method, $config, $plain);
         }
 
+        /**
+         * @param string $url
+         * @param string $method
+         * @param array  $config
+         * @param bool   $plain
+         *
+         * @return array|string
+         */
         public static function sendRequest(string $url, string $method, array $config = [], bool $plain = false)
         {
             $pluginVersion = Loader::getPluginVersion();

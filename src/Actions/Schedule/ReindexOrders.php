@@ -17,8 +17,6 @@ namespace Cdek\Actions\Schedule {
 
     class ReindexOrders extends TaskContract
     {
-        private Validate $error;
-
         public function __construct(string $taskId)
         {
             parent::__construct($taskId);
