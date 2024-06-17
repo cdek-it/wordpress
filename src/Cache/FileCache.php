@@ -12,7 +12,7 @@ namespace Cdek\Cache
 
     class FileCache
     {
-        const CACHE_FILE_NAME = '.cache.php';
+        private const CACHE_FILE_NAME = '.cache.php';
         private static array $store;
 
         public static function getVars(): ?array

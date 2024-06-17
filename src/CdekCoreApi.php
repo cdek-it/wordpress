@@ -16,16 +16,16 @@ namespace Cdek {
 
     class CdekCoreApi
     {
-        const SUCCESS_STATUS = 200;
-        const FINISH_STATUS = 201;
-        const HAS_NEXT_INFO_STATUS = 202;
-        const EMPTY_ANSWER = 204;
-        const UNKNOWN_METHOD = 404;
-        const FATAL_ERRORS_FIRST_NUMBER = 5;
+        private const SUCCESS_STATUS = 200;
+        private const FINISH_STATUS = 201;
+        private const HAS_NEXT_INFO_STATUS = 202;
+        private const EMPTY_ANSWER = 204;
+        private const UNKNOWN_METHOD = 404;
+        private const FATAL_ERRORS_FIRST_NUMBER = 5;
         private const TOKEN_PATH = 'cms/wordpress/shops/%s/token';
         private const SHOP = 'cms/wordpress/shops';
         private const TASKS = 'wordpress/tasks';
-        public ?int $status;
+        private ?int $status;
         private TokenStorageContract $generalTokenStorage;
         private TokenStorageContract $tokenCoreStorage;
         private HttpCoreClient $coreClient;
