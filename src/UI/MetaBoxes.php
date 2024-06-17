@@ -34,6 +34,8 @@ namespace Cdek\UI {
                 return;
             }
 
+            add_action('admin_enqueue_scripts', [__CLASS__, 'registerOrderScripts']);
+
             $cdekMethod     = CheckoutHelper::getOrderShippingMethod($order);
             $selectedTariff = (int) ($cdekMethod->get_meta(MetaKeys::TARIFF_CODE) ?:
                 $cdekMethod->get_meta('tariff_code'));
@@ -87,7 +89,7 @@ namespace Cdek\UI {
                  str_replace('<a>', '<a href="'.esc_url($settings_page_url).'">',
                              sprintf(esc_html__(/* translators: %s: Name of the plugin */ 'Select the correct sending address in <a>the settings</a> plugin named %s',
                                                                                           'cdekdelivery'),
-                                 esc_html($pluginName))).
+                                     esc_html($pluginName))).
                  '</p>
             </div>';
         }
@@ -104,7 +106,7 @@ namespace Cdek\UI {
                  str_replace('<a>', '<a href="'.esc_url($settings_page_url).'">',
                              sprintf(esc_html__(/* translators: %s: Name of the plugin */ 'Select the correct sending address in <a>the settings</a> plugin named %s',
                                                                                           'cdekdelivery'),
-                                 esc_html($pluginName))).
+                                     esc_html($pluginName))).
                  '</p>
                 </div>';
         }
@@ -121,7 +123,7 @@ namespace Cdek\UI {
                  str_replace('<a>', '<a href="'.esc_url($settings_page_url).'">',
                              sprintf(esc_html__(/* translators: %s: Name of the plugin */ 'Enter the correct client ID and secret key in <a>the settings</a> plugin named %s',
                                                                                           'cdekdelivery'),
-                                 esc_html($pluginName))).
+                                     esc_html($pluginName))).
                  '</p>
                 </div>';
         }
@@ -144,8 +146,8 @@ namespace Cdek\UI {
             $shipping = CheckoutHelper::getOrderShippingMethod($order);
 
             $hasPackages
-                         = Helper::getActualShippingMethod($shipping->get_data()['instance_id'])
-                                 ->get_option('has_packages_mode') === 'yes';
+                = Helper::getActualShippingMethod($shipping->get_data()['instance_id'])
+                        ->get_option('has_packages_mode') === 'yes';
             $orderNumber = $orderData['order_number'] ?? null;
             $orderUuid   = $orderData['order_uuid'] ?? null;
 
@@ -180,9 +182,14 @@ namespace Cdek\UI {
             echo '<div class="notice notice-warning"><p>
                 <strong>CDEKDelivery:</strong> '.
                  esc_html__('Editing the order is not available due to a change in the order status in the CDEK system',
-                    'cdekdelivery').
+                            'cdekdelivery').
                  '
             </p></div>';
+        }
+
+        public static function registerOrderScripts(): void
+        {
+            Helper::enqueueScript('cdek-admin-create-order', 'cdek-create-order', true);
         }
 
         public function __invoke(): void
