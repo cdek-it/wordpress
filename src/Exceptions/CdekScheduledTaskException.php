@@ -1,15 +1,25 @@
 <?php
 
-namespace Cdek\Exceptions;
-class CdekScheduledTaskException extends \Cdek\Exceptions\CdekException
-{
-    protected bool $isSchedule = true;
-    public function __construct(
-        string $message,
-        string $code = 'cdek_error',
-        ?array $data = null
-    )
+namespace {
+
+    defined('ABSPATH') or exit;
+}
+
+namespace Cdek\Exceptions{
+
+    use WP_Error;
+
+    class CdekScheduledTaskException
     {
-        parent::__construct($message, $code, $data, true);
+        public function __construct(
+            string $message,
+            string $code = 'cdek_error',
+            ?array $data = null
+        )
+        {
+            $error = new WP_Error('cdek_error', 'Error happened at CDEKDelivery');
+            $error->add($code, $message, $data);
+            wp_die($error);
+        }
     }
 }
