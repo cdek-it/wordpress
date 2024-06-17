@@ -18,8 +18,8 @@ namespace Cdek\Managers{
     class TaskManager
     {
         private const TASK_CLASSES = [
-            ReindexOrders::class,
-            CollectOrders::class,
+            '\\' . ReindexOrders::class,
+            '\\' . CollectOrders::class,
         ];
         private array $taskCollection;
         private array $taskData = [];
