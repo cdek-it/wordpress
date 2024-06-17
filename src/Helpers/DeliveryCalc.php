@@ -156,11 +156,14 @@ namespace Cdek\Helpers {
             $api            = $this->api;
             $deliveryMethod = $this->method;
 
+            $servicesParams = $deliveryParam['services'];
+
             $this->rates    = array_map(static function ($tariff) use (
                 $priceRules,
                 $api,
                 $deliveryParam,
-                $deliveryMethod
+                $deliveryMethod,
+                $servicesParams
             ) {
                 $rule = Tariff::isTariffToOffice($tariff['meta_data'][MetaKeys::TARIFF_CODE]) ? $priceRules['office'] :
                     $priceRules['door'];
@@ -181,8 +184,9 @@ namespace Cdek\Helpers {
                 $deliveryParam['type']        = Tariff::getTariffType($deliveryParam['tariff_code']);
 
                 $serviceList = Helper::getServices($deliveryMethod, $deliveryParam['tariff_code']);
+
                 if (!empty($serviceList)) {
-                    $deliveryParam['services'] = $serviceList;
+                    $deliveryParam['services'] = array_merge($serviceList, $servicesParams);
                 }
 
                 $tariffInfo = $api->calculateTariff($deliveryParam);
