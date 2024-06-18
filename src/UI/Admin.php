@@ -63,23 +63,9 @@ namespace Cdek\UI {
             ]);
         }
 
-        public static function registerOrderScripts(): void
-        {
-            global $plugin_page, $pagenow;
-
-            // Not on an Orders page.
-            if ('admin.php' !== $pagenow || 0 !== strpos($plugin_page, 'wc-orders')) {
-                return;
-            }
-
-            Helper::enqueueScript('cdek-admin-create-order', 'cdek-create-order', true);
-        }
-
         public function __invoke(): void
         {
             add_action('load-woocommerce_page_wc-settings', [__CLASS__, 'registerAdminScripts']);
-
-            add_action('admin_enqueue_scripts', [__CLASS__, 'registerOrderScripts']);
         }
     }
 

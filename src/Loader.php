@@ -15,6 +15,7 @@ namespace Cdek {
     use Cdek\Actions\ProcessWoocommerceCreateShippingAction;
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
+    use Cdek\Managers\TaskManager;
     use Cdek\Blocks\CheckoutMapBlock;
     use Cdek\Controllers\CourierController;
     use Cdek\Controllers\LocationController;
@@ -81,6 +82,16 @@ namespace Cdek {
             }
 
             self::checkRequirements();
+            TaskManager::addPluginScheduleEvents();
+        }
+
+        public static function deactivate()
+        {
+            foreach (TaskManager::getTasksHooks() as $hook){
+                if (as_has_scheduled_action($hook) !== false) {
+                    as_unschedule_action($hook);
+                }
+            }
         }
 
         /**
@@ -117,8 +128,6 @@ namespace Cdek {
         {
             self::$pluginMainFilePath = $pluginMainFile;
 
-            add_action("activate_$pluginMainFile", [__CLASS__, 'activate']);
-
             try {
                 self::checkRequirements();
             } catch (RuntimeException $e) {
@@ -131,6 +140,9 @@ namespace Cdek {
             self::$pluginVersion  = get_file_data(self::$pluginMainFilePath, ['Version'])[0];
             self::$pluginName     = get_file_data(self::$pluginMainFilePath, ['Plugin Name'])[0];
             self::$pluginMainFile = plugin_basename(self::$pluginMainFilePath);
+
+            add_action("activate_" . plugin_basename($pluginMainFile), [__CLASS__, 'activate']);
+            add_action("deactivate_" . plugin_basename($pluginMainFile), [__CLASS__, 'deactivate']);
 
             self::declareCompatibility();
 
@@ -174,7 +186,11 @@ namespace Cdek {
 
             add_action('woocommerce_before_order_itemmeta', new AdminShippingFields, 10, 2);
 
+            add_action('upgrader_process_complete', [TaskManager::class, 'addPluginScheduleEvents']);
+
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, new CreateOrderAction, 10, 2);
+
+            TaskManager::registerTasks();
 
             (new CdekWidget)();
             (new Admin)();
