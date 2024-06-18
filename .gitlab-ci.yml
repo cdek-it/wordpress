@@ -1,5 +1,7 @@
 ---
-image: alpine:latest
+image:
+  name: docker-web.cdek.ru/phnodenx-dev-rocky9-8.2
+  entrypoint: ['']
 
 stages:
   - build
@@ -10,31 +12,20 @@ variables:
   ARTIFACTORY_REPO: "https://repo.cdek.ru/artifactory/erp-cms"
 
 build_tag:
-  image: php:8.2-alpine
   stage: build
   tags:
     - docker
   only:
     - tags
   before_script:
-    - apk add nodejs-current yarn
-    - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-    - php composer-setup.php
-    - php -r "unlink('composer-setup.php');"
-    - mv composer.phar /usr/local/bin/composer
     - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
   script:
     - sed -i "s/\(Version:\)\( *\).*/\1\2${RELEASE_VERSION}/" cdek.php
     - sed -i "s/\(Stable tag:\)\( *\).*/\1\2${RELEASE_VERSION}/" readme.txt
     - sed -i "s/\(Project-Id-Version:\)\( *\).*/\1\2CDEKDelivery ${RELEASE_VERSION}/" lang/cdekdelivery.pot
-    - sed -i "s/\(Project-Id-Version:\)\( *\).*/\1\2CDEKDelivery ${RELEASE_VERSION}/" lang/cdekdelivery-ru_RU.po
-    - yarn set version berry
     - yarn
     - yarn build
     - rm -rf node_modules
-    - composer i -a
-    - vendor/bin/wp i18n --allow-root make-mo lang lang
-    - vendor/bin/wp i18n --allow-root make-json --no-purge lang lang
     - composer i -a --no-dev
     - composer archive -f zip --file=cdek
   artifacts:
@@ -47,7 +38,6 @@ build_custom:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: always
     - when: manual
-  image: php:8.2-alpine
   stage: build
   tags:
     - docker
@@ -56,7 +46,6 @@ build_custom:
     paths:
       - cdek.zip
   before_script:
-    - !reference [build_tag, before_script]
     - export RELEASE_VERSION="${CI_COMMIT_REF_NAME}#${CI_COMMIT_SHORT_SHA}"
   script:
     - !reference [build_tag, script]
@@ -71,7 +60,6 @@ upload:
   only:
     - tags
   before_script:
-    - apk add curl zip
     - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
     - export ARCHIVE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/\./_/g')
   script:
