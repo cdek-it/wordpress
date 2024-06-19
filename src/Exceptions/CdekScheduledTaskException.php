@@ -16,7 +16,7 @@ namespace Cdek\Exceptions{
             string $message,
             string $code = 'cdek_error',
             ?array $data = null,
-            bool $stopPropagation = true
+            bool $stopPropagation = false
         )
         {
             if($stopPropagation){

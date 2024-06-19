@@ -110,7 +110,7 @@ namespace Cdek {
                 $this->tokenCoreStorage->getToken(),
             );
 
-            return $this->initData($response);
+            return $this->initData($response, false);
         }
 
         /**
@@ -183,13 +183,14 @@ namespace Cdek {
          *
          * @throws CdekScheduledTaskException
          */
-        private function initData(array $response): array
+        private function initData(array $response, bool $stopPropagation = true): array
         {
             if($response['error']){
                 throw new CdekScheduledTaskException(
                     '[CDEKDelivery] Failed to get core api response',
                     'cdek_error.core.response_error',
                     $response,
+                    $stopPropagation
                 );
             }
 
@@ -212,6 +213,7 @@ namespace Cdek {
                     '[CDEKDelivery] Failed to get core api response',
                     'cdek_error.core.response',
                     $response,
+                    $stopPropagation
                 );
             }
 
