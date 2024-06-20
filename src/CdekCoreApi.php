@@ -190,7 +190,7 @@ namespace Cdek {
                     '[CDEKDelivery] Failed to get core api response',
                     'cdek_error.core.response_error',
                     $response,
-                    $stopPropagation
+                    $stopPropagation,
                 );
             }
 
@@ -213,7 +213,7 @@ namespace Cdek {
                     '[CDEKDelivery] Failed to get core api response',
                     'cdek_error.core.response',
                     $response,
-                    $stopPropagation
+                    $stopPropagation,
                 );
             }
 
