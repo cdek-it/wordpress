@@ -41,9 +41,19 @@ namespace Cdek\Model {
                 'mode' => self::OFFICE_OFFICE,
                 'type' => self::SHOP_TYPE,
             ],
+            121 => [
+                'name' => 'Магистральный экспресс дверь-дверь',
+                'mode' => self::DOOR_DOOR,
+                'type' => self::SHOP_TYPE,
+            ],
             122 => [
                 'name' => 'Магистральный экспресс склад-дверь',
                 'mode' => self::OFFICE_DOOR,
+                'type' => self::SHOP_TYPE,
+            ],
+            123 => [
+                'name' => 'Магистральный экспресс дверь-склад',
+                'mode' => self::DOOR_OFFICE,
                 'type' => self::SHOP_TYPE,
             ],
             136 => [
@@ -186,9 +196,19 @@ namespace Cdek\Model {
                 'mode' => self::OFFICE_PICKUP,
                 'type' => self::SHOP_TYPE,
             ],
+            748 => [
+                'name' => 'Сборный груз дверь-дверь',
+                'mode' => self::DOOR_DOOR,
+                'type' => self::DELIVERY_TYPE,
+            ],
             749 => [
                 'name' => 'Сборный груз дверь-склад',
                 'mode' => self::DOOR_OFFICE,
+                'type' => self::DELIVERY_TYPE,
+            ],
+            750 => [
+                'name' => 'Сборный груз склад-дверь',
+                'mode' => self::OFFICE_DOOR,
                 'type' => self::DELIVERY_TYPE,
             ],
             751 => [
