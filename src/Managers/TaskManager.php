@@ -94,7 +94,7 @@ namespace Cdek\Managers{
         public static function addPluginScheduleEvents(): void
         {
             if (as_has_scheduled_action(Config::TASK_MANAGER_HOOK_NAME) !== false) {
-                as_unschedule_action(Config::TASK_MANAGER_HOOK_NAME);
+                as_unschedule_all_actions(Config::TASK_MANAGER_HOOK_NAME);
             }
 
             $dateTime = new \DateTime('now + 1 hour');
@@ -132,7 +132,7 @@ namespace Cdek\Managers{
         {
             try {
                 $response = (new CdekCoreApi())->taskManager($this->taskCursor['next'] ?? null);
-            } catch (CdekScheduledTaskException $e) {
+            } catch (CdekScheduledTaskException|CdekApiException $e) {
                 static::addPluginScheduleEvents();
 
                 throw new CdekScheduledTaskException(
