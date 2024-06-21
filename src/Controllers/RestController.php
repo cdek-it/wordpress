@@ -11,6 +11,7 @@ namespace Cdek\Controllers {
     use Cdek\Actions\GenerateWaybillAction;
     use Cdek\CdekApi;
     use Cdek\Config;
+    use Cdek\Helpers\DBTokenStorage;
     use Cdek\Model\OrderMetaData;
     use WP_REST_Request;
     use WP_REST_Response;
@@ -21,6 +22,13 @@ namespace Cdek\Controllers {
         public static function checkAuth(): WP_REST_Response
         {
             return new WP_REST_Response(['state' => (new CdekApi)->checkAuth()], 200);
+        }
+
+        public static function resetCache(): WP_REST_Response
+        {
+            DBTokenStorage::flushCache();
+
+            return new WP_REST_Response(['state' => 'OK'], 200);
         }
 
         /**
@@ -45,7 +53,13 @@ namespace Cdek\Controllers {
             register_rest_route(Config::DELIVERY_NAME, '/check-auth', [
                 'methods'             => WP_REST_Server::READABLE,
                 'callback'            => [__CLASS__, 'checkAuth'],
-                'permission_callback' => '__return_true',
+                'permission_callback' => static fn() => current_user_can('manage_woocommerce'),
+            ]);
+
+            register_rest_route(Config::DELIVERY_NAME, '/flush-cache', [
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => [__CLASS__, 'resetCache'],
+                'permission_callback' => static fn() => current_user_can('manage_woocommerce'),
             ]);
 
             register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/waybill', [
