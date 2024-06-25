@@ -42,7 +42,7 @@ namespace Cdek\Actions {
                                                    'country'  => $order->get_shipping_country(),
                                                    'postcode' => $order->get_shipping_postcode(),
                                                ],
-                                           ], isset(OrderMetaData::getMetaByOrderId($order->get_id())['pvz_code']));
+                                           ], isset(OrderMetaData::getMetaByOrderId($order->get_id())['office_code']));
 
                     $rate = $calculator->getTariffRate((int) ($shipping->get_meta(MetaKeys::TARIFF_CODE) ?:
                         $shipping->get_meta('tariff_code')));

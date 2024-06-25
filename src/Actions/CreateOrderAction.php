@@ -43,7 +43,8 @@ namespace Cdek\Actions {
                 'currency'    => $order->get_currency() ?: 'RUB',
                 'tariff_code' => $tariffCode,
                 'type'        => Tariff::getTariffType($tariffCode),
-                'pvz_code'    => $shippingMethod->get_meta(MetaKeys::OFFICE_CODE) ?: $postOrderData['pvz_code'] ?: null,
+                'pvz_code'    => $shippingMethod->get_meta(MetaKeys::OFFICE_CODE) ?: $postOrderData['office_code'] ?:
+                    null,
             ];
 
             try {
@@ -153,7 +154,7 @@ namespace Cdek\Actions {
             ];
 
             if (Tariff::isTariffToOffice($postOrderData['tariff_code'])) {
-                $param['delivery_point'] = $postOrderData['pvz_code'];
+                $param['delivery_point'] = $postOrderData['office_code'];
             } else {
                 $param['to_location'] = [
                     'city'         => trim($order->get_shipping_city() ?: $order->get_billing_city()),

@@ -99,6 +99,21 @@ namespace Cdek\Blocks {
             ];
         }
 
+        public static function saveCustomerData(WC_Customer $customer, WP_REST_Request $request): void
+        {
+            $shippingMethod = $customer->get_meta('shipping_method');
+            $arCheckShipping = explode(':', reset($shippingMethod));
+
+            if (empty($arCheckShipping) || $arCheckShipping[0] !== Config::DELIVERY_NAME) {
+                return;
+            }
+
+            if (Tariff::isTariffToOffice((int) $arCheckShipping[1])) {
+                $customer->add_meta_data(Config::DELIVERY_NAME . '_office_code',
+                                         $request['extensions'][Config::DELIVERY_NAME]['office_code']);
+            }
+        }
+
         public static function saveOrderData(WC_Order $order, WP_REST_Request $request): void
         {
             $shippingMethod = CheckoutHelper::getOrderShippingMethod($order);

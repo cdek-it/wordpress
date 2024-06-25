@@ -26,7 +26,7 @@ namespace Cdek\Actions {
                 return;
             }
 
-            $pvzCode  = CheckoutHelper::getValueFromCurrentSession('pvz_code');
+            $pvzCode  = CheckoutHelper::getValueFromCurrentSession('office_code');
             $tariffId = $shipping->get_meta(MetaKeys::TARIFF_CODE) ?: $shipping->get_meta('tariff_code');
 
             if (Tariff::isTariffToOffice($tariffId)) {

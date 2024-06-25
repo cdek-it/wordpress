@@ -55,6 +55,16 @@ namespace Cdek\Helpers {
                 return wp_strip_all_tags($_REQUEST[$valueName]);
             }
 
+            try {
+                $cdekValue = WC()->customer->get_meta(Config::DELIVERY_NAME."_$valueName");
+
+                if (!empty($cdekValue)) {
+                    return $cdekValue;
+                }
+            } catch (Throwable $e) {
+                //do nothing
+            }
+
             return WC()->checkout()->get_value($valueName) ?: $defaultValue;
         }
 
