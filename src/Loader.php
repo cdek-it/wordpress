@@ -181,6 +181,9 @@ namespace Cdek {
 
             add_action('woocommerce_blocks_loaded', [CheckoutMapBlock::class, 'addStoreApiData']);
 
+            add_action('woocommerce_store_api_checkout_update_customer_from_request',
+                       [CheckoutMapBlock::class, 'saveCustomerData'], 10, 2);
+
             add_action('woocommerce_store_api_checkout_update_order_from_request',
                        [CheckoutMapBlock::class, 'saveOrderData'], 10, 2);
 

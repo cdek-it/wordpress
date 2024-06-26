@@ -45,8 +45,8 @@ namespace Cdek\Validator {
 
             $tariffCode = explode(':', $shippingMethodIdSelected)[1];
             if (Tariff::isTariffToOffice($tariffCode)) {
-                $pvzCode = CheckoutHelper::getValueFromCurrentSession('pvz_code');
-                if (empty($pvzCode)) {
+                $officeCode = CheckoutHelper::getValueFromCurrentSession('office_code');
+                if (empty($officeCode)) {
                     wc_add_notice(esc_html__('Order pickup point not selected.', 'cdekdelivery'), 'error');
                 }
             } elseif (empty(CheckoutHelper::getValueFromCurrentSession('address_1'))) {

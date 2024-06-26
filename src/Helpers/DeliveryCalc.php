@@ -183,7 +183,7 @@ namespace Cdek\Helpers {
                 $serviceList = Helper::getServices($deliveryMethod, $deliveryParam['tariff_code']);
 
                 if (!empty($serviceList)) {
-                    $deliveryParam['services'] = array_merge($serviceList, $deliveryParam['services']);
+                    $deliveryParam['services'] = array_merge($serviceList, $deliveryParam['services'] ?? []);
                 }
 
                 $tariffInfo = $api->calculateTariff($deliveryParam);
