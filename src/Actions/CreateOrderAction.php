@@ -43,7 +43,7 @@ namespace Cdek\Actions {
                 'currency'    => $order->get_currency() ?: 'RUB',
                 'tariff_code' => $tariffCode,
                 'type'        => Tariff::getTariffType($tariffCode),
-                'pvz_code'    => $shippingMethod->get_meta(MetaKeys::OFFICE_CODE) ?: $postOrderData['office_code'] ?:
+                'office_code'    => $shippingMethod->get_meta(MetaKeys::OFFICE_CODE) ?: $postOrderData['pvz_code'] ?:
                     null,
             ];
 
