@@ -17,6 +17,7 @@ namespace Cdek\Blocks {
     use Cdek\MetaKeys;
     use Cdek\Model\Tariff;
     use WC_Order;
+    use WC_Customer;
     use WP_REST_Request;
 
     class CheckoutMapBlock implements IntegrationInterface
