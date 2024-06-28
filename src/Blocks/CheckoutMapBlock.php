@@ -16,6 +16,7 @@ namespace Cdek\Blocks {
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\MetaKeys;
     use Cdek\Model\Tariff;
+    use WC_Customer;
     use WC_Order;
     use WP_REST_Request;
 
