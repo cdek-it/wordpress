@@ -79,10 +79,11 @@ class CdekShippingMethod extends WC_Shipping_Method
             'yandex_map_api_key'                 => [
                 'type'              => 'text',
                 'title'             => esc_html__('Yandex map key', 'cdekdelivery'),
-                'description'       => str_replace('<a>',
-                                                   '<a rel="noopener nofollower" href="https://yandex.ru/dev/jsapi-v2-1/doc/ru/#get-api-key" target="_blank">',
-                                                   esc_html__('Yandex API access key. The generation process is described on <a>the page</a>',
-                                                              'cdekdelivery')),
+                'description' => str_replace(
+                    [esc_html__('<a>'), esc_html__('</a>')],
+                    ['<a rel="noopener nofollower" href="https://yandex.ru/dev/jsapi-v2-1/doc/ru/#get-api-key" target="_blank">', '</a>'],
+                    esc_html__('Yandex API access key. The generation process is described on <a>the page</a>',
+                               'cdekdelivery')),
                 'custom_attributes' => [
                     'required' => true,
                 ],
