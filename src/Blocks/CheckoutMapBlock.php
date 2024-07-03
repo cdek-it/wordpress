@@ -16,8 +16,8 @@ namespace Cdek\Blocks {
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\MetaKeys;
     use Cdek\Model\Tariff;
-    use WC_Customer;
     use WC_Order;
+    use WC_Customer;
     use WP_REST_Request;
 
     class CheckoutMapBlock implements IntegrationInterface
@@ -102,14 +102,11 @@ namespace Cdek\Blocks {
 
         public static function saveCustomerData(WC_Customer $customer, WP_REST_Request $request): void
         {
-            $shippingMethod = $customer->get_meta('shipping_method');
-            $arCheckShipping = explode(':', reset($shippingMethod));
-
-            if (empty($arCheckShipping) || $arCheckShipping[0] !== Config::DELIVERY_NAME) {
-                return;
-            }
-
-            if (Tariff::isTariffToOffice((int) $arCheckShipping[1])) {
+            if (
+                array_key_exists(Config::DELIVERY_NAME, $request['extensions'])
+                &&
+                !empty($request['extensions'][Config::DELIVERY_NAME]['office_code'])
+            ) {
                 $customer->add_meta_data(Config::DELIVERY_NAME . '_office_code',
                                          $request['extensions'][Config::DELIVERY_NAME]['office_code']);
             }
