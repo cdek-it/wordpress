@@ -18,8 +18,8 @@ namespace Cdek {
         public const API_VERSION = 'v2/';
         public const API_URL = 'https://api.cdek.ru/' . self::API_VERSION;
         public const TEST_API_URL = 'https://api.edu.cdek.ru/' . self::API_VERSION;
-        public const TEST_CLIENT_ID = 'EMscd6r9JnFiQ3bLoyjJY6eM78JrJceI';
-        public const TEST_CLIENT_SECRET = 'PjLZkKBHEiLK3YsjtNrt3TGNG0ahs3kG';
+        public const TEST_CLIENT_ID = 'wqGwiQx0gg8mLtiEKsUinjVSICCjtTEP';
+        public const TEST_CLIENT_SECRET = 'RmAmgvSgSl1yirlz9QupbzOJVqhCxcP5';
         public const GRAPHICS_TIMEOUT_SEC = 60;
         public const GRAPHICS_FIRST_SLEEP = 2;
         public const MAX_REQUEST_RETRIES_FOR_GRAPHICS = 3;
