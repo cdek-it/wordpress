@@ -33,9 +33,17 @@ namespace Cdek\Actions {
          */
         public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
         {
-            $this->api      = new CdekApi;
-            $order          = wc_get_order($orderId);
-            $postOrderData  = OrderMetaData::getMetaByOrderId($orderId);
+            $this->api     = new CdekApi;
+            $order         = wc_get_order($orderId);
+            $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
+
+            if (!empty($postOrderData['order_number'])) {
+                return [
+                    'state'   => false,
+                    'message' => esc_html__('Order already exists', 'cdekdelivery'),
+                ];
+            }
+
             $shippingMethod = CheckoutHelper::getOrderShippingMethod($order);
             $tariffCode     = $shippingMethod->get_meta(MetaKeys::TARIFF_CODE) ?:
                 $shippingMethod->get_meta('tariff_code') ?: $postOrderData['tariff_id'];
@@ -43,12 +51,10 @@ namespace Cdek\Actions {
                 'currency'    => $order->get_currency() ?: 'RUB',
                 'tariff_code' => $tariffCode,
                 'type'        => Tariff::getTariffType($tariffCode),
-                'office_code'    => $shippingMethod->get_meta(MetaKeys::OFFICE_CODE) ?: $postOrderData['pvz_code'] ?:
-                    null,
+                'office_code' => $shippingMethod->get_meta(MetaKeys::OFFICE_CODE) ?: $postOrderData['pvz_code'] ?: null,
             ];
 
             try {
-
                 $param             = $this->buildRequestData($order, $postOrderData);
                 $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
 
@@ -74,6 +80,12 @@ namespace Cdek\Actions {
                 include(WP_PLUGIN_DIR.'/cdek/templates/admin/status_list.php');
                 $cdekStatusesRender = ob_get_clean();
 
+                if (!empty($cdekNumber)) {
+                    Note::send($orderId, sprintf(__(/* translators: 1: tracking number */ 'Tracking number: %1$s',
+                                                                                          'cdekdelivery'),
+                                           $cdekNumber), true);
+                }
+
                 return [
                     'state'     => true,
                     'code'      => $cdekNumber,
@@ -91,7 +103,6 @@ namespace Cdek\Actions {
                     'state'   => false,
                     'message' => $e->getMessage(),
                 ];
-
             } catch (Throwable $e) {
                 if ($attempt < 1 || $attempt > 5) {
                     throw $e;

@@ -12,7 +12,7 @@ class DispatchOrderAutomationAction
 {
 
     /**
-     * @param int|WC_Order $orderId
+     * @param  int|WC_Order  $orderId
      */
     public function __invoke($orderId, $postedData = null, ?WC_Order $originalOrder = null): void
     {
@@ -29,17 +29,24 @@ class DispatchOrderAutomationAction
         if ($shipping->get_method_id() !== Config::DELIVERY_NAME) {
             return;
         }
-        if (Helper::getActualShippingMethod($shipping->get_instance_id())->get_option('automate_orders') !== 'yes') {
+
+        $actualShippingMethod = Helper::getActualShippingMethod($shipping->get_instance_id());
+
+        if ($actualShippingMethod->get_option('automate_orders') !== 'yes') {
             return;
         }
 
-        if ($order->get_payment_method() !== 'cod' && !$order->is_paid()) {
+        $awaitingGateways = $actualShippingMethod->get_option('automate_wait_gateways', []);
+
+        if (!empty($awaitingGateways) &&
+            in_array($order->get_payment_method(), $awaitingGateways, true) &&
+            !$order->is_paid()) {
             return;
         }
 
         as_schedule_single_action(time() + 60 * 5, Config::ORDER_AUTOMATION_HOOK_NAME, [
             $order->get_id(),
             1,
-        ], 'cdekdelivery');
+        ],                        'cdekdelivery');
     }
 }

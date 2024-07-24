@@ -14,16 +14,16 @@ class CdekShippingMethod extends WC_Shipping_Method
     public function __construct($instance_id = 0)
     {
         parent::__construct($instance_id);
-        $this->id = Config::DELIVERY_NAME;
-        $this->instance_id = absint($instance_id);
-        $this->method_title = esc_html__('CDEK Shipping', 'cdekdelivery');
+        $this->id                 = Config::DELIVERY_NAME;
+        $this->instance_id        = absint($instance_id);
+        $this->method_title       = esc_html__('CDEK Shipping', 'cdekdelivery');
         $this->method_description = esc_html__('Official Shipping Method for Cdek', 'cdekdelivery');
-        $this->supports = [
+        $this->supports           = [
             'settings',
             'shipping-zones',
             'instance-settings',
         ];
-        $this->enabled = 'yes';
+        $this->enabled            = 'yes';
         $this->init();
     }
 
@@ -31,7 +31,7 @@ class CdekShippingMethod extends WC_Shipping_Method
     {
         $this->title = esc_html__('CDEK Shipping', 'cdekdelivery');
         $this->init_settings();
-        add_action('woocommerce_update_options_shipping_' . $this->id, [$this, 'process_admin_options']);
+        add_action('woocommerce_update_options_shipping_'.$this->id, [$this, 'process_admin_options']);
         $this->init_form_fields();
     }
 
@@ -49,9 +49,12 @@ class CdekShippingMethod extends WC_Shipping_Method
             ],
         ];
 
+        $availableGateways = (!isset($_GET['tab']) || $_GET['tab'] !== 'shipping') ? [] :
+            array_map(static fn($g) => $g->title, WC()->payment_gateways()->payment_gateways());
+
         $this->form_fields = [
             'auth_block_name'                    => [
-                'title' => '<h3 style="text-align: center;">' . esc_html__('Authorization', 'cdekdelivery') . '</h3>',
+                'title' => '<h3 style="text-align: center;">'.esc_html__('Authorization', 'cdekdelivery').'</h3>',
                 'type'  => 'title',
                 'class' => 'cdek_setting_block_name',
             ],
@@ -79,9 +82,13 @@ class CdekShippingMethod extends WC_Shipping_Method
             'yandex_map_api_key'                 => [
                 'type'              => 'text',
                 'title'             => esc_html__('Yandex map key', 'cdekdelivery'),
-                'description' => str_replace(
-                    [esc_html__('<a>'), esc_html__('</a>')],
-                    ['<a rel="noopener nofollower" href="https://yandex.ru/dev/jsapi-v2-1/doc/ru/#get-api-key" target="_blank">', '</a>'],
+                'description'       => str_replace([
+                                                       esc_html__('<a>'),
+                                                       esc_html__('</a>'),
+                                                   ], [
+                                                       '<a rel="noopener nofollower" href="https://yandex.ru/dev/jsapi-v2-1/doc/ru/#get-api-key" target="_blank">',
+                                                       '</a>',
+                                                   ],
                     esc_html__('Yandex API access key. The generation process is described on <a>the page</a>',
                                'cdekdelivery')),
                 'custom_attributes' => [
@@ -89,7 +96,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 ],
             ],
             'seller_block_name'                  => [
-                'title' => '<h3 style="text-align: center;">' . esc_html__('Client', 'cdekdelivery') . '</h3>',
+                'title' => '<h3 style="text-align: center;">'.esc_html__('Client', 'cdekdelivery').'</h3>',
                 'type'  => 'title',
                 'class' => 'cdek_setting_block_name',
             ],
@@ -189,16 +196,28 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'type'        => 'date',
                 'date_format' => 'd.m.Y',
             ],
-            'delivery_block_name'                => [
-                'title' => '<h3 style="text-align: center;">' . esc_html__('Delivery', 'cdekdelivery') . '</h3>',
+            'automate_block_name'                => [
+                'title' => '<h3 style="text-align: center;">'.esc_html__('Automation', 'cdekdelivery').'</h3>',
                 'type'  => 'title',
                 'class' => 'cdek_delivery_block_name',
             ],
             'automate_orders'                    => [
-                'title'       => esc_html__('Automatically create orders in CDEK', 'cdekdelivery'),
+                'title'       => esc_html__('Automatically create waybills in CDEK', 'cdekdelivery'),
                 'type'        => 'checkbox',
-                'description' => esc_html__('If you have information about the dimensions and correctly filled in shipping addresses, the CDEK invoice will be created automatically',
+                'description' => esc_html__('If you have information about the dimensions and correctly filled in shipping addresses, CDEK waybills will be created automatically',
                                             'cdekdelivery'),
+            ],
+            'automate_wait_gateways'             => [
+                'title'       => esc_html__('Wait for gateways', 'cdekdelivery'),
+                'type'        => 'multiselect',
+                'options'     => $availableGateways,
+                'description' => esc_html__('Plugin will wait for selected gateways to finish payments before auto-creation of waybill in CDEK. If order is working with non selected payment gateway, CDEK waybill will be created right after order placement',
+                                            'cdekdelivery'),
+            ],
+            'delivery_block_name'                => [
+                'title' => '<h3 style="text-align: center;">'.esc_html__('Delivery', 'cdekdelivery').'</h3>',
+                'type'  => 'title',
+                'class' => 'cdek_delivery_block_name',
             ],
             'tariff_list'                        => [
                 'title'       => esc_html__('Tariff', 'cdekdelivery'),
@@ -258,20 +277,18 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'type' => 'hidden',
             ],
             'package_setting_block_name'         => [
-                'title' => '<h3 style="text-align: center;">' . esc_html__('Dimensions', 'cdekdelivery') . '</h3>',
+                'title' => '<h3 style="text-align: center;">'.esc_html__('Dimensions', 'cdekdelivery').'</h3>',
                 'type'  => 'title',
                 'class' => 'cdek_package_setting_block_name',
             ],
             'product_weight_default'             => [
-                'title'             => esc_html__('Default weight of one item in', 'cdekdelivery') .
-                                       ' (' .
-                                       get_option('woocommerce_weight_unit') .
+                'title'             => esc_html__('Default weight of one item in', 'cdekdelivery').
+                                       ' ('.
+                                       get_option('woocommerce_weight_unit').
                                        ')',
                 'desc_tip'          => true,
                 'description'       => sprintf(esc_html__('All goods must have their weight indicated, if there are goods without %s a specified weight, then for such goods the value from this field will be substituted. %s This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings.',
-                                                          'cdekdelivery'),
-                                               "<br>",
-                                               "<br>"),
+                                                          'cdekdelivery'), "<br>", "<br>"),
                 'type'              => 'number',
                 'default'           => 1,
                 'custom_attributes' => [
@@ -321,7 +338,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'default'     => 'no',
             ],
             'services_block_name'                => [
-                'title' => '<h3 style="text-align: center;">' . esc_html__('Services', 'cdekdelivery') . '</h3>',
+                'title' => '<h3 style="text-align: center;">'.esc_html__('Services', 'cdekdelivery').'</h3>',
                 'type'  => 'title',
                 'class' => 'cdek_delivery_block_name',
             ],
@@ -345,7 +362,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'default'     => 'no',
             ],
             'delivery_price_block_name'          => [
-                'title' => '<h3 style="text-align: center;">' . esc_html__('Delivery cost', 'cdekdelivery') . '</h3>',
+                'title' => '<h3 style="text-align: center;">'.esc_html__('Delivery cost', 'cdekdelivery').'</h3>',
                 'type'  => 'title',
                 'class' => 'cdek_delivery_price_block_name',
             ],
@@ -371,9 +388,7 @@ class CdekShippingMethod extends WC_Shipping_Method
                 'title'             => esc_html__('Extra charge on order as a percentage', 'cdekdelivery'),
                 'type'              => 'number',
                 'description'       => sprintf(esc_html__('Calculated from the cost of the order. Changes the total amount on the receipt.%s The surcharge will only appear on the receipt.%s Therefore, it is recommended to inform the user on the checkout page about extra charges when sending by cash on delivery.',
-                                                          'cdekdelivery'),
-                                               "<br> <b> ",
-                                               "</b> "),
+                                                          'cdekdelivery'), "<br> <b> ", "</b> "),
                 'custom_attributes' => [
                     'min'  => 100,
                     'step' => 1,
@@ -406,16 +421,14 @@ class CdekShippingMethod extends WC_Shipping_Method
                 if ($this->get_instance_option("use_$key", false) === 'yes') {
                     return $instanceValue;
                 }
-            } else if (!empty($instanceValue) || strpos($key, 'use_') === 0) {
+            } elseif (!empty($instanceValue) || strpos($key, 'use_') === 0) {
                 return $instanceValue;
             }
         }
 
         // Return global option.
-        $option = apply_filters('woocommerce_shipping_' . $this->id . '_option',
-                                WC_Settings_API::get_option($key, $empty_value),
-                                $key,
-                                $this);
+        $option = apply_filters('woocommerce_shipping_'.$this->id.'_option',
+                                WC_Settings_API::get_option($key, $empty_value), $key, $this);
 
         return $option;
     }
