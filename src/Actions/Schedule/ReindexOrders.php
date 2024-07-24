@@ -36,7 +36,7 @@ namespace Cdek\Actions\Schedule {
          */
         public function start(): void
         {
-            if (empty($this->getTaskMeta())) {
+            if (!array($this->getTaskMeta())) {
                 throw new CdekScheduledTaskException(
                     '[CDEKDelivery] Failed to get orders meta info',
                     'cdek_error.core.data',

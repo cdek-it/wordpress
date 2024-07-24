@@ -169,7 +169,7 @@ namespace Cdek {
             add_action('woocommerce_after_shipping_rate', new CheckoutMap, 10, 2);
             add_filter('woocommerce_checkout_create_order_shipping_item', new ProcessWoocommerceCreateShippingAction);
             add_action('woocommerce_checkout_create_order', new SaveCustomCheckoutFieldsAction, 10, 2);
-            add_action('woocommerce_payment_complete', new DispatchOrderAutomationAction);
+            add_action('woocommerce_order_payment_status_changed', new DispatchOrderAutomationAction);
             add_action('woocommerce_checkout_order_processed', new DispatchOrderAutomationAction, 10, 3);
             add_action('woocommerce_store_api_checkout_order_processed', new DispatchOrderAutomationAction);
 
