@@ -1,5 +1,5 @@
 'use strict';
-import {__} from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import $ from 'jquery';
 import './styles/main.scss';
 import apiFetch from '@wordpress/api-fetch';
@@ -54,7 +54,8 @@ $(document).ready(() => {
             packageList.push(packageData);
 
             let packageInfo = '';
-            packageInfo = `${__('Package', 'cdekdelivery')} №${packageList.length} (${packageData.length}х${packageData.width}х${packageData.height}):`;
+            packageInfo = `${__('Package',
+              'cdekdelivery')} №${packageList.length} (${packageData.length}х${packageData.width}х${packageData.height}):`;
 
             packageData.items.forEach(function(item) {
                 packageInfo += `${item.name} х${item.quantity}, `;
@@ -68,11 +69,17 @@ $(document).ready(() => {
         }
     });
 
+    let dataUrl = null;
+
     $('#cdek-order-waybill, #cdek-order-barcode').click(function(e) {
         e.preventDefault();
         e.stopPropagation();
 
         const loader = $('#cdek-loader');
+
+        if (dataUrl !== null) {
+            URL.revokeObjectURL(dataUrl);
+        }
 
         loader.show();
 
@@ -87,7 +94,7 @@ $(document).ready(() => {
             for (let i = 0; i < binaryString.length; i++) {
                 uint8Array[i] = binaryString.charCodeAt(i);
             }
-            const dataUrl = window.URL.createObjectURL(
+            dataUrl = window.URL.createObjectURL(
               new Blob([uint8Array], { type: 'application/pdf' }));
 
             const a = window.document.createElement('a');
@@ -97,7 +104,8 @@ $(document).ready(() => {
             a.click();
             a.remove();
 
-            setTimeout(() => URL.revokeObjectURL(dataUrl), 200);
+            window.document.addEventListener('beforeunload',
+              () => URL.revokeObjectURL(dataUrl));
         })
           .catch(e => console.error(e))
           .finally(() => loader.hide());
