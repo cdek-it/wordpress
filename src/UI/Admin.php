@@ -49,7 +49,7 @@ namespace Cdek\UI {
 
         public static function registerAdminScripts(): void
         {
-            // Not on an Orders page.
+            // Not on Settings page.
             if (!isset($_GET['tab']) || $_GET['tab'] !== 'shipping') {
                 return;
             }
