@@ -81,7 +81,7 @@ namespace Cdek\Actions {
                 $cdekStatusesRender = ob_get_clean();
 
                 if (!empty($cdekNumber)) {
-                    Note::send($orderId, sprintf(__(/* translators: 1: tracking number */ 'Tracking number: %1$s',
+                    Note::send($orderId, sprintf(esc_html__(/* translators: 1: tracking number */ 'Tracking number: %1$s',
                                                                                           'cdekdelivery'),
                                            $cdekNumber), true);
                 }
@@ -96,7 +96,7 @@ namespace Cdek\Actions {
 
             } catch (PhoneNotValidException $e) {
                 Note::send($order->get_id(),
-                           sprintf(__(/* translators: 1: error message */ 'Cdek shipping error: %1$s', 'cdekdelivery'),
+                           sprintf(esc_html__(/* translators: 1: error message */ 'Cdek shipping error: %1$s', 'cdekdelivery'),
                                    $e->getMessage()));
 
                 return [
