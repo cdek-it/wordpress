@@ -4,6 +4,7 @@ image:
   entrypoint: ['']
 
 stages:
+  - sync
   - build
   - upload
   - deploy
@@ -117,3 +118,21 @@ deploy_staging:
     - chmod 600 ~/.ssh/id_rsa
     - eval $(ssh-agent -s)
     - ssh-add ~/.ssh/id_rsa
+
+github:
+  image: docker-proxy.cdek.ru/bitnami/git:latest
+  stage: sync
+  tags:
+    - docker
+  rules:
+    - if: $CI_COMMIT_REF_PROTECTED == "true"
+  before_script:
+    - git config checkout.defaultRemote origin
+    - git remote add -f github "https://${GITHUB_AUTH_USERNAME}:${GITHUB_AUTH_TOKEN}@${GITHUB_REPO}" || true
+  script:
+    - git branch -D $CI_COMMIT_REF_NAME || true
+    - git checkout --track origin/$CI_COMMIT_REF_NAME
+    - git pull -f --unshallow
+    - git fetch github $CI_COMMIT_REF_NAME
+    - git branch -u github/$CI_COMMIT_REF_NAME
+    - git push
