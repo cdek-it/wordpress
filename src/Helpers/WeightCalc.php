@@ -23,7 +23,7 @@ namespace Cdek\Helpers {
             $measurement        = get_option('woocommerce_weight_unit');
             switch ($measurement) {
                 case 'g':
-                    return (int) $weightWithFallback;
+                    return ceil($weightWithFallback);
                 case 'kg':
                     return self::convertToG($weightWithFallback, self::G_INTO_KG);
                 case 'lbs':
@@ -64,7 +64,7 @@ namespace Cdek\Helpers {
 
         private static function convertToG(float $weight, float $coefficient): int
         {
-            return (int) ($weight * $coefficient);
+            return ceil($weight * $coefficient);
         }
 
         private static function convertToMeasurement(int $weight, float $coefficient): float
