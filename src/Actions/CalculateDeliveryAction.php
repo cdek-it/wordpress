@@ -42,8 +42,8 @@ namespace Cdek\Actions {
                 return false;
             }
 
-            $officeData = json_decode($this->method->get_option('pvz_code'), true);
-            $doorData   = json_decode($this->method->get_option('address'), true);
+            $officeData = json_decode($this->method->get_option('pvz_code'), true) ?: [];
+            $doorData   = json_decode($this->method->get_option('address'), true) ?: [];
 
             $deliveryParam['from'] = [
                 'postal_code'  => $officeData['postal'] ?? $doorData['postal'] ?? '',
