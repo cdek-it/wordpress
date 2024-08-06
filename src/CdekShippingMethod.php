@@ -103,8 +103,8 @@ namespace Cdek {
                     'type'              => 'text',
                     'title'             => esc_html__('Yandex map key', 'cdekdelivery'),
                     'description'       => str_replace([
-                                                           esc_html__('<a>'),
-                                                           esc_html__('</a>'),
+                                                           esc_html('<a>'),
+                                                           esc_html('</a>'),
                                                        ], [
                                                            '<a rel="noopener nofollower" href="https://yandex.ru/dev/jsapi-v2-1/doc/ru/#get-api-key" target="_blank">',
                                                            '</a>',
