@@ -53,10 +53,14 @@ namespace Cdek\Validator {
                 wc_add_notice(esc_html__('No shipping address.', 'cdekdelivery'), 'error');
             }
 
-            try {
-                Helper::validateCdekPhoneNumber($phone, $country);
-            } catch (Throwable $e) {
-                wc_add_notice($e->getMessage(), 'error');
+            if(empty($phone)) {
+                wc_add_notice(esc_html__('Phone number is required.', 'cdekdelivery'), 'error');
+            }else{
+                try {
+                    Helper::validateCdekPhoneNumber($phone, $country);
+                } catch (Throwable $e) {
+                    wc_add_notice($e->getMessage(), 'error');
+                }
             }
         }
     }

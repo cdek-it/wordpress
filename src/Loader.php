@@ -173,8 +173,6 @@ namespace Cdek {
             add_action('woocommerce_checkout_order_processed', new DispatchOrderAutomationAction, 10, 3);
             add_action('woocommerce_store_api_checkout_order_processed', new DispatchOrderAutomationAction);
 
-            add_action('woocommerce_update_options_shipping_official_cdek', new FlushTokenCacheAction);
-
             add_action('woocommerce_blocks_loaded',
                 static fn() => add_action('woocommerce_blocks_checkout_block_registration',
                     static fn(IntegrationRegistry $registry) => $registry->register(new CheckoutMapBlock)));

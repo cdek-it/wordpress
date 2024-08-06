@@ -1,22 +1,26 @@
 <?php
+declare(strict_types=1);
 
 namespace {
 
     defined('ABSPATH') or exit;
 }
 
-namespace Cdek\Helpers {
+
+namespace Cdek\Actions {
 
     use Cdek\CdekApi;
     use Cdek\Config;
+    use Cdek\Exceptions\CdekApiException;
     use Cdek\Exceptions\TariffNotAvailableException;
     use Cdek\Helper;
+    use Cdek\Helpers\WeightCalc;
     use Cdek\MetaKeys;
     use Cdek\Model\Tariff;
-    use Exception;
+    use Throwable;
     use WC_Shipping_Method;
 
-    class DeliveryCalc
+    final class CalculateDeliveryAction
     {
         private WC_Shipping_Method $method;
         private array $rates = [];
@@ -29,10 +33,10 @@ namespace Cdek\Helpers {
         }
 
         /**
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          * @throws \JsonException
          */
-        final public function calculate(array $package, bool $addTariffsToOffice = true): bool
+        public function __invoke(array $package, bool $addTariffsToOffice = true): bool
         {
             if (!$this->api->checkAuth()) {
                 return false;
@@ -62,7 +66,7 @@ namespace Cdek\Helpers {
             try {
                 WC()->session->set(Config::DELIVERY_NAME.'_postcode', $deliveryParam['to']['postal_code']);
                 WC()->session->set(Config::DELIVERY_NAME.'_city', $deliveryParam['to']['city']);
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 // do nothing
             }
 
@@ -295,7 +299,7 @@ namespace Cdek\Helpers {
         }
 
         /**
-         * @throws \Cdek\Exceptions\TariffNotAvailableException
+         * @throws TariffNotAvailableException
          */
         final public function getTariffRate(int $code): array
         {
@@ -305,5 +309,6 @@ namespace Cdek\Helpers {
 
             return $this->rates[$code];
         }
+
     }
 }
