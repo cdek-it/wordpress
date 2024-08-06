@@ -9,9 +9,6 @@ stages:
   - upload
   - deploy
 
-variables:
-  ARTIFACTORY_REPO: "https://repo.cdek.ru/artifactory/erp-cms"
-
 build_tag:
   image: docker-proxy.cdek.ru/php:8.2-alpine
   stage: build
