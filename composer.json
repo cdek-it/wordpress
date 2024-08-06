@@ -17,8 +17,23 @@
       "name": "Demin",
       "email": "demin.sv@cdek.ru",
       "role": "Contributor"
+    },
+    {
+      "name": "Darya Polyakova",
+      "role": "Supporter"
+    },
+    {
+      "name": "Vika Melnikova",
+      "role": "Supporter"
     }
   ],
+  "support": {
+    "email": "integrator@cdek.ru",
+    "docs": "https://github.com/cdek-it/wordpress/wiki",
+    "source": "https://github.com/cdek-it/wordpress",
+    "issues": "https://github.com/cdek-it/wordpress/issues",
+    "forum": "https://github.com/cdek-it/wordpress/discussions"
+  },
   "autoload": {
     "psr-4": {
       "Cdek\\": "src/"

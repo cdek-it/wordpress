@@ -33,6 +33,7 @@ build_tag:
     - yarn
     - yarn build
     - rm -rf node_modules
+    - composer remove composer/installers
     - composer i -a --no-dev
     - composer archive -f zip --file=cdek
   artifacts:
