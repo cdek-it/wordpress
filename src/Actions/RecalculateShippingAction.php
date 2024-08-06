@@ -8,7 +8,6 @@ namespace {
 namespace Cdek\Actions {
 
     use Cdek\Exceptions\TariffNotAvailableException;
-    use Cdek\Helpers\DeliveryCalc;
     use Cdek\MetaKeys;
     use Cdek\Model\OrderMetaData;
     use WC_Abstract_Order;
@@ -31,8 +30,8 @@ namespace Cdek\Actions {
 
             try {
                 foreach ($order->get_shipping_methods() as $shipping) {
-                    $calculator = new DeliveryCalc($shipping->get_instance_id());
-                    $calculator->calculate([
+                    $calculator = new CalculateDeliveryAction($shipping->get_instance_id());
+                    $calculator([
                                                'contents'    => array_map(static fn($el) => [
                                                    'data'     => $el->get_product(),
                                                    'quantity' => $el->get_quantity(),
