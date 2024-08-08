@@ -37,7 +37,7 @@ namespace Cdek\Actions {
             $order         = wc_get_order($orderId);
             $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
 
-            if (!empty($postOrderData['order_number'])) {
+            if (!empty($postOrderData['order_number']) || !empty($postOrderData['order_uuid'])) {
                 return [
                     'state'   => false,
                     'message' => esc_html__('Order already exists', 'cdekdelivery'),

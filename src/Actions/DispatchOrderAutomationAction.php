@@ -6,6 +6,7 @@ use Cdek\Config;
 use Cdek\Exceptions\ShippingMethodNotFoundException;
 use Cdek\Helper;
 use Cdek\Helpers\CheckoutHelper;
+use Cdek\Note;
 use WC_Order;
 
 class DispatchOrderAutomationAction
@@ -44,9 +45,11 @@ class DispatchOrderAutomationAction
             return;
         }
 
-        as_schedule_single_action(time() + 60 * 5, Config::ORDER_AUTOMATION_HOOK_NAME, [
+        if (as_schedule_single_action(time() + 60 * 5, Config::ORDER_AUTOMATION_HOOK_NAME, [
             $order->get_id(),
             1,
-        ],                        'cdekdelivery');
+        ],                            'cdekdelivery')) {
+            Note::send($order->get_id(), esc_html__('Created order automation task', 'cdekdelivery'));
+        }
     }
 }
