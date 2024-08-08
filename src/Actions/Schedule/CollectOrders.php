@@ -11,7 +11,7 @@ namespace Cdek\Actions\Schedule {
 
     class CollectOrders extends TaskContract
     {
-        private const ORDERS_LIMIT = 10000;
+        private const ORDERS_LIMIT = 1000;
 
         public static function getName(): string
         {
