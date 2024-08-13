@@ -6,6 +6,7 @@ image:
 stages:
   - sync
   - build
+  - test
   - upload
   - deploy
 
@@ -134,3 +135,23 @@ github:
     - git fetch github $CI_COMMIT_REF_NAME
     - git branch -u github/$CI_COMMIT_REF_NAME
     - git push
+
+sonarqube-check:
+  image:
+    name: docker-proxy.cdek.ru/sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  tags:
+    - docker
+  stage: test
+  script:
+    - sonar-scanner
+  allow_failure: true
+  only:
+    - main
