@@ -24,6 +24,7 @@ namespace Cdek {
         private const FATAL_ERRORS_FIRST_NUMBER = 5;
         private const TOKEN_PATH = 'cms/wordpress/shops/%s/token';
         private const SHOP = 'cms/wordpress/shops';
+        private const GET_ORDERS = 'orders';
         private const TASKS = 'wordpress/tasks';
         private ?int $status;
         private TokenStorageContract $generalTokenStorage;
@@ -158,6 +159,24 @@ namespace Cdek {
                     'X-Current-Page' => $data->getCurrentPage(),
                     'X-Total-Pages'  => $data->getTotalPages(),
                 ],
+            );
+
+            return $this->initData($response);
+        }
+
+        /**
+         * @param int $orderId
+         *
+         * @throws CdekApiException
+         * @throws CdekScheduledTaskException
+         * @throws \JsonException
+         */
+        public function getOrder(int $orderId): array
+        {
+            $response = $this->coreClient->sendCdekRequest(
+                $this->getShopApiUrl() . '/' . self::GET_ORDERS . '/' . $orderId,
+                'GET',
+                $this->tokenCoreStorage->getToken(),
             );
 
             return $this->initData($response);

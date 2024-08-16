@@ -8,7 +8,10 @@ namespace {
 namespace Cdek\Actions {
 
     use Cdek\CdekApi;
+    use Cdek\CdekCoreApi;
     use Cdek\Config;
+    use Cdek\Exceptions\CdekApiException;
+    use Cdek\Exceptions\CdekScheduledTaskException;
     use Cdek\Exceptions\PhoneNotValidException;
     use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
@@ -27,6 +30,9 @@ namespace Cdek\Actions {
         private const ALLOWED_PRODUCT_TYPES = ['variation', 'simple'];
 
         private CdekApi $api;
+        private CdekCoreApi $coreApi;
+
+        private static $isInProgress = false;
 
         /**
          * @throws \Cdek\Exceptions\RestApiInvalidRequestException|\Throwable|\JsonException
@@ -34,6 +40,7 @@ namespace Cdek\Actions {
         public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
         {
             $this->api     = new CdekApi;
+            $this->coreApi = new CdekCoreApi;
             $order         = wc_get_order($orderId);
             $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
 
@@ -55,6 +62,15 @@ namespace Cdek\Actions {
             ];
 
             try {
+                if($this->orderIsSend($orderId)){
+                    return [
+                        'state'   => false,
+                        'message' => 'OrderCreated'
+                    ];
+                }
+
+                static::$isInProgress = true;
+
                 $param             = $this->buildRequestData($order, $postOrderData);
                 $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
 
@@ -381,6 +397,27 @@ namespace Cdek\Actions {
             $orderInfo     = json_decode($orderInfoJson, true);
 
             return $orderInfo['entity']['cdek_number'] ?? $this->getCdekOrderNumber($orderUuid, $iteration + 1);
+        }
+
+        private function orderIsSend($orderId): bool
+        {
+            try {
+                if(static::$isInProgress){
+                    return true;
+                }
+
+                sleep(5);
+
+                $response = $this->coreApi->getOrder($orderId);
+                return !empty($response['id']);
+
+            } catch (CdekApiException|CdekScheduledTaskException|\JsonException $e) {
+                Note::send($orderId,
+                           sprintf(esc_html__('Cdek shipping error: %1$s', 'cdekdelivery'),
+                                   $e->getMessage()));
+
+                return true;
+            }
         }
     }
 }
