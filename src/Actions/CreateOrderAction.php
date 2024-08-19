@@ -32,8 +32,6 @@ namespace Cdek\Actions {
         private CdekApi $api;
         private CdekCoreApi $coreApi;
 
-        private static $isInProgress = false;
-
         /**
          * @throws \Cdek\Exceptions\RestApiInvalidRequestException|\Throwable|\JsonException
          */
@@ -44,16 +42,9 @@ namespace Cdek\Actions {
             $order         = wc_get_order($orderId);
             $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
 
-            if (!empty($postOrderData['order_number']) || !empty($postOrderData['order_uuid'])) {
-                return [
-                    'state'   => false,
-                    'message' => esc_html__('Order already exists', 'cdekdelivery'),
-                ];
-            }
-
             $shippingMethod = CheckoutHelper::getOrderShippingMethod($order);
             $tariffCode     = $shippingMethod->get_meta(MetaKeys::TARIFF_CODE) ?:
-                $shippingMethod->get_meta('tariff_code') ?: $postOrderData['tariff_id'];
+            $shippingMethod->get_meta('tariff_code') ?: $postOrderData['tariff_id'];
             $postOrderData  = [
                 'currency'    => $order->get_currency() ?: 'RUB',
                 'tariff_code' => $tariffCode,
@@ -62,14 +53,12 @@ namespace Cdek\Actions {
             ];
 
             try {
-                if($this->orderIsSend($orderId)){
+                if($this->coreApi->isOrderExist($orderId)){
                     return [
                         'state'   => false,
-                        'message' => 'OrderCreated'
+                        'message' => esc_html__('Order already exists', 'cdekdelivery'),
                     ];
                 }
-
-                static::$isInProgress = true;
 
                 $param             = $this->buildRequestData($order, $postOrderData);
                 $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
@@ -397,27 +386,6 @@ namespace Cdek\Actions {
             $orderInfo     = json_decode($orderInfoJson, true);
 
             return $orderInfo['entity']['cdek_number'] ?? $this->getCdekOrderNumber($orderUuid, $iteration + 1);
-        }
-
-        private function orderIsSend($orderId): bool
-        {
-            try {
-                if(static::$isInProgress){
-                    return true;
-                }
-
-                sleep(5);
-
-                $response = $this->coreApi->getOrder($orderId);
-                return !empty($response['id']);
-
-            } catch (CdekApiException|CdekScheduledTaskException|\JsonException $e) {
-                Note::send($orderId,
-                           sprintf(esc_html__('Cdek shipping error: %1$s', 'cdekdelivery'),
-                                   $e->getMessage()));
-
-                return true;
-            }
         }
     }
 }

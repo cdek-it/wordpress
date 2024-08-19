@@ -20,7 +20,7 @@ namespace Cdek {
         private const FINISH_STATUS = 201;
         private const HAS_NEXT_INFO_STATUS = 202;
         private const EMPTY_ANSWER = 204;
-        private const UNKNOWN_METHOD = 404;
+        private const NOT_FOUND = 404;
         private const FATAL_ERRORS_FIRST_NUMBER = 5;
         private const TOKEN_PATH = 'cms/wordpress/shops/%s/token';
         private const SHOP = 'cms/wordpress/shops';
@@ -118,7 +118,7 @@ namespace Cdek {
          * @param string         $taskId
          * @param TaskOutputData $data
          *
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          * @throws \Cdek\Exceptions\CdekScheduledTaskException
          * @throws \JsonException
          */
@@ -141,7 +141,7 @@ namespace Cdek {
          * @param string         $taskId
          * @param TaskOutputData $data
          *
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          * @throws \Cdek\Exceptions\CdekScheduledTaskException
          * @throws \JsonException
          */
@@ -167,19 +167,34 @@ namespace Cdek {
         /**
          * @param int $orderId
          *
+         * @return bool
          * @throws CdekApiException
-         * @throws CdekScheduledTaskException
-         * @throws \JsonException
          */
-        public function getOrder(int $orderId): array
+        public function isOrderExist(int $orderId): bool
         {
-            $response = $this->coreClient->sendCdekRequest(
-                $this->getShopApiUrl() . '/' . self::GET_ORDERS . '/' . $orderId,
-                'GET',
-                $this->tokenCoreStorage->getToken(),
-            );
+            try {
+                $response = $this->coreClient->sendCdekRequest(
+                    $this->getShopApiUrl() . '/' . self::GET_ORDERS . '/' . $orderId,
+                    'GET',
+                    $this->tokenCoreStorage->getToken(),
+                );
+            } catch (CdekScheduledTaskException | \JsonException $e) {
+                throw new CdekApiException($e->getMessage(), $e->getCode(), ['orderId' => $orderId]);
+            }
 
-            return $this->initData($response);
+            if (!empty($response['response']['code'])){
+                throw new CdekApiException('[CDEKDelivery] Failed to get core api response', 'cdek_error.core.response_error', ['orderId' => $orderId]);
+            }
+
+            if($response['response']['code'] === self::SUCCESS_STATUS){
+                return true;
+            }
+
+            if($response['response']['code'] === self::NOT_FOUND){
+                return false;
+            }
+
+            throw new CdekApiException('[CDEKDelivery] Failed to get core api response', 'cdek_error.core.response_error', ['orderId' => $orderId]);
         }
 
         public function isServerError(): bool
