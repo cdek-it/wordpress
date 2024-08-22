@@ -127,6 +127,12 @@ namespace Cdek {
                         'required' => true,
                     ],
                 ],
+                'order_prefix' => [
+                    'title' => esc_html__('Prefix for orders', 'cdekdelivery'),
+                    'type'  => 'text',
+                    'desc_tip' => true,
+                    'description' => esc_html__('Specify the prefix to be added to the order number when sending to CDEK', 'cdekdelivery')
+                ],
                 'sender_title'                => [
                     'title' => esc_html__('Контактное лицо', 'cdekdelivery'),
                     'type'  => 'title',

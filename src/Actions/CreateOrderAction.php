@@ -130,7 +130,7 @@ namespace Cdek\Actions {
                 'type'            => $postOrderData['type'],
                 'tariff_code'     => $postOrderData['tariff_code'],
                 'date_invoice'    => gmdate('Y-m-d'),
-                'number'          => $order->get_id(),
+                'number'          => ($deliveryMethod->get_option('order_prefix') ?: '') . $order->get_id(),
                 'shipper_name'    => $deliveryMethod->get_option('shipper_name'),
                 'shipper_address' => $deliveryMethod->get_option('shipper_address'),
                 'sender'          => [
