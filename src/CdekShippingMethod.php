@@ -120,21 +120,25 @@ namespace Cdek {
                     'type'  => 'title',
                     'class' => 'cdek_setting_block_name',
                 ],
-                'seller_company'                     => [
+                'sender_company'                     => [
                     'title'             => esc_html__('Company name', 'cdekdelivery'),
                     'type'              => 'text',
                     'custom_attributes' => [
                         'required' => true,
                     ],
                 ],
-                'seller_name'                        => [
+                'sender_title'                => [
+                    'title' => esc_html__('Контактное лицо', 'cdekdelivery'),
+                    'type'  => 'title',
+                ],
+                'sender_name'                        => [
                     'title'             => esc_html__('Full name', 'cdekdelivery'),
                     'type'              => 'text',
                     'custom_attributes' => [
                         'required' => true,
                     ],
                 ],
-                'seller_phone'                       => [
+                'sender_phone'                       => [
                     'title'             => esc_html__('Phone', 'cdekdelivery'),
                     'type'              => 'text',
                     'desc_tip'          => true,
@@ -144,13 +148,62 @@ namespace Cdek {
                         'required' => true,
                     ],
                 ],
-                'seller_email'                       => [
+                'sender_email'                       => [
                     'title'             => esc_html__('Company email address', 'cdekdelivery'),
                     'type'              => 'text',
                     'custom_attributes' => [
                         'required' => true,
                         'type'     => 'email',
                     ],
+                ],
+                'seller_title'                => [
+                    'title' => esc_html__('Online store data', 'cdekdelivery'),
+                    'type'  => 'title',
+                ],
+                'seller_name'                        => [
+                    'title'             => esc_html__('Full name', 'cdekdelivery'),
+                    'type'              => 'text',
+                    'custom_attributes' => [
+                        'required' => true,
+                    ],
+                ],
+                'seller_inn'                                => [
+                    'title'             => esc_html__('TIN', 'cdekdelivery'),
+                    'type'              => 'text',
+                    'desc_tip'          => true,
+                    'custom_attributes' => [
+                        'pattern' => '\d*',
+                    ],
+                ],
+                'seller_phone'                       => [
+                    'title'             => esc_html__('Phone', 'cdekdelivery'),
+                    'type'              => 'text',
+                    'desc_tip'          => true,
+                    'description'       => esc_html__('Must be transmitted in international format: country code (for Russia +7) and the number itself (10 or more digits)', 'cdekdelivery'),
+                    'custom_attributes' => [
+                        'required' => true,
+                    ],
+                ],
+                'seller_ownership_form' => [
+                    'title'    => esc_html__('Form of ownership', 'cdekdelivery'),
+                    'type'     => 'select',
+                    'desc_tip'          => true,
+                    'description'       => esc_html__('Select the type of ownership form of the seller', 'cdekdelivery'),
+                    'options' => [
+                        '9'   => esc_html__('Joint Stock Company', 'cdekdelivery'),
+                        '61'  => esc_html__('Closed Joint Stock Company', 'cdekdelivery'),
+                        '63'  => esc_html__('Individual Entrepreneur', 'cdekdelivery'),
+                        '119' => esc_html__('Open Joint Stock Company', 'cdekdelivery'),
+                        '137' => esc_html__('Limited Liability Company', 'cdekdelivery'),
+                        '147' => esc_html__('Public Joint Stock Company', 'cdekdelivery')
+                    ]
+                ],
+                'seller_address'                     => [
+                    'title'       => esc_html__('True seller address', 'cdekdelivery'),
+                    'type'        => 'text',
+                    'desc_tip'    => true,
+                    'description' => esc_html__('Address of the actual seller. Used when printing invoices to display the address of the present seller of the product or trade name. For international orders',
+                                                'cdekdelivery'),
                 ],
                 'international_title'                => [
                     'title' => esc_html__('International orders', 'cdekdelivery'),
@@ -163,13 +216,6 @@ namespace Cdek {
                     'description' => esc_html__('When the international orders mode is enabled, additional fields will appear on the checkout page: passport series, passport number, date of issue, department, TIN, date of birth.',
                                                 'cdekdelivery'),
                     'default'     => 'no',
-                ],
-                'seller_address'                     => [
-                    'title'       => esc_html__('True seller address', 'cdekdelivery'),
-                    'type'        => 'text',
-                    'desc_tip'    => true,
-                    'description' => esc_html__('Address of the actual seller. Used when printing invoices to display the address of the present seller of the product or trade name. For international orders',
-                                                'cdekdelivery'),
                 ],
                 'shipper_name'                       => [
                     'title'       => esc_html__('Shipper', 'cdekdelivery'),

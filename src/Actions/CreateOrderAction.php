@@ -140,18 +140,19 @@ namespace Cdek\Actions {
                     'passport_organization'  => $deliveryMethod->get_option('passport_organization'),
                     'passport_date_of_birth' => $deliveryMethod->get_option('passport_date_of_birth'),
                     'tin'                    => $deliveryMethod->get_option('tin'),
-                    'name'                   => $deliveryMethod->get_option('seller_name'),
-                    'company'                => $deliveryMethod->get_option('seller_company'),
-                    'email'                  => $deliveryMethod->get_option('seller_email'),
+                    'name'                   => $deliveryMethod->get_option('sender_name'),
+                    'company'                => $deliveryMethod->get_option('sender_company'),
+                    'email'                  => $deliveryMethod->get_option('sender_email'),
                     'phones'                 => [
-                        'number' => $deliveryMethod->get_option('seller_phone'),
+                        'number' => $deliveryMethod->get_option('sender_phone'),
                     ],
                 ],
                 'seller'          => [
+                    'name' => $deliveryMethod->get_option('seller_name'),
+                    'inn' => $deliveryMethod->get_option('seller_inn'),
+                    'ownership_form' => $deliveryMethod->get_option('seller_ownership_form'),
                     'address' => $deliveryMethod->get_option('seller_address'),
-                    'phones'  => [
-                        'number' => $deliveryMethod->get_option('seller_phone'),
-                    ],
+                    'phone'  => $deliveryMethod->get_option('seller_phone'),
                 ],
                 'recipient'       => [
                     'name'   => ($order->get_shipping_first_name() ?: $order->get_billing_first_name()).
