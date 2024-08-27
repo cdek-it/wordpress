@@ -14,6 +14,7 @@ namespace Cdek\Actions {
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\StringHelper;
     use Cdek\Helpers\WeightCalc;
+    use Cdek\Loader;
     use Cdek\MetaKeys;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
@@ -77,7 +78,7 @@ namespace Cdek\Actions {
                 OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
 
                 ob_start();
-                include(WP_PLUGIN_DIR.'/cdek/templates/admin/status_list.php');
+                include(Loader::getPluginPath().'/templates/admin/status_list.php');
                 $cdekStatusesRender = ob_get_clean();
 
                 if (!empty($cdekNumber)) {
