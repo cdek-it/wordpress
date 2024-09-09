@@ -9,7 +9,7 @@ class InternationalOrderFields extends FieldsetContract
 {
     final public function isApplicable(): bool
     {
-        return Helper::getActualShippingMethod()->get_option('international_mode') === 'yes';
+        return (empty(WC()->cart) || WC()->cart->needs_shipping()) && Helper::getActualShippingMethod()->get_option('international_mode') === 'yes';
     }
 
     final protected function getFields(): array
