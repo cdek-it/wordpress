@@ -2,7 +2,9 @@
 
 namespace Cdek\Actions;
 
+use Cdek\CdekCoreApi;
 use Cdek\Config;
+use Cdek\Exceptions\CdekApiException;
 use Cdek\Exceptions\ShippingMethodNotFoundException;
 use Cdek\Helper;
 use Cdek\Helpers\CheckoutHelper;
@@ -39,9 +41,22 @@ class DispatchOrderAutomationAction
 
         $awaitingGateways = $actualShippingMethod->get_option('automate_wait_gateways', []);
 
-        if (!empty($awaitingGateways) &&
-            in_array($order->get_payment_method(), $awaitingGateways, true) &&
-            !$order->is_paid()) {
+        if (
+            !empty($awaitingGateways)
+            &&
+            in_array($order->get_payment_method(), $awaitingGateways, true)
+            &&
+            !$order->is_paid()
+        ) {
+            return;
+        }
+
+        try {
+            if ((new CdekCoreApi)->isOrderExist($orderId)) {
+                return;
+            }
+        } catch (CdekApiException $e) {
+            Note::send($orderId, $e->getMessage(), true);
             return;
         }
 

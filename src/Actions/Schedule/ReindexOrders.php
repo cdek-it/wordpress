@@ -17,6 +17,11 @@ namespace Cdek\Actions\Schedule {
 
     class ReindexOrders extends TaskContract
     {
+        /**
+         * @throws CdekScheduledTaskException
+         * @throws CdekApiException
+         * @throws \JsonException
+         */
         public function __construct(string $taskId)
         {
             parent::__construct($taskId);
