@@ -24,7 +24,6 @@ namespace Cdek\Helpers {
 
         /**
          * @throws CdekApiException
-         * @throws CdekScheduledTaskException
          * @throws \JsonException
          */
         final public function getToken(): string
@@ -44,7 +43,6 @@ namespace Cdek\Helpers {
 
         /**
          * @throws CdekApiException
-         * @throws CdekScheduledTaskException
          * @throws \JsonException
          */
         public function getOrRefreshApiPath(): string
@@ -62,7 +60,7 @@ namespace Cdek\Helpers {
             $this->updateToken();
 
             if(!isset(static::$apiUrlString)){
-                throw new CdekScheduledTaskException(
+                throw new CdekApiException(
                     '[CDEKDelivery] Failed to get token path',
                     'cdek_error.token.path'
                 );
@@ -87,7 +85,6 @@ namespace Cdek\Helpers {
 
         /**
          * @throws CdekApiException
-         * @throws CdekScheduledTaskException
          * @throws \JsonException
          */
         final public function updateToken(): string
@@ -109,7 +106,6 @@ namespace Cdek\Helpers {
 
         /**
          * @throws CdekApiException
-         * @throws CdekScheduledTaskException
          * @throws \JsonException
          */
         final public function fetchTokenFromApi(): array

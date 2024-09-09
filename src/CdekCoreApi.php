@@ -43,7 +43,6 @@ namespace Cdek {
 
         /**
          * @throws CdekApiException
-         * @throws CdekScheduledTaskException
          * @throws \JsonException
          */
         public function fetchShopToken(): array
@@ -63,7 +62,7 @@ namespace Cdek {
             );
 
             if (empty($response['body'])) {
-                throw new CdekScheduledTaskException('[CDEKDelivery] Register shop failed',
+                throw new CdekApiException('[CDEKDelivery] Register shop failed',
                                                      'cdek_error.register.shop',
                                                      $response
                 );
@@ -72,7 +71,7 @@ namespace Cdek {
             $body = json_decode($response['body'], true);
 
             if (empty($body['data']['id'])) {
-                throw new CdekScheduledTaskException('[CDEKDelivery] Failed to get shop uuid',
+                throw new CdekApiException('[CDEKDelivery] Failed to get shop uuid',
                                                      'cdek_error.uuid.auth',
                                                      $response,
                 );
@@ -87,7 +86,7 @@ namespace Cdek {
             $body = json_decode($response['body'], true);
 
             if ($body === null || !$body['success'] || empty($body['data'])) {
-                throw new CdekScheduledTaskException('[CDEKDelivery] Failed to get shop token',
+                throw new CdekApiException('[CDEKDelivery] Failed to get shop token',
                                                      'cdek_error.shop_token.auth',
                                                      $body,
                 );
@@ -119,7 +118,7 @@ namespace Cdek {
          * @param TaskOutputData $data
          *
          * @throws CdekApiException
-         * @throws \Cdek\Exceptions\CdekScheduledTaskException
+         * @throws CdekScheduledTaskException
          * @throws \JsonException
          */
         public function taskInfo(string $taskId, TaskOutputData $data): array
@@ -142,7 +141,7 @@ namespace Cdek {
          * @param TaskOutputData $data
          *
          * @throws CdekApiException
-         * @throws \Cdek\Exceptions\CdekScheduledTaskException
+         * @throws CdekScheduledTaskException
          * @throws \JsonException
          */
         public function sendTaskData(string $taskId, TaskOutputData $data): array
@@ -178,7 +177,7 @@ namespace Cdek {
                     'GET',
                     $this->tokenCoreStorage->getToken(),
                 );
-            } catch (CdekScheduledTaskException | \JsonException $e) {
+            } catch (\JsonException $e) {
                 throw new CdekApiException($e->getMessage(), $e->getCode(), ['orderId' => $orderId]);
             }
 
@@ -204,7 +203,6 @@ namespace Cdek {
 
         /**
          * @throws CdekApiException
-         * @throws CdekScheduledTaskException
          * @throws \JsonException
          */
         private function getShopApiUrl(): string
