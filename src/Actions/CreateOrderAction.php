@@ -53,10 +53,30 @@ namespace Cdek\Actions {
             ];
 
             try {
-                if($this->coreApi->isOrderExist($orderId)){
+                $existOrder = $this->coreApi->getOrderById($orderId);
+
+                if(!empty($existOrder)){
+
+                    $cdekStatuses[] = $existOrder['status'];
+
+                    try {
+                        $historyCdekStatuses = $this->coreApi->getHistory($existOrder['uuid']);
+                    }catch (CdekApiException $e){
+                        $historyCdekStatuses = [];
+                    }
+
                     return [
-                        'state'   => false,
-                        'message' => esc_html__('Order already exists', 'cdekdelivery'),
+                        'state'     => true,
+                        'code'      => $existOrder['track'],
+                        'statuses'  => $this->getStatusList(
+                            !empty($historyCdekStatuses),
+                            array_merge(
+                                $cdekStatuses,
+                                $historyCdekStatuses,
+                            ),
+                        ),
+                        'available' => !empty($historyCdekStatuses),
+                        'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
                     ];
                 }
 
@@ -81,10 +101,6 @@ namespace Cdek\Actions {
                 $postOrderData['order_uuid']   = $orderData['entity']['uuid'];
                 OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
 
-                ob_start();
-                include(WP_PLUGIN_DIR.'/cdek/templates/admin/status_list.php');
-                $cdekStatusesRender = ob_get_clean();
-
                 if (!empty($cdekNumber)) {
                     Note::send($orderId, sprintf(esc_html__(/* translators: 1: tracking number */ 'Tracking number: %1$s',
                                                                                           'cdekdelivery'),
@@ -94,7 +110,7 @@ namespace Cdek\Actions {
                 return [
                     'state'     => true,
                     'code'      => $cdekNumber,
-                    'statuses'  => $cdekStatusesRender,
+                    'statuses'  => $this->getStatusList($actionOrderAvailable, $cdekStatuses),
                     'available' => $actionOrderAvailable,
                     'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
                 ];
@@ -386,6 +402,15 @@ namespace Cdek\Actions {
             $orderInfo     = json_decode($orderInfoJson, true);
 
             return $orderInfo['entity']['cdek_number'] ?? $this->getCdekOrderNumber($orderUuid, $iteration + 1);
+        }
+
+        private function getStatusList(bool $actionAvailable, array $statuses = []): string
+        {
+            $cdekStatuses = $statuses;
+            $actionOrderAvailable = $actionAvailable;
+            ob_start();
+            include(WP_PLUGIN_DIR.'/cdek/templates/admin/status_list.php');
+            return ob_get_clean();
         }
     }
 }

@@ -51,8 +51,22 @@ class DispatchOrderAutomationAction
             return;
         }
 
+        $hooks = as_get_scheduled_actions(
+            [
+                'hook' => Config::ORDER_AUTOMATION_HOOK_NAME,
+                'args' => [
+                    $order->get_id(),
+                    1,
+                ],
+            ],
+        );
+
+        if($hooks){
+            return;
+        }
+
         try {
-            if ((new CdekCoreApi)->isOrderExist($orderId)) {
+            if (!empty((new CdekCoreApi)->getOrderById($orderId))) {
                 return;
             }
         } catch (CdekApiException $e) {

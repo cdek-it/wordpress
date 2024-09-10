@@ -64,7 +64,7 @@ namespace Cdek {
             if (empty($response['body'])) {
                 throw new CdekApiException('[CDEKDelivery] Register shop failed',
                                                      'cdek_error.register.shop',
-                                                     $response
+                                                     $response,
                 );
             }
 
@@ -110,7 +110,7 @@ namespace Cdek {
                 $this->tokenCoreStorage->getToken(),
             );
 
-            return $this->initData($response, false);
+            return $this->initTaskData($response, false);
         }
 
         /**
@@ -133,7 +133,7 @@ namespace Cdek {
                 ],
             );
 
-            return $this->initData($response);
+            return $this->initTaskData($response);
         }
 
         /**
@@ -160,16 +160,15 @@ namespace Cdek {
                 ],
             );
 
-            return $this->initData($response);
+            return $this->initTaskData($response);
         }
 
         /**
          * @param int $orderId
          *
-         * @return bool
          * @throws CdekApiException
          */
-        public function isOrderExist(int $orderId): bool
+        public function getOrderById(int $orderId): array
         {
             try {
                 $response = $this->coreClient->sendCdekRequest(
@@ -181,19 +180,27 @@ namespace Cdek {
                 throw new CdekApiException($e->getMessage(), $e->getCode(), ['orderId' => $orderId]);
             }
 
-            if (!empty($response['response']['code'])){
-                throw new CdekApiException('[CDEKDelivery] Failed to get core api response', 'cdek_error.core.response_error', ['orderId' => $orderId]);
+            return $this->initData($response);
+        }
+
+        /**
+         * @param int $orderId
+         *
+         * @throws CdekApiException
+         */
+        public function getHistory(int $orderId): array
+        {
+            try {
+                $response = $this->coreClient->sendCdekRequest(
+                    $this->getShopApiUrl() . '/' . self::GET_ORDERS . '/' . $orderId . '/history',
+                    'GET',
+                    $this->tokenCoreStorage->getToken(),
+                );
+            } catch (\JsonException $e) {
+                throw new CdekApiException($e->getMessage(), $e->getCode(), ['orderId' => $orderId]);
             }
 
-            if($response['response']['code'] === self::SUCCESS_STATUS){
-                return true;
-            }
-
-            if($response['response']['code'] === self::NOT_FOUND){
-                return false;
-            }
-
-            throw new CdekApiException('[CDEKDelivery] Failed to get core api response', 'cdek_error.core.response_error', ['orderId' => $orderId]);
+            return $this->initData($response);
         }
 
         public function isServerError(): bool
@@ -213,9 +220,35 @@ namespace Cdek {
         /**
          * @param array $response
          *
+         * @throws CdekApiException
+         */
+        private function initData(array $response): array
+        {
+            if (!empty($response['response']['code'])){
+                throw new CdekApiException('[CDEKDelivery] Failed to get core api response', 'cdek_error.core.response_error', $response);
+            }
+
+            if($response['response']['code'] === self::SUCCESS_STATUS){
+                $decodeResponse = json_decode($response['body'], true);
+
+                if(!empty($decodeResponse['data'])){
+                    return $decodeResponse['data'];
+                }
+            }
+
+            if($response['response']['code'] === self::NOT_FOUND){
+                return [];
+            }
+
+            throw new CdekApiException('[CDEKDelivery] Failed to get core api response', 'cdek_error.core.response_error', $response);
+        }
+
+        /**
+         * @param array $response
+         *
          * @throws CdekScheduledTaskException
          */
-        private function initData(array $response, bool $stopPropagation = true): array
+        private function initTaskData(array $response, bool $stopPropagation = true): array
         {
             if($response['error']){
                 throw new CdekScheduledTaskException(
