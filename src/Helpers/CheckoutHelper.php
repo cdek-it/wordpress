@@ -97,6 +97,10 @@ namespace Cdek\Helpers {
 
             $originalFields = $checkout->get_checkout_fields('billing');
 
+            if(empty(WC()->cart) || WC()->cart->needs_shipping()){
+                return $fields;
+            }
+
             foreach (self::AVAILABLE_FIELDSETS as $fieldset) {
                 $fieldsetInstance = new $fieldset;
 
