@@ -97,7 +97,7 @@ namespace Cdek\Helpers {
 
             $originalFields = $checkout->get_checkout_fields('billing');
 
-            if(empty(WC()->cart) || WC()->cart->needs_shipping()){
+            if(empty(WC()->cart) || !WC()->cart->needs_shipping()){
                 return $fields;
             }
 
