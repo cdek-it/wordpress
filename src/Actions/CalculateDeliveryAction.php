@@ -138,7 +138,7 @@ namespace Cdek\Actions {
 
                     $this->rates[$tariff['tariff_code']] = [
                         'id'        => sprintf('%s:%s', Config::DELIVERY_NAME, $tariff['tariff_code']),
-                        'label'     => sprintf("CDEK: %s, (%s-%s дней)",
+                        'label'     => sprintf(esc_html__('CDEK: %s, (%s-%s days)', 'cdekdelivery'),
                                                Tariff::getTariffUserNameByCode($tariff['tariff_code']), $minDay,
                                                $maxDay),
                         'cost'      => $cost,
