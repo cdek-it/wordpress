@@ -111,13 +111,11 @@ namespace Cdek\Actions {
                     continue;
                 }
 
-                $delivery = json_decode($calcResult, true);
-
-                if (!$this->checkDeliveryResponse($delivery)) {
+                if (!$this->checkDeliveryResponse($calcResult)) {
                     continue;
                 }
 
-                foreach ($delivery['tariff_codes'] as $tariff) {
+                foreach ($calcResult['tariff_codes'] as $tariff) {
                     if (isset($this->rates[$tariff['tariff_code']]) ||
                         !in_array((string) $tariff['tariff_code'], $tariffList ?: [], true)) {
                         continue;
@@ -196,9 +194,7 @@ namespace Cdek\Actions {
                     return $tariff;
                 }
 
-                $delivery = json_decode($tariffInfo, true);
-
-                $cost = $delivery['total_sum'];
+                $cost = $tariffInfo['total_sum'];
 
                 if (isset($rule['type']) && $rule['type'] === 'amount') {
                     $cost += $rule['value'];

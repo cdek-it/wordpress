@@ -40,7 +40,7 @@ namespace Cdek\Actions {
             if (isset($order['related_entities'])) {
                 foreach ($order['related_entities'] as $entity) {
                     if ($entity['type'] === 'barcode' && isset($entity['url'])) {
-                        $barcodeInfo = json_decode($this->api->getBarcode($entity['uuid']), true);
+                        $barcodeInfo = $this->api->getBarcode($entity['uuid']);
 
                         if ($barcodeInfo['entity']['format'] !==
                             BarcodeFormat::getByIndex(Helper::getActualShippingMethod()
@@ -56,7 +56,7 @@ namespace Cdek\Actions {
                 }
             }
 
-            $barcode = json_decode($this->api->createBarcode($order['entity']['uuid']), true);
+            $barcode = $this->api->createBarcode($order['entity']['uuid']);
 
             if (!isset($barcode['entity'])) {
                 return [
@@ -69,7 +69,7 @@ namespace Cdek\Actions {
             sleep(Config::GRAPHICS_FIRST_SLEEP);
 
             for ($i = 0; $i < Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS; $i++) {
-                $barcodeInfo = json_decode($this->api->getBarcode($barcode['entity']['uuid']), true);
+                $barcodeInfo = $this->api->getBarcode($barcode['entity']['uuid']);
 
                 if (isset($barcodeInfo['entity']['url'])) {
                     return [

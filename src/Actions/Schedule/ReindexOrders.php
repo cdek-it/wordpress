@@ -52,7 +52,7 @@ namespace Cdek\Actions\Schedule {
                 );
             }
 
-            $this->initData($this->cdekCoreApi->sendTaskData(
+            $this->initData($this->cdekCoreApi->putTaskResult(
                 $this->taskId,
                 new TaskOutputData('success'),
             ));

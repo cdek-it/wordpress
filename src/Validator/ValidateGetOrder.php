@@ -14,7 +14,7 @@ namespace Cdek\Validator {
     {
         public static function validate($orderObj, $orderNumber, $orderId): Validate
         {
-            if ($orderObj->requests[0]->state === 'INVALID') {
+            if ($orderObj['requests'][0]['state'] === 'INVALID') {
 
                 $message
                     = sprintf(esc_html__(/* translators: %s: Order number */'An attempt to delete order number %s failed with an error. Order not found.',

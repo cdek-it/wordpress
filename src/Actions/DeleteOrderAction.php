@@ -29,15 +29,13 @@ namespace Cdek\Actions {
             OrderMetaData::cleanMetaByOrderId($orderId);
 
             $order = $this->api->getOrder($orderNumber);
-            $orderObj = json_decode($order);
 
-            $validate = ValidateGetOrder::validate($orderObj, $orderNumber, $orderId);
+            $validate = ValidateGetOrder::validate($order, $orderNumber, $orderId);
             if (!$validate->state) {
                 return $validate->response();
             }
 
             $delete = $this->api->deleteOrder($orderNumber);
-            $delete = json_decode($delete);
 
             $validate = ValidateDeleteOrder::validate($delete, $orderNumber, $orderId);
             if (!$validate->state) {

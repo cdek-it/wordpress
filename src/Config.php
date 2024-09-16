@@ -15,9 +15,8 @@ namespace Cdek {
         public const ORDER_AUTOMATION_HOOK_NAME = 'cdekdelivery_automation';
         public const TASK_MANAGER_HOOK_NAME = 'cdekdelivery_task_manager';
         public const API_CORE_URL = 'https://api.cdek.ru/';
-        public const API_VERSION = 'v2/';
-        public const API_URL = 'https://api.cdek.ru/' . self::API_VERSION;
-        public const TEST_API_URL = 'https://api.edu.cdek.ru/' . self::API_VERSION;
+        public const API_URL = 'https://api.cdek.ru/v2/';
+        public const TEST_API_URL = 'https://api.edu.cdek.ru/v2/';
         public const TEST_CLIENT_ID = 'wqGwiQx0gg8mLtiEKsUinjVSICCjtTEP';
         public const TEST_CLIENT_SECRET = 'RmAmgvSgSl1yirlz9QupbzOJVqhCxcP5';
         public const GRAPHICS_TIMEOUT_SEC = 60;
