@@ -30,11 +30,10 @@ namespace Cdek\Transport {
             ?array $headers = []
         ): HttpResponse {
             $config = [
-                'headers' => [
+                'headers' => array_merge([
                     'Content-Type'  => 'application/json',
                     'Authorization' => $token,
-                    ...$headers,
-                ],
+                ], $headers),
                 'timeout' => 60,
             ];
 
@@ -44,11 +43,11 @@ namespace Cdek\Transport {
 
             $result = self::processRequest($url, $method, $config);
 
-            if($result->isServerError()){
+            if ($result->isServerError()) {
                 throw new CdekServerException('Server error', 'api.server', $result->error());
             }
 
-            if($result->isClientError()){
+            if ($result->isClientError()) {
                 throw new CdekClientException('Server error', 'api.server', $result->error());
             }
 
