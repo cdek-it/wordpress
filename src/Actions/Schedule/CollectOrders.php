@@ -36,7 +36,7 @@ namespace Cdek\Actions\Schedule {
 
                 $maxPages = $result->max_num_pages;
 
-                $response = $this->cdekCoreApi->sendTaskData(
+                $response = $this->cdekCoreApi->putTaskResult(
                     $this->taskId,
                     new TaskOutputData(
                         'success',

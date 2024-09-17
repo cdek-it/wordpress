@@ -6,7 +6,7 @@ namespace {
 
 namespace Cdek\Contracts {
 
-    use Cdek\CdekCoreApi;
+    use Cdek\CoreApi;
     use Cdek\Config;
     use Cdek\Exceptions\CdekApiException;
     use Cdek\Exceptions\CdekScheduledTaskException;
@@ -15,13 +15,13 @@ namespace Cdek\Contracts {
 
     abstract class TaskContract
     {
-        protected cdekCoreApi $cdekCoreApi;
+        protected CoreApi $cdekCoreApi;
         protected ?array $taskMeta = [];
         protected string $taskId;
 
         public function __construct(string $taskId)
         {
-            $this->cdekCoreApi = new CdekCoreApi();
+            $this->cdekCoreApi = new CoreApi();
             $this->taskId = $taskId;
         }
 

@@ -13,7 +13,7 @@ namespace Cdek\Validator {
     {
         public static function validate($courierData): Validate
         {
-            if ($courierData->requests[0]->state === 'INVALID') {
+            if ($courierData['requests'][0]['state'] === 'INVALID') {
                 return new Validate(false,
                                     sprintf(/* translators: %s: Error message */ esc_html__('Error. The courier request has not been created. (%s)',
                                                                                             'cdekdelivery'),
@@ -25,7 +25,7 @@ namespace Cdek\Validator {
 
         public static function validateExist($callCourier): Validate
         {
-            if ($callCourier->requests[0]->type === 'DELETE' && $callCourier->requests[0]->state === 'SUCCESSFUL') {
+            if ($callCourier['requests'][0]['type'] === 'DELETE' && $callCourier->requests[0]->state === 'SUCCESSFUL') {
                 return new Validate(false, esc_html__('Application deleted', 'cdekdelivery'));
             }
 

@@ -8,7 +8,7 @@ namespace Cdek\Managers{
 
     use Cdek\Actions\Schedule\CollectOrders;
     use Cdek\Actions\Schedule\ReindexOrders;
-    use Cdek\CdekCoreApi;
+    use Cdek\CoreApi;
     use Cdek\Config;
     use Cdek\Contracts\TaskContract;
     use Cdek\Exceptions\CdekApiException;
@@ -131,8 +131,8 @@ namespace Cdek\Managers{
         private function getResponse(): void
         {
             try {
-                $response = (new CdekCoreApi())->taskManager($this->taskCursor['next'] ?? null);
-            } catch (CdekScheduledTaskException|CdekApiException $e) {
+                $response = (new CoreApi)->listTasks($this->taskCursor['next'] ?? null);
+            } catch (CdekApiException $e) {
                 static::addPluginScheduleEvents();
 
                 throw new CdekScheduledTaskException(

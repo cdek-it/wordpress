@@ -9,7 +9,5 @@ namespace {
 
 namespace Cdek\Exceptions {
 
-    use Exception;
-
-    class ShippingMethodNotFoundException extends Exception {}
+    class CdekClientException extends CdekApiException {}
 }

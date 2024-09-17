@@ -2,6 +2,8 @@
 
 namespace Cdek\Contracts;
 
+use Cdek\CdekApi;
+
 abstract class TokenStorageContract
 {
     private const CIPHER = 'AES-256-CBC';
@@ -10,7 +12,14 @@ abstract class TokenStorageContract
 
     abstract function updateToken();
 
-    abstract function fetchTokenFromApi();
+    /**
+     * @throws \Cdek\Exceptions\AuthException
+     * @throws \JsonException
+     */
+    final protected function fetchTokenFromApi(): string
+    {
+        return (new CdekApi)->fetchToken();
+    }
 
     protected function encryptToken($token, $clientId): string {
         $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length(self::CIPHER));

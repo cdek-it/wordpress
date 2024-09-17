@@ -7,33 +7,33 @@ namespace {
 
 namespace Cdek\Transport {
 
+    use Cdek\Exceptions\CdekApiException;
+    use Cdek\Exceptions\CdekClientException;
+    use Cdek\Exceptions\CdekServerException;
     use Cdek\Loader;
-    use WP_Http;
+    use WP_Error;
     use WP_REST_Server;
 
     class HttpClient
     {
         /**
-         * @param string     $url
-         * @param string     $method
-         * @param string     $token
-         * @param array|null $data
-         * @param bool       $plain
-         *
-         * @return array|string
+         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws \Cdek\Exceptions\CdekClientException
+         * @throws \Cdek\Exceptions\CdekServerException
+         * @throws \JsonException
          */
-        public static function sendCdekRequest(
+        public static function sendJsonRequest(
             string $url,
             string $method,
             string $token,
-            array $data = null,
-            bool $plain = false
-        ) {
+            ?array $data = null,
+            ?array $headers = []
+        ): HttpResponse {
             $config = [
-                'headers' => [
+                'headers' => array_merge([
                     'Content-Type'  => 'application/json',
                     'Authorization' => $token,
-                ],
+                ], $headers),
                 'timeout' => 60,
             ];
 
@@ -41,41 +41,61 @@ namespace Cdek\Transport {
                 $config['body'] = ($method === WP_REST_Server::READABLE) ? $data : wp_json_encode($data);
             }
 
-            return self::sendRequest($url, $method, $config, $plain);
+            $result = self::processRequest($url, $method, $config);
+
+            if ($result->isServerError()) {
+                throw new CdekServerException('Server error', 'api.server', $result->error());
+            }
+
+            if ($result->isClientError()) {
+                throw new CdekClientException('Server error', 'api.server', $result->error());
+            }
+
+            return $result;
         }
 
         /**
-         * @param string $url
-         * @param string $method
-         * @param array  $config
-         * @param bool   $plain
-         *
-         * @return array|string
+         * @throws CdekApiException
          */
-        public static function sendRequest(string $url, string $method, array $config = [], bool $plain = false)
-        {
-            $pluginVersion = Loader::getPluginVersion();
-
-            $resp = wp_remote_request($url, array_merge($config, [
+        public static function processRequest(
+            string $url,
+            string $method,
+            array $config = []
+        ): HttpResponse {
+            $resp = wp_remote_request($url, array_merge_recursive($config, [
+                'headers'    => [
+                    'X-App-Name'       => 'wordpress',
+                    'X-App-Version'    => Loader::getPluginVersion(),
+                    'X-User-Locale'    => get_user_locale(),
+                    'X-Correlation-Id' => wp_generate_uuid4(),
+                ],
                 'method'     => $method,
-                'user-agent' => "wp/$pluginVersion",
+                'user-agent' => 'wp/'.get_bloginfo('version'),
             ]));
 
-            if ($plain || is_array($resp)) {
-                if ($plain) {
-                    return is_array($resp) ? ['body' => $resp['body'], 'headers' => $resp['headers']] : $resp;
-                }
-
-                return is_array($resp) ? $resp['body'] : $resp;
+            if (is_wp_error($resp)) {
+                assert($resp instanceof WP_Error);
+                throw new CdekApiException($resp->get_error_message(), 'api.general', [
+                    'ip' => self::tryGetRequesterIp(),
+                ]);
             }
 
-            $ip = @file_get_contents('https://ipecho.net/plain');
+            return new HttpResponse($resp['response']['code'], $resp['body'], $resp['headers']);
+        }
+
+        public static function tryGetRequesterIp(): ?string
+        {
+            $ip = wp_remote_retrieve_body(wp_remote_get('https://ipecho.net/plain'));
+
+            if ($ip === '') {
+                return null;
+            }
 
             if (!headers_sent()) {
                 header("X-Requester-IP: $ip");
             }
 
-            return wp_json_encode(['error' => true, 'ip' => $ip]);
+            return $ip;
         }
     }
 }
