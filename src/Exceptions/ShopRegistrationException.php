@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Cdek\Exceptions;
+namespace {
 
-class ShopRegistrationException extends CdekException {}
+    defined('ABSPATH') or exit;
+}
+
+namespace Cdek\Exceptions {
+
+    class ShopRegistrationException extends CdekException {}
+}

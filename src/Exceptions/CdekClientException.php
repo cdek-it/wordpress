@@ -1,8 +1,13 @@
 <?php
 
-namespace Cdek\Exceptions;
+declare(strict_types=1);
 
-class CdekClientException extends CdekApiException
-{
+namespace {
 
+    defined('ABSPATH') or exit;
+}
+
+namespace Cdek\Exceptions {
+
+    class CdekClientException extends CdekApiException {}
 }

@@ -1,10 +1,15 @@
 <?php
 
-namespace Cdek\Exceptions;
+declare(strict_types=1);
 
-use Exception;
+namespace {
 
-class ShippingMethodNotFoundException extends Exception
-{
+    defined('ABSPATH') or exit;
+}
 
+namespace Cdek\Exceptions {
+
+    use Exception;
+
+    class ShippingMethodNotFoundException extends Exception {}
 }
