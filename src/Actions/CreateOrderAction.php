@@ -14,6 +14,7 @@ namespace Cdek\Actions {
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\StringHelper;
     use Cdek\Helpers\WeightCalc;
+    use Cdek\Loader;
     use Cdek\MetaKeys;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
@@ -77,7 +78,7 @@ namespace Cdek\Actions {
                 OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
 
                 ob_start();
-                include(WP_PLUGIN_DIR.'/cdek/templates/admin/status_list.php');
+                include(Loader::getPluginPath().'/templates/admin/status_list.php');
                 $cdekStatusesRender = ob_get_clean();
 
                 if (!empty($cdekNumber)) {
@@ -130,7 +131,7 @@ namespace Cdek\Actions {
                 'type'            => $postOrderData['type'],
                 'tariff_code'     => $postOrderData['tariff_code'],
                 'date_invoice'    => gmdate('Y-m-d'),
-                'number'          => $order->get_id(),
+                'number'          => ($deliveryMethod->get_option('order_prefix') ?: '') . $order->get_id(),
                 'shipper_name'    => $deliveryMethod->get_option('shipper_name'),
                 'shipper_address' => $deliveryMethod->get_option('shipper_address'),
                 'sender'          => [
@@ -140,18 +141,19 @@ namespace Cdek\Actions {
                     'passport_organization'  => $deliveryMethod->get_option('passport_organization'),
                     'passport_date_of_birth' => $deliveryMethod->get_option('passport_date_of_birth'),
                     'tin'                    => $deliveryMethod->get_option('tin'),
-                    'name'                   => $deliveryMethod->get_option('seller_name'),
-                    'company'                => $deliveryMethod->get_option('seller_company'),
-                    'email'                  => $deliveryMethod->get_option('seller_email'),
+                    'name'                   => $deliveryMethod->get_option('sender_name'),
+                    'company'                => $deliveryMethod->get_option('sender_company'),
+                    'email'                  => $deliveryMethod->get_option('sender_email'),
                     'phones'                 => [
-                        'number' => $deliveryMethod->get_option('seller_phone'),
+                        'number' => $deliveryMethod->get_option('sender_phone'),
                     ],
                 ],
                 'seller'          => [
+                    'name' => $deliveryMethod->get_option('seller_name'),
+                    'inn' => $deliveryMethod->get_option('seller_inn'),
+                    'ownership_form' => $deliveryMethod->get_option('seller_ownership_form'),
                     'address' => $deliveryMethod->get_option('seller_address'),
-                    'phones'  => [
-                        'number' => $deliveryMethod->get_option('seller_phone'),
-                    ],
+                    'phone'  => $deliveryMethod->get_option('seller_phone'),
                 ],
                 'recipient'       => [
                     'name'   => ($order->get_shipping_first_name() ?: $order->get_billing_first_name()).
