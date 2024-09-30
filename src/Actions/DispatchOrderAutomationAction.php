@@ -2,20 +2,27 @@
 
 namespace Cdek\Actions;
 
-use Cdek\CdekCoreApi;
+use Cdek\CoreApi;
 use Cdek\Config;
+use Cdek\Exceptions\AuthException;
 use Cdek\Exceptions\CdekApiException;
+use Cdek\Exceptions\CdekClientException;
+use Cdek\Exceptions\CdekServerException;
 use Cdek\Exceptions\ShippingMethodNotFoundException;
 use Cdek\Helper;
 use Cdek\Helpers\CheckoutHelper;
 use Cdek\Note;
+use JsonException;
 use WC_Order;
 
 class DispatchOrderAutomationAction
 {
 
     /**
-     * @param  int|WC_Order  $orderId
+     * @param int|WC_Order   $orderId
+     *
+     * @throws CdekApiException
+     * @throws JsonException
      */
     public function __invoke($orderId, $postedData = null, ?WC_Order $originalOrder = null): void
     {
@@ -65,20 +72,22 @@ class DispatchOrderAutomationAction
             return;
         }
 
-        try {
-            if (!empty((new CdekCoreApi)->getOrderById($orderId))) {
-                return;
-            }
-        } catch (CdekApiException $e) {
-            Note::send($orderId, $e->getMessage(), true);
-            return;
-        }
 
-        if (as_schedule_single_action(time() + 60 * 5, Config::ORDER_AUTOMATION_HOOK_NAME, [
-            $order->get_id(),
-            1,
-        ],                            'cdekdelivery')) {
-            Note::send($order->get_id(), esc_html__('Created order automation task', 'cdekdelivery'));
+        try {
+            (new CoreApi)->getOrderById($orderId);
+        } catch (AuthException|CdekServerException $e) {
+            Note::send($orderId, $e->getMessage(), true);
+        } catch (CdekClientException $e) {
+            if($e->getCode() === 404){
+                if (as_schedule_single_action(time() + 60 * 5, Config::ORDER_AUTOMATION_HOOK_NAME, [
+                    $order->get_id(),
+                    1,
+                ],                            'cdekdelivery')) {
+                    Note::send($order->get_id(), esc_html__('Created order automation task', 'cdekdelivery'));
+                }
+            }else{
+                Note::send($orderId, $e->getMessage(), true);
+            }
         }
     }
 }

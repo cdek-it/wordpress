@@ -99,6 +99,22 @@ namespace Cdek {
         }
 
         /**
+         * @throws CdekApiException
+         * @throws CdekServerException
+         * @throws CdekClientException
+         * @throws \JsonException
+         * @throws \Cdek\Exceptions\AuthException
+         */
+        public function getOrderById(int $orderId): array
+        {
+                return HttpClient::sendJsonRequest(
+                    $this->getEndpoint('orders/' . $orderId),
+                    'GET',
+                    $this->getToken(),
+                )->data();
+        }
+
+        /**
          * @throws \JsonException
          * @throws \Cdek\Exceptions\AuthException
          * @throws \Cdek\Exceptions\CdekApiException
