@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace {
 
@@ -23,7 +24,7 @@ namespace Cdek\Exceptions {
         ) {
             $this->code    = $code;
             $this->data    = $data ?? [];
-            $this->message = $message;
+            $this->message = "[CDEKDelivery] $message";
 
             if ($stopPropagation && defined('REST_REQUEST')) {
                 wp_die($this->getWpError());

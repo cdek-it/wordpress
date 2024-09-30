@@ -103,7 +103,7 @@ namespace Cdek {
             if (!$uuid) {
                 throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Некорректный uuid заказа.');
             }
-            $orderInfo = json_decode((new CdekApi())->getOrder($uuid), true);
+            $orderInfo     = (new CdekApi)->getOrder($uuid);
             $statusName    = [];
             if (!isset($orderInfo['entity']['statuses'])) {
                 throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Заказ не найден.');

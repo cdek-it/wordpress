@@ -25,7 +25,7 @@ namespace Cdek\Actions {
                                           Config::GRAPHICS_FIRST_SLEEP +
                                           Config::GRAPHICS_TIMEOUT_SEC * Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS);
 
-            $order = json_decode($this->api->getOrder($orderUuid), true);
+            $order = $this->api->getOrder($orderUuid);
 
             if (!isset($order['entity'])) {
                 return [
@@ -46,7 +46,7 @@ namespace Cdek\Actions {
                 }
             }
 
-            $waybill = json_decode($this->api->createWaybill($order['entity']['uuid']), true, 512, JSON_THROW_ON_ERROR);
+            $waybill = $this->api->createWaybill($order['entity']['uuid']);
 
             if (!isset($waybill['entity'])) {
                 return [
@@ -59,8 +59,7 @@ namespace Cdek\Actions {
             sleep(Config::GRAPHICS_FIRST_SLEEP);
 
             for ($i = 0; $i < Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS; $i++) {
-                $waybillInfo = json_decode($this->api->getWaybill($waybill['entity']['uuid']), true, 512,
-                                           JSON_THROW_ON_ERROR);
+                $waybillInfo = $this->api->getWaybill($waybill['entity']['uuid']);
 
                 if (isset($waybillInfo['entity']['url'])) {
                     return [

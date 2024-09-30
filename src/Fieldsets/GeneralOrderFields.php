@@ -9,7 +9,7 @@ class GeneralOrderFields extends FieldsetContract
 {
     final public function isApplicable(): bool
     {
-        return empty(WC()->cart) || WC()->cart->needs_shipping();
+        return true;
     }
 
     final protected function getFields(): array

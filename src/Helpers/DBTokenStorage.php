@@ -19,7 +19,7 @@ class DBTokenStorage extends TokenStorageContract
 
     /**
      * @throws \JsonException
-     * @throws \Cdek\Exceptions\CdekApiException
+     * @throws \Cdek\Exceptions\AuthException
      */
     final public function getToken(): string
     {
@@ -33,7 +33,7 @@ class DBTokenStorage extends TokenStorageContract
             $token = $this->updateToken();
         }
 
-        return 'Bearer ' . $token;
+        return "Bearer $token";
     }
 
     private function getTokenFromCache(): ?string
@@ -69,7 +69,7 @@ class DBTokenStorage extends TokenStorageContract
     }
 
     /**
-     * @throws \Cdek\Exceptions\CdekApiException
+     * @throws \Cdek\Exceptions\AuthException|\JsonException
      */
     final public function updateToken(): string
     {
@@ -80,13 +80,5 @@ class DBTokenStorage extends TokenStorageContract
         self::$tokenStatic    = $tokenApi;
         self::$tokenExpStatic = $this->getTokenExp($tokenApi);
         return $tokenApi;
-    }
-
-    /**
-     * @throws CdekApiException
-     */
-    final public function fetchTokenFromApi(): string
-    {
-        return (new CdekApi)->fetchToken();
     }
 }

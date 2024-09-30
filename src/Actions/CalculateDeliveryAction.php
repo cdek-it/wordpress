@@ -111,13 +111,11 @@ namespace Cdek\Actions {
                     continue;
                 }
 
-                $delivery = json_decode($calcResult, true);
-
-                if (!$this->checkDeliveryResponse($delivery)) {
+                if (!$this->checkDeliveryResponse($calcResult)) {
                     continue;
                 }
 
-                foreach ($delivery['tariff_codes'] as $tariff) {
+                foreach ($calcResult['tariff_codes'] as $tariff) {
                     if (isset($this->rates[$tariff['tariff_code']]) ||
                         !in_array((string) $tariff['tariff_code'], $tariffList ?: [], true)) {
                         continue;
@@ -138,7 +136,7 @@ namespace Cdek\Actions {
 
                     $this->rates[$tariff['tariff_code']] = [
                         'id'        => sprintf('%s:%s', Config::DELIVERY_NAME, $tariff['tariff_code']),
-                        'label'     => sprintf("CDEK: %s, (%s-%s дней)",
+                        'label'     => sprintf(esc_html__('CDEK: %s, (%s-%s days)', 'cdekdelivery'),
                                                Tariff::getTariffUserNameByCode($tariff['tariff_code']), $minDay,
                                                $maxDay),
                         'cost'      => $cost,
@@ -196,9 +194,7 @@ namespace Cdek\Actions {
                     return $tariff;
                 }
 
-                $delivery = json_decode($tariffInfo, true);
-
-                $cost = $delivery['total_sum'];
+                $cost = $tariffInfo['total_sum'];
 
                 if (isset($rule['type']) && $rule['type'] === 'amount') {
                     $cost += $rule['value'];

@@ -93,6 +93,10 @@ namespace Cdek\Helpers {
 
         public static function restoreCheckoutFields(array $fields): array
         {
+            if(!empty(WC()->cart) && !WC()->cart->needs_shipping()){
+                return $fields;
+            }
+
             $checkout = WC()->checkout();
 
             $originalFields = $checkout->get_checkout_fields('billing');

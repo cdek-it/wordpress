@@ -52,15 +52,16 @@ namespace Cdek\Actions {
                 $param = $this->createRequestData($data);
             }
 
-            $response   = $this->api->callCourier($param);
-            $courierObj = json_decode($response);
+            $courierObj = $this->api->callCourier($param);
 
-            if (property_exists($courierObj, 'errors') &&
-                $courierObj->errors[0]->code === 'v2_intake_exists_by_order') {
+            if (isset($courierObj['errors']) && $courierObj['errors'][0]['code'] === 'v2_intake_exists_by_order') {
                 $validate
-                    = new Validate(false,
-                                   esc_html__('An error occurred while creating request. Request to call a courier for this invoice already exists',
-                                              'cdekdelivery'));
+                    = new Validate(
+                    false, esc_html__(
+                        'An error occurred while creating request. Request to call a courier for this invoice already exists',
+                        'cdekdelivery',
+                    ),
+                );
 
                 return $validate->response();
             }
@@ -72,8 +73,7 @@ namespace Cdek\Actions {
                 return $validate->response();
             }
 
-            $courierInfoJson = $this->api->courierInfo($courierObj->entity->uuid);
-            $courierInfo     = json_decode($courierInfoJson);
+            $courierInfo = $this->api->courierInfo($courierObj['entity']['uuid']);
 
             sleep(5);
 
@@ -82,28 +82,47 @@ namespace Cdek\Actions {
                 return $validate->response();
             }
 
-            if (!property_exists($courierInfo, 'entity')) {
+            if (!isset($courierInfo['entity'])) {
                 $validate
-                    = new Validate(false, sprintf(esc_html__(/* translators: %s: uuid of request*/ 'Request has been created, but an error occurred while obtaining the request number. Request uuid: %s', 'cdekdelivery'),
-                                                  $courierInfo->requests[0]->request_uuid));
+                    = new Validate(
+                    false, sprintf(
+                    esc_html__(/* translators: %s: uuid of request*/
+                        'Request has been created, but an error occurred while obtaining the request number. Request uuid: %s',
+                        'cdekdelivery',
+                    ),
+                    $courierInfo['requests'][0]['request_uuid'],
+                ),
+                );
 
                 return $validate->response();
             }
 
-            $intakeNumber = $courierInfo->entity->intake_number;
+            $intakeNumber = $courierInfo['entity']['intake_number'];
 
             CourierMetaData::addMetaByOrderId($orderId, [
-                                                          'courier_number' => $intakeNumber,
-                                                          'courier_uuid'   => $courierObj->entity->uuid,
-                                                          'not_cons'       => Tariff::isTariffFromDoor($tariffId),
-                                                      ]);
+                'courier_number' => $intakeNumber,
+                'courier_uuid'   => $courierObj['entity']['uuid'],
+                'not_cons'       => Tariff::isTariffFromDoor($tariffId),
+            ]);
 
             $message
-                = sprintf(esc_html__(/* translators: 1: number of request 2: uuid of request*/'Request has been created to call a courier: Number: %1$s | Uuid: %2$s', 'cdekdelivery'),
-                          $intakeNumber, $courierObj->entity->uuid);
+                = sprintf(
+                esc_html__(/* translators: 1: number of request 2: uuid of request*/
+                    'Request has been created to call a courier: Number: %1$s | Uuid: %2$s',
+                    'cdekdelivery',
+                ),
+                $intakeNumber,
+                $courierObj['entity']['uuid'],
+            );
             Note::send($orderId, $message);
 
-            $validate = new Validate(true, sprintf(esc_html__(/* translators: %s: uuid of application*/'Request number: %s', 'cdekdelivery'), $intakeNumber));
+            $validate = new Validate(
+                true,
+                sprintf(
+                    esc_html__(/* translators: %s: uuid of application*/ 'Request number: %s', 'cdekdelivery'),
+                    $intakeNumber,
+                ),
+            );
 
             return $validate->response();
         }
@@ -190,11 +209,10 @@ namespace Cdek\Actions {
                 return $validate->response();
             }
 
-            $response   = $this->api->callCourierDelete($courierMeta['courier_uuid']);
-            $courierObj = json_decode($response);
+            $courierObj = $this->api->callCourierDelete($courierMeta['courier_uuid']);
 
-            if (property_exists($courierObj, 'errors') &&
-                $courierObj->errors[0]->code === 'v2_entity_has_final_status') {
+            if (isset($courierObj['errors']) &&
+                $courierObj['errors'][0]['code'] === 'v2_entity_has_final_status') {
                 $validate = new Validate(true);
 
                 return $validate->response();
@@ -207,9 +225,12 @@ namespace Cdek\Actions {
 
             CourierMetaData::cleanMetaByOrderId($orderId);
 
-            $message = sprintf(esc_html__(/* translators: %s: request number */'Deleting a request to call a courier: %s',
-'cdekdelivery'),
-                               $courierObj->entity->uuid);
+            $message = sprintf(
+                esc_html__(/* translators: %s: request number */ 'Deleting a request to call a courier: %s',
+                    'cdekdelivery',
+                ),
+                $courierObj['entity']['uuid'],
+            );
 
             Note::send($orderId, $message);
 

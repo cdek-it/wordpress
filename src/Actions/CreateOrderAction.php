@@ -398,8 +398,7 @@ namespace Cdek\Actions {
                 return null;
             }
 
-            $orderInfoJson = $this->api->getOrder($orderUuid);
-            $orderInfo     = json_decode($orderInfoJson, true);
+            $orderInfo     = $this->api->getOrder($orderUuid);
 
             return $orderInfo['entity']['cdek_number'] ?? $this->getCdekOrderNumber($orderUuid, $iteration + 1);
         }

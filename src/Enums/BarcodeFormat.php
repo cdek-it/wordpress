@@ -12,7 +12,7 @@ namespace Cdek\Enums {
 
     final class BarcodeFormat
     {
-        private const AVAILABLE_VALUES = ['A4', 'A5', 'A6'];
+        private const AVAILABLE_VALUES = ['A4', 'A5', 'A6', 'A7'];
 
         private string $value;
 
