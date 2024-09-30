@@ -8,10 +8,11 @@ namespace {
 namespace Cdek\Actions {
 
     use Cdek\CdekApi;
-    use Cdek\CdekCoreApi;
+    use Cdek\CoreApi;
     use Cdek\Config;
     use Cdek\Exceptions\CdekApiException;
-    use Cdek\Exceptions\CdekScheduledTaskException;
+    use Cdek\Exceptions\CdekClientException;
+    use Cdek\Exceptions\CdekServerException;
     use Cdek\Exceptions\PhoneNotValidException;
     use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
@@ -30,7 +31,7 @@ namespace Cdek\Actions {
         private const ALLOWED_PRODUCT_TYPES = ['variation', 'simple'];
 
         private CdekApi $api;
-        private CdekCoreApi $coreApi;
+        private CoreApi $coreApi;
 
         /**
          * @throws \Cdek\Exceptions\RestApiInvalidRequestException|\Throwable|\JsonException
@@ -38,7 +39,7 @@ namespace Cdek\Actions {
         public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
         {
             $this->api     = new CdekApi;
-            $this->coreApi = new CdekCoreApi;
+            $this->coreApi = new CoreApi;
             $order         = wc_get_order($orderId);
             $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
 
@@ -53,65 +54,68 @@ namespace Cdek\Actions {
             ];
 
             try {
-                $existOrder = $this->coreApi->getOrderById($orderId);
+                try {
+                    $existOrder = $this->coreApi->getOrderById($orderId);
+                } catch (CdekClientException $e) {
+                    if($e->getCode() === 404) {
+                        $param             = $this->buildRequestData($order, $postOrderData);
+                        $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
 
-                if(!empty($existOrder)){
+                        $orderData = $this->api->createOrder($param);
 
-                    $cdekStatuses[] = $existOrder['status'];
+                        sleep(5);
 
-                    try {
-                        $historyCdekStatuses = $this->coreApi->getHistory($existOrder['uuid']);
-                    }catch (CdekApiException $e){
-                        $historyCdekStatuses = [];
+                        $cdekNumber = $this->getCdekOrderNumber($orderData['entity']['uuid']);
+
+                        try {
+                            $cdekStatuses         = Helper::getCdekOrderStatuses($orderData['entity']['uuid']);
+                            $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
+                        } catch (Exception $e) {
+                            $cdekStatuses         = [];
+                            $actionOrderAvailable = true;
+                        }
+
+                        $postOrderData['order_number'] = $cdekNumber ?? $orderData['entity']['uuid'];
+                        $postOrderData['order_uuid']   = $orderData['entity']['uuid'];
+                        OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
+
+                        if (!empty($cdekNumber)) {
+                            Note::send($orderId, sprintf(esc_html__(/* translators: 1: tracking number */ 'Tracking number: %1$s',
+                                                                                                          'cdekdelivery'),
+                                                         $cdekNumber), true);
+                        }
+
+                        return [
+                            'state'     => true,
+                            'code'      => $cdekNumber,
+                            'statuses'  => $this->getStatusList($actionOrderAvailable, $cdekStatuses),
+                            'available' => $actionOrderAvailable,
+                            'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
+                        ];
+                    }else{
+                        throw $e;
                     }
-
-                    return [
-                        'state'     => true,
-                        'code'      => $existOrder['track'],
-                        'statuses'  => $this->getStatusList(
-                            !empty($historyCdekStatuses),
-                            array_merge(
-                                $cdekStatuses,
-                                $historyCdekStatuses,
-                            ),
-                        ),
-                        'available' => !empty($historyCdekStatuses),
-                        'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
-                    ];
                 }
 
-                $param             = $this->buildRequestData($order, $postOrderData);
-                $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
-
-                $orderData = $this->api->createOrder($param);
-
-                sleep(5);
-
-                $cdekNumber = $this->getCdekOrderNumber($orderData['entity']['uuid']);
+                $cdekStatuses[] = $existOrder['status'];
 
                 try {
-                    $cdekStatuses         = Helper::getCdekOrderStatuses($orderData['entity']['uuid']);
-                    $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
-                } catch (Exception $e) {
-                    $cdekStatuses         = [];
-                    $actionOrderAvailable = true;
-                }
-
-                $postOrderData['order_number'] = $cdekNumber ?? $orderData['entity']['uuid'];
-                $postOrderData['order_uuid']   = $orderData['entity']['uuid'];
-                OrderMetaData::updateMetaByOrderId($orderId, $postOrderData);
-
-                if (!empty($cdekNumber)) {
-                    Note::send($orderId, sprintf(esc_html__(/* translators: 1: tracking number */ 'Tracking number: %1$s',
-                                                                                          'cdekdelivery'),
-                                           $cdekNumber), true);
+                    $historyCdekStatuses = $this->coreApi->getHistory($existOrder['uuid']);
+                }catch (CdekServerException | CdekClientException | CdekApiException $e){
+                    $historyCdekStatuses = [];
                 }
 
                 return [
                     'state'     => true,
-                    'code'      => $cdekNumber,
-                    'statuses'  => $this->getStatusList($actionOrderAvailable, $cdekStatuses),
-                    'available' => $actionOrderAvailable,
+                    'code'      => $existOrder['track'],
+                    'statuses'  => $this->getStatusList(
+                        !empty($historyCdekStatuses),
+                        array_merge(
+                            $cdekStatuses,
+                            $historyCdekStatuses,
+                        ),
+                    ),
+                    'available' => !empty($historyCdekStatuses),
                     'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
                 ];
 
