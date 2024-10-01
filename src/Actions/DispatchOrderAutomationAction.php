@@ -2,6 +2,7 @@
 
 namespace Cdek\Actions;
 
+use ActionScheduler_Lock;
 use Cdek\CoreApi;
 use Cdek\Config;
 use Cdek\Exceptions\AuthException;
@@ -17,6 +18,7 @@ use WC_Order;
 
 class DispatchOrderAutomationAction
 {
+    const LOCK_TYPE = 'cdek_dispatch_order_automation_lock';
 
     /**
      * @param int|WC_Order   $orderId
@@ -40,7 +42,7 @@ class DispatchOrderAutomationAction
             return;
         }
 
-        $actualShippingMethod = Helper::getActualShippingMethod($shipping->get_instance_id());
+        $actualShippingMethod = Helper::getActualShippingMethod((int)$shipping->get_instance_id());
 
         if ($actualShippingMethod->get_option('automate_orders') !== 'yes') {
             return;
@@ -55,6 +57,16 @@ class DispatchOrderAutomationAction
             &&
             !$order->is_paid()
         ) {
+            return;
+        }
+
+        $lock = ActionScheduler_Lock::instance();
+
+        if ($lock->is_locked(self::LOCK_TYPE)) {
+            return;
+        }
+
+        if (!$lock->set(self::LOCK_TYPE)) {
             return;
         }
 
@@ -76,7 +88,7 @@ class DispatchOrderAutomationAction
         try {
             (new CoreApi)->getOrderById($orderId);
         } catch (AuthException|CdekServerException $e) {
-            Note::send($orderId, $e->getMessage(), true);
+            Note::send($orderId, $e->getCode() . ': ' . $e->getMessage(), true);
         } catch (CdekClientException $e) {
             if($e->getCode() === 404){
                 if (as_schedule_single_action(time() + 60 * 5, Config::ORDER_AUTOMATION_HOOK_NAME, [

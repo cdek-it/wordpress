@@ -109,7 +109,7 @@ namespace Cdek {
         public function getOrderById(int $orderId): array
         {
                 return HttpClient::sendJsonRequest(
-                    $this->getEndpoint('orders/' . $orderId),
+                    $this->getEndpoint("orders/$orderId"),
                     'GET',
                     $this->getToken(),
                 )->data();
@@ -126,7 +126,7 @@ namespace Cdek {
         public function getHistory(int $orderId): array
         {
             return HttpClient::sendJsonRequest(
-                $this->getEndpoint("orders/{$orderId}/history"),
+                $this->getEndpoint("orders/$orderId/history"),
                 'GET',
                 $this->getToken(),
             )->data();

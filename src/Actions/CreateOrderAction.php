@@ -39,7 +39,7 @@ namespace Cdek\Actions {
         public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
         {
             $this->api     = new CdekApi;
-            $this->coreApi = new CoreApi;
+            $this->coreApi = new CoreApi('api');
             $order         = wc_get_order($orderId);
             $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
 
@@ -101,7 +101,7 @@ namespace Cdek\Actions {
 
                 try {
                     $historyCdekStatuses = $this->coreApi->getHistory($existOrder['uuid']);
-                }catch (CdekServerException | CdekClientException | CdekApiException $e){
+                }catch (CdekApiException $e){
                     $historyCdekStatuses = [];
                 }
 

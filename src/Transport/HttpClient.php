@@ -80,7 +80,11 @@ namespace Cdek\Transport {
                 ]);
             }
 
-            return new HttpResponse($resp['response']['code'], $resp['body'], $resp['headers']);
+            return new HttpResponse(
+                $resp['response']['code'],
+                $resp['body'],
+                is_array($resp['headers']) ? $resp['headers'] : $resp['headers']->getAll()
+            );
         }
 
         public static function tryGetRequesterIp(): ?string
