@@ -13,6 +13,8 @@ namespace Cdek {
     use Cdek\Enums\BarcodeFormat;
     use Cdek\Exceptions\AuthException;
     use Cdek\Exceptions\CdekApiException;
+    use Cdek\Exceptions\CdekClientException;
+    use Cdek\Exceptions\CdekServerException;
     use Cdek\Exceptions\RestApiInvalidRequestException;
     use Cdek\Helpers\DBTokenStorage;
     use Cdek\Transport\HttpClient;
@@ -65,7 +67,7 @@ namespace Cdek {
         }
 
         /**
-         * @throws \Cdek\Exceptions\CdekApiException|\JsonException
+         * @throws CdekApiException|\JsonException
          */
         final public function checkAuth(): bool
         {
@@ -108,7 +110,7 @@ namespace Cdek {
 
         /**
          * @throws \JsonException
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          */
         final public function getOrder(string $uuid): array
         {
@@ -120,8 +122,15 @@ namespace Cdek {
         }
 
         /**
-         * @throws \Cdek\Exceptions\RestApiInvalidRequestException
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @param array $params
+         *
+         * @return array
+         * @throws AuthException
+         * @throws CdekApiException
+         * @throws CdekClientException
+         * @throws CdekServerException
+         * @throws RestApiInvalidRequestException
+         * @throws \JsonException
          */
         public function createOrder(array $params): array
         {
@@ -141,7 +150,7 @@ namespace Cdek {
         }
 
         /**
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          */
         public function getFileByLink(string $link): string
         {
@@ -150,7 +159,7 @@ namespace Cdek {
 
         /**
          * @throws \JsonException
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          */
         public function createWaybill(string $orderUuid): array
         {
@@ -164,7 +173,7 @@ namespace Cdek {
 
         /**
          * @throws \JsonException
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          */
         public function createBarcode(string $orderUuid): array
         {
@@ -186,7 +195,7 @@ namespace Cdek {
 
         /**
          * @throws \JsonException
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          */
         public function getBarcode(string $uuid): array
         {
@@ -199,7 +208,7 @@ namespace Cdek {
 
         /**
          * @throws \JsonException
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          */
         public function getWaybill(string $uuid): array
         {
@@ -212,7 +221,7 @@ namespace Cdek {
 
         /**
          * @throws \JsonException
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          */
         public function deleteOrder($uuid): array
         {
@@ -225,7 +234,7 @@ namespace Cdek {
 
         /**
          * @throws \JsonException
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          */
         public function calculateTariffList($deliveryParam): array
         {
@@ -245,7 +254,7 @@ namespace Cdek {
         }
 
         /**
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          * @throws \JsonException
          */
         public function calculateTariff($deliveryParam)
@@ -269,7 +278,7 @@ namespace Cdek {
 
         /**
          * @throws \JsonException
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          */
         public function getCityCode(string $city, ?string $postcode): int
         {
@@ -291,7 +300,7 @@ namespace Cdek {
         }
 
         /**
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          * @throws \JsonException
          */
         public function getOffices($filter)
@@ -317,7 +326,7 @@ namespace Cdek {
 
         /**
          * @throws \JsonException
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          */
         public function callCourier($param): array
         {
@@ -330,7 +339,7 @@ namespace Cdek {
         }
 
         /**
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          * @throws \JsonException
          */
         public function courierInfo($uuid): array
@@ -343,7 +352,7 @@ namespace Cdek {
         }
 
         /**
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
          * @throws \JsonException
          */
         public function callCourierDelete($uuid): array

@@ -10,10 +10,13 @@ namespace Cdek\Actions {
     use Cdek\CdekApi;
     use Cdek\CoreApi;
     use Cdek\Config;
+    use Cdek\Exceptions\AuthException;
     use Cdek\Exceptions\CdekApiException;
     use Cdek\Exceptions\CdekClientException;
+    use Cdek\Exceptions\CdekServerException;
     use Cdek\Exceptions\PhoneNotValidException;
     use Cdek\Exceptions\RestApiInvalidRequestException;
+    use Cdek\Exceptions\ShippingMethodNotFoundException;
     use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\StringHelper;
@@ -89,6 +92,14 @@ namespace Cdek\Actions {
             }
         }
 
+        /**
+         * @param WC_Order  $order
+         * @param           $postOrderData
+         *
+         * @return array
+         * @throws PhoneNotValidException
+         * @throws ShippingMethodNotFoundException
+         */
         private function buildRequestData(WC_Order $order, $postOrderData): array
         {
             $countryCode     = trim(($order->get_shipping_country() ?: $order->get_billing_country()) ?? 'RU');
@@ -369,9 +380,14 @@ namespace Cdek\Actions {
          * @param $packages
          *
          * @return array
+         * @throws AuthException
          * @throws CdekApiException
-         * @throws RestApiInvalidRequestException
+         * @throws CdekClientException
+         * @throws CdekServerException
          * @throws PhoneNotValidException
+         * @throws RestApiInvalidRequestException
+         * @throws ShippingMethodNotFoundException
+         * @throws JsonException
          */
         private function createOrder($order, $postOrderData, $packages): array
         {
@@ -411,7 +427,15 @@ namespace Cdek\Actions {
             ];
         }
 
-        private function sendOrderInfo($postOrderData, $existOrder)
+        /**
+         * @param $postOrderData
+         * @param $existOrder
+         *
+         * @return array
+         * @throws AuthException
+         * @throws JsonException
+         */
+        private function sendOrderInfo($postOrderData, $existOrder): array
         {
             $cdekStatuses[] = $existOrder['status'];
 
