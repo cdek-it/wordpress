@@ -86,7 +86,7 @@ class DispatchOrderAutomationAction
 
 
         try {
-            (new CoreApi)->getOrderById($orderId);
+            (new CoreApi('common'))->getOrderById($orderId);
         } catch (AuthException|CdekServerException $e) {
             Note::send($orderId, $e->getCode() . ': ' . $e->getMessage(), true);
         } catch (CdekClientException $e) {
