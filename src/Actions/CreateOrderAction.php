@@ -64,9 +64,9 @@ namespace Cdek\Actions {
                 } catch (CdekClientException $e) {
                     if($e->getCode() === 404) {
                         return $this->createOrder($order, $postOrderData, $packages);
-                    }else{
-                        throw new CdekClientException($e->getMessage(), $e->getCode());
                     }
+
+                    throw $e;
                 }
 
             } catch (PhoneNotValidException $e) {
