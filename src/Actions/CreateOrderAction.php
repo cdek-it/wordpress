@@ -19,6 +19,7 @@ namespace Cdek\Actions {
     use Cdek\Exceptions\ShippingMethodNotFoundException;
     use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
+    use Cdek\Helpers\ScheduleLocker;
     use Cdek\Helpers\StringHelper;
     use Cdek\Helpers\WeightCalc;
     use Cdek\MetaKeys;
@@ -59,8 +60,7 @@ namespace Cdek\Actions {
 
             try {
                 try {
-                    $existOrder = $this->coreApi->getOrderById($orderId);
-                    return $this->sendOrderInfo($postOrderData, $existOrder);
+                    return $this->sendOrderInfo($postOrderData, $this->coreApi->getOrderById($orderId));
                 } catch (CdekClientException $e) {
                     if($e->getCode() === 404) {
                         return $this->createOrder($order, $postOrderData, $packages);

@@ -12,6 +12,7 @@ use Cdek\Exceptions\CdekServerException;
 use Cdek\Exceptions\ShippingMethodNotFoundException;
 use Cdek\Helper;
 use Cdek\Helpers\CheckoutHelper;
+use Cdek\Helpers\ScheduleLocker;
 use Cdek\Note;
 use JsonException;
 use WC_Order;
@@ -60,30 +61,16 @@ class DispatchOrderAutomationAction
             return;
         }
 
-        $lock = ActionScheduler_Lock::instance();
+        $lock = ScheduleLocker::instance();
+        $lockType = ScheduleLocker::LOCK_TYPE_AUTOMATION_ORDER . '_' . $order->get_id();
 
-        if ($lock->is_locked(self::LOCK_TYPE)) {
+        if ($lock->is_locked($lockType)) {
             return;
         }
 
-        if (!$lock->set(self::LOCK_TYPE)) {
+        if (!$lock->set($lockType)) {
             return;
         }
-
-        $hooks = as_get_scheduled_actions(
-            [
-                'hook' => Config::ORDER_AUTOMATION_HOOK_NAME,
-                'args' => [
-                    $order->get_id(),
-                    1,
-                ],
-            ],
-        );
-
-        if($hooks){
-            return;
-        }
-
 
         try {
             (new CoreApi('common'))->getOrderById($orderId);
