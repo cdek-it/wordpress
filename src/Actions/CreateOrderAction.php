@@ -65,7 +65,7 @@ namespace Cdek\Actions {
                     if($e->getCode() === 404) {
                         return $this->createOrder($order, $postOrderData, $packages);
                     }else{
-                        throw $e;
+                        throw new CdekClientException($e->getMessage(), $e->getCode());
                     }
                 }
 
