@@ -2,18 +2,30 @@
 
 namespace Cdek\Actions;
 
+use ActionScheduler_Lock;
+use Cdek\CoreApi;
 use Cdek\Config;
+use Cdek\Exceptions\AuthException;
+use Cdek\Exceptions\CdekApiException;
+use Cdek\Exceptions\CdekClientException;
+use Cdek\Exceptions\CdekServerException;
 use Cdek\Exceptions\ShippingMethodNotFoundException;
 use Cdek\Helper;
 use Cdek\Helpers\CheckoutHelper;
+use Cdek\Helpers\ScheduleLocker;
 use Cdek\Note;
+use JsonException;
 use WC_Order;
 
 class DispatchOrderAutomationAction
 {
+    const LOCK_TYPE = 'cdek_dispatch_order_automation_lock';
 
     /**
-     * @param  int|WC_Order  $orderId
+     * @param int|WC_Order   $orderId
+     *
+     * @throws CdekApiException
+     * @throws JsonException
      */
     public function __invoke($orderId, $postedData = null, ?WC_Order $originalOrder = null): void
     {
@@ -31,7 +43,7 @@ class DispatchOrderAutomationAction
             return;
         }
 
-        $actualShippingMethod = Helper::getActualShippingMethod($shipping->get_instance_id());
+        $actualShippingMethod = Helper::getActualShippingMethod((int)$shipping->get_instance_id());
 
         if ($actualShippingMethod->get_option('automate_orders') !== 'yes') {
             return;
@@ -39,17 +51,42 @@ class DispatchOrderAutomationAction
 
         $awaitingGateways = $actualShippingMethod->get_option('automate_wait_gateways', []);
 
-        if (!empty($awaitingGateways) &&
-            in_array($order->get_payment_method(), $awaitingGateways, true) &&
-            !$order->is_paid()) {
+        if (
+            !empty($awaitingGateways)
+            &&
+            in_array($order->get_payment_method(), $awaitingGateways, true)
+            &&
+            !$order->is_paid()
+        ) {
             return;
         }
 
-        if (as_schedule_single_action(time() + 60 * 5, Config::ORDER_AUTOMATION_HOOK_NAME, [
-            $order->get_id(),
-            1,
-        ],                            'cdekdelivery')) {
-            Note::send($order->get_id(), esc_html__('Created order automation task', 'cdekdelivery'));
+        $lock = ScheduleLocker::instance();
+        $lockType = ScheduleLocker::LOCK_TYPE_AUTOMATION_ORDER . '_' . $order->get_id();
+
+        if ($lock->is_locked($lockType)) {
+            return;
+        }
+
+        if (!$lock->set($lockType)) {
+            return;
+        }
+
+        try {
+            (new CoreApi('common'))->getOrderById($orderId);
+        } catch (AuthException|CdekServerException $e) {
+            Note::send($orderId, $e->getCode() . ': ' . $e->getMessage(), true);
+        } catch (CdekClientException $e) {
+            if($e->getCode() === 404){
+                if (as_schedule_single_action(time() + 60 * 5, Config::ORDER_AUTOMATION_HOOK_NAME, [
+                    $order->get_id(),
+                    1,
+                ],                            'cdekdelivery')) {
+                    Note::send($order->get_id(), esc_html__('Created order automation task', 'cdekdelivery'));
+                }
+            }else{
+                Note::send($orderId, $e->getMessage(), true);
+            }
         }
     }
 }

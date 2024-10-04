@@ -15,6 +15,7 @@ namespace Cdek {
     use Cdek\Helpers\CoreTokenStorage;
     use Cdek\Model\TaskOutputData;
     use Cdek\Transport\HttpClient;
+    use JsonException;
 
     final class CoreApi
     {
@@ -27,7 +28,7 @@ namespace Cdek {
 
         /**
          * @throws ShopRegistrationException
-         * @throws \JsonException
+         * @throws JsonException
          */
         public function syncShop(string $authIntToken): string
         {
@@ -60,7 +61,7 @@ namespace Cdek {
 
         /**
          * @throws AuthException
-         * @throws \JsonException
+         * @throws JsonException
          */
         public function fetchShopTokens(string $authIntToken, string $shopId): array
         {
@@ -83,8 +84,8 @@ namespace Cdek {
          * @throws CdekApiException
          * @throws CdekServerException
          * @throws CdekClientException
-         * @throws \JsonException
-         * @throws \Cdek\Exceptions\AuthException
+         * @throws JsonException
+         * @throws AuthException
          */
         public function listTasks(?string $next = null): array
         {
@@ -99,9 +100,42 @@ namespace Cdek {
         }
 
         /**
-         * @throws \JsonException
-         * @throws \Cdek\Exceptions\AuthException
-         * @throws \Cdek\Exceptions\CdekApiException
+         * @throws CdekApiException
+         * @throws CdekServerException
+         * @throws CdekClientException
+         * @throws JsonException
+         * @throws AuthException
+         */
+        public function getOrderById(int $orderId): array
+        {
+                return HttpClient::sendJsonRequest(
+                    $this->getEndpoint("orders/$orderId"),
+                    'GET',
+                    $this->getToken(),
+                )->data();
+        }
+
+
+        /**
+         * @throws CdekApiException
+         * @throws JsonException
+         * @throws CdekClientException
+         * @throws AuthException
+         * @throws CdekServerException
+         */
+        public function getHistory(int $orderId): array
+        {
+            return HttpClient::sendJsonRequest(
+                $this->getEndpoint("orders/$orderId/history"),
+                'GET',
+                $this->getToken(),
+            )->data();
+        }
+
+        /**
+         * @throws JsonException
+         * @throws AuthException
+         * @throws CdekApiException
          */
         private function getEndpoint(?string $path = null): string
         {
@@ -115,9 +149,9 @@ namespace Cdek {
         }
 
         /**
-         * @throws \Cdek\Exceptions\AuthException
-         * @throws \Cdek\Exceptions\CdekApiException
-         * @throws \JsonException
+         * @throws AuthException
+         * @throws CdekApiException
+         * @throws JsonException
          */
         private function getToken(): string
         {
@@ -131,11 +165,11 @@ namespace Cdek {
         }
 
         /**
-         * @throws \Cdek\Exceptions\CdekApiException
-         * @throws \JsonException
-         * @throws \Cdek\Exceptions\AuthException
-         * @throws \Cdek\Exceptions\CdekServerException
-         * @throws \Cdek\Exceptions\CdekClientException
+         * @throws CdekApiException
+         * @throws JsonException
+         * @throws AuthException
+         * @throws CdekServerException
+         * @throws CdekClientException
          */
         public function taskInfo(string $taskId, TaskOutputData $data): array
         {
@@ -151,11 +185,11 @@ namespace Cdek {
         }
 
         /**
-         * @throws \Cdek\Exceptions\CdekApiException
-         * @throws \Cdek\Exceptions\CdekServerException
-         * @throws \Cdek\Exceptions\CdekClientException
-         * @throws \JsonException
-         * @throws \Cdek\Exceptions\AuthException
+         * @throws CdekApiException
+         * @throws CdekServerException
+         * @throws CdekClientException
+         * @throws JsonException
+         * @throws AuthException
          */
         public function putTaskResult(string $taskId, TaskOutputData $data): array
         {
