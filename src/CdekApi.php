@@ -310,8 +310,8 @@ namespace Cdek {
                 'GET',
                 $this->tokenStorage->getToken(),
                 $filter,
-            )->json();
-            if (!$result) {
+            );
+            if (!$result->body()) {
                 return [
                     'success' => false,
                     'message' => esc_html__(

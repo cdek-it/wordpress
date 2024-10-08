@@ -48,8 +48,7 @@ class AdminShippingFields
                     break;
                 case MetaKeys::OFFICE_CODE:
                     try {
-                        $officeAddress = json_decode((new CdekApi)->getOffices(['code' => $meta['value']])['body'],
-                                                     true, 512, JSON_THROW_ON_ERROR);
+                        $officeAddress = (new CdekApi)->getOffices(['code' => $meta['value']])->json();
 
                         if (empty($officeAddress[0]['location']['address'])) {
                             self::renderOffice(esc_html__('Not available for order', 'cdekdelivery'));
