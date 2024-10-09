@@ -20,10 +20,10 @@ namespace Cdek\Controllers {
         {
             $data = (new CdekApi)->getOffices($data->get_params());
 
-            return new WP_REST_Response($data->body(), 200, [
-                'x-current-page'   => $data->getHeaders()['x-current-page'] ?? null,
-                'x-total-pages'    => $data->getHeaders()['x-total-pages'] ?? null,
-                'x-total-elements' => $data->getHeaders()['x-total-elements'] ?? null,
+            return new WP_REST_Response($data instanceof WP_Error ? $data : $data['body'], 200, [
+                'x-current-page'   => $data['headers']['x-current-page'] ?? null,
+                'x-total-pages'    => $data['headers']['x-total-pages'] ?? null,
+                'x-total-elements' => $data['headers']['x-total-elements'] ?? null,
             ]);
         }
 

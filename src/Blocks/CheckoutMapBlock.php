@@ -65,7 +65,7 @@ namespace Cdek\Blocks {
                 'city'   => $city,
                 'points' => $city !== -1 ? $api->getOffices([
                                                                 'city_code' => $city,
-                                                            ])->body() : '[]',
+                                                            ])['body'] : '[]',
             ];
         }
 
