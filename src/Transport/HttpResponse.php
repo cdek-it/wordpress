@@ -51,7 +51,7 @@ namespace Cdek\Transport {
          */
         public function data(): array
         {
-            if (!isset($this->headers['content-type']) || $this->headers['content-type'] !== 'application/json') {
+            if (!isset($this->headers['content-type']) || strpos($this->headers['content-type'], 'application/json') === false) {
                 throw new RuntimeException('Response is not JSON');
             }
 
@@ -67,7 +67,7 @@ namespace Cdek\Transport {
          */
         public function error(): array
         {
-            if (!isset($this->headers['content-type']) || $this->headers['content-type'] !== 'application/json') {
+            if (!isset($this->headers['content-type']) || strpos($this->headers['content-type'], 'application/json') === false) {
                 throw new RuntimeException('Response is not JSON');
             }
 
@@ -83,7 +83,7 @@ namespace Cdek\Transport {
          */
         public function json(): array
         {
-            if (!isset($this->headers['content-type']) || $this->headers['content-type'] !== 'application/json') {
+            if (!isset($this->headers['content-type']) || strpos($this->headers['content-type'], 'application/json') === false) {
                 throw new RuntimeException('Response is not JSON');
             }
 
