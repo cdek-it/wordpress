@@ -85,7 +85,7 @@ namespace Cdek\Helpers {
         {
             $arToken = explode('.', $token);
 
-            return json_decode(base64_decode($arToken[2]), true, 512, JSON_THROW_ON_ERROR)['endpoint'] ?? null;
+            return json_decode(base64_decode(count($arToken) - 1), true, 512, JSON_THROW_ON_ERROR)['endpoint'] ?? null;
         }
 
         /**
