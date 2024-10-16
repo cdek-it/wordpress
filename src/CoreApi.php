@@ -50,13 +50,13 @@ namespace Cdek {
                 throw new ShopRegistrationException('[CDEKDelivery] Register shop failed', 'cdek_error.register.shop');
             }
 
-            if (empty($response->data()['id'])) {
+            if (empty($response->getHeaders()['X-Entity-Id'])) {
                 throw new ShopRegistrationException(
                     '[CDEKDelivery] Failed to get shop uuid', 'cdek_error.uuid.auth', $response->data(),
                 );
             }
 
-            return $response->data()['id'];
+            return $response->getHeaders()['X-Entity-Id'];
         }
 
         /**
