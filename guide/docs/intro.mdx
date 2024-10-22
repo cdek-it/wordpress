@@ -1,0 +1,44 @@
+---
+sidebar_position: 1
+slug: /
+---
+import Image from '@theme/IdealImage';
+
+# Введение
+
+Данный плагин обеспечивает интеграцию с сервисом доставки от СДЭК с магазином на Woocommerce
+
+## Минимальные требования
+
+- [PHP](https://www.php.net/downloads) версии 7.4 или выше
+- [MySQL](https://www.mysql.com/downloads/) версии 5.67 или выше ИЛИ
+  - [MariaDB](https://mariadb.org/download/) версии 10.4 или выше
+- [Wordpress](https://wordpress.org/download/) версии 6.3 или выше
+- [Woocommerce](https://wordpress.org/plugins/woocommerce/) версии 6.9 или выше
+- [Личный кабинет CDEK](https://lk.cdek.ru/) и включенный [API Интеграции](https://lk.cdek.ru/integration)
+
+:::warning
+
+Также необходимо проверить соответствие [Требованиям Woocommerce](https://woocommerce.com/document/server-requirements/#section-1)
+
+:::
+
+## Установка плагина
+
+Для установки необходимо:
+
+1. В панели администратора перейти по пути: `Плагины` -> `Добавить новый`
+1. В поиске найти `CDEKDelivery`
+1. Нажать на **Установить сейчас**
+1. Дождаться пока кнопка **Установить сейчас** не сменит надпись на **Активировать**
+1. Нажать на **Активировать**
+
+<Image img={require('./img/install.png')} />
+
+<details>
+<summary>Кнопка **Установить сейчас** не доступна</summary>
+
+    Возможно, Woocommerce не установлен или не активирован. Проверьте это в разделе `Плагины` -> `Установленные`.
+    <Image img={require('./img/error.png')} />
+
+</details>

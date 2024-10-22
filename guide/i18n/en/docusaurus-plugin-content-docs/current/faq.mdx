@@ -1,0 +1,90 @@
+---
+sidebar_position: 5
+---
+
+# FAQ
+
+Frequently asked questions about the plugin
+
+<details>
+    <summary>How do I set CDEKDelivery methods?</summary>
+
+    After activating the plugin, go to WooCommerce > Settings > Delivery > CDEKDelivery. Here you can set delivery
+    rates, delivery options, and make other settings related to CDEK delivery.
+
+</details>
+
+<details>
+    <summary>Do I need a contract with CDEK to use this plugin?</summary>
+
+    Yes, you will have to enter into a contract with CDEK in order to use CDEK delivery services.
+
+</details>
+
+<details>
+    <summary>Is there a test mode?</summary>
+
+    Yes, CDEKDelivery plugin supports test mode. You can set it in plugin's settings section to try to use it without
+    integration keys.
+
+</details>
+
+<details>
+    <summary>Can I use plugin to ship international orders via CDEK?</summary>
+
+    Yes, the plugin includes international deliveries.
+
+</details>
+
+<details>
+    <summary>What additional services are available?</summary>
+
+    The following additional services are available:
+
+    - Insurance
+    - Free delivery for orders over certain price
+    - Fixed delivery price
+    - Surcharge settable in percentage
+</details>
+
+<details>
+    <summary>What algorithm is used to determine dimensions for price calculation in cart</summary>
+
+    Sort parameters below in ascending order: height, width, and length.
+
+    Now follow these steps for each product:
+
+    read dimensions
+
+    sort dimensions in ascending order
+
+    if there is more than one product, multiply smallest dimension of product by number of products and sort resulting
+    values
+
+    Now compare respective values (i.e., smallest with smallest, medium with medium, greatest with greatest) from
+    settings and from products, and select greatest of them.
+
+    Example: there is order with following products:
+
+    * product 1 (10 \* 12 \* 15) 1 pc
+    * product 2 (5 \* 20 \* 10) 3 pcs
+    * product 3 (7 \* 3 \* 25) 1 pc
+    Dimensions specified in settings are (12, 12, 12)
+
+    The following values will be compared:
+    ~~~
+    (12, 12, 12)
+    (10, 12, 15)
+    (10, 15, 20) ( 15 = 5 * 3, multiply smallest side by number of products and sort again)
+    (3, 7, 25)
+    ~~~
+
+    As a result, order will be calculated with these dimensions: 12, 15, 25.
+</details>
+
+<details>
+    <summary>Can I specify my online store shipment number</summary>
+
+    This is not possible yet; online store number field is always filled in with order UUID. For version 3.11.0 — with
+    Woocommerce order No.
+</details>

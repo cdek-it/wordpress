@@ -1,0 +1,50 @@
+---
+sidebar_position: 1
+---
+import Image from '@theme/IdealImage';
+
+# Sending order info to CDEK
+
+:::warning
+
+Order information is not automatically transmitted to CDEK unless it is enabled in settings
+
+:::
+
+Go to the order page in the admin panel.
+There is a form in Delivery section used to submit shipment package dimensions and create order in CDEK system.
+
+:::note
+
+Dimensions fields by default contain values calculated at the time of order placement
+
+:::
+
+Fill in package dimensions and submit order.
+
+:::info
+
+Package dimensions must be in centimeters
+
+:::
+
+<Image img={require('./img/creation.png')} />
+
+Once the shipment order form is submitted, a waybill is created in the CDEK system and its number will be displayed.
+You can click **Cancel the order** to delete this waybill, edit form data, and resubmit if changes are needed.
+
+<Image img={require('./img/created.png')} />
+
+:::note
+
+Click **Get waybill** to get the waybill hard copy
+
+:::
+
+:::note
+
+Click **Get barcode** to get barcodes for each cargo place
+
+*You can specify barcode print format (A4, A5, A6) in delivery settings*
+
+:::

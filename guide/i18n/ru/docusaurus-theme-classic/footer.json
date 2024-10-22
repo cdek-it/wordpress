@@ -1,0 +1,42 @@
+{
+  "link.title.О плагине": {
+    "message": "О плагине",
+    "description": "The title of the footer links column with title=О плагине in the footer"
+  },
+  "link.title.Официальные ресурсы": {
+    "message": "Официальные ресурсы",
+    "description": "The title of the footer links column with title=Официальные ресурсы in the footer"
+  },
+  "link.title.Полезные ссылки": {
+    "message": "Полезные ссылки",
+    "description": "The title of the footer links column with title=Полезные ссылки in the footer"
+  },
+  "link.item.label.Информация о версиях": {
+    "message": "Информация о версиях",
+    "description": "The label of footer link with label=Информация о версиях linking to https://translate.wordpress.org/projects/wp-plugins/cdekdelivery/"
+  },
+  "link.item.label.Страница плагина": {
+    "message": "Страница плагина",
+    "description": "The label of footer link with label=Страница плагина linking to https://wordpress.org/plugins/cdekdelivery/"
+  },
+  "link.item.label.Заключить договор": {
+    "message": "Заключить договор",
+    "description": "The label of footer link with label=Заключить договор linking to https://www.cdek.ru/ru/contract/"
+  },
+  "link.item.label.Личный кабинет": {
+    "message": "Личный кабинет",
+    "description": "The label of footer link with label=Личный кабинет linking to https://api-docs.cdek.ru/29923741.html"
+  },
+  "link.item.label.Рассчитать стоимость доставки": {
+    "message": "Рассчитать стоимость доставки",
+    "description": "The label of footer link with label=Рассчитать стоимость доставки linking to https://www.cdek.ru/ru/"
+  },
+  "link.item.label.Техническая поддержка": {
+    "message": "Техническая поддержка",
+    "description": "The label of footer link with label=Техническая поддержка linking to mailto:integrator@cdek.ru"
+  },
+  "copyright": {
+    "message": "Copyright © 2024 ООО \"СДЭК ДИДЖИТАЛ\"",
+    "description": "The footer copyright"
+  }
+}

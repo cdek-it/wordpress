@@ -1,0 +1,82 @@
+---
+sidebar_position: 2
+---
+import Image from '@theme/IdealImage';
+
+# Настройка
+
+Доступ к настройкам можно получить по ссылке на странице со списком плагинов.
+
+<Image img={require('./img/setup.png')} />
+
+Прежде всего, необходимо заполнить поля `Идентификатор`, `Секретный ключ` и `Ключ Яндекс.Карты` и нажать на кнопку
+`Сохранить изменения` для применения изменений.
+
+<Image img={require('./img/settings.png')} />
+
+<details>
+    <summary>Где взять `Идентификатор` и `Секретный ключ`</summary>
+
+    Необходимо перейти на страницу [Интеграции](https://lk.cdek.ru/integration) в ЛК СДЭК
+    <Image img={require('./img/int.png')} />
+    И скопировать ключи из соответствующих полей.
+    <Image img={require('./img/keys.png')} />
+
+</details>
+
+<details>
+    <summary>Where to find `Yandex map key`</summary>
+
+    Go to the [Developer's Area](https://developer.tech.yandex.ru/) page and click the Get Key button. Select JavaScript
+    API and HTTP Geocoder in the popup window that appears.
+
+    :::note
+
+    Yandex key has timeout up to 1 hour before any changes will apply
+
+    :::
+
+    When the form is completed, the "Service successfully connected" message will appear. The generated key will be
+    available in the Keys section. It will be required later for the API connection.
+
+    :::warning
+
+    Make sure to set the HTTP Referrer equal to your website address for the key.
+
+    Read more at https://yandex.ru/dev/jsapi30/doc/ru/limit
+
+    :::
+</details>
+
+Then you should select addresses for the cargo shipment (orders) on map — pick-up point (for "from warehouse" rates) or
+address
+(for "from door" rates).
+Check box "Close map after selecting pick-up point" if you want the map to close automatically once the buyer selects a pick-up point.
+
+:::tip
+
+Press and hold CTRL to select several rates at once
+
+:::
+
+<Image img={require('./img/map.png')} />
+
+<details>
+    <summary>Map is not loading</summary>
+
+    <Image img={require('./img/yandex.png')} />
+
+    Please, check the Yandex map key and HTTP Referrer settings. Also try to wait up to 1 hour after the last changes
+    to the key.
+    If the problem persists, please, contact the [plugin support](mailto:integrator@cdek.ru).
+
+</details>
+
+You can link desired additional services to orders in the Services section.
+Set surcharge or discount on delivery price or add insurance to estimate (calculated as 0.75 % of goods price in order) in the Delivery Price section.
+
+:::tip
+
+There is a question mark icon next to some fields — point to it to see details about the field
+
+:::

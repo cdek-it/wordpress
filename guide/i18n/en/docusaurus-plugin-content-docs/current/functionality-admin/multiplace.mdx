@@ -1,0 +1,25 @@
+---
+sidebar_position: 2
+---
+
+import Image from '@theme/IdealImage';
+
+# Multi-seater mode
+
+With enabled Multi-seater mode, products from the same order can be packaged in several packages with different sizes.
+
+<Image img={require('./img/multiplace.png')} />
+
+In addition to choice of package size on the order page in the admin panel, there will be a choice of products and number of products to be in this package.
+Product quantity that can be added to package is limited to the number of these products in order.
+If five pieces of Product 1 are added to the order and three of them are added to package 1 of Product 1, then only two units of that product can be added to package 2 (i.e., remaining undistributed product units).
+
+<Image img={require('./img/multicreation.png')} />
+
+Once all the products are distributed into packages, a list of packages with their dimensions and contents will be
+displayed.
+Clicking Create Order will create an order in the CDEK system and you will get the order № and an
+invoice link in response.
+You can check the package number column to ensure that several packages have been created.
+
+<Image img={require('./img/multiready.png')} />

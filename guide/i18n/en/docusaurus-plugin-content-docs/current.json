@@ -1,0 +1,18 @@
+{
+  "version.label": {
+    "message": "Next",
+    "description": "The label for version current"
+  },
+  "sidebar.tutorialSidebar.category.Функционал для администратора": {
+    "message": "Functionality for Administrator",
+    "description": "The label for category Functionality for Administrator in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Функционал для администратора.link.generated-index.description": {
+    "message": "5 minutes to learn the most important actions for Administrator",
+    "description": "The generated-index page description for category Functionality for Administrator in sidebar tutorialSidebar"
+  },
+  "sidebar.tutorialSidebar.category.Функционал для покупателя": {
+    "message": "Functionality for Customers",
+    "description": "The label for category Functionality for Customers in sidebar tutorialSidebar"
+  }
+}
