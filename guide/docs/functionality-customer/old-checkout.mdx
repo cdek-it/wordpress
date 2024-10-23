@@ -3,42 +3,44 @@ sidebar_position: 1
 ---
 import Image from '@theme/IdealImage';
 
-# Shortcode Checkout
+# Страница оформления заказа на основе шорткода
 
-This page describes how plugin works with the classic shortcode checkout.
+На этой странице описывается, как плагин работает с классической страницей оформления заказа.
 
 <details>
-<summary>How to understand what kind of checkout am I using?</summary>
+    <summary>Как понять какую версию страницы оформления заказа я использую?</summary>
 
-You can check the checkout type in the admin panel. See our [guide](./checkout-versions) for more
-    details.
+    Вы можете проверить тип страницы оформления заказа в панели администратора.
+    Смотрите наш [гайд](./checkout-versions) для более подробной информации.
 
 </details>
 
-After adding goods to the cart, you will find delivery options with various rates and prices on the order creation page.
-Here you can also change the delivery address, and the price will be recalculated.
+После добавления товаров в корзину, на странице оформления заказа вы найдете варианты доставки с различными тарифами.
+При изменении адреса доставки, цена доставки будет пересчитана.
 
 <Image img={require('./img/old.png')} />
 
-For "to warehouse"/"to parcel terminal" rates, **Choose pick-up** button will appear.
-Clicking the button will display a map with pick-up points.
+Для тарифов "на склад" и "на пункт выдачи" появится кнопка **Выбрать ПВЗ**, при клике на которую появится карта с
+возможностью выбрать конкретную точку получения.
 
 <Image img={require('./img/button.png')} />
 
 :::warning
 
-Depending on you theme, position of checkout blocks may vary.
-But, basically, the map button should be located near the delivery options.
+В зависимости от используемой темы, позиция блоков на странице оформления заказа может отличаться.
+Однако, в целом, кнопка карты должна находиться рядом с вариантами доставки.
 
 :::
 
-Selected pick-up point will be displayed next to the **Re-select pick-up** button
+Выбранный ПВЗ будет отображен рядом с кнопкой **Повторно выбрать ПВЗ**
 
 <Image img={require('./img/pickup.png')} />
 
 :::warning
 
-The procedure above is valid for old Wordpress checkout version. The new checkout has a different map representation.
-Please refer to the [new checkout guide](./new-checkout) for more details.
+Выше описан функционал для классической версии страницы оформления заказа.
+Новая версия страницы оформления заказа имеет другое отображение карты.
+Пожалуйста, обратитесь к [гайду по новой странице оформления заказа](./new-checkout) для получения более подробной
+информации.
 
 :::
