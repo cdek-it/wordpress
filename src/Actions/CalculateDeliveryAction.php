@@ -139,7 +139,7 @@ namespace Cdek\Actions {
                         'label'     => sprintf(esc_html__('CDEK: %s, (%s-%s days)', 'cdekdelivery'),
                                                Tariff::getTariffUserNameByCode($tariff['tariff_code']), $minDay,
                                                $maxDay),
-                        'cost'      => $cost,
+                        'cost'      => max($cost, 0),
                         'meta_data' => [
                             MetaKeys::ADDRESS_HASH => sha1($deliveryParam['to']['postal_code'].
                                                            $deliveryParam['to']['city'].
@@ -173,8 +173,8 @@ namespace Cdek\Actions {
                 }
 
                 if (isset($rule['type']) && $rule['type'] === 'fixed') {
-                    $tariff['cost'] = function_exists('wcml_get_woocommerce_currency_option') ?
-                        apply_filters('wcml_raw_price_amount', $rule['value'], 'RUB') : $rule['value'];
+                    $tariff['cost'] = max(function_exists('wcml_get_woocommerce_currency_option') ?
+                        apply_filters('wcml_raw_price_amount', $rule['value'], 'RUB') : $rule['value'], 0);
 
                     return $tariff;
                 }
@@ -208,7 +208,7 @@ namespace Cdek\Actions {
                     $cost    /= $coef;
                 }
 
-                $tariff['cost'] = ceil($cost);
+                $tariff['cost'] = max(ceil($cost), 0);
 
                 return $tariff;
             }, $this->rates);
