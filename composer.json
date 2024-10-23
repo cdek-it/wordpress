@@ -68,7 +68,9 @@
       "composer.*",
       "package.json",
       "yarn.lock",
-      "webpack.config.js"
+      "webpack.config.js",
+      "sonar-project.properties",
+      "guide"
     ]
   },
   "scripts": {
