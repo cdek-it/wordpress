@@ -1,0 +1,32 @@
+---
+sidebar_position: 2
+---
+import Image from '@theme/IdealImage';
+
+# Block Checkout
+
+This page describes how plugin works with the new block checkout.
+
+<details>
+    <summary>How to understand what kind of checkout am I using?</summary>
+
+    You can check the checkout type in the admin panel. See our [guide](./checkout-versions) for more
+    details.
+
+</details>
+
+With the new checkout, delivery options are displayed below a delivery address after its input.
+
+<Image img={require('./img/new.png')} />
+
+There is no pick-up point selection button for "to warehouse" delivery methods;
+in case of such method, map will be displayed below delivery methods rather than in pop-up window.
+
+<Image img={require('./img/map.png')} />
+
+:::warning
+
+The procedure above is valid for new Wordpress checkout version. The old checkout has a different map representation.
+Please refer to the [old checkout guide](./old-checkout) for more details.
+
+:::
