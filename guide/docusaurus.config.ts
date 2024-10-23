@@ -82,7 +82,7 @@ const config: Config = {
           items: [
             {
               label: 'Информация о версиях',
-              to: 'https://translate.wordpress.org/projects/wp-plugins/cdekdelivery/',
+              to: 'https://github.com/cdek-it/wordpress/releases',
             },
             {
               label: 'Страница плагина',
@@ -99,7 +99,7 @@ const config: Config = {
             },
             {
               label: 'Личный кабинет',
-              href: 'https://api-docs.cdek.ru/29923741.html',
+              href: 'https://lk.cdek.ru/',
             },
           ],
         },
