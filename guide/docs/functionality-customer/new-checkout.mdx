@@ -3,30 +3,30 @@ sidebar_position: 2
 ---
 import Image from '@theme/IdealImage';
 
-# Block Checkout
+# Страница оформления заказа на основе блоков
 
-This page describes how plugin works with the new block checkout.
+На этой странице описывается, как плагин работает с новой страницей оформления заказа.
 
 <details>
-    <summary>How to understand what kind of checkout am I using?</summary>
+    <summary>Как понять какую версию страницы оформления заказа я использую?</summary>
 
-    You can check the checkout type in the admin panel. See our [guide](./checkout-versions) for more
-    details.
+    Вы можете проверить тип страницы оформления заказа в панели администратора.
+    Смотрите наш [гайд](./checkout-versions) для более подробной информации.
 
 </details>
 
-With the new checkout, delivery options are displayed below a delivery address after its input.
+На новой странице оформления заказа, варианты доставки отображаются ниже адреса доставки после его ввода.
 
 <Image img={require('./img/new.png')} />
 
-There is no pick-up point selection button for "to warehouse" delivery methods;
-in case of such method, map will be displayed below delivery methods rather than in pop-up window.
+Кнопка выбора пункта самовывоза не отображается, вместо нее отображается карта с доступными пунктами самовывоза.
 
 <Image img={require('./img/map.png')} />
 
 :::warning
 
-The procedure above is valid for new Wordpress checkout version. The old checkout has a different map representation.
-Please refer to the [old checkout guide](./old-checkout) for more details.
+Выше описан функционал для новой версии страницы оформления заказа.
+Старая версия страницы оформления заказа имеет другое отображение карты.
+Пожалуйста, обратитесь к [гайду по старой странице оформления заказа](./old-checkout) для получения более подробной информации.
 
 :::

@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 ---
+
 import Image from '@theme/IdealImage';
 
 # Настройка
@@ -25,58 +26,57 @@ import Image from '@theme/IdealImage';
 </details>
 
 <details>
-    <summary>Where to find `Yandex map key`</summary>
+    <summary>Где получить `Ключ Яндекс.Карты`</summary>
 
-    Go to the [Developer's Area](https://developer.tech.yandex.ru/) page and click the Get Key button. Select JavaScript
-    API and HTTP Geocoder in the popup window that appears.
+    Зайдите на страницу Кабинета Разработчика и нажмите кнопку Получить ключ. Во всплывающем окне выберите сервис
+    «JavaScript API и HTTP Геокодер».
 
     :::note
 
-    Yandex key has timeout up to 1 hour before any changes will apply
+    Может пройти до 1 часа после последних изменений до того, как ключ начнет работать.
 
     :::
 
-    When the form is completed, the "Service successfully connected" message will appear. The generated key will be
-    available in the Keys section. It will be required later for the API connection.
+    После заполнения формы появится надпись «Сервис успешно подключен». Созданный ключ будет доступен в разделе «Ключи».
+    Его необходимо использовать в дальнейшем при подключении API.
 
     :::warning
 
-    Make sure to set the HTTP Referrer equal to your website address for the key.
+    Обязательно задайте параметр HTTP Referrer равный адресу вашего сайта для ключа.
 
-    Read more at https://yandex.ru/dev/jsapi30/doc/ru/limit
+    Подробнее можно прочитать на странице https://yandex.ru/dev/jsapi30/doc/ru/limit
 
     :::
 </details>
 
-Then you should select addresses for the cargo shipment (orders) on map — pick-up point (for "from warehouse" rates) or
-address
-(for "from door" rates).
-Check box "Close map after selecting pick-up point" if you want the map to close automatically once the buyer selects a pick-up point.
+Необходимо выбрать адреса для отправки груза (заказов) на карте - ПВЗ (для тарифов “от склада”) и адрес (для тарифов “от двери”).
+Если Вы хотите, чтобы после выбора ПВЗ покупателем карта автоматически закрывалась - активируйте чекбокс "Закрыть карту после выбора пвз".
 
 :::tip
 
-Press and hold CTRL to select several rates at once
+Выбор нескольких тарифов происходит через нажатую кнопку CTRL
 
 :::
 
 <Image img={require('./img/map.png')} />
 
 <details>
-    <summary>Map is not loading</summary>
+    <summary>Карта не загружается</summary>
 
     <Image img={require('./img/yandex.png')} />
 
-    Please, check the Yandex map key and HTTP Referrer settings. Also try to wait up to 1 hour after the last changes
-    to the key.
-    If the problem persists, please, contact the [plugin support](mailto:integrator@cdek.ru).
+    Пожалуйста, проверьте ключ карты Яндекс и настройки HTTP Referrer.
+    Также попробуйте подождать до 1 часа после последних изменений на стороне Яндекса.
+
+    Если проблема сохраняется, пожалуйста, обратитесь в [техподдержку](mailto:integrator@cdek.ru).
 
 </details>
 
-You can link desired additional services to orders in the Services section.
-Set surcharge or discount on delivery price or add insurance to estimate (calculated as 0.75 % of goods price in order) in the Delivery Price section.
+В блоке "Услуги" Вы можете подключить к закам необходимые дополнительные услуги.
+В блоке "Cтоимость доставки" установить наценку или скидку на стоимость доставки, добавить к расчету стоимость страховки (рассчитывается как 0,75% от стоимости товаров в заказе).
 
 :::tip
 
-There is a question mark icon next to some fields — point to it to see details about the field
+Напротив некоторых полей есть значок вопроса - при наведении на него, отобразится подробная информация о поле
 
 :::
