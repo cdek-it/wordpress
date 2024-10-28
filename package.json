@@ -36,7 +36,7 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@playwright/test": "^1.48.1",
+    "@playwright/test": "^1.48.2",
     "@woocommerce/dependency-extraction-webpack-plugin": "^3.0.1",
     "@woocommerce/eslint-plugin": "^2.3.0",
     "prettier": "^3.3.3",
