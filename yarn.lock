@@ -3161,7 +3161,7 @@ __metadata:
     "@wordpress/api-fetch": "npm:^7.10.0"
     "@wordpress/block-editor": "npm:^14.5.0"
     "@wordpress/data": "npm:^10.10.0"
-    "@wordpress/element": "npm:^6.10.0"
+    "@wordpress/element": "npm:^6.11.0"
     "@wordpress/env": "npm:^10.10.0"
     "@wordpress/i18n": "npm:^5.10.0"
     "@wordpress/icons": "npm:^10.10.0"
@@ -7816,6 +7816,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@wordpress/element@npm:^6.11.0":
+  version: 6.11.0
+  resolution: "@wordpress/element@npm:6.11.0"
+  dependencies:
+    "@babel/runtime": "npm:7.25.7"
+    "@types/react": "npm:^18.2.79"
+    "@types/react-dom": "npm:^18.2.25"
+    "@wordpress/escape-html": "npm:*"
+    change-case: "npm:^4.1.2"
+    is-plain-object: "npm:^5.0.0"
+    react: "npm:^18.3.0"
+    react-dom: "npm:^18.3.0"
+  checksum: 10c0/2b38434a70ae5c747779deaa7dd9b8fea6d8a02510067aef94fa57ea493e80a75cae95e6b69c575fbfb3a12cda62c04072b789472e3abdd02a1200f9511cd6d9
+  languageName: node
+  linkType: hard
+
 "@wordpress/element@npm:wp-6.0":
   version: 4.4.1
   resolution: "@wordpress/element@npm:4.4.1"
@@ -7850,6 +7866,15 @@ __metadata:
   bin:
     wp-env: bin/wp-env
   checksum: 10c0/bb9ebe17b14ec0d0f10d76a0ce01bd8b6baeec76630d2e65458740bf844783f193398e70ae4f609924783b21eb44c863d541d0ce78a9c9692683ad507a6c5952
+  languageName: node
+  linkType: hard
+
+"@wordpress/escape-html@npm:*":
+  version: 3.11.0
+  resolution: "@wordpress/escape-html@npm:3.11.0"
+  dependencies:
+    "@babel/runtime": "npm:7.25.7"
+  checksum: 10c0/157e8b66ddb8d6b71912b1a61535148bd337006c666da30c1f2e6e71b0a8d9a075fa6c7052b306c2d52d0a27ca2b3abbbe98ae73d645a13c66a202b6fa2ecb28
   languageName: node
   linkType: hard
 
@@ -23584,11 +23609,11 @@ __metadata:
 
 "typescript@patch:typescript@npm%3A~5.6.3#optional!builtin<compat/typescript>":
   version: 5.6.3
-  resolution: "typescript@patch:typescript@npm%3A5.6.3#optional!builtin<compat/typescript>::version=5.6.3&hash=8c6c40"
+  resolution: "typescript@patch:typescript@npm%3A5.6.3#optional!builtin<compat/typescript>::version=5.6.3&hash=5adc0c"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 10c0/7c9d2e07c81226d60435939618c91ec2ff0b75fbfa106eec3430f0fcf93a584bc6c73176676f532d78c3594fe28a54b36eb40b3d75593071a7ec91301533ace7
+  checksum: 10c0/ac8307bb06bbfd08ae7137da740769b7d8c3ee5943188743bb622c621f8ad61d244767480f90fbd840277fbf152d8932aa20c33f867dea1bb5e79b187ca1a92f
   languageName: node
   linkType: hard
 
