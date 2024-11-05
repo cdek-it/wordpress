@@ -1,36 +1,51 @@
 <?php
 
-namespace Cdek\Contracts;
+declare(strict_types=1);
 
-use Cdek\CdekApi;
+namespace {
 
-abstract class TokenStorageContract
-{
-    private const CIPHER = 'AES-256-CBC';
+    defined('ABSPATH') or exit;
+}
 
-    abstract function getToken();
+namespace Cdek\Contracts {
 
-    abstract function updateToken();
+    use Cdek\CdekApi;
+    use Cdek\Exceptions\External\LegacyAuthException;
 
     /**
-     * @throws \Cdek\Exceptions\AuthException
-     * @throws \JsonException
+     * @deprecated
      */
-    final protected function fetchTokenFromApi(): string
+    abstract class TokenStorageContract
     {
-        return (new CdekApi)->fetchToken();
-    }
+        private const CIPHER = 'AES-256-CBC';
 
-    protected function encryptToken($token, $clientId): string {
-        $iv = openssl_random_pseudo_bytes(openssl_cipher_iv_length(self::CIPHER));
-        $encryptedToken = openssl_encrypt($token, self::CIPHER, $clientId, 0, $iv);
-        return base64_encode($iv . $encryptedToken);
-    }
+        abstract function getToken();
 
-    protected function decryptToken($token, $clientId): string {
-        $data = base64_decode($token);
-        $iv = substr($data, 0, openssl_cipher_iv_length(self::CIPHER));
-        $encryptedData = substr($data, openssl_cipher_iv_length(self::CIPHER));
-        return openssl_decrypt($encryptedData, self::CIPHER, $clientId, 0, $iv);
+        abstract function updateToken();
+
+        /**
+         * @throws LegacyAuthException
+         */
+        final protected function fetchTokenFromApi(): string
+        {
+            return (new CdekApi)->fetchToken();
+        }
+
+        protected function encryptToken($token, $clientId): string
+        {
+            $iv             = openssl_random_pseudo_bytes(openssl_cipher_iv_length(self::CIPHER));
+            $encryptedToken = openssl_encrypt($token, self::CIPHER, $clientId, 0, $iv);
+
+            return base64_encode($iv.$encryptedToken);
+        }
+
+        protected function decryptToken($token, $clientId): string
+        {
+            $data          = base64_decode($token);
+            $iv            = substr($data, 0, openssl_cipher_iv_length(self::CIPHER));
+            $encryptedData = substr($data, openssl_cipher_iv_length(self::CIPHER));
+
+            return openssl_decrypt($encryptedData, self::CIPHER, $clientId, 0, $iv);
+        }
     }
 }

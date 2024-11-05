@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -9,6 +11,7 @@ namespace Cdek {
 
     class Config
     {
+        public const PLUGIN_NAME = 'CDEKDelivery';
         public const DELIVERY_NAME = 'official_cdek';
         public const META_KEY = 'order_data';
         public const ORDER_META_BOX_KEY = 'official_cdek_order';

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -38,7 +40,9 @@ namespace Cdek\Helpers {
                  CheckoutHelper::isCdekShippingMethod(wc_get_order(absint(wp_strip_all_tags($_REQUEST['id']))))) ||
                 (isset($_REQUEST['action'], $_REQUEST['order_id']) &&
                  $_REQUEST['action'] === 'woocommerce_load_order_items' &&
-                 CheckoutHelper::isCdekShippingMethod(wc_get_order(absint(wp_strip_all_tags($_REQUEST['order_id'])))))) {
+                 CheckoutHelper::isCdekShippingMethod(
+                     wc_get_order(absint(wp_strip_all_tags($_REQUEST['order_id']))),
+                 ))) {
                 $hiddenMeta[] = 'tariff_code';
                 $hiddenMeta[] = 'tariff_type';
                 $hiddenMeta[] = 'tariff_mode';

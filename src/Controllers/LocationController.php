@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -9,7 +11,6 @@ namespace Cdek\Controllers {
 
     use Cdek\CdekApi;
     use Cdek\Config;
-    use WP_Error;
     use WP_REST_Request;
     use WP_REST_Response;
     use WP_REST_Server;
@@ -18,12 +19,12 @@ namespace Cdek\Controllers {
     {
         public static function getPoints(WP_REST_Request $data): WP_REST_Response
         {
-            $data = (new CdekApi)->getOffices($data->get_params());
+            $offices = (new CdekApi)->getOffices($data->get_params());
 
-            return new WP_REST_Response($data->body(), 200, [
-                'x-current-page'   => $data->getHeaders()['x-current-page'] ?? null,
-                'x-total-pages'    => $data->getHeaders()['x-total-pages'] ?? null,
-                'x-total-elements' => $data->getHeaders()['x-total-elements'] ?? null,
+            return new WP_REST_Response($offices->body(), 200, [
+                'x-current-page'   => $offices->getHeaders()['x-current-page'] ?? null,
+                'x-total-pages'    => $offices->getHeaders()['x-total-pages'] ?? null,
+                'x-total-elements' => $offices->getHeaders()['x-total-elements'] ?? null,
             ]);
         }
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -34,9 +36,29 @@ namespace Cdek\Helpers {
             throw new RuntimeException('CDEKDelivery: The selected unit of measure is not found');
         }
 
+        final public static function getWeight($weight): float
+        {
+            if (empty($weight) ||
+                Helper::getActualShippingMethod()->get_option('product_package_default_toggle') === 'yes') {
+                $defaultWeight = (float)str_replace(
+                    ',',
+                    '.',
+                    Helper::getActualShippingMethod()->get_option('product_weight_default'),
+                );
+                $weight        = $defaultWeight;
+            }
+
+            return (float)$weight;
+        }
+
+        private static function convertToG(float $weight, float $coefficient): int
+        {
+            return ceil($weight * $coefficient);
+        }
+
         final public static function getWeightInWcMeasurement($weight): float
         {
-            $measurement        = get_option('woocommerce_weight_unit');
+            $measurement = get_option('woocommerce_weight_unit');
             switch ($measurement) {
                 case 'g':
                     return $weight;
@@ -48,23 +70,6 @@ namespace Cdek\Helpers {
                     return self::convertToMeasurement($weight, self::G_INTO_OZ);
             }
             throw new RuntimeException('CDEKDelivery: The selected unit of measure is not found');
-        }
-
-        final public static function getWeight($weight): float
-        {
-            if (empty($weight) ||
-                Helper::getActualShippingMethod()->get_option('product_package_default_toggle') === 'yes') {
-                $defaultWeight = (float) str_replace(',', '.', Helper::getActualShippingMethod()
-                                                                     ->get_option('product_weight_default'));
-                $weight        = $defaultWeight;
-            }
-
-            return (float) $weight;
-        }
-
-        private static function convertToG(float $weight, float $coefficient): int
-        {
-            return ceil($weight * $coefficient);
         }
 
         private static function convertToMeasurement(int $weight, float $coefficient): float

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -9,13 +11,11 @@ namespace Cdek {
 
     use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
     use Automattic\WooCommerce\Utilities\FeaturesUtil;
-    use Cdek\Actions\CreateOrderAction;
     use Cdek\Actions\DispatchOrderAutomationAction;
-    use Cdek\Actions\FlushTokenCacheAction;
+    use Cdek\Actions\OrderCreateAction;
     use Cdek\Actions\ProcessWoocommerceCreateShippingAction;
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
-    use Cdek\Managers\TaskManager;
     use Cdek\Blocks\CheckoutMapBlock;
     use Cdek\Controllers\CourierController;
     use Cdek\Controllers\LocationController;
@@ -23,6 +23,7 @@ namespace Cdek {
     use Cdek\Controllers\RestController;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\DataWPScraber;
+    use Cdek\Traits\CanBeCreated;
     use Cdek\UI\Admin;
     use Cdek\UI\AdminNotices;
     use Cdek\UI\AdminShippingFields;
@@ -35,6 +36,8 @@ namespace Cdek {
 
     class Loader
     {
+        use CanBeCreated;
+
         public const REQUIRED_PLUGINS
             = [
                 'WooCommerce' => [
@@ -62,9 +65,9 @@ namespace Cdek {
             return self::$pluginName;
         }
 
-        public static function getPluginUrl(): string
+        public static function getPluginUrl(?string $path = null): string
         {
-            return plugin_dir_url(self::$pluginMainFilePath);
+            return plugin_dir_url(self::$pluginMainFilePath).($path !== null ? ltrim($path, '/') : '');
         }
 
         public static function getPluginFile(): string
@@ -82,16 +85,7 @@ namespace Cdek {
             }
 
             self::checkRequirements();
-            TaskManager::addPluginScheduleEvents();
-        }
-
-        public static function deactivate()
-        {
-            foreach (TaskManager::getTasksHooks() as $hook){
-                if (as_has_scheduled_action($hook) !== false) {
-                    as_unschedule_action($hook);
-                }
-            }
+            TaskManager::scheduleExecution();
         }
 
         /**
@@ -106,9 +100,14 @@ namespace Cdek {
                     throw new RuntimeException("$plugin plugin is not activated, but required.");
                 }
 
-                if (version_compare($checkFields['version'],
-                                    get_file_data(WP_PLUGIN_DIR.'/'.$checkFields['entry'], ['Version'])[0], '>')) {
-                    throw new RuntimeException("$plugin plugin version is too old, required minimum version is {$checkFields['version']}.");
+                if (version_compare(
+                    $checkFields['version'],
+                    get_file_data(WP_PLUGIN_DIR.DIRECTORY_SEPARATOR.$checkFields['entry'], ['Version'])[0],
+                    '>',
+                )) {
+                    throw new RuntimeException(
+                        "$plugin plugin version is too old, required minimum version is {$checkFields['version']}.",
+                    );
                 }
             }
 
@@ -119,9 +118,14 @@ namespace Cdek {
             }
         }
 
-        public static function getPluginPath(): string
+        public static function deactivate(): void
         {
-            return plugin_dir_path(self::$pluginMainFilePath);
+            TaskManager::cancelExecution();
+        }
+
+        public static function getPluginPath(?string $path = null): string
+        {
+            return plugin_dir_path(self::$pluginMainFilePath).($path !== null ? ltrim($path, DIRECTORY_SEPARATOR) : '');
         }
 
         public function __invoke(string $pluginMainFile): void
@@ -141,13 +145,15 @@ namespace Cdek {
             self::$pluginName     = get_file_data(self::$pluginMainFilePath, ['Plugin Name'])[0];
             self::$pluginMainFile = plugin_basename(self::$pluginMainFilePath);
 
-            add_action("activate_" . plugin_basename($pluginMainFile), [__CLASS__, 'activate']);
-            add_action("deactivate_" . plugin_basename($pluginMainFile), [__CLASS__, 'deactivate']);
+            add_action("activate_".plugin_basename($pluginMainFile), [__CLASS__, 'activate']);
+            add_action("deactivate_".plugin_basename($pluginMainFile), [__CLASS__, 'deactivate']);
 
             self::declareCompatibility();
 
-            add_action('plugins_loaded',
-                static fn() => load_plugin_textdomain('cdekdelivery', false, dirname(self::$pluginMainFile).'/lang'));
+            add_action(
+                'plugins_loaded',
+                static fn() => load_plugin_textdomain('cdekdelivery', false, dirname(self::$pluginMainFile).'/lang'),
+            );
 
             add_filter('plugin_action_links_'.self::$pluginMainFile, [Admin::class, 'addPluginLinks']);
             add_filter('plugin_row_meta', [Admin::class, 'addPluginRowMeta'], 10, 2);
@@ -159,8 +165,10 @@ namespace Cdek {
 
             add_filter('woocommerce_hidden_order_itemmeta', [DataWPScraber::class, 'hideMeta']);
             add_filter('woocommerce_checkout_fields', [CheckoutHelper::class, 'restoreCheckoutFields'], 1090);
-            add_action('woocommerce_shipping_methods',
-                static fn($methods) => array_merge($methods, [Config::DELIVERY_NAME => CdekShippingMethod::class]));
+            add_action(
+                'woocommerce_shipping_methods',
+                static fn($methods) => array_merge($methods, [Config::DELIVERY_NAME => ShippingMethod::class]),
+            );
 
             add_action('woocommerce_checkout_process', new CheckoutProcessValidator);
             add_action('woocommerce_store_api_checkout_update_order_meta', new CheckoutProcessValidator);
@@ -173,31 +181,43 @@ namespace Cdek {
             add_action('woocommerce_checkout_order_processed', new DispatchOrderAutomationAction, 10, 3);
             add_action('woocommerce_store_api_checkout_order_processed', new DispatchOrderAutomationAction);
 
-            add_action('woocommerce_blocks_loaded',
-                static fn() => add_action('woocommerce_blocks_checkout_block_registration',
-                    static fn(IntegrationRegistry $registry) => $registry->register(new CheckoutMapBlock)));
+            add_action(
+                'woocommerce_blocks_loaded',
+                static fn()
+                    => add_action(
+                    'woocommerce_blocks_checkout_block_registration',
+                    static fn(IntegrationRegistry $registry) => $registry->register(new CheckoutMapBlock),
+                ),
+            );
 
             add_action('woocommerce_blocks_loaded', [CheckoutMapBlock::class, 'addStoreApiData']);
 
-            add_action('woocommerce_store_api_checkout_update_customer_from_request',
-                       [CheckoutMapBlock::class, 'saveCustomerData'], 10, 2);
+            add_action(
+                'woocommerce_store_api_checkout_update_customer_from_request',
+                [CheckoutMapBlock::class, 'saveCustomerData'],
+                10,
+                2,
+            );
 
-            add_action('woocommerce_store_api_checkout_update_order_from_request',
-                       [CheckoutMapBlock::class, 'saveOrderData'], 10, 2);
+            add_action(
+                'woocommerce_store_api_checkout_update_order_from_request',
+                [CheckoutMapBlock::class, 'saveOrderData'],
+                10,
+                2,
+            );
 
             add_action('woocommerce_before_order_itemmeta', new AdminShippingFields, 10, 2);
 
-            add_action('upgrader_process_complete', [TaskManager::class, 'addPluginScheduleEvents']);
+            add_action('upgrader_process_complete', [TaskManager::class, 'scheduleExecution']);
 
-            add_action(Config::ORDER_AUTOMATION_HOOK_NAME, new CreateOrderAction, 10, 2);
+            add_action(Config::ORDER_AUTOMATION_HOOK_NAME, OrderCreateAction::new(), 10, 2);
+            add_action(Config::TASK_MANAGER_HOOK_NAME, new TaskManager, 20);
 
-            TaskManager::registerTasks();
-
-            (new CdekWidget)();
-            (new Admin)();
-            (new Frontend)();
-            (new MetaBoxes)();
-            (new AdminNotices)();
+            CdekWidget::new()();
+            Admin::new()();
+            Frontend::new()();
+            MetaBoxes::new()();
+            AdminNotices::new()();
         }
 
         private static function declareCompatibility(): void

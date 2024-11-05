@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -38,9 +40,16 @@ namespace Cdek\Validator {
 
             $cityCode = $api->getCityCode($city, $state);
             if ($cityCode === -1) {
-                wc_add_notice(      sprintf(/* translators: 1: Name of a city 2: ZIP code */ esc_html__('Failed to determine locality in %1$s %2$s',
-                                                                                                        'cdekdelivery'),
-                    $city, $state), 'error');
+                wc_add_notice(
+                    sprintf(/* translators: 1: Name of a city 2: ZIP code */ esc_html__(
+                        'Failed to determine locality in %1$s %2$s',
+                        'cdekdelivery',
+                    ),
+                        $city,
+                        $state,
+                    ),
+                    'error',
+                );
             }
 
             $tariffCode = explode(':', $shippingMethodIdSelected)[1];
@@ -53,9 +62,9 @@ namespace Cdek\Validator {
                 wc_add_notice(esc_html__('No shipping address.', 'cdekdelivery'), 'error');
             }
 
-            if(empty($phone)) {
+            if (empty($phone)) {
                 wc_add_notice(esc_html__('Phone number is required.', 'cdekdelivery'), 'error');
-            }else{
+            } else {
                 try {
                     Helper::validateCdekPhoneNumber($phone, $country);
                 } catch (Throwable $e) {

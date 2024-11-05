@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -9,12 +11,15 @@ namespace Cdek\Actions {
 
     use Cdek\CdekApi;
     use Cdek\Model\OrderMetaData;
-    use Cdek\Model\Validate;
+    use Cdek\Model\ValidationResult;
+    use Cdek\Traits\CanBeCreated;
     use Cdek\Validator\ValidateDeleteOrder;
     use Cdek\Validator\ValidateGetOrder;
 
-    class DeleteOrderAction
+    class OrderDeleteAction
     {
+        use CanBeCreated;
+
         private CdekApi $api;
 
         public function __construct()
@@ -22,7 +27,7 @@ namespace Cdek\Actions {
             $this->api = new CdekApi;
         }
 
-        public function __invoke(int $orderId): array
+        public function __invoke(int $orderId): ValidationResult
         {
             $orderNumber = OrderMetaData::getMetaByOrderId($orderId)['order_uuid'];
 
@@ -32,21 +37,19 @@ namespace Cdek\Actions {
 
             $validate = ValidateGetOrder::validate($order, $orderNumber, $orderId);
             if (!$validate->state) {
-                return $validate->response();
+                return $validate;
             }
 
             $delete = $this->api->deleteOrder($orderNumber);
 
             $validate = ValidateDeleteOrder::validate($delete, $orderNumber, $orderId);
             if (!$validate->state) {
-                return $validate->response();
+                return $validate;
             }
 
-            $callCourier = new CallCourier();
-            $callCourier->delete($orderId);
+            IntakeDeleteAction::new()($orderId);
 
-            $validate = new Validate(true, esc_html__('Order has been deleted.', 'cdekdelivery'));
-            return $validate->response();
+            return new ValidationResult(true, esc_html__('Order has been deleted.', 'cdekdelivery'));
         }
     }
 }

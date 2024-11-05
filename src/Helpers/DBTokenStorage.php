@@ -1,84 +1,106 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
 
-namespace Cdek\Helpers;
+declare(strict_types=1);
 
-use Cdek\CdekApi;
-use Cdek\Contracts\TokenStorageContract;
-use Cdek\Helper;
-use Cdek\Exceptions\CdekApiException;
+namespace {
 
-class DBTokenStorage extends TokenStorageContract
-{
-    private static string $tokenStatic = '';
-    private static int $tokenExpStatic = 0;
+    defined('ABSPATH') or exit;
+}
 
-    final public static function flushCache(): void
-    {
-        Helper::getActualShippingMethod()->update_option('token', null);
-    }
+namespace Cdek\Helpers {
+
+    use Cdek\Contracts\TokenStorageContract;
+    use Cdek\Exceptions\External\LegacyAuthException;
+    use Cdek\Helper;
+    use JsonException;
 
     /**
-     * @throws \JsonException
-     * @throws \Cdek\Exceptions\AuthException
+     * @deprecated use CoreTokenStorage instead
      */
-    final public function getToken(): string
+    class DBTokenStorage extends TokenStorageContract
     {
-        $token = $this->getTokenFromCache();
+        private static string $tokenStatic = '';
+        private static int $tokenExpStatic = 0;
+        private static int $iteration = 0;
 
-        if (empty($token)) {
-            $token = $this->getTokenFromSettings();
+        final public static function flushCache(): void
+        {
+            Helper::getActualShippingMethod()->update_option('token', null);
         }
 
-        if (empty($token)) {
-            $token = $this->updateToken();
+        /**
+         * @throws LegacyAuthException
+         */
+        final public function getToken(): string
+        {
+            $token = $this->getTokenFromCache();
+
+            if (empty($token)) {
+                $token = $this->getTokenFromSettings();
+            }
+
+            if (empty($token)) {
+                $token = $this->updateToken();
+            }
+
+            return "Bearer $token";
         }
 
-        return "Bearer $token";
-    }
-
-    private function getTokenFromCache(): ?string
-    {
-        return !empty(self::$tokenStatic) && self::$tokenExpStatic > time() ? self::$tokenStatic : null;
-    }
-
-    private function getTokenFromSettings(): ?string
-    {
-        $tokenSetting = Helper::getActualShippingMethod()->get_option('token');
-        if (empty($tokenSetting)) {
-            return null;
+        private function getTokenFromCache(): ?string
+        {
+            return !empty(self::$tokenStatic) && self::$tokenExpStatic > time() ? self::$tokenStatic : null;
         }
-        $decryptToken = $this->decryptToken($tokenSetting, Helper::getActualShippingMethod()->get_option('client_id'));
-        if (empty($decryptToken)) {
-            return null;
-        }
-        $tokenExpSetting = $this->getTokenExp($decryptToken);
-        if ($tokenExpSetting < time()) {
-            return null;
-        }
-        self::$tokenStatic    = $decryptToken;
-        self::$tokenExpStatic = $tokenExpSetting;
-        return $decryptToken;
-    }
 
-    /**
-     * @throws \JsonException
-     */
-    private function getTokenExp(string $token): int
-    {
-        return json_decode(base64_decode(strtr(explode('.', $token)[1], '-_', '+/')), false, 512, JSON_THROW_ON_ERROR)->exp;
-    }
+        private function getTokenFromSettings(): ?string
+        {
+            $tokenSetting = Helper::getActualShippingMethod()->get_option('token');
+            if (empty($tokenSetting)) {
+                return null;
+            }
+            $decryptToken = $this->decryptToken(
+                $tokenSetting,
+                Helper::getActualShippingMethod()->get_option('client_id'),
+            );
+            if (empty($decryptToken)) {
+                return null;
+            }
+            $tokenExpSetting = $this->getTokenExp($decryptToken);
+            if ($tokenExpSetting < time()) {
+                return null;
+            }
+            self::$tokenStatic    = $decryptToken;
+            self::$tokenExpStatic = $tokenExpSetting;
 
-    /**
-     * @throws \Cdek\Exceptions\AuthException|\JsonException
-     */
-    final public function updateToken(): string
-    {
-        $tokenApi     = $this->fetchTokenFromApi();
-        $clientId     = Helper::getActualShippingMethod()->get_option('client_id');
-        $tokenEncrypt = $this->encryptToken($tokenApi, $clientId);
-        Helper::getActualShippingMethod()->update_option('token', $tokenEncrypt);
-        self::$tokenStatic    = $tokenApi;
-        self::$tokenExpStatic = $this->getTokenExp($tokenApi);
-        return $tokenApi;
+            return $decryptToken;
+        }
+
+        private function getTokenExp(string $token): int
+        {
+            try{
+                return json_decode(
+                           base64_decode(strtr(explode('.', $token)[1], '-_', '+/')),
+                           true,
+                           512,
+                           JSON_THROW_ON_ERROR,
+                       )['exp'];
+            }catch (JsonException $e){
+                return 0;
+            }
+        }
+
+        /**
+         * @throws LegacyAuthException
+         */
+        final public function updateToken(): string
+        {
+            $tokenApi     = $this->fetchTokenFromApi();
+            $clientId     = Helper::getActualShippingMethod()->get_option('client_id');
+            $tokenEncrypt = $this->encryptToken($tokenApi, $clientId);
+            Helper::getActualShippingMethod()->update_option('token', $tokenEncrypt);
+            self::$tokenStatic    = $tokenApi;
+            self::$tokenExpStatic = $this->getTokenExp($tokenApi);
+
+            return $tokenApi;
+        }
     }
 }

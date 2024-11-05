@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * @noinspection PhpMultipleClassDeclarationsInspection
+ */
 declare(strict_types=1);
 
 namespace {
@@ -9,7 +12,8 @@ namespace {
 
 namespace Cdek\Transport {
 
-    use RuntimeException;
+    use Cdek\Exceptions\External\UnparsableAnswerException;
+    use JsonException;
 
     final class HttpResponse
     {
@@ -24,11 +28,6 @@ namespace Cdek\Transport {
             $this->statusCode = $statusCode;
             $this->body       = $body;
             $this->headers    = $headers;
-        }
-
-        public function isSuccessful(): bool
-        {
-            return $this->statusCode >= 200 && $this->statusCode < 300;
         }
 
         public function isServerError(): bool
@@ -47,51 +46,53 @@ namespace Cdek\Transport {
         }
 
         /**
-         * @throws \JsonException
+         * @throws UnparsableAnswerException
          */
         public function data(): array
         {
-            if (!isset($this->headers['content-type']) || strpos($this->headers['content-type'], 'application/json') === false) {
-                throw new RuntimeException('Response is not JSON');
-            }
-
-            if($this->decodedBody === null){
-                $this->decodedBody = json_decode($this->body, true, 512, JSON_THROW_ON_ERROR);
-            }
-
-            return $this->decodedBody['data'] ?? [];
+            return $this->json()['data'] ?? [];
         }
 
         /**
-         * @throws \JsonException
-         */
-        public function error(): array
-        {
-            if (!isset($this->headers['content-type']) || strpos($this->headers['content-type'], 'application/json') === false) {
-                throw new RuntimeException('Response is not JSON');
-            }
-
-            if($this->decodedBody === null){
-                $this->decodedBody = json_decode($this->body, true, 512, JSON_THROW_ON_ERROR);
-            }
-
-            return $this->decodedBody['error'] ?? [];
-        }
-
-        /**
-         * @throws \JsonException
+         * @throws UnparsableAnswerException
          */
         public function json(): array
         {
-            if (!isset($this->headers['content-type']) || strpos($this->headers['content-type'], 'application/json') === false) {
-                throw new RuntimeException('Response is not JSON');
+            if (!isset($this->headers['content-type']) ||
+                strpos($this->headers['content-type'], 'application/json') === false) {
+                throw new UnparsableAnswerException($this->body);
             }
 
-            if($this->decodedBody === null){
-                $this->decodedBody = json_decode($this->body, true, 512, JSON_THROW_ON_ERROR);
+            if ($this->decodedBody === null) {
+                try {
+                    $this->decodedBody = json_decode(
+                        $this->body,
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE,
+                    );
+                } catch (JsonException $e) {
+                    throw new UnparsableAnswerException($this->body);
+                }
             }
 
             return $this->decodedBody;
+        }
+
+        /**
+         * @throws UnparsableAnswerException
+         */
+        public function nextCursor(): ?string
+        {
+            return $this->json()['cursor']['next'] ?? null;
+        }
+
+        /**
+         * @throws UnparsableAnswerException
+         */
+        public function error(): array
+        {
+            return $this->json()['error'] ?? [];
         }
 
         public function body(): string

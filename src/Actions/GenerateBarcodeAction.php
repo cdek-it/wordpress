@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace {
 
@@ -11,9 +12,11 @@ namespace Cdek\Actions {
     use Cdek\Config;
     use Cdek\Enums\BarcodeFormat;
     use Cdek\Helper;
+    use Cdek\Traits\CanBeCreated;
 
     class GenerateBarcodeAction
     {
+        use CanBeCreated;
         private CdekApi $api;
 
         public function __construct()
@@ -27,7 +30,7 @@ namespace Cdek\Actions {
                                           Config::GRAPHICS_FIRST_SLEEP +
                                           Config::GRAPHICS_TIMEOUT_SEC * Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS);
 
-            $order = json_decode($this->api->getOrder($cdekUuid), true);
+            $order = $this->api->getOrder($cdekUuid);
 
             if (!isset($order['entity'])) {
                 return [

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -16,8 +18,8 @@ namespace Cdek\Blocks {
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\MetaKeys;
     use Cdek\Model\Tariff;
-    use WC_Order;
     use WC_Customer;
+    use WC_Order;
     use WP_REST_Request;
 
     class CheckoutMapBlock implements IntegrationInterface
@@ -26,18 +28,18 @@ namespace Cdek\Blocks {
         public static function addStoreApiData(): void
         {
             woocommerce_store_api_register_endpoint_data([
-                                                             'endpoint'        => CartSchema::IDENTIFIER,
-                                                             'namespace'       => Config::DELIVERY_NAME,
-                                                             'schema_callback' => [__CLASS__, 'extend_cart_schema'],
-                                                             'schema_type'     => ARRAY_A,
-                                                             'data_callback'   => [__CLASS__, 'extend_cart_data'],
-                                                         ]);
+                'endpoint'        => CartSchema::IDENTIFIER,
+                'namespace'       => Config::DELIVERY_NAME,
+                'schema_callback' => [__CLASS__, 'extend_cart_schema'],
+                'schema_type'     => ARRAY_A,
+                'data_callback'   => [__CLASS__, 'extend_cart_data'],
+            ]);
             woocommerce_store_api_register_endpoint_data([
-                                                             'endpoint'        => CheckoutSchema::IDENTIFIER,
-                                                             'namespace'       => Config::DELIVERY_NAME,
-                                                             'schema_callback' => [__CLASS__, 'extend_checkout_schema'],
-                                                             'schema_type'     => ARRAY_A,
-                                                         ]);
+                'endpoint'        => CheckoutSchema::IDENTIFIER,
+                'namespace'       => Config::DELIVERY_NAME,
+                'schema_callback' => [__CLASS__, 'extend_checkout_schema'],
+                'schema_type'     => ARRAY_A,
+            ]);
         }
 
         public static function extend_cart_data(): array
@@ -64,8 +66,8 @@ namespace Cdek\Blocks {
                 ],
                 'city'   => $city,
                 'points' => $city !== -1 ? $api->getOffices([
-                                                                'city_code' => $city,
-                                                            ])->body() : '[]',
+                    'city_code' => $city,
+                ])->body() : '[]',
             ];
         }
 
@@ -102,13 +104,12 @@ namespace Cdek\Blocks {
 
         public static function saveCustomerData(WC_Customer $customer, WP_REST_Request $request): void
         {
-            if (
-                array_key_exists(Config::DELIVERY_NAME, $request['extensions'])
-                &&
-                !empty($request['extensions'][Config::DELIVERY_NAME]['office_code'])
-            ) {
-                $customer->add_meta_data(Config::DELIVERY_NAME . '_office_code',
-                                         $request['extensions'][Config::DELIVERY_NAME]['office_code']);
+            if (array_key_exists(Config::DELIVERY_NAME, $request['extensions']) &&
+                !empty($request['extensions'][Config::DELIVERY_NAME]['office_code'])) {
+                $customer->add_meta_data(
+                    Config::DELIVERY_NAME.'_office_code',
+                    $request['extensions'][Config::DELIVERY_NAME]['office_code'],
+                );
             }
         }
 
@@ -120,10 +121,13 @@ namespace Cdek\Blocks {
                 return;
             }
 
-            if (Tariff::isTariffToOffice((int) ($shippingMethod->get_meta(MetaKeys::TARIFF_CODE) ?:
-                $shippingMethod->get_meta('tariff_code')))) {
-                $shippingMethod->add_meta_data(MetaKeys::OFFICE_CODE,
-                                               $request['extensions'][Config::DELIVERY_NAME]['office_code']);
+            if (Tariff::isTariffToOffice(
+                (int)($shippingMethod->get_meta(MetaKeys::TARIFF_CODE) ?: $shippingMethod->get_meta('tariff_code')),
+            )) {
+                $shippingMethod->add_meta_data(
+                    MetaKeys::OFFICE_CODE,
+                    $request['extensions'][Config::DELIVERY_NAME]['office_code'],
+                );
             }
         }
 

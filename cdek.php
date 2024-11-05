@@ -28,4 +28,4 @@ if (!class_exists(\Cdek\Loader::class)) {
                   E_USER_ERROR);
 }
 
-(new \Cdek\Loader)(__FILE__);
+\Cdek\Loader::new()(__FILE__);

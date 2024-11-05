@@ -1,16 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
 }
 
-
 namespace Cdek\Controllers {
 
-    use Cdek\Actions\CallCourier;
+    use Cdek\Actions\IntakeCreateAction;
+    use Cdek\Actions\IntakeDeleteAction;
     use Cdek\Config;
     use Cdek\Helpers\DataWPScraber;
+    use WP_Http;
     use WP_REST_Request;
     use WP_REST_Response;
     use WP_REST_Server;
@@ -19,29 +22,28 @@ namespace Cdek\Controllers {
     {
         public static function callCourier(WP_REST_Request $request): WP_REST_Response
         {
-            $callCourier = new CallCourier();
-            $param = DataWPScraber::getData($request, [
-                'date',
-                'starttime',
-                'endtime',
-                'desc',
-                'name',
-                'phone',
-                'address',
-                'comment',
-                'weight',
-                'length',
-                'width',
-                'height',
-                'need_call',
-            ]);
-
-            return new WP_REST_Response($callCourier->call($request->get_param('id'),$param), 200);
+            return new WP_REST_Response(
+                IntakeCreateAction::new()($request->get_param('id'), DataWPScraber::getData($request, [
+                    'date',
+                    'starttime',
+                    'endtime',
+                    'desc',
+                    'name',
+                    'phone',
+                    'address',
+                    'comment',
+                    'weight',
+                    'length',
+                    'width',
+                    'height',
+                    'need_call',
+                ]))->response(), WP_Http::OK,
+            );
         }
 
         public static function deleteCourierCall(WP_REST_Request $data): WP_REST_Response
         {
-            return new WP_REST_Response((new CallCourier())->delete($data->get_param('id')), 200);
+            return new WP_REST_Response(IntakeDeleteAction::new()($data->get_param('id'))->response(), WP_Http::OK);
         }
 
         public function __invoke(): void

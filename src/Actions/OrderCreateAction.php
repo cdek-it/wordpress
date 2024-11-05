@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -8,31 +10,33 @@ namespace {
 namespace Cdek\Actions {
 
     use Cdek\CdekApi;
-    use Cdek\CoreApi;
     use Cdek\Config;
-    use Cdek\Exceptions\AuthException;
-    use Cdek\Exceptions\CdekApiException;
-    use Cdek\Exceptions\CdekClientException;
-    use Cdek\Exceptions\CdekServerException;
+    use Cdek\CoreApi;
+    use Cdek\Exceptions\External\ApiException;
+    use Cdek\Exceptions\External\LegacyAuthException;
+    use Cdek\Exceptions\External\HttpClientException;
+    use Cdek\Exceptions\External\HttpServerException;
     use Cdek\Exceptions\PhoneNotValidException;
-    use Cdek\Exceptions\RestApiInvalidRequestException;
+    use Cdek\Exceptions\External\RestApiInvalidRequestException;
     use Cdek\Exceptions\ShippingMethodNotFoundException;
     use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
-    use Cdek\Helpers\ScheduleLocker;
     use Cdek\Helpers\StringHelper;
     use Cdek\Helpers\WeightCalc;
+    use Cdek\Loader;
     use Cdek\MetaKeys;
     use Cdek\Model\OrderMetaData;
     use Cdek\Model\Tariff;
     use Cdek\Note;
+    use Cdek\Traits\CanBeCreated;
     use Exception;
-    use Throwable;
     use JsonException;
+    use Throwable;
     use WC_Order;
 
-    class CreateOrderAction
+    class OrderCreateAction
     {
+        use CanBeCreated;
         private const ALLOWED_PRODUCT_TYPES = ['variation', 'simple'];
 
         private CdekApi $api;
@@ -44,13 +48,14 @@ namespace Cdek\Actions {
         public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
         {
             $this->api     = new CdekApi;
-            $this->coreApi = new CoreApi('common');
+            $this->coreApi = new CoreApi;
+
             $order         = wc_get_order($orderId);
             $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
 
             $shippingMethod = CheckoutHelper::getOrderShippingMethod($order);
             $tariffCode     = $shippingMethod->get_meta(MetaKeys::TARIFF_CODE) ?:
-            $shippingMethod->get_meta('tariff_code') ?: $postOrderData['tariff_id'];
+                $shippingMethod->get_meta('tariff_code') ?: $postOrderData['tariff_id'];
             $postOrderData  = [
                 'currency'    => $order->get_currency() ?: 'RUB',
                 'tariff_code' => $tariffCode,
@@ -61,18 +66,21 @@ namespace Cdek\Actions {
             try {
                 try {
                     return $this->sendOrderInfo($postOrderData, $this->coreApi->getOrderById($orderId));
-                } catch (CdekClientException $e) {
-                    if($e->getCode() === 404) {
+                } catch (HttpClientException $e) {
+                    if ($e->getCode() === 404) {
                         return $this->createOrder($order, $postOrderData, $packages);
                     }
 
                     throw $e;
                 }
-
             } catch (PhoneNotValidException $e) {
-                Note::send($order->get_id(),
-                           sprintf(esc_html__(/* translators: 1: error message */ 'Cdek shipping error: %1$s', 'cdekdelivery'),
-                                   $e->getMessage()));
+                Note::send(
+                    $order->get_id(),
+                    sprintf(
+                        esc_html__(/* translators: 1: error message */ 'Cdek shipping error: %1$s', 'cdekdelivery'),
+                        $e->getMessage(),
+                    ),
+                );
 
                 return [
                     'state'   => false,
@@ -93,7 +101,111 @@ namespace Cdek\Actions {
         }
 
         /**
-         * @param WC_Order  $order
+         * @param $postOrderData
+         * @param $existOrder
+         *
+         * @return array
+         * @throws LegacyAuthException
+         * @throws JsonException
+         */
+        private function sendOrderInfo($postOrderData, $existOrder): array
+        {
+            $cdekStatuses[] = $existOrder['status'];
+
+            try {
+                $historyCdekStatuses = $this->coreApi->getHistory($existOrder['uuid']);
+            } catch (ApiException $e) {
+                $historyCdekStatuses = [];
+            }
+
+            return [
+                'state'     => true,
+                'code'      => $existOrder['track'],
+                'statuses'  => $this->getStatusList(
+                    !empty($historyCdekStatuses),
+                    array_merge(
+                        $cdekStatuses,
+                        $historyCdekStatuses,
+                    ),
+                ),
+                'available' => !empty($historyCdekStatuses),
+                'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
+            ];
+        }
+
+        private function getStatusList(bool $actionAvailable, array $statuses = []): string
+        {
+            $cdekStatuses         = $statuses;
+            $actionOrderAvailable = $actionAvailable;
+            ob_start();
+
+            include(Loader::getPluginPath('templates/admin/status_list.php'));
+
+            return ob_get_clean();
+        }
+
+        /**
+         * @param $order
+         * @param $postOrderData
+         * @param $packages
+         *
+         * @return array
+         * @throws LegacyAuthException
+         * @throws ApiException
+         * @throws HttpClientException
+         * @throws HttpServerException
+         * @throws PhoneNotValidException
+         * @throws RestApiInvalidRequestException
+         * @throws ShippingMethodNotFoundException
+         * @throws JsonException
+         */
+        private function createOrder($order, $postOrderData, $packages): array
+        {
+            $param             = $this->buildRequestData($order, $postOrderData);
+            $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
+
+            $orderData = $this->api->createOrder($param);
+
+            sleep(5);
+
+            $cdekNumber = $this->getCdekOrderNumber($orderData['entity']['uuid']);
+
+            try {
+                $cdekStatuses         = Helper::getCdekOrderStatuses($orderData['entity']['uuid']);
+                $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
+            } catch (Exception $e) {
+                $cdekStatuses         = [];
+                $actionOrderAvailable = true;
+            }
+
+            $postOrderData['order_number'] = $cdekNumber ?? $orderData['entity']['uuid'];
+            $postOrderData['order_uuid']   = $orderData['entity']['uuid'];
+            OrderMetaData::updateMetaByOrderId($order->get_id(), $postOrderData);
+
+            if (!empty($cdekNumber)) {
+                Note::send(
+                    $order->get_id(),
+                    sprintf(
+                        esc_html__(/* translators: 1: tracking number */ 'Tracking number: %1$s',
+                            'cdekdelivery',
+                        ),
+                        $cdekNumber,
+                    ),
+                    true,
+                );
+            }
+
+            return [
+                'state'     => true,
+                'code'      => $cdekNumber,
+                'statuses'  => $this->getStatusList($actionOrderAvailable, $cdekStatuses),
+                'available' => $actionOrderAvailable,
+                'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
+            ];
+        }
+
+        /**
+         * @param  WC_Order  $order
          * @param           $postOrderData
          *
          * @return array
@@ -106,8 +218,9 @@ namespace Cdek\Actions {
             $recipientNumber = trim($order->get_shipping_phone() ?: $order->get_billing_phone());
             Helper::validateCdekPhoneNumber($recipientNumber, $countryCode);
 
-            $deliveryMethod = Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
-                                                                            ->get_data()['instance_id']);
+            $deliveryMethod = Helper::getActualShippingMethod(
+                CheckoutHelper::getOrderShippingMethod($order)->get_data()['instance_id'],
+            );
 
             $param = [
                 'type'            => $postOrderData['type'],
@@ -199,8 +312,10 @@ namespace Cdek\Actions {
 
         private function buildPackagesData(WC_Order $order, array $postOrderData, array $packages = null): array
         {
-            $items = array_filter($order->get_items(),
-                static fn($el) => in_array($el->get_product()->get_type(), self::ALLOWED_PRODUCT_TYPES, true));
+            $items = array_filter(
+                $order->get_items(),
+                static fn($el) => in_array($el->get_product()->get_type(), self::ALLOWED_PRODUCT_TYPES, true),
+            );
 
             if ($packages === null) {
                 $deliveryMethod = CheckoutHelper::getOrderShippingMethod($order);
@@ -218,10 +333,14 @@ namespace Cdek\Actions {
                 }, $items);
 
                 return [
-                    $this->buildItemsData($order, (int) $deliveryMethod->get_meta(MetaKeys::LENGTH),
-                                          (int) $deliveryMethod->get_meta(MetaKeys::WIDTH),
-                                          (int) $deliveryMethod->get_meta(MetaKeys::HEIGHT), $packageItems,
-                                          $postOrderData),
+                    $this->buildItemsData(
+                        $order,
+                        (int)$deliveryMethod->get_meta(MetaKeys::LENGTH),
+                        (int)$deliveryMethod->get_meta(MetaKeys::WIDTH),
+                        (int)$deliveryMethod->get_meta(MetaKeys::HEIGHT),
+                        $packageItems,
+                        $postOrderData,
+                    ),
                 ];
             }
 
@@ -253,8 +372,14 @@ namespace Cdek\Actions {
                         ];
                     }, $package['items']);
                 }
-                $output[] = $this->buildItemsData($order, (int) $package['length'], (int) $package['width'],
-                                                  (int) $package['height'], $package['items'], $postOrderData);
+                $output[] = $this->buildItemsData(
+                    $order,
+                    (int)$package['length'],
+                    (int)$package['width'],
+                    (int)$package['height'],
+                    $package['items'],
+                    $postOrderData,
+                );
             }
 
             return $output;
@@ -268,15 +393,16 @@ namespace Cdek\Actions {
             array $items,
             array $postOrderData
         ): array {
-            $deliveryMethod = Helper::getActualShippingMethod(CheckoutHelper::getOrderShippingMethod($order)
-                                                                            ->get_data()['instance_id']);
+            $deliveryMethod = Helper::getActualShippingMethod(
+                CheckoutHelper::getOrderShippingMethod($order)->get_data()['instance_id'],
+            );
 
             $totalWeight = 0;
             $itemsData   = [];
 
             foreach ($items as $item) {
                 $weight      = WeightCalc::getWeightInGrams($item['weight']);
-                $quantity    = (int) $item['quantity'];
+                $quantity    = (int)$item['quantity'];
                 $totalWeight += $quantity * $weight;
                 $cost        = $item['price'];
 
@@ -285,10 +411,10 @@ namespace Cdek\Actions {
                 }
 
                 $selectedPaymentMethodId = $order->get_payment_method();
-                $percentCod              = (int) $deliveryMethod->get_option('percentcod');
+                $percentCod              = (int)$deliveryMethod->get_option('percentcod');
                 if ($selectedPaymentMethodId === 'cod') {
                     if ($percentCod !== 0) {
-                        $paymentValue = (int) (($percentCod / 100) * $cost);
+                        $paymentValue = (int)(($percentCod / 100) * $cost);
                     } else {
                         $paymentValue = $cost;
                     }
@@ -343,10 +469,10 @@ namespace Cdek\Actions {
             }
 
             if ($currency === $defaultCurrency) {
-                $cost = round($cost * (float) $rates['RUB'], 2);
+                $cost = round($cost * (float)$rates['RUB'], 2);
             } else {
-                $costConvertToDefault = round($cost / (float) $rates[$currency], 2);
-                $cost                 = round($costConvertToDefault * (float) $rates['RUB'], 2);
+                $costConvertToDefault = round($cost / (float)$rates[$currency], 2);
+                $cost                 = round($costConvertToDefault * (float)$rates['RUB'], 2);
             }
 
             return $cost;
@@ -360,104 +486,9 @@ namespace Cdek\Actions {
                 return null;
             }
 
-            $orderInfo     = $this->api->getOrder($orderUuid);
+            $orderInfo = $this->api->getOrder($orderUuid);
 
             return $orderInfo['entity']['cdek_number'] ?? $this->getCdekOrderNumber($orderUuid, $iteration + 1);
-        }
-
-        private function getStatusList(bool $actionAvailable, array $statuses = []): string
-        {
-            $cdekStatuses = $statuses;
-            $actionOrderAvailable = $actionAvailable;
-            ob_start();
-            include(WP_PLUGIN_DIR.'/cdek/templates/admin/status_list.php');
-            return ob_get_clean();
-        }
-
-        /**
-         * @param $order
-         * @param $postOrderData
-         * @param $packages
-         *
-         * @return array
-         * @throws AuthException
-         * @throws CdekApiException
-         * @throws CdekClientException
-         * @throws CdekServerException
-         * @throws PhoneNotValidException
-         * @throws RestApiInvalidRequestException
-         * @throws ShippingMethodNotFoundException
-         * @throws JsonException
-         */
-        private function createOrder($order, $postOrderData, $packages): array
-        {
-            $param             = $this->buildRequestData($order, $postOrderData);
-            $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
-
-            $orderData = $this->api->createOrder($param);
-
-            sleep(5);
-
-            $cdekNumber = $this->getCdekOrderNumber($orderData['entity']['uuid']);
-
-            try {
-                $cdekStatuses         = Helper::getCdekOrderStatuses($orderData['entity']['uuid']);
-                $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
-            } catch (Exception $e) {
-                $cdekStatuses         = [];
-                $actionOrderAvailable = true;
-            }
-
-            $postOrderData['order_number'] = $cdekNumber ?? $orderData['entity']['uuid'];
-            $postOrderData['order_uuid']   = $orderData['entity']['uuid'];
-            OrderMetaData::updateMetaByOrderId($order->get_id(), $postOrderData);
-
-            if (!empty($cdekNumber)) {
-                Note::send($order->get_id(), sprintf(esc_html__(/* translators: 1: tracking number */ 'Tracking number: %1$s',
-                                                                                              'cdekdelivery'),
-                                             $cdekNumber), true);
-            }
-
-            return [
-                'state'     => true,
-                'code'      => $cdekNumber,
-                'statuses'  => $this->getStatusList($actionOrderAvailable, $cdekStatuses),
-                'available' => $actionOrderAvailable,
-                'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
-            ];
-        }
-
-        /**
-         * @param $postOrderData
-         * @param $existOrder
-         *
-         * @return array
-         * @throws AuthException
-         * @throws JsonException
-         */
-        private function sendOrderInfo($postOrderData, $existOrder): array
-        {
-            $cdekStatuses[] = $existOrder['status'];
-
-            try {
-                $historyCdekStatuses = $this->coreApi->getHistory($existOrder['uuid']);
-            }catch (CdekApiException $e){
-                $historyCdekStatuses = [];
-            }
-
-            return [
-                'state'     => true,
-                'code'      => $existOrder['track'],
-                'statuses'  => $this->getStatusList(
-                    !empty($historyCdekStatuses),
-                    array_merge(
-                        $cdekStatuses,
-                        $historyCdekStatuses,
-                    ),
-                ),
-                'available' => !empty($historyCdekStatuses),
-                'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
-            ];
         }
     }
 }

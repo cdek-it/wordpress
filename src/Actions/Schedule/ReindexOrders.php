@@ -1,5 +1,6 @@
 <?php
 
+declare(strict_types=1);
 
 namespace {
 
@@ -9,58 +10,34 @@ namespace {
 namespace Cdek\Actions\Schedule {
 
     use Cdek\Contracts\TaskContract;
-    use Cdek\Exceptions\CdekApiException;
-    use Cdek\Exceptions\CdekScheduledTaskException;
-    use Cdek\Model\TaskOutputData;
+    use Cdek\Exceptions\External\ApiException;
+    use Cdek\Exceptions\ScheduledTaskException;
     use Cdek\Model\OrderMetaData;
-    use Cdek\Model\Validate;
+    use Cdek\Model\TaskResult;
+    use Iterator;
 
     class ReindexOrders extends TaskContract
     {
         /**
-         * @throws CdekScheduledTaskException
-         * @throws CdekApiException
-         * @throws \JsonException
-         */
-        public function __construct(string $taskId)
-        {
-            parent::__construct($taskId);
-            $this->initTaskData();
-        }
-
-        public static function getName(): string
-        {
-            return 'restore-order-uuids';
-        }
-
-        /**
          * @return void
-         * @throws CdekApiException
-         * @throws CdekScheduledTaskException
+         * @throws ApiException
+         * @throws ScheduledTaskException
          * @throws \JsonException
          */
-        public function start(): void
+        final protected function process(): Iterator
         {
-            if (!array($this->getTaskMeta())) {
-                throw new CdekScheduledTaskException(
-                    '[CDEKDelivery] Failed to get orders meta info',
-                    'cdek_error.core.data',
-                );
+            if ($this->taskMeta === null) {
+                throw new ScheduledTaskException('Failed to get orders meta info');
             }
 
-            foreach ($this->getTaskMeta() as $arOrder) {
+            foreach ($this->taskMeta as $order) {
                 OrderMetaData::updateMetaByOrderId(
-                    $arOrder['external_id'],
-                    [
-                        'order_uuid' => $arOrder['id'],
-                    ],
+                    $order['external_id'],
+                    ['order_uuid' => $order['id']],
                 );
             }
 
-            $this->initData($this->cdekCoreApi->putTaskResult(
-                $this->taskId,
-                new TaskOutputData('success'),
-            ));
+            yield new TaskResult('success');
         }
     }
 }

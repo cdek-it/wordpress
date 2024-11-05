@@ -8,12 +8,15 @@ namespace {
 
 namespace Cdek\Exceptions {
 
-    class TariffNotAvailableException extends \RuntimeException
+    use Cdek\Contracts\ExceptionContract;
+
+    class TariffNotAvailableException extends ExceptionContract
     {
+        protected string $key = 'calc.tariff';
 
         public function __construct(array $availableTariffs)
         {
-            parent::__construct('Tariff not available', 'cdek_error.calc.tariff', $availableTariffs, false);
+            parent::__construct('Tariff not available', $availableTariffs, false);
         }
     }
 }

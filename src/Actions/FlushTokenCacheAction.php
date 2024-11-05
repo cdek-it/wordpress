@@ -1,14 +1,23 @@
 <?php
+
 declare(strict_types=1);
 
-namespace Cdek\Actions;
+namespace {
 
-use Cdek\Helpers\DBTokenStorage;
+    defined('ABSPATH') or exit;
+}
 
-class FlushTokenCacheAction
-{
-    final public function __invoke(): void
+namespace Cdek\Actions {
+
+    use Cdek\Helpers\DBTokenStorage;
+    use Cdek\Traits\CanBeCreated;
+
+    class FlushTokenCacheAction
     {
-        DBTokenStorage::flushCache();
+        use CanBeCreated;
+        final public function __invoke(): void
+        {
+            DBTokenStorage::flushCache();
+        }
     }
 }

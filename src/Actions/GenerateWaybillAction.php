@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace {
 
@@ -9,9 +10,12 @@ namespace Cdek\Actions {
 
     use Cdek\CdekApi;
     use Cdek\Config;
+    use Cdek\Traits\CanBeCreated;
 
     class GenerateWaybillAction
     {
+        use CanBeCreated;
+
         private CdekApi $api;
 
         public function __construct()
