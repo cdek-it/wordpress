@@ -33,7 +33,14 @@ const config: Config = {
       [
         '@docusaurus/plugin-ideal-image',
         {},
-      ]
+      ],
+      [
+        'docusaurus-plugin-yandex-metrica',
+        {
+          counterID: '98844577',
+          webvisor: true,
+        }
+      ],
   ],
 
   presets: [
