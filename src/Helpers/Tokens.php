@@ -11,6 +11,7 @@ namespace {
 
 namespace Cdek\Helpers {
 
+    use Cdek\Commands\TokensSyncCommand;
     use Cdek\CoreApi;
     use Cdek\Exceptions\External\CoreAuthException;
     use Cdek\Exceptions\External\LegacyAuthException;
@@ -78,32 +79,7 @@ namespace Cdek\Helpers {
                 return;
             }
 
-            Cache::put([
-                'tokens'    => $tokens,
-                'endpoints' => array_combine(
-                    array_keys($tokens),
-                    array_map(
-                        static fn($token) => self::getTokenFooterArray($token)['endpoint'] ?: null,
-                        $tokens,
-                    ),
-                ),
-            ]);
-        }
-
-        private static function getTokenFooterArray(string $token): array
-        {
-            $arToken = explode('.', $token);
-
-            try {
-                return json_decode(
-                    base64_decode(array_pop($arToken)),
-                    true,
-                    512,
-                    JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE,
-                );
-            } catch (JsonException $e) {
-                return [];
-            }
+            TokensSyncCommand::new()($tokens);
         }
 
         /**
@@ -119,7 +95,7 @@ namespace Cdek\Helpers {
                 return false;
             }
 
-            $kid = self::getTokenFooterArray($token)[PasetoBase::KEY_ID_FOOTER_CLAIM] ?? null;
+            $kid = TokensSyncCommand::getTokenFooterArray($token)[PasetoBase::KEY_ID_FOOTER_CLAIM] ?? null;
 
             if ($kid === null) {
                 return false;
@@ -133,7 +109,7 @@ namespace Cdek\Helpers {
 
             try {
                 $request->set_param(
-                    'action',
+                    'command',
                     Parser::getPublic(AsymmetricPublicKey::fromEncodedString($keyring[$kid]))
                           ->addRule(new ValidAt)
                           ->addRule(new ForAudience(parse_url(rest_url(), PHP_URL_HOST)))
