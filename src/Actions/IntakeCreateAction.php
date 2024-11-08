@@ -68,16 +68,14 @@ namespace Cdek\Actions {
                 );
             }
 
-            sleep(5);
-
             $validate = ValidateCourier::validate($courierObj);
             if (!$validate->state) {
                 return $validate;
             }
 
-            $courierInfo = $this->api->courierInfo($courierObj['entity']['uuid']);
-
             sleep(5);
+
+            $courierInfo = $this->api->courierInfo($courierObj['entity']['uuid']);
 
             $validate = ValidateCourier::validate($courierInfo);
             if (!$validate->state) {

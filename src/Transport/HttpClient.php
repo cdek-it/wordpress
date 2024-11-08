@@ -15,7 +15,6 @@ namespace Cdek\Transport {
     use Cdek\Loader;
     use WP_Error;
     use WP_REST_Server;
-    use WpOrg\Requests\Response\Headers;
     use WpOrg\Requests\Utility\CaseInsensitiveDictionary;
 
     class HttpClient

@@ -13,8 +13,6 @@ namespace Cdek\Contracts {
 
     abstract class FieldsetContract
     {
-        protected const FIELDS = [];
-
         final public function getFieldsNames(): array
         {
             return array_keys($this->getFields());
