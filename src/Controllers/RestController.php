@@ -16,6 +16,7 @@ namespace Cdek\Controllers {
     use Cdek\Config;
     use Cdek\Helpers\Tokens;
     use Cdek\Model\OrderMetaData;
+    use WP_Http;
     use WP_REST_Request;
     use WP_REST_Response;
     use WP_REST_Server;
@@ -25,14 +26,14 @@ namespace Cdek\Controllers {
         public static function checkAuth(): WP_REST_Response
         {
             (new CdekApi)->checkAuth();
-            return new WP_REST_Response(['state' => 'OK']);
+            return new WP_REST_Response(['state' => 'OK'], WP_Http::OK);
         }
 
         public static function resetCache(): WP_REST_Response
         {
             FlushTokenCacheAction::new()();
 
-            return new WP_REST_Response(['state' => 'OK']);
+            return new WP_REST_Response(['state' => 'OK'], WP_Http::OK);
         }
 
         /**
@@ -43,7 +44,7 @@ namespace Cdek\Controllers {
             return new WP_REST_Response(
                 GenerateWaybillAction::new()(
                     OrderMetaData::getMetaByOrderId($request->get_param('id'))['order_uuid'] ?? '',
-                ),
+                ), WP_Http::OK,
             );
         }
 
@@ -52,13 +53,13 @@ namespace Cdek\Controllers {
             return new WP_REST_Response(
                 GenerateBarcodeAction::new()(
                     OrderMetaData::getMetaByOrderId($request->get_param('id'))['order_uuid'] ?? '',
-                ),
+                ), WP_Http::OK,
             );
         }
 
         public static function callback(WP_REST_Request $request): WP_REST_Response
         {
-            return new WP_REST_Response(['state' => $request->get_param('action')]);
+            return new WP_REST_Response(['state' => $request->get_param('action')], WP_Http::ACCEPTED);
         }
 
         public function __invoke(): void
