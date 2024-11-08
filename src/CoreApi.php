@@ -106,7 +106,7 @@ namespace Cdek {
         public function fetchKeyring(): array
         {
             return HttpClient::sendJsonRequest(
-                $this->getEndpoint('keys', false),
+                $this->getEndpoint('.well-known/key', false),
                 'GET',
                 null,
             )->data();
