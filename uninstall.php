@@ -1,5 +1,5 @@
 <?php
-defined('WP_UNINSTALL_PLUGIN') || exit;
+defined('WP_UNINSTALL_PLUGIN') or exit;
 
 if (file_exists(__DIR__ . '/vendor/autoload.php')) {
     require __DIR__ . '/vendor/autoload.php';
@@ -10,4 +10,4 @@ if (!class_exists(\Cdek\Uninstaller::class)) {
                   E_USER_ERROR);
 }
 
-(new \Cdek\Uninstaller)();
+\Cdek\Uninstaller::new()();

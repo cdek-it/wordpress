@@ -1,39 +1,45 @@
 <?php
 
-namespace Cdek\Contracts;
+declare(strict_types=1);
 
-use InvalidArgumentException;
+namespace {
 
-abstract class FieldsetContract
-{
-    protected const FIELDS = [];
+    defined('ABSPATH') or exit;
+}
 
-    final public function getFieldsNames(): array
+namespace Cdek\Contracts {
+
+    use InvalidArgumentException;
+
+    abstract class FieldsetContract
     {
-        return array_keys($this->getFields());
-    }
-
-    abstract protected function getFields(): array;
-
-    final public function isRequiredField(string $fieldName): bool
-    {
-        $fieldList = $this->getFields();
-        if (!isset($fieldList[$fieldName])) {
-            throw new InvalidArgumentException('Field not found');
+        final public function getFieldsNames(): array
+        {
+            return array_keys($this->getFields());
         }
 
-        return $fieldList[$fieldName]['required'] ?? false;
-    }
+        abstract protected function getFields(): array;
 
-    abstract public function isApplicable(): bool;
+        final public function isRequiredField(string $fieldName): bool
+        {
+            $fieldList = $this->getFields();
+            if (!isset($fieldList[$fieldName])) {
+                throw new InvalidArgumentException('Field not found');
+            }
 
-    final public function getFieldDefinition(string $fieldName): array
-    {
-        $fieldList = $this->getFields();
-        if (!isset($fieldList[$fieldName])) {
-            throw new InvalidArgumentException('Field not found');
+            return $fieldList[$fieldName]['required'] ?? false;
         }
 
-        return $fieldList[$fieldName];
+        abstract public function isApplicable(): bool;
+
+        final public function getFieldDefinition(string $fieldName): array
+        {
+            $fieldList = $this->getFields();
+            if (!isset($fieldList[$fieldName])) {
+                throw new InvalidArgumentException('Field not found');
+            }
+
+            return $fieldList[$fieldName];
+        }
     }
 }

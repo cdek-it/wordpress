@@ -1,19 +1,22 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
 }
 
 namespace Cdek\Model {
-    class Validate
+
+    class ValidationResult
     {
         public bool $state;
         public string $message;
 
         public function __construct(bool $state, string $message = '')
         {
-            $this->state = $state;
+            $this->state   = $state;
             $this->message = $message;
         }
 

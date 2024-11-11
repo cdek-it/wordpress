@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -36,8 +38,8 @@ namespace Cdek\UI {
             }
 
             $points = $city !== -1 ? $api->getOffices([
-                                                          'city_code' => $city,
-                                                      ])->body() : '[]';
+                'city_code' => $city,
+            ])->body() : '[]';
 
             $mapAutoClose = CheckoutHelper::getMapAutoClose();
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -9,10 +11,14 @@ namespace {
 namespace Cdek\UI {
 
     use Cdek\Helper;
-    use Cdek\Helpers\UrlHelper;
+    use Cdek\Traits\CanBeCreated;
 
-    class Frontend {
-        public static function registerScripts(): void {
+    class Frontend
+    {
+        use CanBeCreated;
+
+        public static function registerScripts(): void
+        {
             if (!is_checkout()) {
                 return;
             }
@@ -20,9 +26,9 @@ namespace Cdek\UI {
             Helper::enqueueScript('cdek-map', 'cdek-checkout-map', true);
         }
 
-        public function __invoke(): void {
+        public function __invoke(): void
+        {
             add_action('wp_enqueue_scripts', [__CLASS__, 'registerScripts']);
         }
     }
-
 }

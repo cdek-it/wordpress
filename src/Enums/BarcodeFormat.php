@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace {
 
@@ -18,7 +19,6 @@ namespace Cdek\Enums {
 
         public function __construct(string $value)
         {
-
             if (!in_array($value, self::AVAILABLE_VALUES)) {
                 throw new RuntimeException('Not supported value!');
             }

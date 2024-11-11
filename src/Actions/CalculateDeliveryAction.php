@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace {
@@ -11,17 +12,19 @@ namespace Cdek\Actions {
 
     use Cdek\CdekApi;
     use Cdek\Config;
-    use Cdek\Exceptions\CdekApiException;
     use Cdek\Exceptions\TariffNotAvailableException;
     use Cdek\Helper;
     use Cdek\Helpers\WeightCalc;
     use Cdek\MetaKeys;
     use Cdek\Model\Tariff;
+    use Cdek\Traits\CanBeCreated;
     use Throwable;
     use WC_Shipping_Method;
 
-    final class CalculateDeliveryAction
+    class CalculateDeliveryAction
     {
+        use CanBeCreated;
+
         private WC_Shipping_Method $method;
         private array $rates = [];
         private CdekApi $api;
@@ -33,8 +36,8 @@ namespace Cdek\Actions {
         }
 
         /**
-         * @throws CdekApiException
-         * @throws \JsonException
+         * @throws \Cdek\Exceptions\External\ApiException
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
          */
         public function __invoke(array $package, bool $addTariffsToOffice = true): bool
         {
@@ -76,7 +79,7 @@ namespace Cdek\Actions {
             if ($this->method->get_option('insurance') === 'yes') {
                 $deliveryParam['services'][] = [
                     'code'      => 'INSURANCE',
-                    'parameter' => (int) $package['contents_cost'],
+                    'parameter' => (int)$package['contents_cost'],
                 ];
             }
 
@@ -88,7 +91,8 @@ namespace Cdek\Actions {
             ];
 
             foreach (['office', 'door'] as $ruleType) {
-                $priceRules[$ruleType] = array_reduce($priceRules[$ruleType] ?? [],
+                $priceRules[$ruleType] = array_reduce(
+                    $priceRules[$ruleType] ?? [],
                     static function ($carry, $item) use ($package) {
                         if ($carry !== null) {
                             return $carry;
@@ -99,7 +103,8 @@ namespace Cdek\Actions {
                         }
 
                         return null;
-                    });
+                    },
+                );
             }
 
             foreach ([Tariff::SHOP_TYPE, Tariff::DELIVERY_TYPE] as $deliveryType) {
@@ -117,7 +122,7 @@ namespace Cdek\Actions {
 
                 foreach ($calcResult['tariff_codes'] as $tariff) {
                     if (isset($this->rates[$tariff['tariff_code']]) ||
-                        !in_array((string) $tariff['tariff_code'], $tariffList ?: [], true)) {
+                        !in_array((string)$tariff['tariff_code'], $tariffList ?: [], true)) {
                         continue;
                     }
 
@@ -125,9 +130,9 @@ namespace Cdek\Actions {
                         continue;
                     }
 
-                    $minDay = (int) $tariff['period_min'] + (int) $this->method->get_option('extra_day');
-                    $maxDay = (int) $tariff['period_max'] + (int) $this->method->get_option('extra_day');
-                    $cost   = (int) $tariff['delivery_sum'];
+                    $minDay = (int)$tariff['period_min'] + (int)$this->method->get_option('extra_day');
+                    $maxDay = (int)$tariff['period_max'] + (int)$this->method->get_option('extra_day');
+                    $cost   = (int)$tariff['delivery_sum'];
 
                     if ((!isset($officeData['city']) && Tariff::isTariffFromOffice($tariff['tariff_code'])) ||
                         (!isset($doorData['city']) && Tariff::isTariffFromDoor($tariff['tariff_code']))) {
@@ -136,14 +141,19 @@ namespace Cdek\Actions {
 
                     $this->rates[$tariff['tariff_code']] = [
                         'id'        => sprintf('%s:%s', Config::DELIVERY_NAME, $tariff['tariff_code']),
-                        'label'     => sprintf(esc_html__('CDEK: %s, (%s-%s days)', 'cdekdelivery'),
-                                               Tariff::getTariffUserNameByCode($tariff['tariff_code']), $minDay,
-                                               $maxDay),
+                        'label'     => sprintf(
+                            esc_html__('CDEK: %s, (%s-%s days)', 'cdekdelivery'),
+                            Tariff::getTariffUserNameByCode($tariff['tariff_code']),
+                            $minDay,
+                            $maxDay,
+                        ),
                         'cost'      => max($cost, 0),
                         'meta_data' => [
-                            MetaKeys::ADDRESS_HASH => sha1($deliveryParam['to']['postal_code'].
-                                                           $deliveryParam['to']['city'].
-                                                           $deliveryParam['to']['country_code']),
+                            MetaKeys::ADDRESS_HASH => sha1(
+                                $deliveryParam['to']['postal_code'].
+                                $deliveryParam['to']['city'].
+                                $deliveryParam['to']['country_code'],
+                            ),
                             MetaKeys::TARIFF_CODE  => $tariff['tariff_code'],
                             MetaKeys::TARIFF_MODE  => $tariff['delivery_mode'],
                             MetaKeys::WEIGHT       => $deliveryParam['packages']['weight'],
@@ -158,7 +168,7 @@ namespace Cdek\Actions {
             $api            = $this->api;
             $deliveryMethod = $this->method;
 
-            $this->rates    = array_map(static function ($tariff) use (
+            $this->rates = array_map(static function ($tariff) use (
                 $priceRules,
                 $api,
                 $deliveryParam,
@@ -173,8 +183,11 @@ namespace Cdek\Actions {
                 }
 
                 if (isset($rule['type']) && $rule['type'] === 'fixed') {
-                    $tariff['cost'] = max(function_exists('wcml_get_woocommerce_currency_option') ?
-                        apply_filters('wcml_raw_price_amount', $rule['value'], 'RUB') : $rule['value'], 0);
+                    $tariff['cost'] = max(
+                        function_exists('wcml_get_woocommerce_currency_option') ?
+                            apply_filters('wcml_raw_price_amount', $rule['value'], 'RUB') : $rule['value'],
+                        0,
+                    );
 
                     return $tariff;
                 }
@@ -227,13 +240,13 @@ namespace Cdek\Actions {
                 $weight   = $productGroup['data']->get_weight();
 
                 $dimensions = get_option('woocommerce_dimension_unit') === 'mm' ? [
-                    (int) ((int) $productGroup['data']->get_length() / 10),
-                    (int) ((int) $productGroup['data']->get_width() / 10),
-                    (int) ((int) $productGroup['data']->get_height() / 10),
+                    (int)((int)$productGroup['data']->get_length() / 10),
+                    (int)((int)$productGroup['data']->get_width() / 10),
+                    (int)((int)$productGroup['data']->get_height() / 10),
                 ] : [
-                    (int) $productGroup['data']->get_length(),
-                    (int) $productGroup['data']->get_width(),
-                    (int) $productGroup['data']->get_height(),
+                    (int)$productGroup['data']->get_length(),
+                    (int)$productGroup['data']->get_width(),
+                    (int)$productGroup['data']->get_height(),
                 ];
 
                 sort($dimensions);
@@ -253,7 +266,7 @@ namespace Cdek\Actions {
             }
 
             foreach (['length', 'width', 'height'] as $dimension) {
-                $predefinedDimensions[] = (int) $this->method->get_option("product_{$dimension}_default");
+                $predefinedDimensions[] = (int)$this->method->get_option("product_{$dimension}_default");
             }
 
             sort($predefinedDimensions);
@@ -272,7 +285,7 @@ namespace Cdek\Actions {
             $useDefaultValue = $this->method->get_option('product_package_default_toggle') === 'yes';
             foreach (['length', 'width', 'height'] as $dimension) {
                 if ($$dimension === 0 || $useDefaultValue) {
-                    $$dimension = (int) $this->method->get_option("product_{$dimension}_default");
+                    $$dimension = (int)$this->method->get_option("product_{$dimension}_default");
                 }
             }
 

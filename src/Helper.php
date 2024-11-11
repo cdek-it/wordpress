@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -13,6 +15,7 @@ namespace Cdek {
     use libphonenumber\PhoneNumberUtil;
     use RuntimeException;
     use Throwable;
+
     use function WC;
 
     class Helper
@@ -23,7 +26,7 @@ namespace Cdek {
             bool $hasStyles = false,
             bool $justRegister = false
         ): void {
-            $script_asset_path = Loader::getPluginPath()."/build/$fileName.asset.php";
+            $script_asset_path = Loader::getPluginPath("build/$fileName.asset.php");
 
             $script_asset = file_exists($script_asset_path) ? require $script_asset_path : [
                 'dependencies' => [],
@@ -31,24 +34,34 @@ namespace Cdek {
             ];
 
             if ($justRegister) {
-                wp_register_script($handle, Loader::getPluginUrl()."build/$fileName.js", $script_asset['dependencies'],
-                                   $script_asset['version'], true);
+                wp_register_script(
+                    $handle,
+                    Loader::getPluginUrl("build/$fileName.js"),
+                    $script_asset['dependencies'],
+                    $script_asset['version'],
+                    true,
+                );
             } else {
-                wp_enqueue_script($handle, Loader::getPluginUrl()."build/$fileName.js", $script_asset['dependencies'],
-                                  $script_asset['version'], true);
+                wp_enqueue_script(
+                    $handle,
+                    Loader::getPluginUrl("build/$fileName.js"),
+                    $script_asset['dependencies'],
+                    $script_asset['version'],
+                    true,
+                );
             }
 
             if ($hasStyles) {
-                wp_enqueue_style($handle, Loader::getPluginUrl()."build/$fileName.css", [], Loader::getPluginVersion());
+                wp_enqueue_style($handle, Loader::getPluginUrl("build/$fileName.css"), [], Loader::getPluginVersion());
             }
 
-            wp_set_script_translations($handle, 'cdekdelivery', Loader::getPluginPath().'lang');
+            wp_set_script_translations($handle, 'cdekdelivery', Loader::getPluginPath('lang'));
         }
 
-        public static function getActualShippingMethod(?int $instanceId = null): CdekShippingMethod
+        public static function getActualShippingMethod(?int $instanceId = null): ShippingMethod
         {
             if (!is_null($instanceId)) {
-                return new CdekShippingMethod($instanceId);
+                return new ShippingMethod($instanceId);
             }
 
             if (isset(WC()->cart)) {
@@ -56,7 +69,7 @@ namespace Cdek {
                     $methods = wc_get_shipping_zone(WC()->cart->get_shipping_packages()[0])->get_shipping_methods(true);
 
                     foreach ($methods as $method) {
-                        if ($method instanceof CdekShippingMethod) {
+                        if ($method instanceof ShippingMethod) {
                             return $method;
                         }
                     }
@@ -103,8 +116,8 @@ namespace Cdek {
             if (!$uuid) {
                 throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Некорректный uuid заказа.');
             }
-            $orderInfo     = (new CdekApi)->getOrder($uuid);
-            $statusName    = [];
+            $orderInfo  = (new CdekApi)->getOrder($uuid);
+            $statusName = [];
             if (!isset($orderInfo['entity']['statuses'])) {
                 throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Заказ не найден.');
             }

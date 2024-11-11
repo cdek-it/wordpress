@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -15,7 +17,6 @@ namespace Cdek\Helpers {
     use Cdek\Helper;
     use Throwable;
     use WC_Order;
-    use WC_Order_Item;
     use WC_Order_Item_Shipping;
 
     class CheckoutHelper
@@ -93,7 +94,7 @@ namespace Cdek\Helpers {
 
         public static function restoreCheckoutFields(array $fields): array
         {
-            if(!empty(WC()->cart) && !WC()->cart->needs_shipping()){
+            if (!empty(WC()->cart) && !WC()->cart->needs_shipping()) {
                 return $fields;
             }
 

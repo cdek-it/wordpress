@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -32,7 +34,7 @@ namespace Cdek\Model {
             $meta = $order->get_meta(Config::META_KEY) ?: [];
 
             $meta['order_number'] = '';
-            $meta['order_uuid'] = '';
+            $meta['order_uuid']   = '';
 
             unset($meta['cdek_order_uuid'], $meta['cdek_order_waybill']);
 

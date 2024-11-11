@@ -47,3 +47,4 @@ lang/*.json
 
 .wp-env.override.json
 /cdek.zip
+/.cache.php

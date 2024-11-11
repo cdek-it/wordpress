@@ -9,5 +9,9 @@ namespace {
 
 namespace Cdek\Exceptions {
 
-    class ShopRegistrationException extends CdekException {}
+    use Cdek\Contracts\ExceptionContract;
+
+    class ShopRegistrationException extends ExceptionContract {
+        protected string $key = 'shop.exchange';
+    }
 }

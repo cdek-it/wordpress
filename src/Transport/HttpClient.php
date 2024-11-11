@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -7,25 +9,25 @@ namespace {
 
 namespace Cdek\Transport {
 
-    use Cdek\Exceptions\CdekApiException;
-    use Cdek\Exceptions\CdekClientException;
-    use Cdek\Exceptions\CdekServerException;
+    use Cdek\Exceptions\External\ApiException;
+    use Cdek\Exceptions\External\HttpClientException;
+    use Cdek\Exceptions\External\HttpServerException;
     use Cdek\Loader;
     use WP_Error;
     use WP_REST_Server;
+    use WpOrg\Requests\Utility\CaseInsensitiveDictionary;
 
     class HttpClient
     {
+        private static ?string $correlation = null;
+
         /**
-         * @throws \Cdek\Exceptions\CdekApiException
-         * @throws \Cdek\Exceptions\CdekClientException
-         * @throws \Cdek\Exceptions\CdekServerException
-         * @throws \JsonException
+         * @throws ApiException
          */
         public static function sendJsonRequest(
             string $url,
             string $method,
-            string $token,
+            ?string $token,
             ?array $data = null,
             ?array $headers = []
         ): HttpResponse {
@@ -44,18 +46,18 @@ namespace Cdek\Transport {
             $result = self::processRequest($url, $method, $config);
 
             if ($result->isServerError()) {
-                throw new CdekServerException('Server error', 'api.server', $result->error());
+                throw new HttpServerException($result->error());
             }
 
             if ($result->isClientError()) {
-                throw new CdekClientException('Server error', 'api.server', $result->error());
+                throw new HttpClientException($result->error());
             }
 
             return $result;
         }
 
         /**
-         * @throws CdekApiException
+         * @throws ApiException
          */
         public static function processRequest(
             string $url,
@@ -67,7 +69,7 @@ namespace Cdek\Transport {
                     'X-App-Name'       => 'wordpress',
                     'X-App-Version'    => Loader::getPluginVersion(),
                     'X-User-Locale'    => get_user_locale(),
-                    'X-Correlation-Id' => wp_generate_uuid4(),
+                    'X-Correlation-Id' => self::$correlation ??= wp_generate_uuid4(),
                 ],
                 'method'     => $method,
                 'user-agent' => 'wp/'.get_bloginfo('version'),
@@ -75,15 +77,18 @@ namespace Cdek\Transport {
 
             if (is_wp_error($resp)) {
                 assert($resp instanceof WP_Error);
-                throw new CdekApiException($resp->get_error_message(), 'api.general', [
+                throw new ApiException($resp->get_error_message(),[
+                    'code' => $resp->get_error_code(),
                     'ip' => self::tryGetRequesterIp(),
                 ]);
             }
 
+            $headers = wp_remote_retrieve_headers($resp);
+
             return new HttpResponse(
-                $resp['response']['code'],
-                $resp['body'],
-                is_array($resp['headers']) ? $resp['headers'] : $resp['headers']->getAll()
+                wp_remote_retrieve_response_code($resp),
+                wp_remote_retrieve_body($resp),
+                ($headers instanceof CaseInsensitiveDictionary) ? $headers->getAll() : $headers,
             );
         }
 

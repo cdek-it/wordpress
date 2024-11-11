@@ -11,15 +11,15 @@ namespace Cdek {
 
     use Cdek\Contracts\TokenStorageContract;
     use Cdek\Enums\BarcodeFormat;
-    use Cdek\Exceptions\AuthException;
-    use Cdek\Exceptions\CdekApiException;
-    use Cdek\Exceptions\CdekClientException;
-    use Cdek\Exceptions\CdekServerException;
-    use Cdek\Exceptions\RestApiInvalidRequestException;
+    use Cdek\Exceptions\External\ApiException;
+    use Cdek\Exceptions\External\LegacyAuthException;
+    use Cdek\Exceptions\External\RestApiInvalidRequestException;
     use Cdek\Helpers\DBTokenStorage;
     use Cdek\Transport\HttpClient;
-    use WC_Shipping_Method;
 
+    /**
+     * @deprecated use CoreApi instead
+     */
     final class CdekApi
     {
         private const TOKEN_PATH = 'oauth/token';
@@ -36,7 +36,7 @@ namespace Cdek {
 
         private string $clientId;
         private string $clientSecret;
-        private WC_Shipping_Method $deliveryMethod;
+        private ShippingMethod $deliveryMethod;
 
         private TokenStorageContract $tokenStorage;
 
@@ -46,6 +46,7 @@ namespace Cdek {
             $this->deliveryMethod = Helper::getActualShippingMethod($shippingInstanceId);
             $this->apiUrl         = $this->getApiUrl();
 
+            /** @noinspection GlobalVariableUsageInspection */
             if (!isset($_ENV['CDEK_REST_API']) && $this->deliveryMethod->get_option('test_mode') === 'yes') {
                 $this->clientId     = Config::TEST_CLIENT_ID;
                 $this->clientSecret = Config::TEST_CLIENT_SECRET;
@@ -60,29 +61,26 @@ namespace Cdek {
         private function getApiUrl(): string
         {
             if ($this->deliveryMethod->get_option('test_mode') === 'yes') {
+                /** @noinspection GlobalVariableUsageInspection */
                 return $_ENV['CDEK_REST_API'] ?? Config::TEST_API_URL;
             }
 
             return Config::API_URL;
         }
 
-        /**
-         * @throws CdekApiException|\JsonException
-         */
-        final public function checkAuth(): bool
+        public function checkAuth(): bool
         {
             try {
                 $this->tokenStorage->getToken();
 
                 return true;
-            } catch (AuthException $e) {
+            } catch (LegacyAuthException $e) {
                 return false;
             }
         }
 
         /**
-         * @throws AuthException
-         * @throws \JsonException
+         * @throws LegacyAuthException
          */
         public function fetchToken(): string
         {
@@ -97,20 +95,24 @@ namespace Cdek {
                 );
 
                 if (!isset($body->json()['access_token'])) {
-                    throw new AuthException(
-                        'Failed to get the token', 'authorization.integration', $body->json(), true,
-                    );
+                    throw new LegacyAuthException([
+                        ...$body->json(),
+                        'host'   => parse_url($this->apiUrl, PHP_URL_HOST),
+                        'client' => $this->clientId,
+                    ]);
                 }
 
                 return $body->json()['access_token'];
-            } catch (CdekApiException $e) {
-                throw new AuthException('Failed to get the token', 'auth.integration', $e->getData(), true);
+            } catch (ApiException $e) {
+                throw new LegacyAuthException(
+                    [...$e->getData(), 'host' => parse_url($this->apiUrl, PHP_URL_HOST), 'client' => $this->clientId],
+                );
             }
         }
 
         /**
-         * @throws \JsonException
-         * @throws CdekApiException
+         * @throws ApiException
+         * @throws LegacyAuthException
          */
         final public function getOrder(string $uuid): array
         {
@@ -122,15 +124,12 @@ namespace Cdek {
         }
 
         /**
-         * @param array $params
+         * @param  array  $params
          *
          * @return array
-         * @throws AuthException
-         * @throws CdekApiException
-         * @throws CdekClientException
-         * @throws CdekServerException
+         * @throws LegacyAuthException
+         * @throws ApiException
          * @throws RestApiInvalidRequestException
-         * @throws \JsonException
          */
         public function createOrder(array $params): array
         {
@@ -150,7 +149,8 @@ namespace Cdek {
         }
 
         /**
-         * @throws CdekApiException
+         * @throws ApiException
+         * @throws LegacyAuthException
          */
         public function getFileByLink(string $link): string
         {
@@ -158,8 +158,8 @@ namespace Cdek {
         }
 
         /**
-         * @throws \JsonException
-         * @throws CdekApiException
+         * @throws ApiException
+         * @throws LegacyAuthException
          */
         public function createWaybill(string $orderUuid): array
         {
@@ -172,8 +172,8 @@ namespace Cdek {
         }
 
         /**
-         * @throws \JsonException
-         * @throws CdekApiException
+         * @throws LegacyAuthException
+         * @throws ApiException
          */
         public function createBarcode(string $orderUuid): array
         {
@@ -194,8 +194,8 @@ namespace Cdek {
         }
 
         /**
-         * @throws \JsonException
-         * @throws CdekApiException
+         * @throws LegacyAuthException
+         * @throws ApiException
          */
         public function getBarcode(string $uuid): array
         {
@@ -207,8 +207,8 @@ namespace Cdek {
         }
 
         /**
-         * @throws \JsonException
-         * @throws CdekApiException
+         * @throws LegacyAuthException
+         * @throws ApiException
          */
         public function getWaybill(string $uuid): array
         {
@@ -220,10 +220,10 @@ namespace Cdek {
         }
 
         /**
-         * @throws \JsonException
-         * @throws CdekApiException
+         * @throws LegacyAuthException
+         * @throws ApiException
          */
-        public function deleteOrder($uuid): array
+        public function deleteOrder(string $uuid): array
         {
             return HttpClient::sendJsonRequest(
                 $this->apiUrl.self::ORDERS_PATH.$uuid,
@@ -233,10 +233,10 @@ namespace Cdek {
         }
 
         /**
-         * @throws \JsonException
-         * @throws CdekApiException
+         * @throws LegacyAuthException
+         * @throws ApiException
          */
-        public function calculateTariffList($deliveryParam): array
+        public function calculateTariffList(array $deliveryParam): array
         {
             $request = [
                 'type'          => $deliveryParam['type'],
@@ -254,10 +254,10 @@ namespace Cdek {
         }
 
         /**
-         * @throws CdekApiException
-         * @throws \JsonException
+         * @throws ApiException
+         * @throws LegacyAuthException
          */
-        public function calculateTariff($deliveryParam)
+        public function calculateTariff(array $deliveryParam): array
         {
             $request = [
                 'type'          => $deliveryParam['type'],
@@ -277,8 +277,7 @@ namespace Cdek {
         }
 
         /**
-         * @throws \JsonException
-         * @throws CdekApiException
+         * @throws LegacyAuthException
          */
         public function getCityCode(string $city, ?string $postcode): int
         {
@@ -294,16 +293,16 @@ namespace Cdek {
                     $this->tokenStorage->getToken(),
                     ['city' => $city, 'postal_code' => $postcode],
                 )->json()[0]['code'];
-            } catch (CdekApiException $e) {
+            } catch (ApiException $e) {
                 return -1;
             }
         }
 
         /**
-         * @throws CdekApiException
-         * @throws \JsonException
+         * @throws ApiException
+         * @throws LegacyAuthException
          */
-        public function getOffices($filter)
+        public function getOffices(array $filter)
         {
             $result = HttpClient::sendJsonRequest(
                 $this->apiUrl.self::PVZ_PATH,
@@ -325,10 +324,10 @@ namespace Cdek {
         }
 
         /**
-         * @throws \JsonException
-         * @throws CdekApiException
+         * @throws LegacyAuthException
+         * @throws ApiException
          */
-        public function callCourier($param): array
+        public function callCourier(array $param): array
         {
             return HttpClient::sendJsonRequest(
                 $this->apiUrl.self::CALL_COURIER,
@@ -339,10 +338,10 @@ namespace Cdek {
         }
 
         /**
-         * @throws CdekApiException
-         * @throws \JsonException
+         * @throws ApiException
+         * @throws LegacyAuthException
          */
-        public function courierInfo($uuid): array
+        public function courierInfo(string $uuid): array
         {
             return HttpClient::sendJsonRequest(
                 $this->apiUrl.self::CALL_COURIER.'/'.$uuid,
@@ -352,10 +351,10 @@ namespace Cdek {
         }
 
         /**
-         * @throws CdekApiException
-         * @throws \JsonException
+         * @throws ApiException
+         * @throws LegacyAuthException
          */
-        public function callCourierDelete($uuid): array
+        public function callCourierDelete(string $uuid): array
         {
             return HttpClient::sendJsonRequest(
                 $this->apiUrl.self::CALL_COURIER.'/'.$uuid,

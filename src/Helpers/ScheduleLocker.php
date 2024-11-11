@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace {
@@ -7,14 +8,17 @@ namespace {
 }
 
 namespace Cdek\Helpers {
-    class ScheduleLocker extends \ActionScheduler_OptionLock
+
+    use ActionScheduler_Lock;
+
+    abstract class ScheduleLocker extends ActionScheduler_Lock
     {
-        const LOCK_TYPE_AUTOMATION_ORDER = 'cdek_order_automation_lock';
+        private const LOCK_TYPE_AUTOMATION_ORDER = 'cdek_order_automation_lock';
         protected static $lock_duration = MONTH_IN_SECONDS;
 
-        public static function instance()
+        final public function set($lock_type): bool
         {
-            return new self();
+            return parent::set(self::LOCK_TYPE_AUTOMATION_ORDER . '_' . $lock_type);
         }
     }
 }

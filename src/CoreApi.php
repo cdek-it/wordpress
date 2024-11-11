@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace {
 
     defined('ABSPATH') or exit;
@@ -7,34 +9,32 @@ namespace {
 
 namespace Cdek {
 
-    use Cdek\Exceptions\AuthException;
-    use Cdek\Exceptions\CdekApiException;
-    use Cdek\Exceptions\CdekClientException;
-    use Cdek\Exceptions\CdekServerException;
+    use Cdek\Exceptions\External\ApiException;
+    use Cdek\Exceptions\External\CoreAuthException;
     use Cdek\Exceptions\ShopRegistrationException;
-    use Cdek\Helpers\CoreTokenStorage;
-    use Cdek\Model\TaskOutputData;
+    use Cdek\Helpers\Tokens;
+    use Cdek\Model\TaskResult;
     use Cdek\Transport\HttpClient;
-    use JsonException;
 
     final class CoreApi
     {
         private string $tokenType;
 
-        public function __construct(string $tokenType = 'common')
+        public function __construct(string $tokenType = 'wordpress')
         {
             $this->tokenType = $tokenType;
         }
 
         /**
          * @throws ShopRegistrationException
-         * @throws JsonException
+         * @throws CoreAuthException
+         * @throws \Cdek\Exceptions\CacheException
          */
         public function syncShop(string $authIntToken): string
         {
             try {
                 $response = HttpClient::sendJsonRequest(
-                    Config::API_CORE_URL.'cms/wordpress/shop',
+                    $this->getEndpoint('wordpress/shop', false),
                     'POST',
                     $authIntToken,
                     [
@@ -46,48 +46,78 @@ namespace Cdek {
                         ],
                     ],
                 );
-            } catch (CdekApiException $e) {
-                throw new ShopRegistrationException('[CDEKDelivery] Register shop failed', 'cdek_error.register.shop');
-            }
 
-            if (empty($response->getHeaders()['X-Entity-Id'])) {
-                throw new ShopRegistrationException(
-                    '[CDEKDelivery] Failed to get shop uuid', 'cdek_error.uuid.auth', $response->data(),
-                );
-            }
+                if (empty($response->getHeaders()['x-entity-id'])) {
+                    throw new ShopRegistrationException(
+                        'Failed to get shop uuid', $response->data(),
+                    );
+                }
 
-            return $response->getHeaders()['X-Entity-Id'];
+                return $response->getHeaders()['x-entity-id'];
+            } catch (ApiException $e) {
+                throw new ShopRegistrationException('Register shop failed');
+            }
         }
 
         /**
-         * @throws AuthException
-         * @throws JsonException
+         * @throws CoreAuthException
+         * @throws \Cdek\Exceptions\CacheException
+         */
+        private function getEndpoint(string $path, bool $strict = true): string
+        {
+            $base = Tokens::getEndpoint($this->tokenType);
+
+            if ($base === null) {
+                if ($strict) {
+                    throw new CoreAuthException;
+                }
+
+                /** @noinspection GlobalVariableUsageInspection */
+                return ($_ENV['CDEK_CORE_API'] ?? Config::API_CORE_URL)."cms/$path";
+            }
+
+            return "$base/$path";
+        }
+
+        /**
+         * @throws CoreAuthException
+         * @throws \Cdek\Exceptions\CacheException
          */
         public function fetchShopTokens(string $authIntToken, string $shopId): array
         {
             try {
                 $response = HttpClient::sendJsonRequest(
-                    Config::API_CORE_URL."cms/shops/$shopId/tokens",
+                    $this->getEndpoint("shops/$shopId/tokens", false),
                     'POST',
                     $authIntToken,
                 );
-            } catch (CdekApiException $e) {
-                throw new AuthException(
-                    '[CDEKDelivery] Failed to get shop token', 'auth.core',
-                );
-            }
 
-            return $response->data();
+                return $response->data();
+            } catch (ApiException $e) {
+                throw new CoreAuthException;
+            }
         }
 
         /**
-         * @throws CdekApiException
-         * @throws CdekServerException
-         * @throws CdekClientException
-         * @throws JsonException
-         * @throws AuthException
+         * @throws CoreAuthException
+         * @throws ApiException
+         * @throws \Cdek\Exceptions\CacheException
          */
-        public function listTasks(?string $next = null): array
+        public function fetchKeyring(): array
+        {
+            return HttpClient::sendJsonRequest(
+                $this->getEndpoint('.well-known/key', false),
+                'GET',
+                null,
+            )->data();
+        }
+
+        /**
+         * @throws ApiException
+         * @throws CoreAuthException
+         * @throws \Cdek\Exceptions\CacheException
+         */
+        public function listTasks(?string $next = null): Transport\HttpResponse
         {
             return HttpClient::sendJsonRequest(
                 $this->getEndpoint('tasks'),
@@ -96,32 +126,42 @@ namespace Cdek {
                 ($next === null ? null : [
                     'cursor' => $next,
                 ]),
+            );
+        }
+
+        /**
+         * @throws CoreAuthException
+         * @throws \Cdek\Exceptions\CacheException
+         */
+        private function getToken(): string
+        {
+            $token = Tokens::get($this->tokenType);
+
+            if ($token === null) {
+                throw new CoreAuthException;
+            }
+
+            return $token;
+        }
+
+        /**
+         * @throws ApiException
+         * @throws CoreAuthException
+         * @throws \Cdek\Exceptions\CacheException
+         */
+        public function getOrderById(int $orderId): array
+        {
+            return HttpClient::sendJsonRequest(
+                $this->getEndpoint("orders/$orderId"),
+                'GET',
+                $this->getToken(),
             )->data();
         }
 
         /**
-         * @throws CdekApiException
-         * @throws CdekServerException
-         * @throws CdekClientException
-         * @throws JsonException
-         * @throws AuthException
-         */
-        public function getOrderById(int $orderId): array
-        {
-                return HttpClient::sendJsonRequest(
-                    $this->getEndpoint("orders/$orderId"),
-                    'GET',
-                    $this->getToken(),
-                )->data();
-        }
-
-
-        /**
-         * @throws CdekApiException
-         * @throws JsonException
-         * @throws CdekClientException
-         * @throws AuthException
-         * @throws CdekServerException
+         * @throws ApiException
+         * @throws CoreAuthException
+         * @throws \Cdek\Exceptions\CacheException
          */
         public function getHistory(int $orderId): array
         {
@@ -133,67 +173,27 @@ namespace Cdek {
         }
 
         /**
-         * @throws JsonException
-         * @throws AuthException
-         * @throws CdekApiException
+         * @throws ApiException
+         * @throws CoreAuthException
+         * @throws \Cdek\Exceptions\CacheException
          */
-        private function getEndpoint(?string $path = null): string
-        {
-            $base = CoreTokenStorage::getEndpoint($this->tokenType);
-
-            if ($base === null) {
-                throw new AuthException;
-            }
-
-            return $path !== null ? "$base/$path" : $base;
-        }
-
-        /**
-         * @throws AuthException
-         * @throws CdekApiException
-         * @throws JsonException
-         */
-        private function getToken(): string
-        {
-            $token = CoreTokenStorage::getToken($this->tokenType);
-
-            if ($token === null) {
-                throw new AuthException;
-            }
-
-            return $token;
-        }
-
-        /**
-         * @throws CdekApiException
-         * @throws JsonException
-         * @throws AuthException
-         * @throws CdekServerException
-         * @throws CdekClientException
-         */
-        public function taskInfo(string $taskId, TaskOutputData $data): array
+        public function getTask(string $taskId): array
         {
             return HttpClient::sendJsonRequest(
                 $this->getEndpoint("tasks/$taskId"),
                 'GET',
                 $this->getToken(),
-                [
-                    'status' => $data->getStatus(),
-                    'result' => $data->getData(),
-                ],
             )->data();
         }
 
         /**
-         * @throws CdekApiException
-         * @throws CdekServerException
-         * @throws CdekClientException
-         * @throws JsonException
-         * @throws AuthException
+         * @throws ApiException
+         * @throws CoreAuthException
+         * @throws \Cdek\Exceptions\CacheException
          */
-        public function putTaskResult(string $taskId, TaskOutputData $data): array
+        public function saveTaskResult(string $taskId, TaskResult $data): void
         {
-            return HttpClient::sendJsonRequest(
+            HttpClient::sendJsonRequest(
                 $this->getEndpoint("tasks/$taskId"),
                 'PUT',
                 $this->getToken(),
@@ -205,7 +205,7 @@ namespace Cdek {
                     'X-Current-Page' => $data->getCurrentPage(),
                     'X-Total-Pages'  => $data->getTotalPages(),
                 ],
-            )->data();
+            );
         }
     }
 }
