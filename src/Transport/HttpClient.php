@@ -10,8 +10,10 @@ namespace {
 namespace Cdek\Transport {
 
     use Cdek\Exceptions\External\ApiException;
+    use Cdek\Exceptions\External\EntityNotFoundException;
     use Cdek\Exceptions\External\HttpClientException;
     use Cdek\Exceptions\External\HttpServerException;
+    use Cdek\Exceptions\External\InvalidRequestException;
     use Cdek\Loader;
     use WP_Error;
     use WP_REST_Server;
@@ -47,6 +49,18 @@ namespace Cdek\Transport {
 
             if ($result->isServerError()) {
                 throw new HttpServerException($result->error());
+            }
+
+            if($result->getStatusCode() === 422){
+                throw new InvalidRequestException($result->error()['fields']);
+            }
+
+            if($result->getStatusCode() === 404){
+                throw new EntityNotFoundException($result->error());
+            }
+
+            if (!$result->missInvalidLegacyRequest()) {
+                throw new InvalidRequestException($result->legacyRequestErrors());
             }
 
             if ($result->isClientError()) {

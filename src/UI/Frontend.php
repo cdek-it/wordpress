@@ -10,7 +10,7 @@ namespace {
 
 namespace Cdek\UI {
 
-    use Cdek\Helper;
+    use Cdek\Helpers\UI;
     use Cdek\Traits\CanBeCreated;
 
     class Frontend
@@ -23,7 +23,7 @@ namespace Cdek\UI {
                 return;
             }
 
-            Helper::enqueueScript('cdek-map', 'cdek-checkout-map', true);
+            UI::enqueueScript('cdek-map', 'cdek-checkout-map', true);
         }
 
         public function __invoke(): void

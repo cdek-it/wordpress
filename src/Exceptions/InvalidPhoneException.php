@@ -11,22 +11,21 @@ namespace Cdek\Exceptions {
 
     use Cdek\Contracts\ExceptionContract;
 
-    class PhoneNotValidException extends ExceptionContract
+    class InvalidPhoneException extends ExceptionContract
     {
-        protected string $key = 'phone.validation';
+        protected string $key = 'validation.phone';
 
-        public function __construct(string $invalidPhone, string $countryCode)
+        public function __construct(string $phone)
         {
             parent::__construct(
                 sprintf(/* translators: %s: Recipient phone number */ esc_html__(
                     'Incorrect phone number: %s',
                     'cdekdelivery',
                 ),
-                    $invalidPhone,
+                    $phone,
                 ),
                 [
-                    'phone'      => $invalidPhone,
-                    'setCountry' => $countryCode,
+                    'phone'   => $phone,
                 ],
                 false,
             );

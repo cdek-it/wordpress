@@ -9,7 +9,7 @@ namespace {
 
 namespace Cdek\Model {
 
-    use Cdek\Helper;
+    use Cdek\ShippingMethod;
     use RuntimeException;
 
     class Tariff
@@ -27,7 +27,7 @@ namespace Cdek\Model {
         public const DELIVERY_TYPE = 2;
         public const SHOP_TYPE = 1;
 
-        private const TARIFF_DATA
+        private const DATA
             = [
                 7   => [
                     'name' => 'Международный экспресс документы дверь-дверь',
@@ -221,58 +221,58 @@ namespace Cdek\Model {
                 ],
             ];
 
-        public static function getTariffType(int $code): int
+        public static function getType(int $code): int
         {
-            if (!isset(self::TARIFF_DATA[$code])) {
+            if (!isset(self::DATA[$code])) {
                 throw new RuntimeException("Unknown tariff $code");
             }
 
-            return self::TARIFF_DATA[$code]['type'];
+            return self::DATA[$code]['type'];
         }
 
-        public static function isTariffToOffice(int $code): bool
+        public static function isToOffice(int $code): bool
         {
-            if (!isset(self::TARIFF_DATA[$code])) {
+            if (!isset(self::DATA[$code])) {
                 throw new RuntimeException("Unknown tariff $code");
             }
 
-            return self::TARIFF_DATA[$code]['mode'] === self::DOOR_OFFICE ||
-                   self::TARIFF_DATA[$code]['mode'] === self::OFFICE_OFFICE ||
-                   self::TARIFF_DATA[$code]['mode'] === self::PICKUP_OFFICE ||
-                   self::TARIFF_DATA[$code]['mode'] === self::PICKUP_PICKUP ||
-                   self::TARIFF_DATA[$code]['mode'] === self::OFFICE_PICKUP ||
-                   self::TARIFF_DATA[$code]['mode'] === self::DOOR_PICKUP;
+            return self::DATA[$code]['mode'] === self::DOOR_OFFICE ||
+                   self::DATA[$code]['mode'] === self::OFFICE_OFFICE ||
+                   self::DATA[$code]['mode'] === self::PICKUP_OFFICE ||
+                   self::DATA[$code]['mode'] === self::PICKUP_PICKUP ||
+                   self::DATA[$code]['mode'] === self::OFFICE_PICKUP ||
+                   self::DATA[$code]['mode'] === self::DOOR_PICKUP;
         }
 
-        public static function isTariffFromOffice(int $code): bool
+        public static function isFromOffice(int $code): bool
         {
-            if (!isset(self::TARIFF_DATA[$code])) {
+            if (!isset(self::DATA[$code])) {
                 throw new RuntimeException("Unknown tariff $code");
             }
 
-            return self::TARIFF_DATA[$code]['mode'] === self::OFFICE_DOOR ||
-                   self::TARIFF_DATA[$code]['mode'] === self::OFFICE_OFFICE ||
-                   self::TARIFF_DATA[$code]['mode'] === self::OFFICE_PICKUP;
+            return self::DATA[$code]['mode'] === self::OFFICE_DOOR ||
+                   self::DATA[$code]['mode'] === self::OFFICE_OFFICE ||
+                   self::DATA[$code]['mode'] === self::OFFICE_PICKUP;
         }
 
-        public static function isTariffFromDoor(int $code): bool
+        public static function isFromDoor(int $code): bool
         {
-            if (!isset(self::TARIFF_DATA[$code])) {
+            if (!isset(self::DATA[$code])) {
                 throw new RuntimeException("Unknown tariff $code");
             }
 
-            return self::TARIFF_DATA[$code]['mode'] === self::DOOR_DOOR ||
-                   self::TARIFF_DATA[$code]['mode'] === self::DOOR_OFFICE ||
-                   self::TARIFF_DATA[$code]['mode'] === self::DOOR_PICKUP;
+            return self::DATA[$code]['mode'] === self::DOOR_DOOR ||
+                   self::DATA[$code]['mode'] === self::DOOR_OFFICE ||
+                   self::DATA[$code]['mode'] === self::DOOR_PICKUP;
         }
 
-        public static function getTariffUserNameByCode(int $code)
+        public static function getNameByCode(int $code): string
         {
-            if (!isset(self::TARIFF_DATA[$code])) {
+            if (!isset(self::DATA[$code])) {
                 throw new RuntimeException("Unknown tariff $code");
             }
 
-            $tariffNameEdit = Helper::getActualShippingMethod()->get_option('tariff_name');
+            $tariffNameEdit = ShippingMethod::factory()->tariff_name;
 
             if (!empty($tariffNameEdit)) {
                 $tariffNameEditArray = explode(';', $tariffNameEdit);
@@ -285,20 +285,20 @@ namespace Cdek\Model {
                 }
             }
 
-            return self::TARIFF_DATA[$code]['name'];
+            return self::DATA[$code]['name'];
         }
 
-        public static function getTariffList(): array
+        public static function list(): array
         {
             return array_combine(
-                array_keys(self::TARIFF_DATA),
+                array_keys(self::DATA),
                 array_map(static fn(int $code, array $el) => sprintf('%s (%s)', $el['name'], $code),
-                    array_keys(self::TARIFF_DATA),
-                    self::TARIFF_DATA),
+                    array_keys(self::DATA),
+                    self::DATA),
             );
         }
 
-        public static function getDeliveryModesToOffice(): array
+        public static function listOfficeDeliveryModes(): array
         {
             return [
                 self::OFFICE_OFFICE,
@@ -310,24 +310,24 @@ namespace Cdek\Model {
             ];
         }
 
-        public static function isTariffToPostamat(int $code): bool
+        public static function isToPickup(int $code): bool
         {
-            if (!isset(self::TARIFF_DATA[$code])) {
+            if (!isset(self::DATA[$code])) {
                 throw new RuntimeException("Unknown tariff $code");
             }
 
-            return self::TARIFF_DATA[$code]['mode'] === self::DOOR_PICKUP ||
-                   self::TARIFF_DATA[$code]['mode'] === self::OFFICE_PICKUP ||
-                   self::TARIFF_DATA[$code]['mode'] === self::PICKUP_PICKUP;
+            return self::DATA[$code]['mode'] === self::DOOR_PICKUP ||
+                   self::DATA[$code]['mode'] === self::OFFICE_PICKUP ||
+                   self::DATA[$code]['mode'] === self::PICKUP_PICKUP;
         }
 
-        public static function isTariffModeIM(int $code): bool
+        public static function availableForShops(int $code): bool
         {
-            if (!isset(self::TARIFF_DATA[$code])) {
+            if (!isset(self::DATA[$code])) {
                 throw new RuntimeException("Unknown tariff $code");
             }
 
-            return self::TARIFF_DATA[$code]['type'] === self::SHOP_TYPE;
+            return self::DATA[$code]['type'] === self::SHOP_TYPE;
         }
     }
 }

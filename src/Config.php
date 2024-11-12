@@ -13,7 +13,6 @@ namespace Cdek {
     {
         public const PLUGIN_NAME = 'CDEKDelivery';
         public const DELIVERY_NAME = 'official_cdek';
-        public const META_KEY = 'order_data';
         public const ORDER_META_BOX_KEY = 'official_cdek_order';
         public const ORDER_AUTOMATION_HOOK_NAME = 'cdekdelivery_automation';
         public const TASK_MANAGER_HOOK_NAME = 'cdekdelivery_task_manager';
@@ -28,5 +27,6 @@ namespace Cdek {
         public const DEV_KEY = '7wV8tk&r6VH4zK:1&0uDpjOkvM~qngLl';
         public const DOCS_URL = 'https://cdek-it.github.io/wordpress/';
         public const FAQ_URL = 'https://cdek-it.github.io/wordpress/faq';
+        public const MAGIC_KEY = 'cdeksik';
     }
 }

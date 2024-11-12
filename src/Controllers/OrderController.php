@@ -9,9 +9,12 @@ namespace {
 
 namespace Cdek\Controllers {
 
+    use Cdek\Actions\GenerateBarcodeAction;
+    use Cdek\Actions\GenerateWaybillAction;
     use Cdek\Actions\OrderCreateAction;
     use Cdek\Actions\OrderDeleteAction;
     use Cdek\Config;
+    use Cdek\Model\Order;
     use WP_Http;
     use WP_REST_Request;
     use WP_REST_Response;
@@ -21,7 +24,7 @@ namespace Cdek\Controllers {
     {
         /**
          * @throws \JsonException
-         * @throws \Cdek\Exceptions\External\RestApiInvalidRequestException
+         * @throws \Cdek\Exceptions\External\InvalidRequestException
          * @throws \Throwable
          */
         public static function createOrder(WP_REST_Request $request): WP_REST_Response
@@ -38,6 +41,32 @@ namespace Cdek\Controllers {
         public static function deleteOrder(WP_REST_Request $request): WP_REST_Response
         {
             return new WP_REST_Response(OrderDeleteAction::new()($request->get_param('id'))->response(), WP_Http::OK);
+        }
+
+        /**
+         * @throws \Cdek\Exceptions\External\ApiException
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         */
+        public static function getWaybill(WP_REST_Request $request): WP_REST_Response
+        {
+            return new WP_REST_Response(
+                GenerateWaybillAction::new()(
+                    Order::getMetaByOrderId($request->get_param('id'))['order_uuid'] ?? '',
+                ), WP_Http::OK,
+            );
+        }
+
+        /**
+         * @throws \Cdek\Exceptions\External\ApiException
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         */
+        public static function getBarcode(WP_REST_Request $request): WP_REST_Response
+        {
+            return new WP_REST_Response(
+                GenerateBarcodeAction::new()(
+                    Order::getMetaByOrderId($request->get_param('id'))['order_uuid'] ?? '',
+                ), WP_Http::OK,
+            );
         }
 
         public function __invoke(): void
@@ -118,6 +147,35 @@ namespace Cdek\Controllers {
                         'description' => esc_html__('Order number', 'cdekdelivery'),
                         'required'    => true,
                         'type'        => 'integer',
+                    ],
+                ],
+            ]);
+
+
+            register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/waybill', [
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => [__CLASS__, 'getWaybill'],
+                'permission_callback' => static fn() => current_user_can('edit_posts'),
+                'show_in_index'       => true,
+                'args'                => [
+                    'id' => [
+                        'description' => esc_html__('CDEK Order ID', 'cdekdelivery'),
+                        'required'    => true,
+                        'type'        => 'number',
+                    ],
+                ],
+            ]);
+
+            register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/barcode', [
+                'methods'             => WP_REST_Server::READABLE,
+                'callback'            => [__CLASS__, 'getBarcode'],
+                'permission_callback' => static fn() => current_user_can('edit_posts'),
+                'show_in_index'       => true,
+                'args'                => [
+                    'id' => [
+                        'description' => esc_html__('CDEK Order ID', 'cdekdelivery'),
+                        'required'    => true,
+                        'type'        => 'number',
                     ],
                 ],
             ]);

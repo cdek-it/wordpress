@@ -11,5 +11,5 @@ namespace Cdek\Exceptions {
 
     use Cdek\Contracts\ExceptionContract;
 
-    class ShippingMethodNotFoundException extends ExceptionContract {}
+    class ShippingNotFoundException extends ExceptionContract {}
 }

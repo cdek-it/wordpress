@@ -10,8 +10,7 @@ namespace {
 namespace Cdek\UI {
 
     use Cdek\Config;
-    use Cdek\Helper;
-    use Cdek\Helpers\Url;
+    use Cdek\Helpers\UI;
     use Cdek\Loader;
     use Cdek\Traits\CanBeCreated;
 
@@ -57,15 +56,16 @@ namespace Cdek\UI {
         public static function registerAdminScripts(): void
         {
             // Not on Settings page.
+            /** @noinspection GlobalVariableUsageInspection */
             if (!isset($_GET['tab']) || $_GET['tab'] !== 'shipping') {
                 return;
             }
 
-            Helper::enqueueScript('cdek-admin-settings', 'cdek-admin-settings', true);
+            UI::enqueueScript('cdek-admin-settings', 'cdek-admin-settings', true);
             wp_localize_script('cdek-admin-settings', 'cdek_admin_settings', [
                 'api' => [
-                    'offices'    => Url::buildRest('/get-offices'),
-                    'check_auth' => Url::buildRest('/check-auth'),
+                    'cities'    => UI::buildRestUrl('/cities'),
+                    'check_auth' => UI::buildRestUrl('/check-auth'),
                 ],
             ]);
         }

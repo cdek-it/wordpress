@@ -30,19 +30,9 @@ namespace Cdek\Transport {
             $this->headers    = $headers;
         }
 
-        public function isServerError(): bool
+        public function body(): string
         {
-            return $this->statusCode >= 500 && $this->statusCode < 600;
-        }
-
-        public function isClientError(): bool
-        {
-            return $this->statusCode >= 400 && $this->statusCode < 500;
-        }
-
-        public function getStatusCode(): int
-        {
-            return $this->statusCode;
+            return $this->body;
         }
 
         /**
@@ -80,29 +70,79 @@ namespace Cdek\Transport {
         }
 
         /**
-         * @throws UnparsableAnswerException
+         * @throws \Cdek\Exceptions\External\UnparsableAnswerException
          */
-        public function nextCursor(): ?string
+        public function entity(): ?array
         {
-            return $this->json()['cursor']['next'] ?? null;
+            return $this->json()['entity'] ?? null;
+        }
+
+        /**
+         * @throws \Cdek\Exceptions\External\UnparsableAnswerException
+         */
+        public function related(): array
+        {
+            return $this->json()['related_entities'] ?? [];
         }
 
         /**
          * @throws UnparsableAnswerException
          */
-        public function error(): array
+        public function legacyRequestErrors(): array
         {
-            return $this->json()['error'] ?? [];
+            return $this->json()['requests'][0]['errors'] ?? [];
         }
 
-        public function body(): string
+        /**
+         * @throws UnparsableAnswerException
+         */
+        public function error(): ?array
         {
-            return $this->body;
+            return $this->json()['error']
+                   ??
+                   $this->legacyRequestErrors()[0]
+                   ??
+                   null;
         }
 
         public function getHeaders(): array
         {
             return $this->headers;
+        }
+
+        public function getStatusCode(): int
+        {
+            return $this->statusCode;
+        }
+
+        public function isClientError(): bool
+        {
+            return $this->statusCode >= 400 && $this->statusCode < 500;
+        }
+
+        public function isServerError(): bool
+        {
+            return $this->statusCode >= 500 && $this->statusCode < 600;
+        }
+
+        /**
+         * @throws \Cdek\Exceptions\External\UnparsableAnswerException
+         */
+        public function missInvalidLegacyRequest(): bool
+        {
+            if (empty($this->json()['requests'][0]['state'])) {
+                return true;
+            }
+
+            return $this->json()['requests'][0]['state'] !== 'INVALID';
+        }
+
+        /**
+         * @throws UnparsableAnswerException
+         */
+        public function nextCursor(): ?string
+        {
+            return $this->json()['cursor']['next'] ?? null;
         }
     }
 }

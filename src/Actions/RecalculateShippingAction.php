@@ -9,9 +9,7 @@ namespace {
 
 namespace Cdek\Actions {
 
-    use Cdek\Exceptions\TariffNotAvailableException;
-    use Cdek\MetaKeys;
-    use Cdek\Model\OrderMetaData;
+    use Cdek\Model\Order;
     use WC_Abstract_Order;
     use WC_Order;
 
@@ -20,8 +18,13 @@ namespace Cdek\Actions {
 
         private static bool $addedError = false;
 
+        /**
+         * @throws \Cdek\Exceptions\External\ApiException
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         */
         public function __invoke(bool $and_taxes, WC_Abstract_Order $order): void
         {
+            /** @noinspection GlobalVariableUsageInspection */
             if (!isset($_POST['action']) ||
                 $_POST['action'] !== 'woocommerce_calc_line_taxes' ||
                 !($order instanceof WC_Order) ||
@@ -30,48 +33,53 @@ namespace Cdek\Actions {
                 return;
             }
 
-            try {
-                foreach ($order->get_shipping_methods() as $shipping) {
-                    $calculator = CalculateDeliveryAction::new($shipping->get_instance_id());
-                    $calculator([
-                        'contents'    => array_map(static fn($el)
-                            => [
-                            'data'     => $el->get_product(),
-                            'quantity' => $el->get_quantity(),
-                        ], $order->get_items()),
-                        'destination' => [
-                            'city'     => $order->get_shipping_city(),
-                            'country'  => $order->get_shipping_country(),
-                            'postcode' => $order->get_shipping_postcode(),
-                        ],
-                    ], isset(OrderMetaData::getMetaByOrderId($order->get_id())['office_code']));
+            $orderModel = new Order($order);
 
-                    $rate = $calculator->getTariffRate(
-                        (int)($shipping->get_meta(MetaKeys::TARIFF_CODE) ?: $shipping->get_meta('tariff_code')),
-                    );
-                    $shipping->set_total($rate['cost']);
-                    $shipping->set_name($rate['label']);
-                    $shipping->set_meta_data([
-                        MetaKeys::WIDTH  => $rate['width'],
-                        MetaKeys::HEIGHT => $rate['height'],
-                        MetaKeys::LENGTH => $rate['length'],
-                    ]);
-                }
-            } catch (TariffNotAvailableException $e) {
+            $shipping = $orderModel->getShipping();
+
+            if ($shipping === null) {
+                return;
+            }
+
+            $rates = CalculateDeliveryAction::new()([
+                'contents'    => array_map(static fn($el)
+                    => [
+                    'data'     => $el->get_product(),
+                    'quantity' => $el->get_quantity(),
+                ], $order->get_items()),
+                'destination' => [
+                    'city'     => $order->get_shipping_city(),
+                    'country'  => $order->get_shipping_country(),
+                    'postcode' => $order->get_shipping_postcode(),
+                ],
+            ], $shipping->getInstanceId(), !empty($shipping->office ?: $orderModel->pvz_code));
+
+            $tariff = $shipping->tariff;
+
+            if (!array_key_exists($tariff, $rates)) {
                 if (self::$addedError) {
                     return;
                 }
 
                 self::$addedError = true;
-                $availableTariffs = implode(', ', $e->getData());
+                $availableTariffs = implode(', ', array_keys($rates));
                 echo '<div class="cdek-error">'.sprintf(
                     /* translators: %s tariff codes  */ esc_html__(
-                            'The selected CDEK tariff is not available with the specified parameters. Available tariffs with codes: %s',
-                            'cdekdelivery',
-                        ),
+                        'The selected CDEK tariff is not available with the specified parameters. Available tariffs with codes: %s',
+                        'cdekdelivery',
+                    ),
                         esc_html($availableTariffs),
                     ).'</div>';
+
+                return;
             }
+
+            $shipping->updateTotal((float)$rates[$tariff]['cost']);
+            $shipping->updateName($rates[$tariff]['label']);
+            $shipping->width  = $rates[$tariff]['width'];
+            $shipping->height = $rates[$tariff]['height'];
+            $shipping->length = $rates[$tariff]['length'];
+            $shipping->save();
         }
     }
 }

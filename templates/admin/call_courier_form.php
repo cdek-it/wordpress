@@ -9,7 +9,7 @@ defined('ABSPATH') or exit;
 
 /** @var $fromDoor */
 
-use Cdek\Helpers\Url;
+use Cdek\Helpers\UI;
 
 ?>
 
@@ -80,5 +80,5 @@ use Cdek\Helpers\Url;
     <input id="cdek-courier-send-call" class="button save_order button-primary" type="button" value="<?php esc_html_e('Send',
                                                                                                               'cdekdelivery') ?>"
            data-action="<?php
-           echo esc_url(Url::buildRest("order/$orderIdWP/courier")) ?>">
+           echo esc_url(UI::buildRestUrl("order/$orderIdWP/courier")) ?>">
 </div>

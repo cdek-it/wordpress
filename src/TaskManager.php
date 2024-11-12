@@ -116,7 +116,7 @@ namespace Cdek {
          */
         private function loadTasks(?string $cursor = null): array
         {
-            $response = (new CoreApi)->listTasks($cursor);
+            $response = (new CoreApi)->taskList($cursor);
 
             $tasks = $response->data();
 

@@ -10,11 +10,11 @@ namespace {
 namespace Cdek\Actions {
 
     use Cdek\CdekApi;
-    use Cdek\Model\CourierMetaData;
+    use Cdek\Exceptions\External\InvalidRequestException;
+    use Cdek\Model\Intake;
     use Cdek\Model\ValidationResult;
     use Cdek\Note;
     use Cdek\Traits\CanBeCreated;
-    use Cdek\Validator\ValidateCourier;
 
     class IntakeDeleteAction
     {
@@ -40,41 +40,44 @@ namespace Cdek\Actions {
          */
         public function __invoke(int $orderId): ValidationResult
         {
-            $courierMeta = CourierMetaData::getMetaByOrderId($orderId);
+            $courierMeta = new Intake($orderId);
 
-            if (empty($courierMeta)) {
-                return new ValidationResult(true);
-            }
-
-            if ($courierMeta['courier_uuid'] === '') {
-                CourierMetaData::cleanMetaByOrderId($orderId);
+            if (empty($courierMeta->uuid)) {
+                $courierMeta->clean();
 
                 return new ValidationResult(true);
             }
 
-            $courierObj = $this->api->callCourierDelete($courierMeta['courier_uuid']);
+            try {
+                $intake = $this->api->intakeDelete($courierMeta['courier_uuid']);
+            } catch (InvalidRequestException $e) {
+                if ($e->getData()[0]['code'] === 'v2_entity_has_final_status') {
+                    return new ValidationResult(true);
+                }
 
-            if (isset($courierObj['errors']) && $courierObj['errors'][0]['code'] === 'v2_entity_has_final_status') {
-                return new ValidationResult(true);
-            }
-
-            $validate = ValidateCourier::validate($courierObj);
-            if (!$validate->state) {
-                return $validate;
-            }
-
-            CourierMetaData::cleanMetaByOrderId($orderId);
-
-            $message = sprintf(
-                esc_html__(/* translators: %s: request number */ 'Deleting a request to call a courier: %s',
+                return new ValidationResult(
+                    false, sprintf(/* translators: %s: Error message */ esc_html__(
+                    'Error. The courier request has not been created. (%s)',
                     'cdekdelivery',
                 ),
-                $courierObj['entity']['uuid'],
+                    $e->getData()[0]['message'],
+                ),
+                );
+            }
+
+            $courierMeta->clean();
+
+            Note::send(
+                $orderId,
+                sprintf(
+                    esc_html__(/* translators: %s: request number */ 'Intake %s has been deleted',
+                        'cdekdelivery',
+                    ),
+                    $intake,
+                ),
             );
 
-            Note::send($orderId, $message);
-
-            return new ValidationResult(true, esc_html__('Request has been deleted.', 'cdekdelivery'));
+            return new ValidationResult(true, esc_html__('Intake has been deleted', 'cdekdelivery'));
         }
     }
 }

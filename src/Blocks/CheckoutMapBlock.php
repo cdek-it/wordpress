@@ -16,8 +16,10 @@ namespace Cdek\Blocks {
     use Cdek\Config;
     use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
-    use Cdek\MetaKeys;
+    use Cdek\Helpers\UI;
+    use Cdek\Model\Order;
     use Cdek\Model\Tariff;
+    use Cdek\ShippingMethod;
     use WC_Customer;
     use WC_Order;
     use WP_REST_Request;
@@ -53,11 +55,7 @@ namespace Cdek\Blocks {
 
             $api = new CdekApi;
 
-            $city = $api->getCityCode($cityInput, $postcodeInput);
-
-            if ($city === -1) {
-                $city = $api->getCityCode($cityInput, '');
-            }
+            $city = $api->cityCodeGet($cityInput, $postcodeInput);
 
             return [
                 'inputs' => [
@@ -65,12 +63,11 @@ namespace Cdek\Blocks {
                     'postcode' => $postcodeInput,
                 ],
                 'city'   => $city,
-                'points' => $city !== -1 ? $api->getOffices([
-                    'city_code' => $city,
-                ])->body() : '[]',
+                'points' => $city !== null ? $api->officeListRaw($city) : '[]',
             ];
         }
 
+        /** @noinspection PhpUnused */
         public static function extend_checkout_data(): array
         {
             return [
@@ -90,6 +87,7 @@ namespace Cdek\Blocks {
             ];
         }
 
+        /** @noinspection PhpUnused */
         public static function extend_checkout_schema(): array
         {
             return [
@@ -115,19 +113,14 @@ namespace Cdek\Blocks {
 
         public static function saveOrderData(WC_Order $order, WP_REST_Request $request): void
         {
-            $shippingMethod = CheckoutHelper::getOrderShippingMethod($order);
+            $shipping = (new Order($order))->getShipping();
 
-            if (!CheckoutHelper::isCdekShippingMethod($order)) {
+            if ($shipping === null) {
                 return;
             }
 
-            if (Tariff::isTariffToOffice(
-                (int)($shippingMethod->get_meta(MetaKeys::TARIFF_CODE) ?: $shippingMethod->get_meta('tariff_code')),
-            )) {
-                $shippingMethod->add_meta_data(
-                    MetaKeys::OFFICE_CODE,
-                    $request['extensions'][Config::DELIVERY_NAME]['office_code'],
-                );
+            if (Tariff::isToOffice($shipping->tariff)) {
+                $shipping->office = $request['extensions'][Config::DELIVERY_NAME]['office_code'];
             }
         }
 
@@ -138,8 +131,8 @@ namespace Cdek\Blocks {
 
         public function initialize(): void
         {
-            Helper::enqueueScript('cdek-checkout-map-block-frontend', 'cdek-checkout-map-block-frontend', false, true);
-            Helper::enqueueScript('cdek-checkout-map-block-editor', 'cdek-checkout-map-block', false, true);
+            UI::enqueueScript('cdek-checkout-map-block-frontend', 'cdek-checkout-map-block-frontend', false, true);
+            UI::enqueueScript('cdek-checkout-map-block-editor', 'cdek-checkout-map-block', false, true);
         }
 
         public function get_script_handles(): array
@@ -155,8 +148,8 @@ namespace Cdek\Blocks {
         public function get_script_data(): array
         {
             return [
-                'apiKey'              => Helper::getActualShippingMethod()->get_option('yandex_map_api_key'),
-                'officeDeliveryModes' => Tariff::getDeliveryModesToOffice(),
+                'apiKey'              => ShippingMethod::factory()->yandex_map_api_key,
+                'officeDeliveryModes' => Tariff::listOfficeDeliveryModes(),
             ];
         }
     }

@@ -44,7 +44,15 @@ namespace Cdek\Helpers {
         /**
          * @throws \Cdek\Exceptions\CacheException
          */
-        public static function get(string $tokenType, bool $exchangeForbidden = false): ?string
+        public static function get(string $tokenType): ?string
+        {
+            return self::exchangeableGet($tokenType);
+        }
+
+        /**
+         * @throws \Cdek\Exceptions\CacheException
+         */
+        private static function exchangeableGet(string $tokenType, bool $exchangeForbidden = false): ? string
         {
             $tokens = Cache::get('tokens');
 
@@ -58,7 +66,7 @@ namespace Cdek\Helpers {
 
             self::tryExchangeLegacyToken();
 
-            return self::get($tokenType, true);
+            return self::exchangeableGet($tokenType, true);
         }
 
         /**
@@ -67,14 +75,14 @@ namespace Cdek\Helpers {
         public static function tryExchangeLegacyToken(): void
         {
             try {
-                $token = (new DBTokenStorage)->getToken();
+                $token = (new LegacyTokenStorage)->getToken();
             } catch (LegacyAuthException $e) {
                 return;
             }
 
             try {
                 $api    = new CoreApi;
-                $tokens = $api->fetchShopTokens($token, $api->syncShop($token));
+                $tokens = $api->shopTokensFetch($token, $api->shopSync($token));
             } catch (ShopRegistrationException|CoreAuthException $e) {
                 return;
             }
@@ -101,7 +109,7 @@ namespace Cdek\Helpers {
                 return false;
             }
 
-            $keyring = Cache::remember('keyring', static fn() => (new CoreApi)->fetchKeyring());
+            $keyring = Cache::remember('keyring', static fn() => (new CoreApi)->keyringFetch());
 
             if (!isset($keyring[$kid])) {
                 return false;

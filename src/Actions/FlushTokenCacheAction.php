@@ -9,7 +9,7 @@ namespace {
 
 namespace Cdek\Actions {
 
-    use Cdek\Helpers\DBTokenStorage;
+    use Cdek\Helpers\LegacyTokenStorage;
     use Cdek\Traits\CanBeCreated;
 
     class FlushTokenCacheAction
@@ -17,7 +17,7 @@ namespace Cdek\Actions {
         use CanBeCreated;
         final public function __invoke(): void
         {
-            DBTokenStorage::flushCache();
+            LegacyTokenStorage::flushCache();
         }
     }
 }
