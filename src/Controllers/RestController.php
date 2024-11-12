@@ -13,6 +13,7 @@ namespace Cdek\Controllers {
     use Cdek\Actions\GenerateBarcodeAction;
     use Cdek\Actions\GenerateWaybillAction;
     use Cdek\CdekApi;
+    use Cdek\Commands\TokensSyncCommand;
     use Cdek\Config;
     use Cdek\Helpers\Tokens;
     use Cdek\Model\OrderMetaData;
@@ -59,7 +60,15 @@ namespace Cdek\Controllers {
 
         public static function callback(WP_REST_Request $request): WP_REST_Response
         {
-            return new WP_REST_Response(['state' => $request->get_param('action')], WP_Http::ACCEPTED);
+            switch ($request->get_param('command')){
+                case 'tokens.refresh':
+                    TokensSyncCommand::new()($request->get_json_params());
+                    break;
+                default:
+                    return new WP_REST_Response(['state' => 'unknown command'], WP_Http::BAD_REQUEST);
+            }
+
+            return new WP_REST_Response(['state' => 'OK'], WP_Http::ACCEPTED);
         }
 
         public function __invoke(): void
