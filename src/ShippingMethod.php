@@ -110,7 +110,7 @@ namespace Cdek {
                         esc_html('</a>'),
                     ],
                         [
-                            '<a rel="noopener nofollower" href="https://yandex.ru/dev/jsapi-v2-1/doc/ru/#get-api-key" target="_blank">',
+                            '<a rel="noopener nofollower" href="https://yandex.ru/dev/jsapi30/doc/ru/quickstart" target="_blank">',
                             '</a>',
                         ],
                         esc_html__(
