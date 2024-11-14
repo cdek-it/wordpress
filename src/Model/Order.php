@@ -11,6 +11,7 @@ namespace Cdek\Model {
 
     use Cdek\CdekApi;
     use Cdek\Contracts\MetaModelContract;
+    use Cdek\Exceptions\OrderNotFoundException;
     use DateTime;
     use InvalidArgumentException;
     use RuntimeException;
@@ -67,46 +68,30 @@ namespace Cdek\Model {
         private const META_KEY = 'order_data';
         private WC_Order $order;
         private array $meta;
+        private ?bool $locked = null;
 
         /**
          * @param  WC_Order|WP_Post|int  $order
          *
          * @noinspection MissingParameterTypeDeclarationInspection
+         * @throws \Cdek\Exceptions\OrderNotFoundException
          */
         public function __construct($order)
         {
-            $this->order = $order instanceof WC_Order ? $order : wc_get_order($order);
             $this->meta  = $this->order->get_meta(self::META_KEY) ?: [];
-        }
 
-        public static function getMetaByOrderId(int $orderId): array
-        {
-            return wc_get_order($orderId)->get_meta(self::META_KEY) ?: [];
-        }
-
-        public static function isLockedByStatuses(array $statuses): bool
-        {
-            return !($statuses[0]['code'] !== 'CREATED' && $statuses[0]['code'] !== 'INVALID');
-        }
-
-        final public function getShipping(): ?ShippingItem
-        {
-            $shippingMethods = $this->order->get_shipping_methods();
-
-            foreach ($shippingMethods as $method) {
-                try {
-                    return new ShippingItem($method);
-                } catch (InvalidArgumentException $e) {
-                    continue;
-                }
+            if($order instanceof WC_Order) {
+                $this->order = $order;
+                return;
             }
 
-            return null;
-        }
+            $orderSearch = wc_get_order($order);
 
-        final public function getIntake(): Intake
-        {
-            return new Intake($this->order);
+            if($orderSearch === false) {
+                throw new OrderNotFoundException;
+            }
+
+            $this->order = $orderSearch;
         }
 
         /** @noinspection MissingReturnTypeInspection */
@@ -135,16 +120,6 @@ namespace Cdek\Model {
             parent::__set($key, $value);
         }
 
-        final public function isPaid(): bool
-        {
-            return $this->order->is_paid();
-        }
-
-        final public function shouldBePaidUponDelivery(): bool
-        {
-            return $this->payment_method === 'cod';
-        }
-
         final public function clean(): void
         {
             unset($this->meta['order_uuid'], $this->meta['order_number'], $this->meta['cdek_order_uuid'], $this->meta['cdek_order_waybill']);
@@ -159,11 +134,34 @@ namespace Cdek\Model {
             $this->order->save();
         }
 
-        // TODO Выпилить после перехода сохранения на Fieldset-ы
-        /** @noinspection MissingReturnTypeInspection */
-        final public function meta(string $key)
+        final public function getIntake(): Intake
         {
-            return $this->order->get_meta($key);
+            return new Intake($this->order);
+        }
+
+        final public function getShipping(): ?ShippingItem
+        {
+            $shippingMethods = $this->order->get_shipping_methods();
+
+            foreach ($shippingMethods as $method) {
+                try {
+                    return new ShippingItem($method);
+                } catch (InvalidArgumentException $e) {
+                    continue;
+                }
+            }
+
+            return null;
+        }
+
+        final public function isLocked(): ?bool
+        {
+            return $this->locked;
+        }
+
+        final public function isPaid(): bool
+        {
+            return $this->order->is_paid();
         }
 
         final public function loadLegacyStatuses(): array
@@ -177,12 +175,30 @@ namespace Cdek\Model {
                 throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Заказ не найден.');
             }
 
-            return array_map(static fn(array $st)
+            $statuses = array_map(static fn(array $st)
                 => [
                 'time' => DateTime::createFromFormat('Y-m-d\TH:i:sO', $st['date_time']),
                 'name' => $st['name'],
                 'code' => $st['code'],
             ], $orderInfo->entity()['statuses']);
+
+            $this->locked = $statuses[0]['code'] === 'CREATED' || $statuses[0]['code'] === 'INVALID';
+
+            return $statuses;
+        }
+
+        /**
+         * @noinspection MissingReturnTypeInspection
+         * TODO Выпилить после перехода сохранения на Fieldset-ы
+         */
+        final public function meta(string $key)
+        {
+            return $this->order->get_meta($key);
+        }
+
+        final public function shouldBePaidUponDelivery(): bool
+        {
+            return $this->payment_method === 'cod';
         }
     }
 }

@@ -11,5 +11,7 @@ namespace Cdek\Exceptions {
 
     use Cdek\Contracts\ExceptionContract;
 
-    class ShippingNotFoundException extends ExceptionContract {}
+    class ShippingNotFoundException extends ExceptionContract {
+        protected string $key = 'shipping.missing';
+    }
 }

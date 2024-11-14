@@ -36,7 +36,7 @@ namespace Cdek\Actions {
             $order->clean();
 
             try {
-                $order = $this->api->orderGet($orderUuid);
+                $this->api->orderGet($orderUuid);
             } catch (InvalidRequestException $e) {
                 Note::send(
                     $orderId,

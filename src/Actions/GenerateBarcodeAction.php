@@ -47,7 +47,7 @@ namespace Cdek\Actions {
                 ];
             }
 
-            if (!$order->entity() !== null) {
+            if ($order->entity() === null) {
                 return [
                     'success' => false,
                     'message' => esc_html__(

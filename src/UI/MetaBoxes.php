@@ -186,7 +186,7 @@ namespace Cdek\UI {
 
             try {
                 $cdekStatuses         = $order->loadLegacyStatuses();
-                $actionOrderAvailable = Order::isLockedByStatuses($cdekStatuses);
+                $actionOrderAvailable = $order->isLocked();
             } catch (Exception $e) {
                 $cdekStatuses         = [];
                 $actionOrderAvailable = true;

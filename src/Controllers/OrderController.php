@@ -51,7 +51,7 @@ namespace Cdek\Controllers {
         {
             return new WP_REST_Response(
                 GenerateWaybillAction::new()(
-                    Order::getMetaByOrderId($request->get_param('id'))['order_uuid'] ?? '',
+                    (new Order($request->get_param('id')))->uuid,
                 ), WP_Http::OK,
             );
         }
@@ -64,7 +64,7 @@ namespace Cdek\Controllers {
         {
             return new WP_REST_Response(
                 GenerateBarcodeAction::new()(
-                    Order::getMetaByOrderId($request->get_param('id'))['order_uuid'] ?? '',
+                    (new Order($request->get_param('id')))->uuid,
                 ), WP_Http::OK,
             );
         }
