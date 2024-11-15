@@ -50,6 +50,7 @@ namespace Cdek\Actions {
          * @throws \Cdek\Exceptions\External\ApiException
          * @throws \Cdek\Exceptions\External\CoreAuthException
          * @throws \Cdek\Exceptions\ShippingNotFoundException
+         * @throws \Cdek\Exceptions\OrderNotFoundException
          */
         public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
         {

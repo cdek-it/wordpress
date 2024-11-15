@@ -16,7 +16,6 @@ namespace Cdek\Actions {
     use Cdek\Model\ValidationResult;
     use Cdek\Note;
     use Cdek\Traits\CanBeCreated;
-    use Cdek\Validator\ValidateCourier;
     use Cdek\Validator\IntakeValidator;
 
     class IntakeCreateAction
@@ -34,6 +33,7 @@ namespace Cdek\Actions {
          * @throws \Cdek\Exceptions\External\ApiException
          * @throws \Cdek\Exceptions\External\LegacyAuthException
          * @throws \Cdek\Exceptions\ShippingNotFoundException
+         * @throws \Cdek\Exceptions\OrderNotFoundException
          */
         public function __invoke(int $orderId, array $data): ValidationResult
         {

@@ -10,7 +10,6 @@ namespace {
 namespace Cdek\Actions\Schedule {
 
     use Cdek\Contracts\TaskContract;
-    use Cdek\Exceptions\External\ApiException;
     use Cdek\Exceptions\OrderNotFoundException;
     use Cdek\Exceptions\ScheduledTaskException;
     use Cdek\Model\Order;
@@ -20,10 +19,7 @@ namespace Cdek\Actions\Schedule {
     class ReindexOrders extends TaskContract
     {
         /**
-         * @return void
-         * @throws ApiException
          * @throws ScheduledTaskException
-         * @throws \JsonException
          */
         final protected function process(): Iterator
         {

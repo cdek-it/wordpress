@@ -6,11 +6,9 @@ namespace Cdek\Actions;
 
 use Cdek\Config;
 use Cdek\CoreApi;
-use Cdek\Exceptions\External\ApiException;
 use Cdek\Exceptions\External\CoreAuthException;
 use Cdek\Exceptions\External\HttpClientException;
 use Cdek\Exceptions\External\HttpServerException;
-use Cdek\Helper;
 use Cdek\Helpers\ScheduleLocker;
 use Cdek\Model\Order;
 use Cdek\Note;
@@ -20,9 +18,9 @@ class DispatchOrderAutomationAction
 {
 
     /**
-     * @param  int|WC_Order  $orderId
-     *
-     * @throws ApiException
+     * @throws \Cdek\Exceptions\External\ApiException
+     * @throws \Cdek\Exceptions\CacheException
+     * @throws \Cdek\Exceptions\OrderNotFoundException
      */
     public function __invoke($orderId, $postedData = null, ?WC_Order $originalOrder = null): void
     {

@@ -27,6 +27,11 @@ namespace Cdek\Actions {
             $this->api = new CdekApi;
         }
 
+        /**
+         * @throws \Cdek\Exceptions\OrderNotFoundException
+         * @throws \Cdek\Exceptions\External\ApiException
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         */
         public function __invoke(int $orderId): ValidationResult
         {
             $order       = new Order($orderId);

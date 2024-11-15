@@ -21,6 +21,7 @@ namespace Cdek\Actions {
         /**
          * @throws \Cdek\Exceptions\External\ApiException
          * @throws \Cdek\Exceptions\External\LegacyAuthException
+         * @throws \Cdek\Exceptions\OrderNotFoundException
          */
         public function __invoke(bool $and_taxes, WC_Abstract_Order $order): void
         {

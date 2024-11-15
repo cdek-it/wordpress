@@ -8,10 +8,7 @@ namespace {
 
 namespace Cdek\Actions {
 
-    use Cdek\Config;
-    use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
-    use Cdek\MetaKeys;
     use Cdek\Model\ShippingItem;
     use Cdek\Model\Tariff;
     use InvalidArgumentException;
@@ -19,10 +16,6 @@ namespace Cdek\Actions {
 
     class ProcessWoocommerceCreateShippingAction
     {
-        /**
-         * @throws \WC_Data_Exception
-         * @throws \Exception
-         */
         public function __invoke(WC_Order_Item_Shipping $shippingItem): void
         {
             try {
