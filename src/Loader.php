@@ -18,7 +18,6 @@ namespace Cdek {
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
     use Cdek\Blocks\CheckoutMapBlock;
     use Cdek\Controllers\IntakeController;
-    use Cdek\Controllers\LocationController;
     use Cdek\Controllers\OrderController;
     use Cdek\Controllers\SettingsController;
     use Cdek\Helpers\CheckoutHelper;
@@ -200,7 +199,6 @@ namespace Cdek {
             add_action('rest_api_init', new SettingsController);
             add_action('rest_api_init', new OrderController);
             add_action('rest_api_init', new IntakeController);
-            add_action('rest_api_init', new LocationController);
 
             add_filter('woocommerce_hidden_order_itemmeta', [DataCleaner::class, 'hideMeta']);
             add_filter('woocommerce_checkout_fields', [CheckoutHelper::class, 'restoreFields'], 1090);
