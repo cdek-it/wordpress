@@ -14,14 +14,13 @@ namespace Cdek\Exceptions\External {
     {
         protected string $key = 'http.missing';
 
-        public function __construct(
-            array $error
-        ) {
+        public function __construct(array $error)
+        {
+            $this->message = $this->message ?: $error['message'];
+
             parent::__construct([
                 'error' => $error['code'],
             ]);
-
-            $this->message = $error['message'];
         }
     }
 }

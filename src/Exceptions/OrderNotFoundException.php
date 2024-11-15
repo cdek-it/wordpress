@@ -15,7 +15,9 @@ namespace Cdek\Exceptions {
         protected string $key = 'order.missing';
         public function __construct()
         {
-            parent::__construct('Order not found');
+            $this->message = $this->message ?: esc_html__('Order not found', 'cdekdelivery');
+
+            parent::__construct();
         }
     }
 }

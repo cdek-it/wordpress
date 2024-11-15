@@ -15,5 +15,12 @@ namespace Cdek\Exceptions\External {
     class ApiException extends ExceptionContract
     {
         protected string $key = 'api.general';
+
+        public function __construct(array $data)
+        {
+            $this->message = $this->message ?: esc_html__('API error', 'cdekdelivery');
+
+            parent::__construct($data);
+        }
     }
 }

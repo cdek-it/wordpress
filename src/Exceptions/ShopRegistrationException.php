@@ -13,5 +13,12 @@ namespace Cdek\Exceptions {
 
     class ShopRegistrationException extends ExceptionContract {
         protected string $key = 'shop.exchange';
+
+        public function __construct()
+        {
+            $this->message = $this->message ?: esc_html__('Shop registration error', 'cdekdelivery');
+
+            parent::__construct();
+        }
     }
 }

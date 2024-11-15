@@ -17,13 +17,14 @@ namespace Cdek\Exceptions {
 
         public function __construct(string $phone)
         {
+            $this->message = $this->message ?: sprintf(/* translators: %s: Recipient phone number */ esc_html__(
+                'Incorrect phone number: %s',
+                'cdekdelivery',
+            ),
+                $phone,
+            );
+
             parent::__construct(
-                sprintf(/* translators: %s: Recipient phone number */ esc_html__(
-                    'Incorrect phone number: %s',
-                    'cdekdelivery',
-                ),
-                    $phone,
-                ),
                 [
                     'phone'   => $phone,
                 ],

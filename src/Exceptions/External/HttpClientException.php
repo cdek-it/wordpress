@@ -15,7 +15,9 @@ namespace Cdek\Exceptions\External {
 
         public function __construct(array $data)
         {
-            parent::__construct('Client request error', $data);
+            $this->message = $this->message ?: esc_html__('Client request error', 'cdekdelivery');
+
+            parent::__construct($data);
         }
     }
 }

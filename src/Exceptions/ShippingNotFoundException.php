@@ -13,5 +13,12 @@ namespace Cdek\Exceptions {
 
     class ShippingNotFoundException extends ExceptionContract {
         protected string $key = 'shipping.missing';
+
+        public function __construct()
+        {
+            $this->message = $this->message ?: esc_html__('Shipping not found', 'cdekdelivery');
+
+            parent::__construct();
+        }
     }
 }

@@ -20,18 +20,17 @@ namespace Cdek\Contracts {
         private ?array $data;
 
         public function __construct(
-            string $message = '',
             ?array $data = null,
             bool $stopPropagation = true
         ) {
-            $this->data    = $data ?? [];
-            $this->message = '['.Config::PLUGIN_NAME."] $message";
+            $this->data = $data ?? [];
+            $this->message = '['.Config::PLUGIN_NAME.'] ' . ($this->message ?: 'Unknown error');
 
             if ($stopPropagation && defined('REST_REQUEST')) {
                 wp_die($this->getWpError(), '', $this->status);
             }
 
-            parent::__construct($message);
+            parent::__construct($this->message);
         }
 
         private function getWpError(): WP_Error
