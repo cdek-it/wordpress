@@ -18,8 +18,8 @@ namespace Cdek\Actions {
     use Cdek\Exceptions\External\CoreAuthException;
     use Cdek\Exceptions\External\HttpClientException;
     use Cdek\Exceptions\External\HttpServerException;
-    use Cdek\Exceptions\External\LegacyAuthException;
     use Cdek\Exceptions\External\InvalidRequestException;
+    use Cdek\Exceptions\External\LegacyAuthException;
     use Cdek\Exceptions\InvalidPhoneException;
     use Cdek\Exceptions\ShippingNotFoundException;
     use Cdek\Helpers\StringHelper;
@@ -233,7 +233,8 @@ namespace Cdek\Actions {
                     ],
                 ],
                 'from_location'   => [
-                    'city' => $deliveryMethod->city_code,
+                    'city'    => $deliveryMethod->city_code,
+                    'address' => $deliveryMethod->address,
                 ],
                 'developer_key'   => Config::DEV_KEY,
             ];

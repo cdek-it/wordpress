@@ -43,6 +43,7 @@ namespace Cdek {
      * @property bool $has_packages_mode
      * @property string $extra_day
      * @property bool $map_auto_close
+     * @property string $address
      * @property-read string $city
      * @property string $city_code
      * @property string $token
