@@ -16,9 +16,9 @@ namespace Cdek\Exceptions\External {
     {
         protected string $key = 'api.general';
 
-        public function __construct(array $data)
+        public function __construct(array $data, ?string $message = null)
         {
-            $this->message = $this->message ?: esc_html__('API error', 'cdekdelivery');
+            $this->message = $this->message ?: $message ?: esc_html__('API error', 'cdekdelivery');
 
             parent::__construct($data);
         }

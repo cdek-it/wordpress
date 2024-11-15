@@ -17,17 +17,21 @@ namespace Cdek\Transport {
 
     final class HttpResponse
     {
+        private string $method;
+        private string $url;
         private int $statusCode;
         private string $body;
         private array $headers;
 
         private ?array $decodedBody = null;
 
-        public function __construct(int $statusCode, string $body, array $headers)
+        public function __construct(int $statusCode, string $body, array $headers, string $url, string $method)
         {
             $this->statusCode = $statusCode;
             $this->body       = $body;
             $this->headers    = $headers;
+            $this->url = $url;
+            $this->method = $method;
         }
 
         public function body(): string
@@ -50,7 +54,7 @@ namespace Cdek\Transport {
         {
             if (!isset($this->headers['content-type']) ||
                 strpos($this->headers['content-type'], 'application/json') === false) {
-                throw new UnparsableAnswerException($this->body);
+                throw new UnparsableAnswerException($this->body, $this->url, $this->method);
             }
 
             if ($this->decodedBody === null) {
@@ -62,7 +66,7 @@ namespace Cdek\Transport {
                         JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE,
                     );
                 } catch (JsonException $e) {
-                    throw new UnparsableAnswerException($this->body);
+                    throw new UnparsableAnswerException($this->body, $this->url, $this->method);
                 }
             }
 
