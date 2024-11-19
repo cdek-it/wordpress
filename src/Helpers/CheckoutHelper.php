@@ -11,13 +11,9 @@ namespace Cdek\Helpers {
 
     use Cdek\Config;
     use Cdek\Contracts\FieldsetContract;
-    use Cdek\Exceptions\ShippingMethodNotFoundException;
     use Cdek\Fieldsets\GeneralOrderFields;
     use Cdek\Fieldsets\InternationalOrderFields;
-    use Cdek\Helper;
     use Throwable;
-    use WC_Order;
-    use WC_Order_Item_Shipping;
 
     class CheckoutHelper
     {
@@ -69,30 +65,7 @@ namespace Cdek\Helpers {
             return WC()->checkout()->get_value($valueName) ?: $defaultValue;
         }
 
-        public static function isCdekShippingMethod(WC_Order $order): bool
-        {
-            try {
-                return self::getOrderShippingMethod($order)->get_method_id() === Config::DELIVERY_NAME;
-            } catch (ShippingMethodNotFoundException $e) {
-                return false;
-            }
-        }
-
-        public static function getOrderShippingMethod(WC_Order $order): WC_Order_Item_Shipping
-        {
-            $shippingMethodArray = $order->get_shipping_methods();
-            if (empty($shippingMethodArray)) {
-                throw new ShippingMethodNotFoundException('Order don\'t have shipping methods');
-            }
-
-            $method = array_shift($shippingMethodArray);
-
-            assert($method instanceof WC_Order_Item_Shipping);
-
-            return $method;
-        }
-
-        public static function restoreCheckoutFields(array $fields): array
+        public static function restoreFields(array $fields): array
         {
             if (!empty(WC()->cart) && !WC()->cart->needs_shipping()) {
                 return $fields;
@@ -124,11 +97,6 @@ namespace Cdek\Helpers {
             }
 
             return $fields;
-        }
-
-        public static function getMapAutoClose(): bool
-        {
-            return Helper::getActualShippingMethod()->get_option('map_auto_close') === 'yes';
         }
     }
 }

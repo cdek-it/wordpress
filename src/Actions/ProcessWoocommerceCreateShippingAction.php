@@ -8,32 +8,27 @@ namespace {
 
 namespace Cdek\Actions {
 
-    use Cdek\Config;
-    use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
-    use Cdek\MetaKeys;
+    use Cdek\Model\ShippingItem;
     use Cdek\Model\Tariff;
+    use InvalidArgumentException;
     use WC_Order_Item_Shipping;
 
     class ProcessWoocommerceCreateShippingAction
     {
-        /**
-         * @throws \WC_Data_Exception
-         * @throws \Exception
-         */
-        public function __invoke(WC_Order_Item_Shipping $shipping): void
+        public function __invoke(WC_Order_Item_Shipping $shippingItem): void
         {
-            if ($shipping->get_method_id() !== Config::DELIVERY_NAME) {
+            try {
+                $shipping = new ShippingItem($shippingItem);
+            } catch (InvalidArgumentException $e){
                 return;
             }
 
-            $pvzCode  = CheckoutHelper::getValueFromCurrentSession('office_code');
-            $tariffId = $shipping->get_meta(MetaKeys::TARIFF_CODE) ?: $shipping->get_meta('tariff_code');
-
-            if (Tariff::isTariffToOffice($tariffId)) {
-                $shipping->add_meta_data(MetaKeys::OFFICE_CODE, $pvzCode);
-                $shipping->save_meta_data();
+            if (!Tariff::isToOffice($shipping->tariff)) {
+                return;
             }
+
+            $shipping->office = CheckoutHelper::getValueFromCurrentSession('office_code');
         }
     }
 }

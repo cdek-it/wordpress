@@ -11,12 +11,11 @@ namespace Cdek\Exceptions {
 
     use Cdek\Contracts\ExceptionContract;
 
-    class ShopRegistrationException extends ExceptionContract {
-        protected string $key = 'shop.exchange';
-
+    class OrderNotFoundException extends ExceptionContract {
+        protected string $key = 'order.missing';
         public function __construct()
         {
-            $this->message = $this->message ?: esc_html__('Shop registration error', 'cdekdelivery');
+            $this->message = $this->message ?: esc_html__('Order not found', 'cdekdelivery');
 
             parent::__construct();
         }

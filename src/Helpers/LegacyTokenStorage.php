@@ -1,4 +1,5 @@
-<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+<?php
+/** @noinspection PhpMultipleClassDeclarationsInspection */
 
 declare(strict_types=1);
 
@@ -9,23 +10,23 @@ namespace {
 
 namespace Cdek\Helpers {
 
-    use Cdek\Contracts\TokenStorageContract;
+    use Cdek\CdekApi;
     use Cdek\Exceptions\External\LegacyAuthException;
-    use Cdek\Helper;
+    use Cdek\ShippingMethod;
     use JsonException;
 
     /**
      * @deprecated use CoreTokenStorage instead
      */
-    class DBTokenStorage extends TokenStorageContract
+    class LegacyTokenStorage
     {
-        private static string $tokenStatic = '';
-        private static int $tokenExpStatic = 0;
-        private static int $iteration = 0;
+        private const CIPHER = 'AES-256-CBC';
+        private static string $token = '';
+        private static int $tokenExp = 0;
 
         final public static function flushCache(): void
         {
-            Helper::getActualShippingMethod()->update_option('token', null);
+            ShippingMethod::factory()->update_option('token', null);
         }
 
         /**
@@ -48,18 +49,19 @@ namespace Cdek\Helpers {
 
         private function getTokenFromCache(): ?string
         {
-            return !empty(self::$tokenStatic) && self::$tokenExpStatic > time() ? self::$tokenStatic : null;
+            return !empty(self::$token) && self::$tokenExp > time() ? self::$token : null;
         }
 
         private function getTokenFromSettings(): ?string
         {
-            $tokenSetting = Helper::getActualShippingMethod()->get_option('token');
+            $shipping = ShippingMethod::factory();
+            $tokenSetting = $shipping->token;
             if (empty($tokenSetting)) {
                 return null;
             }
             $decryptToken = $this->decryptToken(
                 $tokenSetting,
-                Helper::getActualShippingMethod()->get_option('client_id'),
+                $shipping->client_id,
             );
             if (empty($decryptToken)) {
                 return null;
@@ -68,22 +70,22 @@ namespace Cdek\Helpers {
             if ($tokenExpSetting < time()) {
                 return null;
             }
-            self::$tokenStatic    = $decryptToken;
-            self::$tokenExpStatic = $tokenExpSetting;
+            self::$token    = $decryptToken;
+            self::$tokenExp = $tokenExpSetting;
 
             return $decryptToken;
         }
 
         private function getTokenExp(string $token): int
         {
-            try{
+            try {
                 return json_decode(
                            base64_decode(strtr(explode('.', $token)[1], '-_', '+/')),
                            true,
                            512,
                            JSON_THROW_ON_ERROR,
                        )['exp'];
-            }catch (JsonException $e){
+            } catch (JsonException $e) {
                 return 0;
             }
         }
@@ -93,14 +95,34 @@ namespace Cdek\Helpers {
          */
         final public function updateToken(): string
         {
-            $tokenApi     = $this->fetchTokenFromApi();
-            $clientId     = Helper::getActualShippingMethod()->get_option('client_id');
-            $tokenEncrypt = $this->encryptToken($tokenApi, $clientId);
-            Helper::getActualShippingMethod()->update_option('token', $tokenEncrypt);
-            self::$tokenStatic    = $tokenApi;
-            self::$tokenExpStatic = $this->getTokenExp($tokenApi);
+            $tokenApi       = (new CdekApi)->fetchToken();
+
+            $shippingMethod = ShippingMethod::factory();
+            $clientId       = $shippingMethod->client_id;
+            $tokenEncrypt   = $this->encryptToken($tokenApi, $clientId);
+            $shippingMethod->update_option('token', $tokenEncrypt);
+
+            self::$token    = $tokenApi;
+            self::$tokenExp = $this->getTokenExp($tokenApi);
 
             return $tokenApi;
+        }
+
+        private function encryptToken(string $token, string $clientId): string
+        {
+            $iv             = openssl_random_pseudo_bytes(openssl_cipher_iv_length(self::CIPHER));
+            $encryptedToken = openssl_encrypt($token, self::CIPHER, $clientId, 0, $iv);
+
+            return base64_encode($iv.$encryptedToken);
+        }
+
+        private function decryptToken(string $token, string $clientId): string
+        {
+            $data          = base64_decode($token);
+            $iv            = substr($data, 0, openssl_cipher_iv_length(self::CIPHER));
+            $encryptedData = substr($data, openssl_cipher_iv_length(self::CIPHER));
+
+            return openssl_decrypt($encryptedData, self::CIPHER, $clientId, 0, $iv);
         }
     }
 }

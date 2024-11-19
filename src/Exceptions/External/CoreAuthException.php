@@ -17,7 +17,9 @@ namespace Cdek\Exceptions\External {
         protected int $status = 401;
         public function __construct()
         {
-            parent::__construct('Failed to get shop token');
+            $this->message = $this->message ?: esc_html__('Core auth error', 'cdekdelivery');
+
+            parent::__construct();
         }
     }
 }

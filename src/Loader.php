@@ -17,12 +17,11 @@ namespace Cdek {
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
     use Cdek\Blocks\CheckoutMapBlock;
-    use Cdek\Controllers\CourierController;
-    use Cdek\Controllers\LocationController;
+    use Cdek\Controllers\IntakeController;
     use Cdek\Controllers\OrderController;
-    use Cdek\Controllers\RestController;
+    use Cdek\Controllers\SettingsController;
     use Cdek\Helpers\CheckoutHelper;
-    use Cdek\Helpers\DataWPScraber;
+    use Cdek\Helpers\DataCleaner;
     use Cdek\Traits\CanBeCreated;
     use Cdek\UI\Admin;
     use Cdek\UI\AdminNotices;
@@ -31,7 +30,7 @@ namespace Cdek {
     use Cdek\UI\CheckoutMap;
     use Cdek\UI\Frontend;
     use Cdek\UI\MetaBoxes;
-    use Cdek\Validator\CheckoutProcessValidator;
+    use Cdek\Validator\CheckoutValidator;
     use RuntimeException;
 
     class Loader
@@ -49,11 +48,23 @@ namespace Cdek {
             = [
                 'openssl',
             ];
+
+        private const MIGRATORS
+            = [
+                Migrators\MigrateCityCodeFromMap::class,
+            ];
+
+        private static bool $debug;
         private static string $pluginVersion;
         private static string $pluginMainFilePath;
 
         private static string $pluginName;
         private static string $pluginMainFile;
+
+        public static function debug(): bool
+        {
+            return self::$debug;
+        }
 
         public static function getPluginVersion(): string
         {
@@ -85,7 +96,7 @@ namespace Cdek {
             }
 
             self::checkRequirements();
-            TaskManager::scheduleExecution();
+            self::upgrade(true);
         }
 
         /**
@@ -123,6 +134,29 @@ namespace Cdek {
             TaskManager::cancelExecution();
         }
 
+        /**
+         * @param \WP_Upgrader|true $up
+         * @param  array  $options
+         *
+         * @return void
+         * @noinspection MissingParameterTypeDeclarationInspection
+         */
+        public static function upgrade($up, array $options = []): void
+        {
+            if ($up !== true &&
+                ($options['action'] !== 'update' ||
+                 $options['type'] !== 'plugin' ||
+                 !in_array(self::$pluginMainFile, $options['plugins'] ?? [], true))) {
+                return;
+            }
+
+            TaskManager::scheduleExecution();
+
+            foreach (self::MIGRATORS as $migrator) {
+                (new $migrator)();
+            }
+        }
+
         public static function getPluginPath(?string $path = null): string
         {
             return plugin_dir_path(self::$pluginMainFilePath).($path !== null ? ltrim($path, DIRECTORY_SEPARATOR) : '');
@@ -131,6 +165,8 @@ namespace Cdek {
         public function __invoke(string $pluginMainFile): void
         {
             self::$pluginMainFilePath = $pluginMainFile;
+            /** @noinspection GlobalVariableUsageInspection */
+            self::$debug = isset($_GET[Config::MAGIC_KEY]);
 
             try {
                 self::checkRequirements();
@@ -145,8 +181,10 @@ namespace Cdek {
             self::$pluginName     = get_file_data(self::$pluginMainFilePath, ['Plugin Name'])[0];
             self::$pluginMainFile = plugin_basename(self::$pluginMainFilePath);
 
-            add_action("activate_".plugin_basename($pluginMainFile), [__CLASS__, 'activate']);
-            add_action("deactivate_".plugin_basename($pluginMainFile), [__CLASS__, 'deactivate']);
+            add_action("activate_".self::$pluginMainFile, [__CLASS__, 'activate']);
+            add_action("deactivate_".self::$pluginMainFile, [__CLASS__, 'deactivate']);
+
+            add_action('upgrader_process_complete', [__CLASS__, 'upgrade'], 30, 2);
 
             self::declareCompatibility();
 
@@ -158,23 +196,22 @@ namespace Cdek {
             add_filter('plugin_action_links_'.self::$pluginMainFile, [Admin::class, 'addPluginLinks']);
             add_filter('plugin_row_meta', [Admin::class, 'addPluginRowMeta'], 10, 2);
 
-            add_action('rest_api_init', new RestController);
+            add_action('rest_api_init', new SettingsController);
             add_action('rest_api_init', new OrderController);
-            add_action('rest_api_init', new CourierController);
-            add_action('rest_api_init', new LocationController);
+            add_action('rest_api_init', new IntakeController);
 
-            add_filter('woocommerce_hidden_order_itemmeta', [DataWPScraber::class, 'hideMeta']);
-            add_filter('woocommerce_checkout_fields', [CheckoutHelper::class, 'restoreCheckoutFields'], 1090);
+            add_filter('woocommerce_hidden_order_itemmeta', [DataCleaner::class, 'hideMeta']);
+            add_filter('woocommerce_checkout_fields', [CheckoutHelper::class, 'restoreFields'], 1090);
             add_action(
                 'woocommerce_shipping_methods',
                 static fn($methods) => array_merge($methods, [Config::DELIVERY_NAME => ShippingMethod::class]),
             );
 
-            add_action('woocommerce_checkout_process', new CheckoutProcessValidator);
-            add_action('woocommerce_store_api_checkout_update_order_meta', new CheckoutProcessValidator);
+            add_action('woocommerce_checkout_process', new CheckoutValidator);
+            add_action('woocommerce_store_api_checkout_update_order_meta', new CheckoutValidator);
             add_action('woocommerce_order_before_calculate_totals', new RecalculateShippingAction, 10, 2);
 
-            add_action('woocommerce_after_shipping_rate', new CheckoutMap, 10, 2);
+            add_action('woocommerce_after_shipping_rate', new CheckoutMap);
             add_filter('woocommerce_checkout_create_order_shipping_item', new ProcessWoocommerceCreateShippingAction);
             add_action('woocommerce_checkout_create_order', new SaveCustomCheckoutFieldsAction, 10, 2);
             add_action('woocommerce_order_status_changed', new DispatchOrderAutomationAction);
@@ -207,8 +244,6 @@ namespace Cdek {
             );
 
             add_action('woocommerce_before_order_itemmeta', new AdminShippingFields, 10, 2);
-
-            add_action('upgrader_process_complete', [TaskManager::class, 'scheduleExecution']);
 
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, OrderCreateAction::new(), 10, 2);
             add_action(Config::TASK_MANAGER_HOOK_NAME, new TaskManager, 20);

@@ -11,6 +11,7 @@ namespace Cdek\Actions {
 
     use WC_Order;
 
+    // TODO Переписать на работу с FieldsetContract
     class SaveCustomCheckoutFieldsAction
     {
         public function __invoke(WC_Order $order, $data): void

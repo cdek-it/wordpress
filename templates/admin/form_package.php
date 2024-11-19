@@ -7,7 +7,7 @@ defined('ABSPATH') or exit;
 
 /** @var $orderIdWP */
 
-use Cdek\Helpers\Url;
+use Cdek\Helpers\UI;
 
 ?>
 <div>
@@ -31,7 +31,7 @@ use Cdek\Helpers\Url;
         <p class="form-field form-field-wide wc-order-status">
             <button id="create-order-btn" type="button" class="button refund-items"
                     data-action="<?php
-                    echo esc_url(Url::buildRest("/order/$orderIdWP/create")) ?>"><?php esc_html_e('Send an order to CDEK', 'cdekdelivery') ?>
+                    echo esc_url(UI::buildRestUrl("/order/$orderIdWP/create")) ?>"><?php esc_html_e('Send an order to CDEK', 'cdekdelivery') ?>
             </button>
         </p>
     </div>

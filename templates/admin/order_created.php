@@ -11,7 +11,7 @@ defined('ABSPATH') or exit;
 
 /** @var $actionOrderAvailable */
 
-use Cdek\Helpers\Url;
+use Cdek\Helpers\UI;
 
 ?>
 
@@ -31,11 +31,11 @@ if (!$orderNumber) { ?>style="display: none" <?php
                         echo esc_html($orderNumber) ?></b></p>
                 <a id="cdek-order-waybill"
                    href="<?php
-                   echo esc_url(Url::buildRest("order/$orderIdWP/waybill")) ?>"><?php
+                   echo esc_url(UI::buildRestUrl("order/$orderIdWP/waybill")) ?>"><?php
                     esc_html_e('Get waybill', 'cdekdelivery') ?></a>
                 <a id="cdek-order-barcode"
                    href="<?php
-                   echo esc_url(Url::buildRest("order/$orderIdWP/barcode")) ?>"><?php
+                   echo esc_url(UI::buildRestUrl("order/$orderIdWP/barcode")) ?>"><?php
                     esc_html_e('Get barcode', 'cdekdelivery') ?></a>
                 <?php
                 if ($actionOrderAvailable) { ?>
@@ -57,7 +57,7 @@ if (!$orderNumber) { ?>style="display: none" <?php
                     echo esc_html($courierNumber) ?></p>
                 <p id="cdek-courier-delete"
                    data-action="<?php
-                   echo esc_url(Url::buildRest("order/$orderIdWP/courier/delete")) ?>"><?php
+                   echo esc_url(UI::buildRestUrl("order/$orderIdWP/courier/delete")) ?>"><?php
                     esc_html_e("Cancel the courier request", 'cdekdelivery') ?></p>
             </div>
 
@@ -75,7 +75,7 @@ if (!$orderNumber) { ?>style="display: none" <?php
             <p id="cdek-delete-order-error" class="form-field form-field-wide wc-order-status"
                style="display: none"></p>
             <a id="delete-order-btn" href="<?php
-            echo esc_url(Url::buildRest("order/$orderIdWP/delete")) ?>"><?php
+            echo esc_url(UI::buildRestUrl("order/$orderIdWP/delete")) ?>"><?php
                 esc_html_e("Cancel the order", 'cdekdelivery') ?></a>
         </div>
         <?php

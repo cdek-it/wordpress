@@ -3,31 +3,43 @@
 declare(strict_types=1);
 
 namespace {
-
     defined('ABSPATH') or exit;
 }
 
 namespace Cdek\Model {
 
-    class Service
-    {
-        public const SERVICES
-            = [
-                [
-                    'code'        => 'DELIV_RECEIVER',
-                    'name'        => 'ДОСТАВКА В ГОРОДЕ ПОЛУЧАТЕЛЕ',
-                    'description' => 'Дополнительная услуга доставки груза в городе получателя, при условии, 
-            что тариф доставки с режимом «до склада» (только для тарифов «Магистральный», «Магистральный супер-экспресс»).
-            Не применимо к заказам до постаматов.',
-                ],
-            ];
+    use Cdek\ShippingMethod;
 
-        public static function getServiceList(): array
-        {
-            $serviceList = [];
-            foreach (self::SERVICES as $service) {
-                $serviceList[$service['code']] = $service['name'];
+    class Service {
+        public static function factory(ShippingMethod $shipping, int $tariff): array {
+            if (Tariff::isToPickup($tariff) || !Tariff::availableForShops($tariff)) {
+                return [];
             }
+
+            $banAttachInspection = $shipping->services_ban_attachment_inspection;
+            $tryingOn    = $shipping->services_trying_on;
+            $partialDelivery = $shipping->services_part_deliv;
+
+            $serviceList      = [];
+
+            if ($banAttachInspection && !$tryingOn && !$partialDelivery) {
+                $serviceList[] = [
+                    'code' => 'BAN_ATTACHMENT_INSPECTION',
+                ];
+            }
+
+            if (!$banAttachInspection && $tryingOn) {
+                $serviceList[] = [
+                    'code' => 'TRYING_ON',
+                ];
+            }
+
+            if (!$banAttachInspection && $partialDelivery) {
+                $serviceList[] = [
+                    'code' => 'PART_DELIV',
+                ];
+            }
+
 
             return $serviceList;
         }

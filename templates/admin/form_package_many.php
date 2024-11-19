@@ -8,7 +8,7 @@ defined('ABSPATH') or exit;
 
 /** @var $hasPackages */
 
-use Cdek\Helpers\Url;
+use Cdek\Helpers\UI;
 
 ?>
 <div id="cdek-create-order-form" <?php
@@ -77,7 +77,7 @@ endif ?> >
         <p class="form-field form-field-wide wc-order-status">
             <button id="send_package" type="button" class="button refund-items"
                     data-action="<?php
-                    echo esc_url(Url::buildRest("/order/$orderIdWP/create")) ?>"><?php esc_html_e('Create an order', 'cdekdelivery') ?>
+                    echo esc_url(UI::buildRestUrl("/order/$orderIdWP/create")) ?>"><?php esc_html_e('Create an order', 'cdekdelivery') ?>
             </button>
         </p>
     </div>

@@ -6,7 +6,7 @@ namespace Cdek\UI;
 
 use Cdek\CdekApi;
 use Cdek\Config;
-use Cdek\Helpers\WeightCalc;
+use Cdek\Helpers\WeightConverter;
 use Cdek\MetaKeys;
 use Exception;
 use WC_Order_Item_Shipping;
@@ -31,7 +31,7 @@ class AdminShippingFields
                     break;
                 case 'weight':
                 case MetaKeys::WEIGHT:
-                    self::renderWeight(WeightCalc::getWeightInWcMeasurement($meta['value']));
+                    self::renderWeight(WeightConverter::getWeightInWcMeasurement($meta['value']));
                     break;
                 case MetaKeys::LENGTH:
                 case 'length':
@@ -50,16 +50,16 @@ class AdminShippingFields
                     break;
                 case MetaKeys::OFFICE_CODE:
                     try {
-                        $officeAddress = (new CdekApi)->getOffices(['code' => $meta['value']])->json();
+                        $officeInfo = (new CdekApi)->officeGet($meta['value']);
 
-                        if (empty($officeAddress[0]['location']['address'])) {
+                        if ($officeInfo === null) {
                             self::renderOffice(esc_html__('Not available for order', 'cdekdelivery'));
                         } else {
                             self::renderOffice(
                                 sprintf(
                                     '%s (%s)',
                                     $meta['value'],
-                                    $officeAddress[0]['location']['address'],
+                                    $officeInfo['location']['address'],
                                 ),
                             );
                         }

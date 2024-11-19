@@ -28,10 +28,10 @@ namespace Cdek\Contracts {
             $this->api = new CoreApi;
             $this->id  = $id;
 
-            $this->taskMeta = $this->api->getTask($this->id)['meta'];
+            $this->taskMeta = $this->api->taskGet($this->id)['meta'];
 
             foreach ($this->process() as $result){
-                $this->api->saveTaskResult($this->id, $result);
+                $this->api->taskResultCreate($this->id, $result);
             }
         }
         abstract protected function process(): Iterator;

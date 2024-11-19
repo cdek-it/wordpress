@@ -9,10 +9,10 @@ namespace {
 
 namespace Cdek\Helpers {
 
-    use Cdek\Helper;
+    use Cdek\ShippingMethod;
     use RuntimeException;
 
-    class WeightCalc
+    class WeightConverter
     {
 
         private const G_INTO_KG = 1000;
@@ -25,7 +25,7 @@ namespace Cdek\Helpers {
             $measurement        = get_option('woocommerce_weight_unit');
             switch ($measurement) {
                 case 'g':
-                    return ceil($weightWithFallback);
+                    return absint(ceil($weightWithFallback));
                 case 'kg':
                     return self::convertToG($weightWithFallback, self::G_INTO_KG);
                 case 'lbs':
@@ -39,11 +39,11 @@ namespace Cdek\Helpers {
         final public static function getWeight($weight): float
         {
             if (empty($weight) ||
-                Helper::getActualShippingMethod()->get_option('product_package_default_toggle') === 'yes') {
+                ShippingMethod::factory()->product_package_default_toggle) {
                 $defaultWeight = (float)str_replace(
                     ',',
                     '.',
-                    Helper::getActualShippingMethod()->get_option('product_weight_default'),
+                    ShippingMethod::factory()->product_weight_default,
                 );
                 $weight        = $defaultWeight;
             }
@@ -53,7 +53,7 @@ namespace Cdek\Helpers {
 
         private static function convertToG(float $weight, float $coefficient): int
         {
-            return ceil($weight * $coefficient);
+            return absint(ceil($weight * $coefficient));
         }
 
         final public static function getWeightInWcMeasurement($weight): float

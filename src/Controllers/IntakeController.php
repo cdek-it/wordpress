@@ -12,18 +12,23 @@ namespace Cdek\Controllers {
     use Cdek\Actions\IntakeCreateAction;
     use Cdek\Actions\IntakeDeleteAction;
     use Cdek\Config;
-    use Cdek\Helpers\DataWPScraber;
+    use Cdek\Helpers\DataCleaner;
     use WP_Http;
     use WP_REST_Request;
     use WP_REST_Response;
     use WP_REST_Server;
 
-    class CourierController
+    class IntakeController
     {
-        public static function callCourier(WP_REST_Request $request): WP_REST_Response
+        /**
+         * @throws \Cdek\Exceptions\External\ApiException
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         * @throws \Cdek\Exceptions\ShippingNotFoundException
+         */
+        public static function create(WP_REST_Request $request): WP_REST_Response
         {
             return new WP_REST_Response(
-                IntakeCreateAction::new()($request->get_param('id'), DataWPScraber::getData($request, [
+                IntakeCreateAction::new()($request->get_param('id'), DataCleaner::getData($request, [
                     'date',
                     'starttime',
                     'endtime',
@@ -41,16 +46,17 @@ namespace Cdek\Controllers {
             );
         }
 
-        public static function deleteCourierCall(WP_REST_Request $data): WP_REST_Response
+        public static function delete(WP_REST_Request $data): WP_REST_Response
         {
-            return new WP_REST_Response(IntakeDeleteAction::new()($data->get_param('id'))->response(), WP_Http::OK);
+            return new WP_REST_Response(IntakeDeleteAction::new()((int)$data->get_param('id'))->response(),
+                WP_Http::OK);
         }
 
         public function __invoke(): void
         {
             register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/courier', [
                 'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => [__CLASS__, 'callCourier'],
+                'callback'            => [__CLASS__, 'create'],
                 'permission_callback' => static fn() => current_user_can('edit_posts'),
                 'show_in_index'       => true,
                 'args'                => [
@@ -64,7 +70,7 @@ namespace Cdek\Controllers {
 
             register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/courier/delete', [
                 'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => [__CLASS__, 'deleteCourierCall'],
+                'callback'            => [__CLASS__, 'delete'],
                 'permission_callback' => static fn() => current_user_can('edit_posts'),
                 'show_in_index'       => true,
                 'args'                => [

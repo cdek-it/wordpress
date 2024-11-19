@@ -12,7 +12,7 @@ namespace Cdek\Validator {
     use Cdek\Model\ValidationResult;
     use DateTime;
 
-    class ValidateCourierFormData
+    class IntakeValidator
     {
         public static function validate($data): ValidationResult
         {

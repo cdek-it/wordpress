@@ -10,8 +10,10 @@ namespace {
 namespace Cdek\Transport {
 
     use Cdek\Exceptions\External\ApiException;
+    use Cdek\Exceptions\External\EntityNotFoundException;
     use Cdek\Exceptions\External\HttpClientException;
     use Cdek\Exceptions\External\HttpServerException;
+    use Cdek\Exceptions\External\InvalidRequestException;
     use Cdek\Loader;
     use WP_Error;
     use WP_REST_Server;
@@ -49,6 +51,18 @@ namespace Cdek\Transport {
                 throw new HttpServerException($result->error());
             }
 
+            if ($result->getStatusCode() === 422) {
+                throw new InvalidRequestException($result->error()['fields']);
+            }
+
+            if ($result->getStatusCode() === 404) {
+                throw new EntityNotFoundException($result->error());
+            }
+
+            if (!$result->missInvalidLegacyRequest()) {
+                throw new InvalidRequestException($result->legacyRequestErrors());
+            }
+
             if ($result->isClientError()) {
                 throw new HttpClientException($result->error());
             }
@@ -77,10 +91,10 @@ namespace Cdek\Transport {
 
             if (is_wp_error($resp)) {
                 assert($resp instanceof WP_Error);
-                throw new ApiException($resp->get_error_message(),[
+                throw new ApiException([
                     'code' => $resp->get_error_code(),
-                    'ip' => self::tryGetRequesterIp(),
-                ]);
+                    'ip'   => self::tryGetRequesterIp(),
+                ], $resp->get_error_message());
             }
 
             $headers = wp_remote_retrieve_headers($resp);
@@ -89,6 +103,8 @@ namespace Cdek\Transport {
                 wp_remote_retrieve_response_code($resp),
                 wp_remote_retrieve_body($resp),
                 ($headers instanceof CaseInsensitiveDictionary) ? $headers->getAll() : $headers,
+                $url,
+                $method,
             );
         }
 

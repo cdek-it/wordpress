@@ -21,7 +21,9 @@ namespace Cdek\Exceptions\External {
 
         public function __construct(array $data)
         {
-            parent::__construct('Failed to get the token', $data);
+            $this->message = $this->message ?: esc_html__('Failed to get the token', 'cdekdelivery');
+
+            parent::__construct($data);
         }
     }
 }

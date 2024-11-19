@@ -11,71 +11,94 @@ namespace Cdek\Actions {
 
     use Cdek\CdekApi;
     use Cdek\Config;
+    use Cdek\Contracts\ExceptionContract;
     use Cdek\CoreApi;
+    use Cdek\Exceptions\CacheException;
     use Cdek\Exceptions\External\ApiException;
-    use Cdek\Exceptions\External\LegacyAuthException;
+    use Cdek\Exceptions\External\CoreAuthException;
     use Cdek\Exceptions\External\HttpClientException;
     use Cdek\Exceptions\External\HttpServerException;
-    use Cdek\Exceptions\PhoneNotValidException;
-    use Cdek\Exceptions\External\RestApiInvalidRequestException;
-    use Cdek\Exceptions\ShippingMethodNotFoundException;
-    use Cdek\Helper;
-    use Cdek\Helpers\CheckoutHelper;
+    use Cdek\Exceptions\External\LegacyAuthException;
+    use Cdek\Exceptions\External\InvalidRequestException;
+    use Cdek\Exceptions\InvalidPhoneException;
+    use Cdek\Exceptions\ShippingNotFoundException;
     use Cdek\Helpers\StringHelper;
-    use Cdek\Helpers\WeightCalc;
+    use Cdek\Helpers\WeightConverter;
     use Cdek\Loader;
-    use Cdek\MetaKeys;
-    use Cdek\Model\OrderMetaData;
+    use Cdek\Model\Order;
+    use Cdek\Model\Service;
+    use Cdek\Model\ShippingItem;
     use Cdek\Model\Tariff;
     use Cdek\Note;
     use Cdek\Traits\CanBeCreated;
+    use Cdek\Validator\PhoneValidator;
     use Exception;
-    use JsonException;
     use Throwable;
-    use WC_Order;
 
     class OrderCreateAction
     {
         use CanBeCreated;
-        private const ALLOWED_PRODUCT_TYPES = ['variation', 'simple'];
 
+        private const ALLOWED_PRODUCT_TYPES = ['variation', 'simple'];
+        private int $tariff;
         private CdekApi $api;
-        private CoreApi $coreApi;
+        private ShippingItem $shipping;
+        private Order $order;
 
         /**
-         * @throws RestApiInvalidRequestException|Throwable|JsonException
+         * @throws \Cdek\Exceptions\CacheException
+         * @throws \Cdek\Exceptions\External\ApiException
+         * @throws \Cdek\Exceptions\External\CoreAuthException
+         * @throws \Cdek\Exceptions\ShippingNotFoundException
+         * @throws \Cdek\Exceptions\OrderNotFoundException
          */
         public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
         {
-            $this->api     = new CdekApi;
-            $this->coreApi = new CoreApi;
+            $this->api   = new CdekApi;
+            $this->order = new Order($orderId);
 
-            $order         = wc_get_order($orderId);
-            $postOrderData = OrderMetaData::getMetaByOrderId($orderId);
+            $shipping = $this->order->getShipping();
 
-            $shippingMethod = CheckoutHelper::getOrderShippingMethod($order);
-            $tariffCode     = $shippingMethod->get_meta(MetaKeys::TARIFF_CODE) ?:
-                $shippingMethod->get_meta('tariff_code') ?: $postOrderData['tariff_id'];
-            $postOrderData  = [
-                'currency'    => $order->get_currency() ?: 'RUB',
-                'tariff_code' => $tariffCode,
-                'type'        => Tariff::getTariffType($tariffCode),
-                'office_code' => $shippingMethod->get_meta(MetaKeys::OFFICE_CODE) ?: $postOrderData['pvz_code'] ?: null,
-            ];
+            if ($shipping === null) {
+                throw new ShippingNotFoundException;
+            }
+
+            $this->shipping = $shipping;
+            $this->tariff   = $shipping->tariff ?: $this->order->tariff_id;
 
             try {
-                try {
-                    return $this->sendOrderInfo($postOrderData, $this->coreApi->getOrderById($orderId));
-                } catch (HttpClientException $e) {
-                    if ($e->getCode() === 404) {
-                        return $this->createOrder($order, $postOrderData, $packages);
-                    }
+                $coreApi = new CoreApi;
 
-                    throw $e;
+                $existingOrder = $coreApi->orderGet($orderId);
+
+                try {
+                    $historyCdekStatuses = $coreApi->orderHistory($existingOrder['uuid']);
+                } catch (ExceptionContract $e) {
+                    $historyCdekStatuses = [];
                 }
-            } catch (PhoneNotValidException $e) {
+
+                return [
+                    'state'     => true,
+                    'code'      => $existingOrder['track'],
+                    'statuses'  => $this->outputStatusList(
+                        !empty($historyCdekStatuses),
+                        array_merge(
+                            [$existingOrder['status']],
+                            $historyCdekStatuses,
+                        ),
+                    ),
+                    'available' => !empty($historyCdekStatuses),
+                    'door'      => Tariff::isFromDoor($this->tariff),
+                ];
+            } catch (CoreAuthException|ApiException|CacheException $e) {
+                //Do nothing
+            }
+
+            try {
+                return $this->createOrder($packages);
+            } catch (InvalidPhoneException $e) {
                 Note::send(
-                    $order->get_id(),
+                    $this->order->id,
                     sprintf(
                         esc_html__(/* translators: 1: error message */ 'Cdek shipping error: %1$s', 'cdekdelivery'),
                         $e->getMessage(),
@@ -100,40 +123,7 @@ namespace Cdek\Actions {
             }
         }
 
-        /**
-         * @param $postOrderData
-         * @param $existOrder
-         *
-         * @return array
-         * @throws LegacyAuthException
-         * @throws JsonException
-         */
-        private function sendOrderInfo($postOrderData, $existOrder): array
-        {
-            $cdekStatuses[] = $existOrder['status'];
-
-            try {
-                $historyCdekStatuses = $this->coreApi->getHistory($existOrder['uuid']);
-            } catch (ApiException $e) {
-                $historyCdekStatuses = [];
-            }
-
-            return [
-                'state'     => true,
-                'code'      => $existOrder['track'],
-                'statuses'  => $this->getStatusList(
-                    !empty($historyCdekStatuses),
-                    array_merge(
-                        $cdekStatuses,
-                        $historyCdekStatuses,
-                    ),
-                ),
-                'available' => !empty($historyCdekStatuses),
-                'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
-            ];
-        }
-
-        private function getStatusList(bool $actionAvailable, array $statuses = []): string
+        private function outputStatusList(bool $actionAvailable, array $statuses = []): string
         {
             $cdekStatuses         = $statuses;
             $actionOrderAvailable = $actionAvailable;
@@ -145,46 +135,39 @@ namespace Cdek\Actions {
         }
 
         /**
-         * @param $order
-         * @param $postOrderData
-         * @param $packages
-         *
-         * @return array
          * @throws LegacyAuthException
          * @throws ApiException
          * @throws HttpClientException
          * @throws HttpServerException
-         * @throws PhoneNotValidException
-         * @throws RestApiInvalidRequestException
-         * @throws ShippingMethodNotFoundException
-         * @throws JsonException
+         * @throws InvalidPhoneException
+         * @throws InvalidRequestException
          */
-        private function createOrder($order, $postOrderData, $packages): array
+        private function createOrder(array $packages): array
         {
-            $param             = $this->buildRequestData($order, $postOrderData);
-            $param['packages'] = $this->buildPackagesData($order, $postOrderData, $packages);
+            $param             = $this->buildRequestData();
+            $param['packages'] = $this->buildPackagesData($packages);
 
-            $orderData = $this->api->createOrder($param);
+            $orderData = $this->api->orderCreate($param);
 
             sleep(5);
 
             $cdekNumber = $this->getCdekOrderNumber($orderData['entity']['uuid']);
 
+            $this->order->number = $cdekNumber;
+            $this->order->uuid   = $orderData['entity']['uuid'];
+            $this->order->save();
+
             try {
-                $cdekStatuses         = Helper::getCdekOrderStatuses($orderData['entity']['uuid']);
-                $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
+                $cdekStatuses         = $this->order->loadLegacyStatuses();
+                $actionOrderAvailable = $this->order->isLocked();
             } catch (Exception $e) {
                 $cdekStatuses         = [];
                 $actionOrderAvailable = true;
             }
 
-            $postOrderData['order_number'] = $cdekNumber ?? $orderData['entity']['uuid'];
-            $postOrderData['order_uuid']   = $orderData['entity']['uuid'];
-            OrderMetaData::updateMetaByOrderId($order->get_id(), $postOrderData);
-
             if (!empty($cdekNumber)) {
                 Note::send(
-                    $order->get_id(),
+                    $this->order->id,
                     sprintf(
                         esc_html__(/* translators: 1: tracking number */ 'Tracking number: %1$s',
                             'cdekdelivery',
@@ -198,128 +181,107 @@ namespace Cdek\Actions {
             return [
                 'state'     => true,
                 'code'      => $cdekNumber,
-                'statuses'  => $this->getStatusList($actionOrderAvailable, $cdekStatuses),
+                'statuses'  => $this->outputStatusList($actionOrderAvailable, $cdekStatuses),
                 'available' => $actionOrderAvailable,
-                'door'      => Tariff::isTariffFromDoor($postOrderData['tariff_code']),
+                'door'      => Tariff::isFromDoor($this->tariff),
             ];
         }
 
         /**
-         * @param  WC_Order  $order
-         * @param           $postOrderData
-         *
-         * @return array
-         * @throws PhoneNotValidException
-         * @throws ShippingMethodNotFoundException
+         * @throws InvalidPhoneException
          */
-        private function buildRequestData(WC_Order $order, $postOrderData): array
+        private function buildRequestData(): array
         {
-            $countryCode     = trim(($order->get_shipping_country() ?: $order->get_billing_country()) ?? 'RU');
-            $recipientNumber = trim($order->get_shipping_phone() ?: $order->get_billing_phone());
-            Helper::validateCdekPhoneNumber($recipientNumber, $countryCode);
+            $countryCode     = $this->order->country ?: 'RU';
+            $recipientNumber = $this->order->phone;
+            PhoneValidator::new()($recipientNumber, $countryCode);
 
-            $deliveryMethod = Helper::getActualShippingMethod(
-                CheckoutHelper::getOrderShippingMethod($order)->get_data()['instance_id'],
-            );
+            $deliveryMethod = $this->shipping->getMethod();
 
             $param = [
-                'type'            => $postOrderData['type'],
-                'tariff_code'     => $postOrderData['tariff_code'],
+                'type'            => Tariff::getType($this->tariff),
+                'tariff_code'     => $this->tariff,
                 'date_invoice'    => gmdate('Y-m-d'),
-                'number'          => $order->get_id(),
-                'shipper_name'    => $deliveryMethod->get_option('shipper_name'),
-                'shipper_address' => $deliveryMethod->get_option('shipper_address'),
+                'number'          => $this->order->id,
+                'shipper_name'    => $deliveryMethod->shipper_name,
+                'shipper_address' => $deliveryMethod->shipper_address,
                 'sender'          => [
-                    'passport_series'        => $deliveryMethod->get_option('passport_series'),
-                    'passport_number'        => $deliveryMethod->get_option('passport_number'),
-                    'passport_date_of_issue' => $deliveryMethod->get_option('passport_date_of_issue'),
-                    'passport_organization'  => $deliveryMethod->get_option('passport_organization'),
-                    'passport_date_of_birth' => $deliveryMethod->get_option('passport_date_of_birth'),
-                    'tin'                    => $deliveryMethod->get_option('tin'),
-                    'name'                   => $deliveryMethod->get_option('seller_name'),
-                    'company'                => $deliveryMethod->get_option('seller_company'),
-                    'email'                  => $deliveryMethod->get_option('seller_email'),
+                    'passport_series'        => $deliveryMethod->passport_series,
+                    'passport_number'        => $deliveryMethod->passport_number,
+                    'passport_date_of_issue' => $deliveryMethod->passport_date_of_issue,
+                    'passport_organization'  => $deliveryMethod->passport_organization,
+                    'passport_date_of_birth' => $deliveryMethod->passport_date_of_birth,
+                    'tin'                    => $deliveryMethod->tin,
+                    'name'                   => $deliveryMethod->seller_name,
+                    'company'                => $deliveryMethod->seller_company,
+                    'email'                  => $deliveryMethod->seller_email,
                     'phones'                 => [
-                        'number' => $deliveryMethod->get_option('seller_phone'),
+                        'number' => $deliveryMethod->seller_phone,
                     ],
                 ],
                 'seller'          => [
-                    'address' => $deliveryMethod->get_option('seller_address'),
+                    'address' => $deliveryMethod->seller_address,
                     'phones'  => [
-                        'number' => $deliveryMethod->get_option('seller_phone'),
+                        'number' => $deliveryMethod->seller_phone,
                     ],
                 ],
                 'recipient'       => [
-                    'name'   => ($order->get_shipping_first_name() ?: $order->get_billing_first_name()).
-                                ' '.
-                                ($order->get_shipping_last_name() ?: $order->get_billing_last_name()),
-                    'email'  => $order->get_billing_email(),
+                    'name'   => "{$this->order->first_name} {$this->order->last_name}",
+                    'email'  => $this->order->billing_email,
                     'phones' => [
-                        'number' => trim($order->get_shipping_phone() ?: $order->get_billing_phone()),
+                        'number' => $recipientNumber,
                     ],
                 ],
+                'from_location'   => [
+                    'city' => $deliveryMethod->city_code,
+                ],
+                'developer_key'   => Config::DEV_KEY,
             ];
 
-            if (Tariff::isTariffToOffice($postOrderData['tariff_code'])) {
-                $param['delivery_point'] = $postOrderData['office_code'];
+            if (Tariff::isToOffice($this->tariff)) {
+                $param['delivery_point'] = $this->shipping->office ?: $this->order->pvz_code ?: null;
             } else {
                 $param['to_location'] = [
-                    'city'         => trim($order->get_shipping_city() ?: $order->get_billing_city()),
-                    'postal_code'  => trim($order->get_shipping_postcode() ?: $order->get_billing_postcode()),
-                    'country_code' => trim(($order->get_shipping_country() ?: $order->get_billing_country()) ?? 'RU'),
-                    'address'      => trim($order->get_shipping_address_1() ?: $order->get_billing_address_1()),
+                    'city'         => $this->order->city,
+                    'postal_code'  => $this->order->postcode,
+                    'country_code' => $countryCode,
+                    'address'      => $this->order->address_1,
                 ];
             }
 
-            if (Tariff::isTariffFromOffice($param['tariff_code'])) {
-                $office                  = json_decode($deliveryMethod->get_option('pvz_code'), true);
-                $param['shipment_point'] = $office['address'];
-            } else {
-                $address = json_decode($deliveryMethod->get_option('address'), true);
-
-                $param['from_location'] = [
-                    'postal_code'  => $address['postal'] ?? null,
-                    'city'         => $address['city'],
-                    'address'      => $address['city'].($address['address'] ? ", {$address['address']}" : ''),
-                    'country_code' => $address['country'] ?? 'RU',
-                ];
-            }
-
-            if ($deliveryMethod->get_option('international_mode') === 'yes') {
+            if ($deliveryMethod->international_mode) {
                 $param['recipient'] = array_merge($param['recipient'], [
-                    'passport_date_of_birth' => $order->get_meta('_passport_date_of_birth'),
-                    'tin'                    => $order->get_meta('_tin'),
-                    'passport_organization'  => $order->get_meta('_passport_organization'),
-                    'passport_date_of_issue' => $order->get_meta('_passport_date_of_issue'),
-                    'passport_number'        => $order->get_meta('_passport_number'),
-                    'passport_series'        => $order->get_meta('_passport_series'),
+                    'passport_date_of_birth' => $this->order->meta('_passport_date_of_birth'),
+                    'tin'                    => $this->order->meta('_tin'),
+                    'passport_organization'  => $this->order->meta('_passport_organization'),
+                    'passport_date_of_issue' => $this->order->meta('_passport_date_of_issue'),
+                    'passport_number'        => $this->order->meta('_passport_number'),
+                    'passport_series'        => $this->order->meta('_passport_series'),
                 ]);
             }
 
-            $serviceList = Helper::getServices($deliveryMethod, $param['tariff_code']);
+            $serviceList = Service::factory($deliveryMethod, $param['tariff_code']);
             if (!empty($serviceList)) {
                 $param['services'] = $serviceList;
             }
 
-            if ($order->get_payment_method() === 'cod') {
+            if ($this->order->shouldBePaidUponDelivery()) {
                 $param['delivery_recipient_cost'] = [
-                    'value' => $order->get_shipping_total(),
+                    'value' => $this->order->shipping_total,
                 ];
             }
 
             return $param;
         }
 
-        private function buildPackagesData(WC_Order $order, array $postOrderData, array $packages = null): array
+        private function buildPackagesData(array $packages = null): array
         {
             $items = array_filter(
-                $order->get_items(),
+                $this->order->items,
                 static fn($el) => in_array($el->get_product()->get_type(), self::ALLOWED_PRODUCT_TYPES, true),
             );
 
             if ($packages === null) {
-                $deliveryMethod = CheckoutHelper::getOrderShippingMethod($order);
-
                 $packageItems = array_map(static function ($item) {
                     $product = $item->get_product();
 
@@ -334,12 +296,10 @@ namespace Cdek\Actions {
 
                 return [
                     $this->buildItemsData(
-                        $order,
-                        (int)$deliveryMethod->get_meta(MetaKeys::LENGTH),
-                        (int)$deliveryMethod->get_meta(MetaKeys::WIDTH),
-                        (int)$deliveryMethod->get_meta(MetaKeys::HEIGHT),
+                        (int)$this->shipping->length,
+                        (int)$this->shipping->width,
+                        (int)$this->shipping->height,
                         $packageItems,
-                        $postOrderData,
                     ),
                 ];
             }
@@ -373,12 +333,10 @@ namespace Cdek\Actions {
                     }, $package['items']);
                 }
                 $output[] = $this->buildItemsData(
-                    $order,
                     (int)$package['length'],
                     (int)$package['width'],
                     (int)$package['height'],
                     $package['items'],
-                    $postOrderData,
                 );
             }
 
@@ -386,33 +344,29 @@ namespace Cdek\Actions {
         }
 
         private function buildItemsData(
-            WC_Order $order,
             int $length,
             int $width,
             int $height,
-            array $items,
-            array $postOrderData
+            array $items
         ): array {
-            $deliveryMethod = Helper::getActualShippingMethod(
-                CheckoutHelper::getOrderShippingMethod($order)->get_data()['instance_id'],
-            );
+            $deliveryMethod = $this->shipping->getMethod();
 
             $totalWeight = 0;
             $itemsData   = [];
 
             foreach ($items as $item) {
-                $weight      = WeightCalc::getWeightInGrams($item['weight']);
+                $weight      = WeightConverter::getWeightInGrams($item['weight']);
                 $quantity    = (int)$item['quantity'];
                 $totalWeight += $quantity * $weight;
                 $cost        = $item['price'];
 
-                if ($postOrderData['currency'] !== 'RUB' && function_exists('wcml_get_woocommerce_currency_option')) {
-                    $cost = $this->convertCurrencyToRub($cost, $postOrderData['currency']);
+                if ($this->order->currency !== 'RUB' && function_exists('wcml_get_woocommerce_currency_option')) {
+                    $cost = $this->convertCurrencyToRub($cost, $this->order->currency);
                 }
 
-                $selectedPaymentMethodId = $order->get_payment_method();
-                $percentCod              = (int)$deliveryMethod->get_option('percentcod');
-                if ($selectedPaymentMethodId === 'cod') {
+                if ($this->order->shouldBePaidUponDelivery()) {
+                    $percentCod = (int)$deliveryMethod->get_option('percentcod');
+
                     if ($percentCod !== 0) {
                         $paymentValue = (int)(($percentCod / 100) * $cost);
                     } else {
@@ -434,7 +388,7 @@ namespace Cdek\Actions {
             }
 
             $package = [
-                'number'  => sprintf('%s_%s', $order->get_id(), StringHelper::generateRandom(5)),
+                'number'  => sprintf('%s_%s', $this->order->id, StringHelper::generateRandom(5)),
                 'length'  => $length,
                 'width'   => $width,
                 'height'  => $height,
@@ -442,7 +396,7 @@ namespace Cdek\Actions {
                 'comment' => __('inventory attached', 'cdekdelivery'),
             ];
 
-            if ($postOrderData['type'] === Tariff::SHOP_TYPE) {
+            if (Tariff::availableForShops($this->tariff)) {
                 $package['items'] = $itemsData;
             }
 
@@ -478,6 +432,10 @@ namespace Cdek\Actions {
             return $cost;
         }
 
+        /**
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         * @throws \Cdek\Exceptions\External\ApiException
+         */
         private function getCdekOrderNumber(string $orderUuid, int $iteration = 1): ?string
         {
             sleep(1);
@@ -486,9 +444,9 @@ namespace Cdek\Actions {
                 return null;
             }
 
-            $orderInfo = $this->api->getOrder($orderUuid);
+            $orderInfo = $this->api->orderGet($orderUuid);
 
-            return $orderInfo['entity']['cdek_number'] ?? $this->getCdekOrderNumber($orderUuid, $iteration + 1);
+            return $orderInfo->entity()['cdek_number'] ?? $this->getCdekOrderNumber($orderUuid, $iteration + 1);
         }
     }
 }

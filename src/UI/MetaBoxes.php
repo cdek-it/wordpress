@@ -12,12 +12,9 @@ namespace Cdek\UI {
     use Automattic\WooCommerce\Utilities\OrderUtil;
     use Cdek\CdekApi;
     use Cdek\Config;
-    use Cdek\Helper;
-    use Cdek\Helpers\CheckoutHelper;
+    use Cdek\Helpers\UI;
     use Cdek\Loader;
-    use Cdek\MetaKeys;
-    use Cdek\Model\CourierMetaData;
-    use Cdek\Model\OrderMetaData;
+    use Cdek\Model\Order;
     use Cdek\Model\Tariff;
     use Cdek\Traits\CanBeCreated;
     use Exception;
@@ -27,29 +24,29 @@ namespace Cdek\UI {
     {
         use CanBeCreated;
 
-        public static function registerMetaBoxes(string $post_type, $post): void
+        public static function registerMetaBoxes(string $_post_type, $post): void
         {
             if (!$post || !OrderUtil::is_order($post, wc_get_order_types())) {
                 return;
             }
 
-            $order = wc_get_order($post);
+            $order = new Order($post);
 
-            if (!CheckoutHelper::isCdekShippingMethod($order)) {
+            $shipping = $order->getShipping();
+
+            if ($shipping === null) {
                 return;
             }
 
             add_action('admin_enqueue_scripts', [__CLASS__, 'registerOrderScripts']);
 
-            $cdekMethod     = CheckoutHelper::getOrderShippingMethod($order);
-            $selectedTariff = (int)($cdekMethod->get_meta(MetaKeys::TARIFF_CODE) ?:
-                $cdekMethod->get_meta('tariff_code'));
+            $selectedTariff = $shipping->tariff;
 
             if ($selectedTariff === 0) {
                 return;
             }
 
-            if (!(new CdekApi($cdekMethod->get_data()['instance_id']))->checkAuth()) {
+            if (!(new CdekApi($shipping->getInstanceId()))->checkAuth()) {
                 add_meta_box(
                     Config::ORDER_META_BOX_KEY, Loader::getPluginName(), [__CLASS__, 'noAuthMetaBox'],
                     ['woocommerce_page_wc-orders', 'shop_order'],
@@ -60,12 +57,12 @@ namespace Cdek\UI {
                 return;
             }
 
-            $settings = Helper::getActualShippingMethod($cdekMethod->get_data()['instance_id']);
+            $settings = $shipping->getMethod();
 
             $address = $settings->get_option('address');
 
             if ((empty($address) || !isset(json_decode($address, true)['country'])) &&
-                Tariff::isTariffFromDoor($selectedTariff)) {
+                Tariff::isFromDoor($selectedTariff)) {
                 add_meta_box(
                     Config::ORDER_META_BOX_KEY,
                     Loader::getPluginName(),
@@ -81,7 +78,7 @@ namespace Cdek\UI {
             $office = $settings->get_option('pvz_code');
 
             if ((empty($office) || !isset(json_decode($office, true)['country'])) &&
-                Tariff::isTariffFromOffice($selectedTariff)) {
+                Tariff::isFromOffice($selectedTariff)) {
                 add_meta_box(
                     Config::ORDER_META_BOX_KEY,
                     Loader::getPluginName(),
@@ -166,12 +163,16 @@ namespace Cdek\UI {
 
         public static function createOrderMetaBox($post): void
         {
-            $order     = wc_get_order($post);
-            $orderIdWP = $order->get_id();
-            $orderData = OrderMetaData::getMetaByOrderId($orderIdWP);
+            $order     = new Order($post);
+
+            $shipping = $order->getShipping();
+
+            if($shipping === null) {
+                return;
+            }
 
             $items = [];
-            foreach ($order->get_items() as $item) {
+            foreach ($order->items as $item) {
                 /** @noinspection OnlyWritesOnParameterInspection */
                 $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
             }
@@ -179,18 +180,13 @@ namespace Cdek\UI {
             $dateMin = gmdate('Y-m-d');
             $dateMax = gmdate('Y-m-d', strtotime($dateMin." +31 days"));
 
-            $shipping = CheckoutHelper::getOrderShippingMethod($order);
-
-            $hasPackages
-                         = Helper::getActualShippingMethod($shipping->get_data()['instance_id'])->get_option(
-                        'has_packages_mode',
-                    ) === 'yes';
-            $orderNumber = $orderData['order_number'] ?? null;
-            $orderUuid   = $orderData['order_uuid'] ?? null;
+            $hasPackages = $shipping->getMethod()->has_packages_mode;
+            $orderNumber = $order->number ?: null;
+            $orderUuid   = $order->uuid ?: null;
 
             try {
-                $cdekStatuses         = Helper::getCdekOrderStatuses($orderUuid);
-                $actionOrderAvailable = Helper::getCdekActionOrderAvailable($cdekStatuses);
+                $cdekStatuses         = $order->loadLegacyStatuses();
+                $actionOrderAvailable = $order->isLocked();
             } catch (Exception $e) {
                 $cdekStatuses         = [];
                 $actionOrderAvailable = true;
@@ -201,16 +197,13 @@ namespace Cdek\UI {
             }
 
             try {
-                $fromDoor      = Tariff::isTariffFromDoor(
-                    $shipping->get_meta(MetaKeys::TARIFF_CODE) ?:
-                        $shipping->get_meta('tariff_code') ?: $orderData['tariff_id'],
-                );
-                $courierNumber = CourierMetaData::getMetaByOrderId($orderIdWP)['courier_number'] ?? '';
-                $length        = $shipping->get_meta(MetaKeys::LENGTH) ?: $shipping->get_meta('length');
-                $height        = $shipping->get_meta(MetaKeys::HEIGHT) ?: $shipping->get_meta('height');
-                $width         = $shipping->get_meta(MetaKeys::WIDTH) ?: $shipping->get_meta('width');
+                $fromDoor      = Tariff::isFromDoor($shipping->tariff ?: $order->tariff_id);
+                $courierNumber = $order->getIntake()->number;
+                $length        = $shipping->length;
+                $height        = $shipping->height;
+                $width         = $shipping->width;
 
-                include __DIR__.'/../../templates/admin/create-order.php';
+                include Loader::getPluginPath('templates/admin/create-order.php');
             } catch (Throwable $e) {
             }
         }
@@ -227,7 +220,7 @@ namespace Cdek\UI {
 
         public static function registerOrderScripts(): void
         {
-            Helper::enqueueScript('cdek-admin-create-order', 'cdek-create-order', true);
+            UI::enqueueScript('cdek-admin-create-order', 'cdek-create-order', true);
         }
 
         public function __invoke(): void

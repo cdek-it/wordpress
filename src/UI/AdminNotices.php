@@ -20,6 +20,7 @@ namespace Cdek\UI {
 
         public static function weightUnitsConflict(): void
         {
+            /** @noinspection GlobalVariableUsageInspection */
             if (!(isset($_GET['section']) && $_GET['section'] === Config::DELIVERY_NAME) &&
                 !((isset($_GET['tab']) && $_GET['tab'] === 'products'))) {
                 return;

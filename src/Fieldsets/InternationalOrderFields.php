@@ -10,13 +10,13 @@ namespace {
 namespace Cdek\Fieldsets {
 
     use Cdek\Contracts\FieldsetContract;
-    use Cdek\Helper;
+    use Cdek\ShippingMethod;
 
     class InternationalOrderFields extends FieldsetContract
     {
         final public function isApplicable(): bool
         {
-            return Helper::getActualShippingMethod()->get_option('international_mode') === 'yes';
+            return ShippingMethod::factory()->international_mode;
         }
 
         final protected function getFields(): array

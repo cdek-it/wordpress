@@ -10,16 +10,13 @@ namespace {
 namespace Cdek\Actions {
 
     use Cdek\CdekApi;
-    use Cdek\Helpers\CheckoutHelper;
-    use Cdek\MetaKeys;
-    use Cdek\Model\CourierMetaData;
-    use Cdek\Model\OrderMetaData;
+    use Cdek\Exceptions\ShippingNotFoundException;
+    use Cdek\Model\Order;
     use Cdek\Model\Tariff;
     use Cdek\Model\ValidationResult;
     use Cdek\Note;
     use Cdek\Traits\CanBeCreated;
-    use Cdek\Validator\ValidateCourier;
-    use Cdek\Validator\ValidateCourierFormData;
+    use Cdek\Validator\IntakeValidator;
 
     class IntakeCreateAction
     {
@@ -32,24 +29,33 @@ namespace Cdek\Actions {
             $this->api = new CdekApi();
         }
 
+        /**
+         * @throws \Cdek\Exceptions\External\ApiException
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         * @throws \Cdek\Exceptions\ShippingNotFoundException
+         * @throws \Cdek\Exceptions\OrderNotFoundException
+         */
         public function __invoke(int $orderId, array $data): ValidationResult
         {
-            $validate = ValidateCourierFormData::validate($data);
+            $validate = IntakeValidator::validate($data);
             if (!$validate->state) {
                 return $validate;
             }
 
-            $orderMetaData  = OrderMetaData::getMetaByOrderId($orderId);
-            $shippingMethod = CheckoutHelper::getOrderShippingMethod(wc_get_order($orderId));
+            $order    = new Order($orderId);
+            $shipping = $order->getShipping();
 
-            $tariffId = $shippingMethod->get_meta(MetaKeys::TARIFF_CODE) ?:
-                $shippingMethod->get_meta('tariff_code') ?: $orderMetaData['tariff_id'];
+            if ($shipping === null) {
+                throw new ShippingNotFoundException;
+            }
 
-            if (Tariff::isTariffFromDoor($tariffId)) {
-                $orderNumber = $orderMetaData['order_number'];
+            $tariffId = $shipping->tariff ?: $order->tariff_id;
+
+            if (Tariff::isFromDoor($tariffId)) {
+                $orderNumber = $order->number;
                 $param       = $this->createRequestDataWithOrderNumber($data, $orderNumber);
             } else {
-                $validate = ValidateCourierFormData::validatePackage($data);
+                $validate = IntakeValidator::validatePackage($data);
                 if (!$validate->state) {
                     return $validate;
                 }
@@ -57,9 +63,9 @@ namespace Cdek\Actions {
                 $param = $this->createRequestData($data);
             }
 
-            $courierObj = $this->api->callCourier($param);
+            $result = $this->api->intakeCreate($param);
 
-            if (isset($courierObj['errors']) && $courierObj['errors'][0]['code'] === 'v2_intake_exists_by_order') {
+            if ($result->error() !== null && $result->error()['code'] === 'v2_intake_exists_by_order') {
                 return new ValidationResult(
                     false, esc_html__(
                     'An error occurred while creating intake. Intake for this invoice already exists',
@@ -68,21 +74,33 @@ namespace Cdek\Actions {
                 );
             }
 
-            $validate = ValidateCourier::validate($courierObj);
-            if (!$validate->state) {
-                return $validate;
+            if (!$result->missInvalidLegacyRequest()) {
+                return new ValidationResult(
+                    false, sprintf(/* translators: %s: Error message */ esc_html__(
+                    'Error. The courier request has not been created. (%s)',
+                    'cdekdelivery',
+                ),
+                    $result->error()['message'],
+                ),
+                );
             }
 
             sleep(5);
 
-            $courierInfo = $this->api->courierInfo($courierObj['entity']['uuid']);
+            $courierInfo = $this->api->intakeGet($result->entity()['uuid']);
 
-            $validate = ValidateCourier::validate($courierInfo);
-            if (!$validate->state) {
-                return $validate;
+            if (!$result->missInvalidLegacyRequest()) {
+                return new ValidationResult(
+                    false, sprintf(/* translators: %s: Error message */ esc_html__(
+                    'Error. The courier request has not been created. (%s)',
+                    'cdekdelivery',
+                ),
+                    $result->error()['message'],
+                ),
+                );
             }
 
-            if (!isset($courierInfo['entity'])) {
+            if ($courierInfo === null) {
                 return new ValidationResult(
                     false, sprintf(
                     esc_html__(/* translators: %s: uuid of request*/
@@ -94,34 +112,32 @@ namespace Cdek\Actions {
                 );
             }
 
-            $intakeNumber = $courierInfo['entity']['intake_number'];
+            $intake         = $order->getIntake();
+            $intake->uuid   = $courierInfo['uuid'];
+            $intake->number = $courierInfo['intake_number'];
+            $intake->save();
 
-            CourierMetaData::addMetaByOrderId($orderId, [
-                'courier_number' => $intakeNumber,
-                'courier_uuid'   => $courierObj['entity']['uuid'],
-                'not_cons'       => Tariff::isTariffFromDoor($tariffId),
-            ]);
-
-            $message
-                = sprintf(
-                esc_html__(/* translators: 1: number of intake 2: uuid of intake*/
-                    'Intake has been created: Number: %1$s | Uuid: %2$s',
-                    'cdekdelivery',
+            Note::send(
+                $orderId,
+                sprintf(
+                    esc_html__(/* translators: 1: number of intake 2: uuid of intake*/
+                        'Intake has been created: Number: %1$s | Uuid: %2$s',
+                        'cdekdelivery',
+                    ),
+                    $courierInfo['entity']['intake_number'],
+                    $courierInfo['uuid'],
                 ),
-                $intakeNumber,
-                $courierObj['entity']['uuid'],
             );
-            Note::send($orderId, $message);
 
             return new ValidationResult(
                 true, sprintf(
                 esc_html__(/* translators: %s: uuid of application*/ 'Intake number: %s', 'cdekdelivery'),
-                $intakeNumber,
+                $courierInfo['intake_number'],
             ),
             );
         }
 
-        private function createRequestDataWithOrderNumber($data, $orderNumber)
+        private function createRequestDataWithOrderNumber(array $data, string $orderNumber): array
         {
             $param['cdek_number']      = $orderNumber;
             $param['intake_date']      = $data['date'];
@@ -146,12 +162,7 @@ namespace Cdek\Actions {
             return $param;
         }
 
-        /**
-         * @param $data
-         *
-         * @return array
-         */
-        protected function createRequestData($data): array
+        private function createRequestData(array $data): array
         {
             $param['intake_date']      = $data['date'];
             $param['intake_time_from'] = $data['starttime'];

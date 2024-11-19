@@ -10,11 +10,11 @@ namespace {
 namespace Cdek\Actions {
 
     use Cdek\CdekApi;
-    use Cdek\Model\OrderMetaData;
+    use Cdek\Exceptions\External\InvalidRequestException;
+    use Cdek\Model\Order;
     use Cdek\Model\ValidationResult;
+    use Cdek\Note;
     use Cdek\Traits\CanBeCreated;
-    use Cdek\Validator\ValidateDeleteOrder;
-    use Cdek\Validator\ValidateGetOrder;
 
     class OrderDeleteAction
     {
@@ -27,24 +27,68 @@ namespace Cdek\Actions {
             $this->api = new CdekApi;
         }
 
+        /**
+         * @throws \Cdek\Exceptions\OrderNotFoundException
+         * @throws \Cdek\Exceptions\External\ApiException
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         */
         public function __invoke(int $orderId): ValidationResult
         {
-            $orderNumber = OrderMetaData::getMetaByOrderId($orderId)['order_uuid'];
+            $order       = new Order($orderId);
+            $orderNumber = $order->number;
+            $orderUuid   = $order->uuid;
 
-            OrderMetaData::cleanMetaByOrderId($orderId);
+            $order->clean();
 
-            $order = $this->api->getOrder($orderNumber);
+            try {
+                $this->api->orderGet($orderUuid);
+            } catch (InvalidRequestException $e) {
+                Note::send(
+                    $orderId,
+                    sprintf(
+                        esc_html__(/* translators: %s: Order number */
+                            'An attempt to delete order number %s failed with an error. Order not found.',
+                            'cdekdelivery',
+                        ),
+                        $orderNumber,
+                    ),
+                );
 
-            $validate = ValidateGetOrder::validate($order, $orderNumber, $orderId);
-            if (!$validate->state) {
-                return $validate;
+                return new ValidationResult(
+                    false, sprintf(
+                    esc_html__(/* translators: %s: Order number */
+                        'An error occurred while deleting the order. Order number %s was not found.',
+                        'cdekdelivery',
+                    ),
+                    $orderNumber,
+                ),
+                );
             }
 
-            $delete = $this->api->deleteOrder($orderNumber);
+            try {
+                $this->api->orderDelete($orderUuid);
+            } catch (InvalidRequestException $e) {
+                Note::send(
+                    $orderId,
+                    sprintf(
+                        esc_html__(/* translators: %s: Order number */
+                            'An attempt to delete order number %s failed with an error. Error code: %s',
+                            'cdekdelivery',
+                        ),
+                        $orderNumber,
+                        $e->getData()[0]['code'],
+                    ),
+                );
 
-            $validate = ValidateDeleteOrder::validate($delete, $orderNumber, $orderId);
-            if (!$validate->state) {
-                return $validate;
+                return new ValidationResult(
+                    false, sprintf(
+                    esc_html__(/* translators: %s: Order number */
+                        'An error occurred while deleting the order. Order number %s was not deleted.',
+                        'cdekdelivery',
+                    ),
+                    $orderNumber,
+                ),
+                );
             }
 
             IntakeDeleteAction::new()($orderId);

@@ -10,19 +10,16 @@ namespace {
 namespace Cdek\Actions\Schedule {
 
     use Cdek\Contracts\TaskContract;
-    use Cdek\Exceptions\External\ApiException;
+    use Cdek\Exceptions\OrderNotFoundException;
     use Cdek\Exceptions\ScheduledTaskException;
-    use Cdek\Model\OrderMetaData;
+    use Cdek\Model\Order;
     use Cdek\Model\TaskResult;
     use Iterator;
 
     class ReindexOrders extends TaskContract
     {
         /**
-         * @return void
-         * @throws ApiException
          * @throws ScheduledTaskException
-         * @throws \JsonException
          */
         final protected function process(): Iterator
         {
@@ -30,14 +27,23 @@ namespace Cdek\Actions\Schedule {
                 throw new ScheduledTaskException('Failed to get orders meta info');
             }
 
+            $failedOrders = [];
+
             foreach ($this->taskMeta as $order) {
-                OrderMetaData::updateMetaByOrderId(
-                    $order['external_id'],
-                    ['order_uuid' => $order['id']],
-                );
+                try {
+                    $orderMeta       = new Order($order['external_id']);
+                    $orderMeta->uuid = $order['id'];
+                    $orderMeta->save();
+                } catch (OrderNotFoundException $e) {
+                    $failedOrders[] = $order['external_id'];
+                }
             }
 
-            yield new TaskResult('success');
+            if (empty($failedOrders)) {
+                yield new TaskResult('success');
+            } else {
+                yield new TaskResult('warning', ['failed' => $failedOrders]);
+            }
         }
     }
 }

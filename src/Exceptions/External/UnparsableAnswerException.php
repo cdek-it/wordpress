@@ -14,9 +14,11 @@ namespace Cdek\Exceptions\External {
     {
         protected string $key = 'api.parse';
 
-        public function __construct(string $answer)
+        public function __construct(string $answer, string $url, string $method)
         {
-            parent::__construct(['answer' => $answer]);
+            $this->message = $this->message ?: esc_html__('Unable to parse API answer', 'cdekdelivery');
+
+            parent::__construct(['answer' => $answer, 'url' => $url, 'method' => $method]);
         }
     }
 }

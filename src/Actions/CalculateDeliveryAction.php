@@ -12,58 +12,43 @@ namespace Cdek\Actions {
 
     use Cdek\CdekApi;
     use Cdek\Config;
-    use Cdek\Exceptions\TariffNotAvailableException;
-    use Cdek\Helper;
-    use Cdek\Helpers\WeightCalc;
+    use Cdek\Helpers\WeightConverter;
     use Cdek\MetaKeys;
+    use Cdek\Model\Service;
     use Cdek\Model\Tariff;
+    use Cdek\ShippingMethod;
     use Cdek\Traits\CanBeCreated;
     use Throwable;
-    use WC_Shipping_Method;
 
     class CalculateDeliveryAction
     {
         use CanBeCreated;
-
-        private WC_Shipping_Method $method;
+        private ShippingMethod $method;
         private array $rates = [];
-        private CdekApi $api;
-
-        public function __construct(int $instanceID = null)
-        {
-            $this->method = Helper::getActualShippingMethod($instanceID);
-            $this->api    = new CdekApi;
-        }
 
         /**
          * @throws \Cdek\Exceptions\External\ApiException
          * @throws \Cdek\Exceptions\External\LegacyAuthException
          */
-        public function __invoke(array $package, bool $addTariffsToOffice = true): bool
+        public function __invoke(array $package, int $instanceID, bool $addTariffsToOffice = true): array
         {
-            if (!$this->api->checkAuth()) {
-                return false;
+            $this->method = ShippingMethod::factory($instanceID);
+            $api         = new CdekApi($instanceID);
+
+            if (empty($this->method->city_code) || !$api->checkAuth()) {
+                return [];
             }
 
-            $officeData = json_decode($this->method->get_option('pvz_code'), true) ?: [];
-            $doorData   = json_decode($this->method->get_option('address'), true) ?: [];
-
-            $deliveryParam['from'] = [
-                'postal_code'  => $officeData['postal'] ?? $doorData['postal'] ?? '',
-                'city'         => $officeData['city'] ?? $doorData['city'],
-                'address'      => $officeData['city'] ?? $doorData['city'],
-                'country_code' => $officeData['country'] ?? $doorData['country'] ?? 'RU',
-            ];
-
-            if (!isset($deliveryParam['from']['postal_code'])) {
-                return false;
-            }
-
-            $deliveryParam['to'] = [
-                'postal_code'  => trim($package['destination']['postcode']),
-                'city'         => trim($package['destination']['city']),
-                'address'      => trim($package['destination']['city']),
-                'country_code' => trim($package['destination']['country']),
+            $deliveryParam = [
+                'from' => [
+                    'code' => $this->method->city_code,
+                ],
+                'to' => [
+                    'postal_code'  => trim($package['destination']['postcode']),
+                    'city'         => trim($package['destination']['city']),
+                    'address'      => trim($package['destination']['city']),
+                    'country_code' => trim($package['destination']['country']),
+                ]
             ];
 
             try {
@@ -76,7 +61,7 @@ namespace Cdek\Actions {
             $deliveryParam['packages'] = $this->getPackagesData($package['contents']);
             unset($deliveryParam['packages']['weight_orig_unit']);
 
-            if ($this->method->get_option('insurance') === 'yes') {
+            if ($this->method->insurance) {
                 $deliveryParam['services'][] = [
                     'code'      => 'INSURANCE',
                     'parameter' => (int)$package['contents_cost'],
@@ -85,7 +70,7 @@ namespace Cdek\Actions {
 
             $tariffList = $this->method->get_option('tariff_list');
 
-            $priceRules = json_decode($this->method->get_option('delivery_price_rules'), true) ?: [
+            $priceRules = json_decode($this->method->delivery_price_rules, true) ?: [
                 'office' => [['type' => 'percentage', 'to' => null, 'value' => 100]],
                 'door'   => [['type' => 'percentage', 'to' => null, 'value' => 100]],
             ];
@@ -110,13 +95,13 @@ namespace Cdek\Actions {
             foreach ([Tariff::SHOP_TYPE, Tariff::DELIVERY_TYPE] as $deliveryType) {
                 $deliveryParam['type'] = $deliveryType;
 
-                $calcResult = $this->api->calculateTariffList($deliveryParam);
+                $calcResult = $api->calculateList($deliveryParam);
 
                 if (empty($calcResult)) {
                     continue;
                 }
 
-                if (!$this->checkDeliveryResponse($calcResult)) {
+                if (isset($delivery['errors'])) {
                     continue;
                 }
 
@@ -126,16 +111,16 @@ namespace Cdek\Actions {
                         continue;
                     }
 
-                    if (!$addTariffsToOffice && Tariff::isTariffToOffice($tariff['tariff_code'])) {
+                    if (!$addTariffsToOffice && Tariff::isToOffice($tariff['tariff_code'])) {
                         continue;
                     }
 
-                    $minDay = (int)$tariff['period_min'] + (int)$this->method->get_option('extra_day');
-                    $maxDay = (int)$tariff['period_max'] + (int)$this->method->get_option('extra_day');
+                    $minDay = (int)$tariff['period_min'] + (int)$this->method->extra_day;
+                    $maxDay = (int)$tariff['period_max'] + (int)$this->method->extra_day;
                     $cost   = (int)$tariff['delivery_sum'];
 
-                    if ((!isset($officeData['city']) && Tariff::isTariffFromOffice($tariff['tariff_code'])) ||
-                        (!isset($doorData['city']) && Tariff::isTariffFromDoor($tariff['tariff_code']))) {
+                    if ((!isset($officeData['city']) && Tariff::isFromOffice($tariff['tariff_code'])) ||
+                        (!isset($doorData['city']) && Tariff::isFromDoor($tariff['tariff_code']))) {
                         continue;
                     }
 
@@ -143,7 +128,7 @@ namespace Cdek\Actions {
                         'id'        => sprintf('%s:%s', Config::DELIVERY_NAME, $tariff['tariff_code']),
                         'label'     => sprintf(
                             esc_html__('CDEK: %s, (%s-%s days)', 'cdekdelivery'),
-                            Tariff::getTariffUserNameByCode($tariff['tariff_code']),
+                            Tariff::getNameByCode($tariff['tariff_code']),
                             $minDay,
                             $maxDay,
                         ),
@@ -165,16 +150,15 @@ namespace Cdek\Actions {
                 }
             }
 
-            $api            = $this->api;
             $deliveryMethod = $this->method;
 
-            $this->rates = array_map(static function ($tariff) use (
+            return array_map(static function ($tariff) use (
                 $priceRules,
                 $api,
                 $deliveryParam,
                 $deliveryMethod
             ) {
-                $rule = Tariff::isTariffToOffice($tariff['meta_data'][MetaKeys::TARIFF_CODE]) ? $priceRules['office'] :
+                $rule = Tariff::isToOffice($tariff['meta_data'][MetaKeys::TARIFF_CODE]) ? $priceRules['office'] :
                     $priceRules['door'];
                 if (isset($rule['type']) && $rule['type'] === 'free') {
                     $tariff['cost'] = 0;
@@ -193,15 +177,15 @@ namespace Cdek\Actions {
                 }
 
                 $deliveryParam['tariff_code'] = $tariff['meta_data'][MetaKeys::TARIFF_CODE];
-                $deliveryParam['type']        = Tariff::getTariffType($deliveryParam['tariff_code']);
+                $deliveryParam['type']        = Tariff::getType($deliveryParam['tariff_code']);
 
-                $serviceList = Helper::getServices($deliveryMethod, $deliveryParam['tariff_code']);
+                $serviceList = Service::factory($deliveryMethod, $deliveryParam['tariff_code']);
 
                 if (!empty($serviceList)) {
                     $deliveryParam['services'] = array_merge($serviceList, $deliveryParam['services'] ?? []);
                 }
 
-                $tariffInfo = $api->calculateTariff($deliveryParam);
+                $tariffInfo = $api->calculateGet($deliveryParam);
 
                 if (empty($tariffInfo)) {
                     return $tariff;
@@ -225,8 +209,6 @@ namespace Cdek\Actions {
 
                 return $tariff;
             }, $this->rates);
-
-            return !empty($this->rates);
         }
 
         private function getPackagesData(array $contents): array
@@ -261,7 +243,7 @@ namespace Cdek\Actions {
                 $heightList[] = $dimensions[1];
                 $widthList[]  = $dimensions[2];
 
-                $weight      = WeightCalc::getWeight($weight);
+                $weight      = WeightConverter::getWeight($weight);
                 $totalWeight += $quantity * $weight;
             }
 
@@ -282,7 +264,7 @@ namespace Cdek\Actions {
             $width  = $widthList[0];
             $height = $heightList[0];
 
-            $useDefaultValue = $this->method->get_option('product_package_default_toggle') === 'yes';
+            $useDefaultValue = $this->method->product_package_default_toggle;
             foreach (['length', 'width', 'height'] as $dimension) {
                 if ($$dimension === 0 || $useDefaultValue) {
                     $$dimension = (int)$this->method->get_option("product_{$dimension}_default");
@@ -293,31 +275,8 @@ namespace Cdek\Actions {
                 'length' => $length,
                 'width'  => $width,
                 'height' => $height,
-                'weight' => WeightCalc::getWeightInGrams($totalWeight),
+                'weight' => WeightConverter::getWeightInGrams($totalWeight),
             ];
         }
-
-        private function checkDeliveryResponse(array $delivery): bool
-        {
-            return !isset($delivery['errors']);
-        }
-
-        final public function getRates(): array
-        {
-            return array_values($this->rates);
-        }
-
-        /**
-         * @throws TariffNotAvailableException
-         */
-        final public function getTariffRate(int $code): array
-        {
-            if (!isset($this->rates[$code])) {
-                throw new TariffNotAvailableException(array_keys($this->rates));
-            }
-
-            return $this->rates[$code];
-        }
-
     }
 }
