@@ -31,8 +31,8 @@ build_tag:
     - yarn
     - yarn build
     - rm -rf node_modules
-    - composer remove --no-install composer/installers
-    - composer i -a --no-dev
+    - composer remove --no-install --ignore-platform-req=ext-gmp composer/installers
+    - composer i -a --no-dev --ignore-platform-req=ext-gmp
     - composer archive -f zip --file=cdek
   artifacts:
     name: cdek-integration
