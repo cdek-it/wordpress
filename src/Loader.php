@@ -168,6 +168,8 @@ namespace Cdek {
             /** @noinspection GlobalVariableUsageInspection */
             self::$debug = isset($_GET[Config::MAGIC_KEY]);
 
+            ExceptionHandler::new()();
+
             try {
                 self::checkRequirements();
             } catch (RuntimeException $e) {

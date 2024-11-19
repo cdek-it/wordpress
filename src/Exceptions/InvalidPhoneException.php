@@ -28,7 +28,6 @@ namespace Cdek\Exceptions {
                 [
                     'phone'   => $phone,
                 ],
-                false,
             );
         }
     }
