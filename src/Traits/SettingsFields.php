@@ -282,21 +282,25 @@ namespace Cdek\Traits {
                     ),
                     'default'     => 'no',
                 ],
-                'pvz_code'                           => [
-                    'type'  => Loader::debug() ? 'text' : 'hidden',
-                    'title' => Loader::debug() ? esc_html__('Legacy Office Info', 'cdekdelivery') : null,
-                ],
                 'address'                            => [
-                    'type'  => Loader::debug() ? 'text' : 'hidden',
-                    'title' => Loader::debug() ? esc_html__('Legacy Address', 'cdekdelivery') : null,
+                    'type'  => 'text',
+                    'title' => esc_html__('Address', 'cdekdelivery'),
                 ],
                 'city'                               => [
                     'type'  => 'text',
                     'title' => esc_html__('City Name', 'cdekdelivery'),
                 ],
+                'pvz_code'                           => [
+                    'type'  => Loader::debug() ? 'text' : 'hidden',
+                    'title' => Loader::debug() ? esc_html__('Legacy Office Info', 'cdekdelivery') : '',
+                ],
+                'legacy_address'                           => [
+                    'type'  => Loader::debug() ? 'text' : 'hidden',
+                    'title' => Loader::debug() ? esc_html__('Legacy Address Info', 'cdekdelivery') : '',
+                ],
                 'city_code'                          => [
                     'type'  => Loader::debug() ? 'text' : 'hidden',
-                    'title' => Loader::debug() ? esc_html__('City Code', 'cdekdelivery') : null,
+                    'title' => Loader::debug() ? esc_html__('City Code', 'cdekdelivery') : '',
                 ],
                 'token'                              => [
                     'type' => 'hidden',

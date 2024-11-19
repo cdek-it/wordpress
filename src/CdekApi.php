@@ -11,8 +11,8 @@ namespace Cdek {
 
     use Cdek\Enums\BarcodeFormat;
     use Cdek\Exceptions\External\ApiException;
-    use Cdek\Exceptions\External\LegacyAuthException;
     use Cdek\Exceptions\External\InvalidRequestException;
+    use Cdek\Exceptions\External\LegacyAuthException;
     use Cdek\Helpers\LegacyTokenStorage;
     use Cdek\Transport\HttpClient;
     use Cdek\Transport\HttpResponse;
@@ -150,20 +150,70 @@ namespace Cdek {
         /**
          * @throws LegacyAuthException
          */
-        private function cityCodeGetWithFallback(string $city, ?string $postcode = null): ?string
-        {
+        private function cityCodeGetWithFallback(
+            string $city,
+            ?string $postcode = null,
+        ): ?string {
             try {
                 $result = HttpClient::sendJsonRequest(
                     "{$this->apiUrl}location/cities",
                     'GET',
                     $this->tokenStorage->getToken(),
-                    ['city' => $city, 'postal_code' => $postcode],
+                    [
+                        'city'        => $city,
+                        'postal_code' => $postcode,
+                    ],
                 )->json();
 
                 return !empty($result[0]['code']) ? (string)$result[0]['code'] : null;
             } catch (ApiException $e) {
                 return null;
             }
+        }
+
+        /**
+         * @throws LegacyAuthException
+         */
+        public function cityGet(string $city, string $postcode, string $country = null): ?array
+        {
+            //по запросу к api v2 климовск записан как "климовск микрорайон" поэтому добавляем "микрорайон"
+            if (mb_strtolower($city) === 'климовск') {
+                $city .= ' микрорайон';
+            }
+
+            try {
+                $result = HttpClient::sendJsonRequest(
+                    "{$this->apiUrl}location/cities",
+                    'GET',
+                    $this->tokenStorage->getToken(),
+                    [
+                        'city'          => $city,
+                        'postal_code'   => $postcode,
+                        'country_codes' => $country === null ? null : [$country],
+                    ],
+                )->json();
+
+                return $result[0] ?: null;
+            } catch (ApiException $e) {
+                return null;
+            }
+        }
+
+        /**
+         * @throws LegacyAuthException
+         * @throws \Cdek\Exceptions\External\ApiException
+         */
+        public function citySuggest(string $q, string $country): array
+        {
+            return HttpClient::sendJsonRequest(
+                "{$this->apiUrl}location/suggest/cities",
+                'GET',
+                $this->tokenStorage->getToken(),
+                [
+                    'name'          => $q,
+                    'country_code'   => $country,
+                ],
+            )->json();
         }
 
         /**
