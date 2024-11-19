@@ -1917,7 +1917,7 @@ __metadata:
   resolution: "@cdek/woocommerce-delivery-integration@workspace:."
   dependencies:
     "@cdek-it/widget": "npm:^3.11.0"
-    "@playwright/test": "npm:^1.48.2"
+    "@playwright/test": "npm:^1.49.0"
     "@woocommerce/data": "npm:^5.0.0"
     "@woocommerce/dependency-extraction-webpack-plugin": "npm:^3.0.1"
     "@woocommerce/eslint-plugin": "npm:^2.3.0"
@@ -1925,7 +1925,7 @@ __metadata:
     "@wordpress/api-fetch": "npm:^7.11.0"
     "@wordpress/block-editor": "npm:^14.6.0"
     "@wordpress/data": "npm:^10.11.0"
-    "@wordpress/element": "npm:^6.11.0"
+    "@wordpress/element": "npm:^6.12.0"
     "@wordpress/env": "npm:^10.11.0"
     "@wordpress/i18n": "npm:^5.11.0"
     "@wordpress/icons": "npm:^10.11.0"
@@ -3733,14 +3733,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@playwright/test@npm:^1.48.2":
-  version: 1.48.2
-  resolution: "@playwright/test@npm:1.48.2"
+"@playwright/test@npm:^1.49.0":
+  version: 1.49.0
+  resolution: "@playwright/test@npm:1.49.0"
   dependencies:
-    playwright: "npm:1.48.2"
+    playwright: "npm:1.49.0"
   bin:
     playwright: cli.js
-  checksum: 10c0/68bab3bee8d716111e9a166785e6c3c406b6a184fc46d03b5468fcbb92b6242e5628f6a75f9d286e2491ec0e9e59af67542a1f114b6659d790b5a1f41e4d305b
+  checksum: 10c0/2890d52ee45bd83b5501f17a77c77f12ba934d257fda4b288405c6d91f94b83c4fcbdff3c0be89c2aaeea3d13576b72ec9a70be667ff844b342044afd72a246e
   languageName: node
   linkType: hard
 
@@ -6940,9 +6940,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wordpress/element@npm:*, @wordpress/element@npm:^6.11.0":
-  version: 6.11.0
-  resolution: "@wordpress/element@npm:6.11.0"
+"@wordpress/element@npm:*, @wordpress/element@npm:^6.12.0":
+  version: 6.12.0
+  resolution: "@wordpress/element@npm:6.12.0"
   dependencies:
     "@babel/runtime": "npm:7.25.7"
     "@types/react": "npm:^18.2.79"
@@ -6952,7 +6952,7 @@ __metadata:
     is-plain-object: "npm:^5.0.0"
     react: "npm:^18.3.0"
     react-dom: "npm:^18.3.0"
-  checksum: 10c0/2b38434a70ae5c747779deaa7dd9b8fea6d8a02510067aef94fa57ea493e80a75cae95e6b69c575fbfb3a12cda62c04072b789472e3abdd02a1200f9511cd6d9
+  checksum: 10c0/7d7c3e6dffb1f3669f2b1fca133addeb31d47dc1e637fad65de0866d4f87c9e5226d5645b234a26680f5c6313995f8751f7b0d7716b4c3540ec4dc8dca86a5cc
   languageName: node
   linkType: hard
 
@@ -18514,27 +18514,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"playwright-core@npm:1.48.2":
-  version: 1.48.2
-  resolution: "playwright-core@npm:1.48.2"
+"playwright-core@npm:1.49.0":
+  version: 1.49.0
+  resolution: "playwright-core@npm:1.49.0"
   bin:
     playwright-core: cli.js
-  checksum: 10c0/511da53d9df01fec5e5798915c68e7d1574890a504d1aae05430bf538d0080efa8db86e3dafdcd450f084ce7622f6bbede23ca52e798bfc4c3b3ea8da52a51f5
+  checksum: 10c0/22c1a72fabdcc87bd1cd4d40a032d2c5b94cf94ba7484dc182048c3fa1c8ec26180b559d8cac4ca9870e8fd6bdf5ef9d9f54e7a31fd60d67d098fcffc5e4253b
   languageName: node
   linkType: hard
 
-"playwright@npm:1.48.2":
-  version: 1.48.2
-  resolution: "playwright@npm:1.48.2"
+"playwright@npm:1.49.0":
+  version: 1.49.0
+  resolution: "playwright@npm:1.49.0"
   dependencies:
     fsevents: "npm:2.3.2"
-    playwright-core: "npm:1.48.2"
+    playwright-core: "npm:1.49.0"
   dependenciesMeta:
     fsevents:
       optional: true
   bin:
     playwright: cli.js
-  checksum: 10c0/ecde4ee4767556868b24d7700f3502692a3cb14c8ef127052b51b48833ffcce80942954fb188a9b72505122b48b1b625d1bb486721e1c4f2e980215328ba1ad5
+  checksum: 10c0/e94d662747cd147d0573570fec90dadc013c1097595714036fc8934a075c5a82ab04a49111b03b1f762ea86429bdb7c94460901896901e20970b30ce817cc93f
   languageName: node
   linkType: hard
 
