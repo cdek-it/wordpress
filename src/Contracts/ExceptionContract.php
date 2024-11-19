@@ -11,7 +11,6 @@ namespace Cdek\Contracts {
 
     use Cdek\Config;
     use Exception;
-    use WP_Error;
 
     abstract class ExceptionContract extends Exception
     {
@@ -19,32 +18,27 @@ namespace Cdek\Contracts {
         protected int $status = 500;
         private ?array $data;
 
-        public function __construct(
-            ?array $data = null,
-            bool $stopPropagation = true
-        ) {
-            $this->data = $data ?? [];
-            $this->message = '['.Config::PLUGIN_NAME.'] ' . ($this->message ?: 'Unknown error');
-
-            if ($stopPropagation && defined('REST_REQUEST')) {
-                wp_die($this->getWpError(), '', $this->status);
-            }
+        public function __construct(?array $data = null)
+        {
+            $this->data    = $data ?? [];
+            $this->message = '['.Config::PLUGIN_NAME.'] '.($this->message ?: 'Unknown error');
 
             parent::__construct($this->message);
-        }
-
-        private function getWpError(): WP_Error
-        {
-            // WP_Error при выводе на экран съедает часть data 0 ошибки, поэтому оригинальную ошибку добавляем 1
-            $error = new WP_Error('cdek_error', 'Error happened at CDEKDelivery');
-            $error->add($this->key, $this->message, $this->data);
-
-            return $error;
         }
 
         final public function getData(): array
         {
             return $this->data;
+        }
+
+        final public function getKey(): string
+        {
+            return $this->key;
+        }
+
+        final public function getStatusCode(): int
+        {
+            return $this->status;
         }
     }
 }
