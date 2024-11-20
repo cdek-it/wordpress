@@ -50,6 +50,7 @@ namespace Cdek\Actions {
                     'address'      => trim($package['destination']['city']),
                     'country_code' => trim($package['destination']['country']),
                 ],
+                'packages' => $this->getPackagesData($package['contents']),
             ];
 
             try {
@@ -58,9 +59,6 @@ namespace Cdek\Actions {
             } catch (Throwable $e) {
                 // do nothing
             }
-
-            $deliveryParam['packages'] = $this->getPackagesData($package['contents']);
-            unset($deliveryParam['packages']['weight_orig_unit']);
 
             if ($this->method->insurance) {
                 $deliveryParam['services'][] = [
@@ -192,13 +190,7 @@ namespace Cdek\Actions {
                     $deliveryParam['services'] = array_merge($serviceList, $deliveryParam['services'] ?? []);
                 }
 
-                $tariffInfo = $api->calculateGet($deliveryParam);
-
-                if (empty($tariffInfo)) {
-                    return $tariff;
-                }
-
-                $cost = $tariffInfo['total_sum'];
+                $cost = $api->calculateGet($deliveryParam) ?? $tariff['cost'];
 
                 if (isset($rule['type'])) {
                     if ($rule['type'] === 'amount') {

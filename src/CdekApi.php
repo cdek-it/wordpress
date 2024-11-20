@@ -83,7 +83,7 @@ namespace Cdek {
          * @throws ApiException
          * @throws LegacyAuthException
          */
-        public function calculateGet(array $deliveryParam): array
+        public function calculateGet(array $deliveryParam): ?float
         {
             $request = [
                 'type'          => $deliveryParam['type'],
@@ -94,12 +94,18 @@ namespace Cdek {
                 'services'      => array_key_exists('services', $deliveryParam) ? $deliveryParam['services'] : [],
             ];
 
-            return HttpClient::sendJsonRequest(
+            $resp = HttpClient::sendJsonRequest(
                 "{$this->apiUrl}calculator/tariff",
                 'POST',
                 $this->tokenStorage->getToken(),
                 $request,
             )->json();
+
+            if (empty($resp['total_sum'])) {
+                return null;
+            }
+
+            return (float)$resp['total_sum'];
         }
 
         /**
@@ -210,8 +216,8 @@ namespace Cdek {
                 'GET',
                 $this->tokenStorage->getToken(),
                 [
-                    'name'          => $q,
-                    'country_code'   => $country,
+                    'name'         => $q,
+                    'country_code' => $country,
                 ],
             )->json();
         }
