@@ -44,7 +44,7 @@
   },
   "volta": {
     "node": "22.10.0",
-    "yarn": "4.5.0"
+    "yarn": "4.5.1"
   },
   "workspaces": [
     "guide"
