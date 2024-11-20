@@ -53,15 +53,14 @@ $(document).ready(() => {
         if (checkForm(packageData)) {
             packageList.push(packageData);
 
-            let packageInfo = '';
-            packageInfo = `${__('Package',
+            let packageInfo = `${__('Package',
               'cdekdelivery')} №${packageList.length} (${packageData.length}х${packageData.width}х${packageData.height}):`;
 
             packageData.items.forEach(function(item) {
                 packageInfo += `${item.name} х${item.quantity}, `;
             });
 
-            $('#package_list').append(`<p>${packageInfo.slice(0, -2)}</p>`);
+            $('#package_list').append($('<p></p>').text(packageInfo.slice(0, -2)));
 
             calculateQuantity();
             cleanForm();
