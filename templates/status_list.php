@@ -19,7 +19,7 @@ if (empty($statuses)): ?>
 else: ?>
     <hr>
     <div class="cdek-order-status-elem-time"><?php
-        echo esc_html($statuses[0]['time']->format('Y.m.d H:i')) ?></div>
+        echo esc_html($statuses[0]['time']->format('H:i d.m.Y')) ?></div>
     <div id="cdek-order-status-btn" class="cdek-order-status-elem-name">
         <b><?php
             echo esc_html($statuses[0]['name']) ?></b>
@@ -31,7 +31,7 @@ else: ?>
         <?php
         foreach (array_slice($statuses, 1) as $status) { ?>
             <div class="cdek-order-status-elem-time"><?php
-                echo esc_html($status['time']->format('Y.m.d H:i')) ?></div>
+                echo esc_html($status['time']->format('H:i d.m.Y')) ?></div>
             <div class="cdek-order-status-elem-name"><b><?php
                     echo esc_html($status['name']) ?></b></div>
             <hr>
