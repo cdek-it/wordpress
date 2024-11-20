@@ -23,6 +23,7 @@ namespace Cdek\Actions {
     class CalculateDeliveryAction
     {
         use CanBeCreated;
+
         private ShippingMethod $method;
         private array $rates = [];
 
@@ -33,7 +34,7 @@ namespace Cdek\Actions {
         public function __invoke(array $package, int $instanceID, bool $addTariffsToOffice = true): array
         {
             $this->method = ShippingMethod::factory($instanceID);
-            $api         = new CdekApi($instanceID);
+            $api          = new CdekApi($instanceID);
 
             if (empty($this->method->city_code) || !$api->checkAuth()) {
                 return [];
@@ -43,12 +44,12 @@ namespace Cdek\Actions {
                 'from' => [
                     'code' => $this->method->city_code,
                 ],
-                'to' => [
+                'to'   => [
                     'postal_code'  => trim($package['destination']['postcode']),
                     'city'         => trim($package['destination']['city']),
                     'address'      => trim($package['destination']['city']),
                     'country_code' => trim($package['destination']['country']),
-                ]
+                ],
             ];
 
             try {
@@ -67,8 +68,6 @@ namespace Cdek\Actions {
                     'parameter' => (int)$package['contents_cost'],
                 ];
             }
-
-            $tariffList = $this->method->get_option('tariff_list');
 
             $priceRules = json_decode($this->method->delivery_price_rules, true) ?: [
                 'office' => [['type' => 'percentage', 'to' => null, 'value' => 100]],
@@ -107,7 +106,7 @@ namespace Cdek\Actions {
 
                 foreach ($calcResult['tariff_codes'] as $tariff) {
                     if (isset($this->rates[$tariff['tariff_code']]) ||
-                        !in_array((string)$tariff['tariff_code'], $tariffList ?: [], true)) {
+                        !in_array((string)$tariff['tariff_code'], $this->method->tariff_list ?: [], true)) {
                         continue;
                     }
 
@@ -124,11 +123,19 @@ namespace Cdek\Actions {
                         continue;
                     }
 
+                    if ($maxDay < $minDay) {
+                        $maxDay = $minDay;
+                    }
+
                     $this->rates[$tariff['tariff_code']] = [
                         'id'        => sprintf('%s:%s', Config::DELIVERY_NAME, $tariff['tariff_code']),
-                        'label'     => sprintf(
-                            esc_html__('CDEK: %s, (%s-%s days)', 'cdekdelivery'),
-                            Tariff::getNameByCode($tariff['tariff_code']),
+                        'label'     => ($minDay === $maxDay) ? sprintf(
+                            esc_html__('%s, (%s day)', 'cdekdelivery'),
+                            Tariff::getName($tariff['tariff_code'], $tariff['tariff_name']),
+                            $minDay,
+                        ) : sprintf(
+                            esc_html__('%s, (%s-%s days)', 'cdekdelivery'),
+                            Tariff::getName($tariff['tariff_code'], $tariff['tariff_name']),
                             $minDay,
                             $maxDay,
                         ),
@@ -150,36 +157,36 @@ namespace Cdek\Actions {
                 }
             }
 
-            $deliveryMethod = $this->method;
-
-            return array_map(static function ($tariff) use (
+            return array_map(function ($tariff) use (
                 $priceRules,
                 $api,
-                $deliveryParam,
-                $deliveryMethod
+                $deliveryParam
             ) {
                 $rule = Tariff::isToOffice($tariff['meta_data'][MetaKeys::TARIFF_CODE]) ? $priceRules['office'] :
                     $priceRules['door'];
-                if (isset($rule['type']) && $rule['type'] === 'free') {
-                    $tariff['cost'] = 0;
 
-                    return $tariff;
-                }
+                if (isset($rule['type'])) {
+                    if ($rule['type'] === 'free') {
+                        $tariff['cost'] = 0;
 
-                if (isset($rule['type']) && $rule['type'] === 'fixed') {
-                    $tariff['cost'] = max(
-                        function_exists('wcml_get_woocommerce_currency_option') ?
-                            apply_filters('wcml_raw_price_amount', $rule['value'], 'RUB') : $rule['value'],
-                        0,
-                    );
+                        return $tariff;
+                    }
 
-                    return $tariff;
+                    if ($rule['type'] === 'fixed') {
+                        $tariff['cost'] = max(
+                            function_exists('wcml_get_woocommerce_currency_option') ?
+                                apply_filters('wcml_raw_price_amount', $rule['value'], 'RUB') : $rule['value'],
+                            0,
+                        );
+
+                        return $tariff;
+                    }
                 }
 
                 $deliveryParam['tariff_code'] = $tariff['meta_data'][MetaKeys::TARIFF_CODE];
                 $deliveryParam['type']        = Tariff::getType($deliveryParam['tariff_code']);
 
-                $serviceList = Service::factory($deliveryMethod, $deliveryParam['tariff_code']);
+                $serviceList = Service::factory($this->method, $deliveryParam['tariff_code']);
 
                 if (!empty($serviceList)) {
                     $deliveryParam['services'] = array_merge($serviceList, $deliveryParam['services'] ?? []);
@@ -193,16 +200,16 @@ namespace Cdek\Actions {
 
                 $cost = $tariffInfo['total_sum'];
 
-                if (isset($rule['type']) && $rule['type'] === 'amount') {
-                    $cost += $rule['value'];
-                } elseif (isset($rule['type']) && $rule['type'] === 'percentage') {
-                    $cost *= $rule['value'] / 100;
+                if (isset($rule['type'])) {
+                    if ($rule['type'] === 'amount') {
+                        $cost += $rule['value'];
+                    } elseif ($rule['type'] === 'percentage') {
+                        $cost *= $rule['value'] / 100;
+                    }
                 }
 
                 if (function_exists('wcml_get_woocommerce_currency_option')) {
-                    $costTMP = apply_filters('wcml_raw_price_amount', $cost, 'RUB');
-                    $coef    = $costTMP / $cost;
-                    $cost    /= $coef;
+                    $cost /= apply_filters('wcml_raw_price_amount', $cost, 'RUB') / $cost;
                 }
 
                 $tariff['cost'] = max(ceil($cost), 0);
@@ -217,11 +224,14 @@ namespace Cdek\Actions {
             $lengthList  = [];
             $widthList   = [];
             $heightList  = [];
+
+            $dimensionsInMM = get_option('woocommerce_dimension_unit') === 'mm';
+
             foreach ($contents as $productGroup) {
                 $quantity = $productGroup['quantity'];
                 $weight   = $productGroup['data']->get_weight();
 
-                $dimensions = get_option('woocommerce_dimension_unit') === 'mm' ? [
+                $dimensions = $dimensionsInMM ? [
                     (int)((int)$productGroup['data']->get_length() / 10),
                     (int)((int)$productGroup['data']->get_width() / 10),
                     (int)((int)$productGroup['data']->get_height() / 10),
