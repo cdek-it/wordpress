@@ -60,7 +60,7 @@ namespace Cdek\Helpers {
             }
 
             if ($hasStyles) {
-                wp_enqueue_style($handle, Loader::getPluginUrl("build/$fileName.css"), [], Loader::getPluginVersion());
+                wp_enqueue_style($handle, Loader::getPluginUrl("build/$fileName.css"), [], $script_asset['version']);
             }
 
             wp_set_script_translations($handle, 'cdekdelivery', Loader::getPluginPath('lang'));
