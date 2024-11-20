@@ -12,7 +12,6 @@ namespace Cdek\UI {
     use Cdek\CdekApi;
     use Cdek\Config;
     use Cdek\Helpers\CheckoutHelper;
-    use Cdek\Loader;
     use Cdek\Model\Tariff;
     use Cdek\ShippingMethod;
 
@@ -37,9 +36,17 @@ namespace Cdek\UI {
 
             $points = $city !== null ? $api->officeListRaw($city) : '[]';
 
-            $mapAutoClose = ShippingMethod::factory()->map_auto_close;
-
-            include Loader::getPluginPath('templates/public/open-map.php');
+            echo '<div class="open-pvz-btn" data-points="'.
+                 esc_attr($points).
+                 '" data-city="'.
+                 esc_attr($cityInput).
+                 '" data-lang="'.
+                 (mb_strpos(get_user_locale(), 'en') === 0 ? 'eng' : 'rus').
+                 '">'.
+                 esc_html__('Choose pick-up', 'cdekdelivery').
+                 '</div><input name="office_code" class="cdek-office-code" type="hidden" data-map-auto-close="'.
+                 esc_attr(ShippingMethod::factory()->map_auto_close).
+                 '">';
         }
 
         private function isTariffDestinationCdekOffice($shippingMethodCurrent): bool
@@ -57,7 +64,7 @@ namespace Cdek\UI {
 
             $tariffCode = explode(':', $shippingMethodIdSelected[0])[1];
 
-            return Tariff::isToOffice($tariffCode);
+            return Tariff::isToOffice((int)$tariffCode);
         }
     }
 }

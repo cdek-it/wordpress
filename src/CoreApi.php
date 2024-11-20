@@ -89,20 +89,6 @@ namespace Cdek {
         }
 
         /**
-         * @throws ApiException
-         * @throws CoreAuthException
-         * @throws \Cdek\Exceptions\CacheException
-         */
-        public function orderHistory(int $orderId): array
-        {
-            return HttpClient::sendJsonRequest(
-                $this->getEndpoint("orders/$orderId/history"),
-                'GET',
-                $this->getToken(),
-            )->data();
-        }
-
-        /**
          * @throws ShopRegistrationException
          * @throws CoreAuthException
          * @throws \Cdek\Exceptions\CacheException

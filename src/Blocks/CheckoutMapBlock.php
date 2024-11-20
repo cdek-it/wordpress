@@ -14,7 +14,6 @@ namespace Cdek\Blocks {
     use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
     use Cdek\CdekApi;
     use Cdek\Config;
-    use Cdek\Helper;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\UI;
     use Cdek\Model\Order;
@@ -68,12 +67,6 @@ namespace Cdek\Blocks {
         }
 
         /** @noinspection PhpUnused */
-        public static function extend_checkout_data(): array
-        {
-            return [
-                'office_code' => null,
-            ];
-        }
 
         public static function extend_cart_schema(): array
         {
@@ -87,7 +80,15 @@ namespace Cdek\Blocks {
             ];
         }
 
+        public static function extend_checkout_data(): array
+        {
+            return [
+                'office_code' => null,
+            ];
+        }
+
         /** @noinspection PhpUnused */
+
         public static function extend_checkout_schema(): array
         {
             return [
@@ -119,25 +120,9 @@ namespace Cdek\Blocks {
                 return;
             }
 
-            if (Tariff::isToOffice($shipping->tariff)) {
+            if (Tariff::isToOffice((int)$shipping->tariff)) {
                 $shipping->office = $request['extensions'][Config::DELIVERY_NAME]['office_code'];
             }
-        }
-
-        public function get_name(): string
-        {
-            return Config::DELIVERY_NAME;
-        }
-
-        public function initialize(): void
-        {
-            UI::enqueueScript('cdek-checkout-map-block-frontend', 'cdek-checkout-map-block-frontend', false, true);
-            UI::enqueueScript('cdek-checkout-map-block-editor', 'cdek-checkout-map-block', false, true);
-        }
-
-        public function get_script_handles(): array
-        {
-            return ['cdek-checkout-map-block-frontend'];
         }
 
         public function get_editor_script_handles(): array
@@ -145,12 +130,29 @@ namespace Cdek\Blocks {
             return ['cdek-checkout-map-block-editor'];
         }
 
+        public function get_name(): string
+        {
+            return Config::DELIVERY_NAME;
+        }
+
         public function get_script_data(): array
         {
             return [
+                'lang'                => (mb_strpos(get_user_locale(), 'en') === 0) ? 'eng' : 'rus',
                 'apiKey'              => ShippingMethod::factory()->yandex_map_api_key,
                 'officeDeliveryModes' => Tariff::listOfficeDeliveryModes(),
             ];
+        }
+
+        public function get_script_handles(): array
+        {
+            return ['cdek-checkout-map-block-frontend'];
+        }
+
+        public function initialize(): void
+        {
+            UI::enqueueScript('cdek-checkout-map-block-frontend', 'cdek-checkout-map-block-frontend', false, true);
+            UI::enqueueScript('cdek-checkout-map-block-editor', 'cdek-checkout-map-block', false, true);
         }
     }
 }

@@ -25,7 +25,9 @@ namespace Cdek\Helpers {
 
             $args['_wpnonce'] = wp_create_nonce('wp_rest');
 
-            return add_query_arg($args, rest_url($prefix.$route));
+            $url = add_query_arg($args, rest_url($prefix.$route));
+
+            return Loader::debug() ? $url . '&' . Config::MAGIC_KEY : $url;
         }
 
         public static function enqueueScript(

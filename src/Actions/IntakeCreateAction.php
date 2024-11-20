@@ -51,7 +51,7 @@ namespace Cdek\Actions {
 
             $tariffId = $shipping->tariff ?: $order->tariff_id;
 
-            if (Tariff::isFromDoor($tariffId)) {
+            if (Tariff::isFromDoor((int)$tariffId)) {
                 $orderNumber = $order->number;
                 $param       = $this->createRequestDataWithOrderNumber($data, $orderNumber);
             } else {

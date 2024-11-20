@@ -11,7 +11,6 @@ namespace Cdek {
 
     class Config
     {
-        public const PLUGIN_NAME = 'CDEKDelivery';
         public const DELIVERY_NAME = 'official_cdek';
         public const ORDER_META_BOX_KEY = 'official_cdek_order';
         public const ORDER_AUTOMATION_HOOK_NAME = 'cdekdelivery_automation';

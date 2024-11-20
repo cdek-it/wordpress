@@ -158,6 +158,11 @@ namespace Cdek {
             }
         }
 
+        public static function getTemplate(string $name): string
+        {
+            return self::getPluginPath("templates/$name.php");
+        }
+
         public static function getPluginPath(?string $path = null): string
         {
             return plugin_dir_path(self::$pluginMainFilePath).($path !== null ? ltrim($path, DIRECTORY_SEPARATOR) : '');

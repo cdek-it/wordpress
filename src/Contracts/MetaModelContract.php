@@ -12,6 +12,7 @@ namespace Cdek\Contracts {
         protected const ALIASES = [];
 
         protected array $meta;
+        protected array $dirty = [];
 
         /** @noinspection MissingReturnTypeInspection */
         public function __get(string $key)
@@ -43,6 +44,10 @@ namespace Cdek\Contracts {
         public function __set(string $key, $value): void
         {
             $this->meta[$key] = $value;
+
+            if(!in_array($key, $this->dirty, true)) {
+                $this->dirty[] = $key;
+            }
         }
 
         public function __isset(string $key): bool

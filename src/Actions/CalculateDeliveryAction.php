@@ -98,10 +98,6 @@ namespace Cdek\Actions {
                     continue;
                 }
 
-                if (isset($delivery['errors'])) {
-                    continue;
-                }
-
                 foreach ($calcResult['tariff_codes'] as $tariff) {
                     if (isset($this->rates[$tariff['tariff_code']]) ||
                         !in_array((string)$tariff['tariff_code'], $this->method->tariff_list ?: [], true)) {
@@ -115,11 +111,6 @@ namespace Cdek\Actions {
                     $minDay = (int)$tariff['period_min'] + (int)$this->method->extra_day;
                     $maxDay = (int)$tariff['period_max'] + (int)$this->method->extra_day;
                     $cost   = (int)$tariff['delivery_sum'];
-
-                    if ((!isset($officeData['city']) && Tariff::isFromOffice($tariff['tariff_code'])) ||
-                        (!isset($doorData['city']) && Tariff::isFromDoor($tariff['tariff_code']))) {
-                        continue;
-                    }
 
                     if ($maxDay < $minDay) {
                         $maxDay = $minDay;
@@ -245,7 +236,7 @@ namespace Cdek\Actions {
                 $heightList[] = $dimensions[1];
                 $widthList[]  = $dimensions[2];
 
-                $weight      = WeightConverter::getWeight($weight);
+                $weight      = WeightConverter::applyFallback($weight);
                 $totalWeight += $quantity * $weight;
             }
 

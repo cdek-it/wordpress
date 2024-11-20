@@ -1,28 +1,30 @@
 <?php
-defined('ABSPATH') or exit;
-/** @var $order */
-/** @var $orderNumber */
-/** @var $orderIdWP */
-/** @var $orderUuid */
-/** @var $items */
 
-/** @var $hasPackages */
+defined('ABSPATH') or exit;
 
 use Cdek\Helpers\UI;
 
+/**
+ * @var \Cdek\Model\Order $order
+ * @var array $items
+ */
+
 ?>
 <div id="cdek-create-order-form" <?php
-if ($orderNumber): ?>style="display: none" <?php
+if (!empty($order->number)): ?>style="display: none" <?php
 endif ?> >
     <div id="setting_block">
-        <h3><?php esc_html_e("Packaging dimensions", 'cdekdelivery') ?> №1</h3>
+        <h3><?php
+            esc_html_e("Packaging dimensions", 'cdekdelivery') ?> №1</h3>
         <div style="display: flex">
             <select id="selected_product">
-                <option value="-1"><?php esc_html_e("Select product", 'cdekdelivery') ?></option>
+                <option value="-1"><?php
+                    esc_html_e("Select product", 'cdekdelivery') ?></option>
                 <?php
                 foreach ($items as $key => $item): ?>
                     <option value="<?php
-                    esc_attr_e($key) ?>"><?php esc_html_e($item['name']) ?></option>
+                    esc_attr_e($key) ?>"><?php
+                        esc_html_e($item['name']) ?></option>
                 <?php
                 endforeach; ?>
             </select>
@@ -49,15 +51,18 @@ endif ?> >
         </div>
         <div id="package_parameters">
             <p class="form-field form-field-wide wc-order-status">
-                <label for="package_length"><?php esc_html_e('Length in cm', 'cdekdelivery') ?></label>
+                <label for="package_length"><?php
+                    esc_html_e('Length in cm', 'cdekdelivery') ?></label>
                 <input name="package_length" type="text">
             </p>
             <p class="form-field form-field-wide wc-order-status">
-                <label for="package_width"><?php esc_html_e('Width in cm', 'cdekdelivery') ?></label>
+                <label for="package_width"><?php
+                    esc_html_e('Width in cm', 'cdekdelivery') ?></label>
                 <input name="package_width" type="text">
             </p>
             <p class="form-field form-field-wide wc-order-status">
-                <label for="package_height"><?php esc_html_e('Height in cm', 'cdekdelivery') ?></label>
+                <label for="package_height"><?php
+                    esc_html_e('Height in cm', 'cdekdelivery') ?></label>
                 <input name="package_height" type="text">
             </p>
         </div>
@@ -69,7 +74,8 @@ endif ?> >
 
     <div id="save_package_btn_block">
         <p class="form-field form-field-wide wc-order-status">
-            <button id="save_package" type="button" class="button refund-items"><?php esc_html_e('Save', 'cdekdelivery') ?></button>
+            <button id="save_package" type="button" class="button refund-items"><?php
+                esc_html_e('Save', 'cdekdelivery') ?></button>
         </p>
     </div>
 
@@ -77,7 +83,8 @@ endif ?> >
         <p class="form-field form-field-wide wc-order-status">
             <button id="send_package" type="button" class="button refund-items"
                     data-action="<?php
-                    echo esc_url(UI::buildRestUrl("/order/$orderIdWP/create")) ?>"><?php esc_html_e('Create an order', 'cdekdelivery') ?>
+                    echo esc_url(UI::buildRestUrl("/order/$order->id/create")) ?>"><?php
+                esc_html_e('Sync to CDEK', 'cdekdelivery') ?>
             </button>
         </p>
     </div>

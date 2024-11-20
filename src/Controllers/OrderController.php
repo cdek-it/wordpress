@@ -38,6 +38,11 @@ namespace Cdek\Controllers {
             );
         }
 
+        /**
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         * @throws \Cdek\Exceptions\External\ApiException
+         * @throws \Cdek\Exceptions\OrderNotFoundException
+         */
         public static function deleteOrder(WP_REST_Request $request): WP_REST_Response
         {
             return new WP_REST_Response(OrderDeleteAction::new()($request->get_param('id'))->response(), WP_Http::OK);
@@ -161,7 +166,7 @@ namespace Cdek\Controllers {
                     'id' => [
                         'description' => esc_html__('CDEK Order ID', 'cdekdelivery'),
                         'required'    => true,
-                        'type'        => 'number',
+                        'type'        => 'integer',
                     ],
                 ],
             ]);
@@ -175,7 +180,7 @@ namespace Cdek\Controllers {
                     'id' => [
                         'description' => esc_html__('CDEK Order ID', 'cdekdelivery'),
                         'required'    => true,
-                        'type'        => 'number',
+                        'type'        => 'integer',
                     ],
                 ],
             ]);

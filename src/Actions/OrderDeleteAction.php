@@ -93,7 +93,7 @@ namespace Cdek\Actions {
 
             IntakeDeleteAction::new()($orderId);
 
-            return new ValidationResult(true, esc_html__('Order has been deleted.', 'cdekdelivery'));
+            return new ValidationResult(true, esc_html__('Waybill has been deleted.', 'cdekdelivery'));
         }
     }
 }

@@ -57,7 +57,7 @@ namespace Cdek {
                 [
                     'orders' => ['order_uuid' => $orderUuid],
                     'format' => BarcodeFormat::getByIndex(
-                        $this->deliveryMethod->get_option(
+                        (int)$this->deliveryMethod->get_option(
                             'barcode_format',
                             0,
                         ),

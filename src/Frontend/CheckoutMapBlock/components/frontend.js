@@ -10,7 +10,7 @@ import cdekWidget from '@cdek-it/widget';
 export const Block = ({
     checkoutExtensionData, extensions, cart, validation,
 }) => {
-    const { apiKey, officeDeliveryModes } = getSetting('official_cdek_data');
+    const { apiKey, officeDeliveryModes, lang } = getSetting('official_cdek_data');
 
     const [showMap, setShowMap] = useState(false);
     const [validationError, setValidationError] = useState(null);
@@ -60,7 +60,8 @@ export const Block = ({
 
         if (window.widget === undefined) {
             window.widget = new cdekWidget({
-                apiKey: apiKey,
+                apiKey,
+                lang,
                 debug: true,
                 defaultLocation: shippingRates[0].destination.city,
                 officesRaw: JSON.parse(points),
