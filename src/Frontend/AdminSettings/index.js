@@ -4,52 +4,63 @@ import { debounce } from 'lodash';
 import './styles/main.scss';
 import { createRoot, render } from '@wordpress/element';
 import { DeliveryPrice } from './components/DeliveryPrice';
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
-$.getJSON(window.cdek_admin_settings.api.check_auth)
-  .done(() => $('.token-wrong').remove())
-  .fail((jqxhr) => {
-      console.error(jqxhr);
-      $('p:contains(\'Custom Shipping Method for Cdek\')')
-        .after('<div class="cdek-error token-wrong">[CDEKDelivery] ' + __(
-          'Error receiving token. Make sure the integration keys are correct',
-          'cdekdelivery') + '</div>');
-  });
+apiFetch({
+    url: addQueryArgs(ajaxurl,
+      { action: `${window.cdek.prefix}-auth`, _wpnonce: window.cdek.nonce }),
+})
+  .then(r => {
+      if (r.success) {
+          $('.token-wrong').remove();
+          return Promise.resolve();
+      }
 
-const suggest = debounce((q) => {
-    $.getJSON(window.cdek_admin_settings.api.cities, { q })
-      .done(r => {
-          if (r.length === 0) {
-              $('.city-suggest')
-                .append('<div class="city-suggest__404">' +
-                  __('Nothing found', 'cdekdelivery') + '</div>');
-              return;
-          }
+      return Promise.reject();
+  })
+  .catch(() => $('form h1')
+    .after($('<div class="notice notice-error"></div>')
+      .html($('<p></p>')
+        .text(__(
+          'Error receiving token from CDEK API. Make sure the integration keys are correct',
+          'cdekdelivery')))));
 
-          $('.city-suggest__404').remove();
-          $('.city-suggest__item').remove();
-
-          r.forEach(e => {
-              $('.city-suggest')
-                .append($('<div class="city-suggest__item"></div>')
-                  .html(e.full_name)
-                  .on('click', () => {
-                      $('input#woocommerce_official_cdek_city')
-                        .val(e.full_name.split(',', 2)[0]);
-                      $('input#woocommerce_official_cdek_city_code')
-                        .val(e.code);
-                      $('.city-suggest').remove();
-                  }));
-          });
-      }).fail(() => {
-        $('.city-suggest__404').remove();
-        $('.city-suggest__item').remove();
-
+const suggest = debounce((q) => apiFetch({
+    url: addQueryArgs(ajaxurl, {
+        action: `${window.cdek.prefix}-cities`, _wpnonce: window.cdek.nonce, q,
+    }),
+}).then(r => {
+    if (r.data.length === 0) {
         $('.city-suggest')
           .append('<div class="city-suggest__404">' +
-            __('Temporal error, try again', 'cdekdelivery') + '</div>');
-    })
-      .always(() => $('.city-loader').remove());
-}, 900);
+            __('Nothing found', 'cdekdelivery') + '</div>');
+        return;
+    }
+
+    $('.city-suggest__404').remove();
+    $('.city-suggest__item').remove();
+
+    r.data.forEach(e => {
+        $('.city-suggest')
+          .append($('<div class="city-suggest__item"></div>')
+            .html(e.full_name)
+            .on('click', () => {
+                $('input#woocommerce_official_cdek_city')
+                  .val(e.full_name.split(',', 2)[0]);
+                $('input#woocommerce_official_cdek_city_code')
+                  .val(e.code);
+                $('.city-suggest').remove();
+            }));
+    });
+}).catch(() => {
+    $('.city-suggest__404').remove();
+    $('.city-suggest__item').remove();
+
+    $('.city-suggest')
+      .append('<div class="city-suggest__404">' +
+        __('Temporal error, try again', 'cdekdelivery') + '</div>');
+}).finally(() => $('.city-loader').remove()), 900);
 
 $('input#woocommerce_official_cdek_city').on('input', function() {
     $('.city-suggest').remove();
@@ -58,6 +69,7 @@ $('input#woocommerce_official_cdek_city').on('input', function() {
     $(this)
       .after('<div class="city-suggest"></div>')
       .after('<span class="city-loader"></span>');
+
     suggest(this.value);
 });
 

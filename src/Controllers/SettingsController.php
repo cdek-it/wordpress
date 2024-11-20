@@ -11,85 +11,70 @@ namespace Cdek\Controllers {
 
     use Cdek\Actions\FlushTokenCacheAction;
     use Cdek\CdekApi;
-    use Cdek\Commands\TokensSyncCommand;
     use Cdek\Config;
-    use Cdek\Helpers\Tokens;
-    use WP_Http;
-    use WP_REST_Request;
-    use WP_REST_Response;
-    use WP_REST_Server;
 
     class SettingsController
     {
-        public static function callback(WP_REST_Request $request): WP_REST_Response
+        public static function auth(): void
         {
-            switch ($request->get_param('command')) {
-                case 'tokens.refresh':
-                    TokensSyncCommand::new()($request->get_json_params());
-                    break;
-                default:
-                    return new WP_REST_Response(['state' => 'unknown command'], WP_Http::BAD_REQUEST);
+            check_ajax_referer(Config::DELIVERY_NAME);
+
+            if (!current_user_can('manage_woocommerce')) {
+                wp_die(-2, 403);
             }
 
-            return new WP_REST_Response(['state' => 'OK'], WP_Http::ACCEPTED);
-        }
+            if ((new CdekApi)->checkAuth()) {
+                wp_send_json_success();
+            }
 
-        public static function checkAuth(): WP_REST_Response
-        {
-            return new WP_REST_Response(['state' => (new CdekApi)->checkAuth()], WP_Http::OK);
+            wp_send_json_error();
         }
 
         /**
          * @throws \Cdek\Exceptions\External\ApiException
          * @throws \Cdek\Exceptions\External\LegacyAuthException
          */
-        public static function cities(WP_REST_Request $request): WP_REST_Response
+        public static function cities(): void
         {
-            return new WP_REST_Response(
-                (new CdekApi)->citySuggest($request->get_param('q'), get_option('woocommerce_default_country', 'RU')),
-                WP_Http::OK,
+            check_ajax_referer(Config::DELIVERY_NAME);
+
+            if (!current_user_can('manage_woocommerce')) {
+                wp_die(-2, 403);
+            }
+
+            /** @noinspection GlobalVariableUsageInspection */
+            wp_send_json_success(
+                (new CdekApi)->citySuggest(
+                    sanitize_text_field(wp_unslash($_GET['q'])),
+                    get_option('woocommerce_default_country', 'RU'),
+                ),
             );
         }
 
-        public static function resetCache(): WP_REST_Response
+        public static function cache(): void
         {
+            check_ajax_referer(Config::DELIVERY_NAME);
+
+            if (!current_user_can('manage_woocommerce')) {
+                wp_die(-2, 403);
+            }
+
             FlushTokenCacheAction::new()();
 
-            return new WP_REST_Response(['state' => 'OK'], WP_Http::OK);
+            wp_send_json_success();
         }
 
         public function __invoke(): void
         {
-            register_rest_route(Config::DELIVERY_NAME, '/cities', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [__CLASS__, 'cities'],
-                'permission_callback' => static fn() => current_user_can('manage_woocommerce'),
-                'args'                => [
-                    'q' => [
-                        'description' => esc_html__('Request', 'cdekdelivery'),
-                        'required'    => true,
-                        'type'        => 'string',
-                    ],
-                ],
-            ]);
+            if (!wp_doing_ajax()) {
+                return;
+            }
 
-            register_rest_route(Config::DELIVERY_NAME, '/cb', [
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => [__CLASS__, 'callback'],
-                'permission_callback' => [Tokens::class, 'checkIncomingRequest'],
-            ]);
+            $prefix = Config::DELIVERY_NAME;
 
-            register_rest_route(Config::DELIVERY_NAME, '/check-auth', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [__CLASS__, 'checkAuth'],
-                'permission_callback' => static fn() => current_user_can('manage_woocommerce'),
-            ]);
-
-            register_rest_route(Config::DELIVERY_NAME, '/flush-cache', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [__CLASS__, 'resetCache'],
-                'permission_callback' => static fn() => current_user_can('manage_woocommerce'),
-            ]);
+            add_action("wp_ajax_$prefix-auth", [__CLASS__, 'auth']);
+            add_action("wp_ajax_$prefix-cities", [__CLASS__, 'cities']);
+            add_action("wp_ajax_$prefix-cache", [__CLASS__, 'cache']);
         }
     }
 }
