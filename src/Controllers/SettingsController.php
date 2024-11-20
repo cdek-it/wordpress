@@ -15,21 +15,6 @@ namespace Cdek\Controllers {
 
     class SettingsController
     {
-        public static function auth(): void
-        {
-            check_ajax_referer(Config::DELIVERY_NAME);
-
-            if (!current_user_can('manage_woocommerce')) {
-                wp_die(-2, 403);
-            }
-
-            if ((new CdekApi)->checkAuth()) {
-                wp_send_json_success();
-            }
-
-            wp_send_json_error();
-        }
-
         /**
          * @throws \Cdek\Exceptions\External\ApiException
          * @throws \Cdek\Exceptions\External\LegacyAuthException
@@ -72,7 +57,6 @@ namespace Cdek\Controllers {
 
             $prefix = Config::DELIVERY_NAME;
 
-            add_action("wp_ajax_$prefix-auth", [__CLASS__, 'auth']);
             add_action("wp_ajax_$prefix-cities", [__CLASS__, 'cities']);
             add_action("wp_ajax_$prefix-cache", [__CLASS__, 'cache']);
         }

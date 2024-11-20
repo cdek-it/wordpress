@@ -13,6 +13,7 @@ namespace Cdek\UI {
     use Cdek\Helpers\UI;
     use Cdek\Loader;
     use Cdek\Traits\CanBeCreated;
+    use WC_Admin_Settings;
 
     class Admin
     {
@@ -55,9 +56,10 @@ namespace Cdek\UI {
 
         public static function registerAdminScripts(): void
         {
+            global $current_section, $current_tab;
+
             // Not on Settings page.
-            /** @noinspection GlobalVariableUsageInspection */
-            if (!isset($_GET['tab']) || $_GET['tab'] !== 'shipping') {
+            if($current_section !== Config::DELIVERY_NAME || $current_tab !== 'shipping') {
                 return;
             }
 
@@ -70,7 +72,7 @@ namespace Cdek\UI {
 
         public function __invoke(): void
         {
-            add_action('load-woocommerce_page_wc-settings', [__CLASS__, 'registerAdminScripts']);
+            add_action('woocommerce_settings_start', [__CLASS__, 'registerAdminScripts']);
         }
     }
 }

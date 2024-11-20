@@ -7,25 +7,6 @@ import { DeliveryPrice } from './components/DeliveryPrice';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 
-apiFetch({
-    url: addQueryArgs(ajaxurl,
-      { action: `${window.cdek.prefix}-auth`, _wpnonce: window.cdek.nonce }),
-})
-  .then(r => {
-      if (r.success) {
-          $('.token-wrong').remove();
-          return Promise.resolve();
-      }
-
-      return Promise.reject();
-  })
-  .catch(() => $('form h1')
-    .after($('<div class="notice notice-error"></div>')
-      .html($('<p></p>')
-        .text(__(
-          'Error receiving token from CDEK API. Make sure the integration keys are correct',
-          'cdekdelivery')))));
-
 const suggest = debounce((q) => apiFetch({
     url: addQueryArgs(ajaxurl, {
         action: `${window.cdek.prefix}-cities`, _wpnonce: window.cdek.nonce, q,
