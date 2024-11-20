@@ -7,67 +7,76 @@ import { DeliveryPrice } from './components/DeliveryPrice';
 import apiFetch from '@wordpress/api-fetch';
 import { addQueryArgs } from '@wordpress/url';
 
-const suggest = debounce((q) => apiFetch({
-    url: addQueryArgs(ajaxurl, {
-        action: `${window.cdek.prefix}-cities`, _wpnonce: window.cdek.nonce, q,
-    }),
-}).then(r => {
-    if (r.data.length === 0) {
+(() => {
+    const suggest = debounce((q) => apiFetch({
+        url: addQueryArgs(ajaxurl, {
+            action: `${window.cdek.prefix}-cities`,
+            _wpnonce: window.cdek.nonce,
+            q,
+        }),
+    }).then(r => {
+        if (r.data.length === 0) {
+            $('.city-suggest')
+              .append('<div class="city-suggest__404">' +
+                __('Nothing found', 'cdekdelivery') + '</div>');
+            return;
+        }
+
+        $('.city-suggest__404').remove();
+        $('.city-suggest__item').remove();
+
+        r.data.forEach(e => {
+            $('.city-suggest')
+              .append($('<div class="city-suggest__item"></div>')
+                .html(e.full_name)
+                .on('click', () => {
+                    $('input#woocommerce_official_cdek_city')
+                      .val(e.full_name.split(',', 2)[0]);
+                    $('input#woocommerce_official_cdek_city_code')
+                      .val(e.code);
+                    $('.city-suggest').remove();
+                }));
+        });
+    }).catch(() => {
+        $('.city-suggest__404').remove();
+        $('.city-suggest__item').remove();
+
         $('.city-suggest')
           .append('<div class="city-suggest__404">' +
-            __('Nothing found', 'cdekdelivery') + '</div>');
-        return;
-    }
+            __('Temporal error, try again', 'cdekdelivery') + '</div>');
+    }).finally(() => $('.city-loader').remove()), 900);
 
-    $('.city-suggest__404').remove();
-    $('.city-suggest__item').remove();
+    $('input#woocommerce_official_cdek_city').on('input', function() {
+        $('.city-suggest').remove();
+        $('.city-loader').remove();
 
-    r.data.forEach(e => {
-        $('.city-suggest')
-          .append($('<div class="city-suggest__item"></div>')
-            .html(e.full_name)
-            .on('click', () => {
-                $('input#woocommerce_official_cdek_city')
-                  .val(e.full_name.split(',', 2)[0]);
-                $('input#woocommerce_official_cdek_city_code')
-                  .val(e.code);
-                $('.city-suggest').remove();
-            }));
+        $(this)
+          .after('<div class="city-suggest"></div>')
+          .after('<span class="city-loader"></span>');
+
+        suggest(this.value);
     });
-}).catch(() => {
-    $('.city-suggest__404').remove();
-    $('.city-suggest__item').remove();
 
-    $('.city-suggest')
-      .append('<div class="city-suggest__404">' +
-        __('Temporal error, try again', 'cdekdelivery') + '</div>');
-}).finally(() => $('.city-loader').remove()), 900);
+    const deliveryRulesInput = $(
+      'input#woocommerce_official_cdek_delivery_price_rules');
 
-$('input#woocommerce_official_cdek_city').on('input', function() {
-    $('.city-suggest').remove();
-    $('.city-loader').remove();
+    if (deliveryRulesInput.length) {
+        const div = window.document.createElement('div');
+        deliveryRulesInput.after(div);
 
-    $(this)
-      .after('<div class="city-suggest"></div>')
-      .after('<span class="city-loader"></span>');
+        if (createRoot !== undefined) {
+            const root = createRoot(div);
 
-    suggest(this.value);
-});
-
-const deliveryRulesInput = $(
-  'input#woocommerce_official_cdek_delivery_price_rules');
-
-if (deliveryRulesInput.length) {
-    const div = window.document.createElement('div');
-    deliveryRulesInput.after(div);
-    if (typeof render === 'function') {
-        render(<DeliveryPrice input={deliveryRulesInput} />, div);
-    } else {
-        createRoot(div).render(<DeliveryPrice input={deliveryRulesInput} />);
+            if (root !== undefined && typeof root.render === 'function') {
+                root.render(<DeliveryPrice input={deliveryRulesInput} />);
+            } else {
+                render(<DeliveryPrice input={deliveryRulesInput} />, div);
+            }
+        } else {
+            render(<DeliveryPrice input={deliveryRulesInput} />, div);
+        }
     }
-}
 
-(() => {
     const banAttachmentCheckbox = $(
       '#woocommerce_official_cdek_services_ban_attachment_inspection');
     const tryingOnCheckbox = $('#woocommerce_official_cdek_services_trying_on');

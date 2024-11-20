@@ -152,7 +152,7 @@ namespace Cdek {
          */
         private function cityCodeGetWithFallback(
             string $city,
-            ?string $postcode = null,
+            ?string $postcode = null
         ): ?string {
             try {
                 $result = HttpClient::sendJsonRequest(
