@@ -42,7 +42,6 @@
   "require": {
     "php": "^7.4",
     "composer/installers": "~2.0",
-    "giggsey/libphonenumber-for-php": "^8.13",
     "paragonie/paserk": "^1.1",
     "paragonie/paseto": "^2.4"
   },
