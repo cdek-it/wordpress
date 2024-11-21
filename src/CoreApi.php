@@ -103,6 +103,21 @@ namespace Cdek {
         }
 
         /**
+         * @throws ApiException
+         * @throws CoreAuthException
+         * @throws \Cdek\Exceptions\CacheException
+         */
+        public function validatePhone(string $phone, ?string $country = null): string
+        {
+            return HttpClient::sendJsonRequest(
+                $this->getEndpoint('validate/phone'),
+                'GET',
+                $this->getToken(),
+                ['phone' => $phone, 'country' => $country],
+            )->data()['phone'];
+        }
+
+        /**
          * @throws ShopRegistrationException
          * @throws CoreAuthException
          * @throws \Cdek\Exceptions\CacheException
