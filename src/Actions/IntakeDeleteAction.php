@@ -49,7 +49,7 @@ namespace Cdek\Actions {
             }
 
             try {
-                $intake = $this->api->intakeDelete($courierMeta->uuid);
+                $this->api->intakeDelete($courierMeta->uuid);
             } catch (InvalidRequestException $e) {
                 if ($e->getData()[0]['code'] === 'v2_entity_has_final_status') {
                     return new ValidationResult(true);
@@ -65,17 +65,17 @@ namespace Cdek\Actions {
                 );
             }
 
-            $courierMeta->clean();
-
             Note::send(
                 $orderId,
                 sprintf(
                     esc_html__(/* translators: %s: request number */ 'Intake %s has been deleted',
                         'cdekdelivery',
                     ),
-                    $intake,
+                    $courierMeta->number,
                 ),
             );
+
+            $courierMeta->clean();
 
             return new ValidationResult(true, esc_html__('Intake has been deleted', 'cdekdelivery'));
         }

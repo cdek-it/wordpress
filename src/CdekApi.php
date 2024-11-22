@@ -289,13 +289,13 @@ namespace Cdek {
          * @throws ApiException
          * @throws LegacyAuthException
          */
-        public function intakeDelete(string $uuid): ?string
+        public function intakeDelete(string $uuid): void
         {
-            return HttpClient::sendJsonRequest(
+            HttpClient::sendJsonRequest(
                 "{$this->apiUrl}intakes/$uuid",
                 'DELETE',
                 $this->tokenStorage->getToken(),
-            )->entity()['uuid'] ?? null;
+            )->json();
         }
 
         /**
