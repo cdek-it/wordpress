@@ -51,18 +51,17 @@ namespace Cdek\Actions {
             try {
                 $this->api->intakeDelete($courierMeta->uuid);
             } catch (InvalidRequestException $e) {
-                if ($e->getData()[0]['code'] === 'v2_entity_has_final_status') {
-                    return new ValidationResult(true);
+                if (($e->getData()['errors'][0]['code'] !== 'v2_entity_has_final_status') ||
+                    !str_contains($e->getData()['errors'][0]['message'], 'REMOVED')) {
+                    return new ValidationResult(
+                        false, sprintf(/* translators: %s: Error message */ esc_html__(
+                        'Intake has not been deleted. (%s)',
+                        'cdekdelivery',
+                    ),
+                        $e->getData()['errors'][0]['message'],
+                    ),
+                    );
                 }
-
-                return new ValidationResult(
-                    false, sprintf(/* translators: %s: Error message */ esc_html__(
-                    'Error. The courier request has not been created. (%s)',
-                    'cdekdelivery',
-                ),
-                    $e->getData()[0]['message'],
-                ),
-                );
             }
 
             Note::send(

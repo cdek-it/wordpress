@@ -23,7 +23,6 @@ namespace Cdek\Actions {
     use Cdek\Exceptions\ShippingNotFoundException;
     use Cdek\Helpers\StringHelper;
     use Cdek\Helpers\WeightConverter;
-    use Cdek\Loader;
     use Cdek\Model\Order;
     use Cdek\Model\Service;
     use Cdek\Model\ShippingItem;
@@ -81,6 +80,7 @@ namespace Cdek\Actions {
 
             try {
                 $this->createOrder($packages);
+
                 return new ValidationResult(true);
             } catch (InvalidPhoneException $e) {
                 Note::send(
@@ -146,7 +146,13 @@ namespace Cdek\Actions {
         private function buildRequestData(): array
         {
             $countryCode     = $this->order->country ?: 'RU';
-            $recipientNumber = PhoneValidator::new()($this->order->phone ?: '', $countryCode);
+            $recipientNumber = $this->order->phone ?: '';
+
+            try {
+                $recipientNumber = PhoneValidator::new()($recipientNumber, $countryCode);
+            } catch (CoreAuthException|ApiException|CacheException $e) {
+                //Do nothing
+            }
 
             $deliveryMethod = $this->shipping->getMethod();
 

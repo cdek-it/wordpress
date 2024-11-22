@@ -5,7 +5,7 @@
     & > div {
       padding: 0 12px;
 
-      &.submitbox {
+      &:last-of-type {
         padding-bottom: 12px;
       }
     }
@@ -67,10 +67,6 @@
   }
 
   .create {
-    &[aria-invalid] {
-      padding-bottom: 12px;
-    }
-
     &[aria-invalid="true"] {
       button[data-id] {
         display: none;
