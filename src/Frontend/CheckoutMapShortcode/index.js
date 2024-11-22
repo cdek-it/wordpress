@@ -43,9 +43,9 @@ const onChoose = (_type, _tariff, address) => {
     const officeInfo = el.parent().children('.cdek-office-info');
     if (officeInfo.length === 0) {
         el.before(
-          `<div class="cdek-office-info">${address.name} - [${address.code}]</div>`);
+          `<div class="cdek-office-info">${address.name}</div>`);
     } else {
-        officeInfo.html(`${address.name} - [${address.code}]`);
+        officeInfo.html(`${address.name}`);
     }
     if ($('.cdek-office-code').data('map-auto-close')) {
         widget.close();
@@ -104,6 +104,7 @@ $(document.body)
               apiKey: window.cdek.apiKey,
               popup: true,
               debug: true,
+              lang: el.data('lang'),
               defaultLocation: el.data('city'),
               officesRaw: points,
               hideDeliveryOptions: {

@@ -4,77 +4,79 @@ import { debounce } from 'lodash';
 import './styles/main.scss';
 import { createRoot, render } from '@wordpress/element';
 import { DeliveryPrice } from './components/DeliveryPrice';
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
-$.getJSON(window.cdek_admin_settings.api.check_auth)
-  .done(() => $('.token-wrong').remove())
-  .fail((jqxhr) => {
-      console.error(jqxhr);
-      $('p:contains(\'Custom Shipping Method for Cdek\')')
-        .after('<div class="cdek-error token-wrong">[CDEKDelivery] ' + __(
-          'Error receiving token. Make sure the integration keys are correct',
-          'cdekdelivery') + '</div>');
-  });
+(() => {
+    const suggest = debounce((q) => apiFetch({
+        url: addQueryArgs(ajaxurl, {
+            action: `${window.cdek.prefix}-cities`,
+            _wpnonce: window.cdek.nonce,
+            q,
+        }),
+    }).then(r => {
+        if (r.data.length === 0) {
+            $('.city-suggest')
+              .append('<div class="city-suggest__404">' +
+                __('Nothing found', 'cdekdelivery') + '</div>');
+            return;
+        }
 
-const suggest = debounce((q) => {
-    $.getJSON(window.cdek_admin_settings.api.cities, { q })
-      .done(r => {
-          if (r.length === 0) {
-              $('.city-suggest')
-                .append('<div class="city-suggest__404">' +
-                  __('Nothing found', 'cdekdelivery') + '</div>');
-              return;
-          }
+        $('.city-suggest__404').remove();
+        $('.city-suggest__item').remove();
 
-          $('.city-suggest__404').remove();
-          $('.city-suggest__item').remove();
-
-          r.forEach(e => {
-              $('.city-suggest')
-                .append($('<div class="city-suggest__item"></div>')
-                  .html(e.full_name)
-                  .on('click', () => {
-                      $('input#woocommerce_official_cdek_city')
-                        .val(e.full_name.split(',', 2)[0]);
-                      $('input#woocommerce_official_cdek_city_code')
-                        .val(e.code);
-                      $('.city-suggest').remove();
-                  }));
-          });
-      }).fail(() => {
+        r.data.forEach(e => {
+            $('.city-suggest')
+              .append($('<div class="city-suggest__item"></div>')
+                .html(e.full_name)
+                .on('click', () => {
+                    $('input#woocommerce_official_cdek_city')
+                      .val(e.full_name.split(',', 2)[0]);
+                    $('input#woocommerce_official_cdek_city_code')
+                      .val(e.code);
+                    $('.city-suggest').remove();
+                }));
+        });
+    }).catch(() => {
         $('.city-suggest__404').remove();
         $('.city-suggest__item').remove();
 
         $('.city-suggest')
           .append('<div class="city-suggest__404">' +
             __('Temporal error, try again', 'cdekdelivery') + '</div>');
-    })
-      .always(() => $('.city-loader').remove());
-}, 900);
+    }).finally(() => $('.city-loader').remove()), 900);
 
-$('input#woocommerce_official_cdek_city').on('input', function() {
-    $('.city-suggest').remove();
-    $('.city-loader').remove();
+    $('input#woocommerce_official_cdek_city').on('input', function() {
+        $('.city-suggest').remove();
+        $('.city-loader').remove();
 
-    $(this)
-      .after('<div class="city-suggest"></div>')
-      .after('<span class="city-loader"></span>');
-    suggest(this.value);
-});
+        $(this)
+          .after('<div class="city-suggest"></div>')
+          .after('<span class="city-loader"></span>');
 
-const deliveryRulesInput = $(
-  'input#woocommerce_official_cdek_delivery_price_rules');
+        suggest(this.value);
+    });
 
-if (deliveryRulesInput.length) {
-    const div = window.document.createElement('div');
-    deliveryRulesInput.after(div);
-    if (typeof render === 'function') {
-        render(<DeliveryPrice input={deliveryRulesInput} />, div);
-    } else {
-        createRoot(div).render(<DeliveryPrice input={deliveryRulesInput} />);
+    const deliveryRulesInput = $(
+      'input#woocommerce_official_cdek_delivery_price_rules');
+
+    if (deliveryRulesInput.length) {
+        const div = window.document.createElement('div');
+        deliveryRulesInput.after(div);
+
+        if (createRoot !== undefined) {
+            const root = createRoot(div);
+
+            if (root !== undefined && typeof root.render === 'function') {
+                root.render(<DeliveryPrice input={deliveryRulesInput} />);
+            } else {
+                render(<DeliveryPrice input={deliveryRulesInput} />, div);
+            }
+        } else {
+            render(<DeliveryPrice input={deliveryRulesInput} />, div);
+        }
     }
-}
 
-(() => {
     const banAttachmentCheckbox = $(
       '#woocommerce_official_cdek_services_ban_attachment_inspection');
     const tryingOnCheckbox = $('#woocommerce_official_cdek_services_trying_on');

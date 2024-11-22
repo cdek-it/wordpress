@@ -17,6 +17,7 @@ namespace Cdek {
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
     use Cdek\Blocks\CheckoutMapBlock;
+    use Cdek\Controllers\CallbackController;
     use Cdek\Controllers\IntakeController;
     use Cdek\Controllers\OrderController;
     use Cdek\Controllers\SettingsController;
@@ -29,7 +30,7 @@ namespace Cdek {
     use Cdek\UI\CdekWidget;
     use Cdek\UI\CheckoutMap;
     use Cdek\UI\Frontend;
-    use Cdek\UI\MetaBoxes;
+    use Cdek\Blocks\AdminOrderBox;
     use Cdek\Validator\CheckoutValidator;
     use RuntimeException;
 
@@ -157,6 +158,11 @@ namespace Cdek {
             }
         }
 
+        public static function getTemplate(string $name): string
+        {
+            return self::getPluginPath("templates/$name.php");
+        }
+
         public static function getPluginPath(?string $path = null): string
         {
             return plugin_dir_path(self::$pluginMainFilePath).($path !== null ? ltrim($path, DIRECTORY_SEPARATOR) : '');
@@ -198,15 +204,17 @@ namespace Cdek {
             add_filter('plugin_action_links_'.self::$pluginMainFile, [Admin::class, 'addPluginLinks']);
             add_filter('plugin_row_meta', [Admin::class, 'addPluginRowMeta'], 10, 2);
 
-            add_action('rest_api_init', new SettingsController);
-            add_action('rest_api_init', new OrderController);
-            add_action('rest_api_init', new IntakeController);
+            add_action('rest_api_init', new CallbackController);
+
+            add_action('admin_init', new IntakeController);
+            add_action('admin_init', new OrderController);
+            add_action('admin_init', new SettingsController);
 
             add_filter('woocommerce_hidden_order_itemmeta', [DataCleaner::class, 'hideMeta']);
             add_filter('woocommerce_checkout_fields', [CheckoutHelper::class, 'restoreFields'], 1090);
             add_action(
                 'woocommerce_shipping_methods',
-                static fn($methods) => array_merge($methods, [Config::DELIVERY_NAME => ShippingMethod::class]),
+                static fn(array $methods) => array_merge($methods, [Config::DELIVERY_NAME => ShippingMethod::class]),
             );
 
             add_action('woocommerce_checkout_process', new CheckoutValidator);
@@ -253,7 +261,7 @@ namespace Cdek {
             CdekWidget::new()();
             Admin::new()();
             Frontend::new()();
-            MetaBoxes::new()();
+            AdminOrderBox::new()();
             AdminNotices::new()();
         }
 

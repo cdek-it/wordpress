@@ -30,8 +30,8 @@ namespace Cdek\Transport {
             $this->statusCode = $statusCode;
             $this->body       = $body;
             $this->headers    = $headers;
-            $this->url = $url;
-            $this->method = $method;
+            $this->url        = $url;
+            $this->method     = $method;
         }
 
         public function body(): string
@@ -82,11 +82,11 @@ namespace Cdek\Transport {
         }
 
         /**
-         * @throws \Cdek\Exceptions\External\UnparsableAnswerException
+         * @throws UnparsableAnswerException
          */
-        public function related(): array
+        public function error(): ?array
         {
-            return $this->json()['related_entities'] ?? [];
+            return $this->json()['error'] ?? $this->legacyRequestErrors()[0] ?? null;
         }
 
         /**
@@ -95,18 +95,6 @@ namespace Cdek\Transport {
         public function legacyRequestErrors(): array
         {
             return $this->json()['requests'][0]['errors'] ?? [];
-        }
-
-        /**
-         * @throws UnparsableAnswerException
-         */
-        public function error(): ?array
-        {
-            return $this->json()['error']
-                   ??
-                   $this->legacyRequestErrors()[0]
-                   ??
-                   null;
         }
 
         public function getHeaders(): array
@@ -129,16 +117,17 @@ namespace Cdek\Transport {
             return $this->statusCode >= 500 && $this->statusCode < 600;
         }
 
-        /**
-         * @throws \Cdek\Exceptions\External\UnparsableAnswerException
-         */
         public function missInvalidLegacyRequest(): bool
         {
-            if (empty($this->json()['requests'][0]['state'])) {
+            try {
+                if (empty($this->json()['requests'][0]['state'])) {
+                    return true;
+                }
+
+                return $this->json()['requests'][0]['state'] !== 'INVALID';
+            } catch (UnparsableAnswerException $e) {
                 return true;
             }
-
-            return $this->json()['requests'][0]['state'] !== 'INVALID';
         }
 
         /**
@@ -147,6 +136,14 @@ namespace Cdek\Transport {
         public function nextCursor(): ?string
         {
             return $this->json()['cursor']['next'] ?? null;
+        }
+
+        /**
+         * @throws \Cdek\Exceptions\External\UnparsableAnswerException
+         */
+        public function related(): array
+        {
+            return $this->json()['related_entities'] ?? [];
         }
     }
 }

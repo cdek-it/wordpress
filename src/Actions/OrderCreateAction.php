@@ -11,7 +11,6 @@ namespace Cdek\Actions {
 
     use Cdek\CdekApi;
     use Cdek\Config;
-    use Cdek\Contracts\ExceptionContract;
     use Cdek\CoreApi;
     use Cdek\Exceptions\CacheException;
     use Cdek\Exceptions\External\ApiException;
@@ -24,15 +23,14 @@ namespace Cdek\Actions {
     use Cdek\Exceptions\ShippingNotFoundException;
     use Cdek\Helpers\StringHelper;
     use Cdek\Helpers\WeightConverter;
-    use Cdek\Loader;
     use Cdek\Model\Order;
     use Cdek\Model\Service;
     use Cdek\Model\ShippingItem;
     use Cdek\Model\Tariff;
+    use Cdek\Model\ValidationResult;
     use Cdek\Note;
     use Cdek\Traits\CanBeCreated;
     use Cdek\Validator\PhoneValidator;
-    use Exception;
     use Throwable;
 
     class OrderCreateAction
@@ -52,7 +50,7 @@ namespace Cdek\Actions {
          * @throws \Cdek\Exceptions\ShippingNotFoundException
          * @throws \Cdek\Exceptions\OrderNotFoundException
          */
-        public function __invoke(int $orderId, int $attempt = 0, array $packages = null): array
+        public function __invoke(int $orderId, int $attempt = 0, array $packages = null): ValidationResult
         {
             $this->api   = new CdekApi;
             $this->order = new Order($orderId);
@@ -64,38 +62,26 @@ namespace Cdek\Actions {
             }
 
             $this->shipping = $shipping;
-            $this->tariff   = $shipping->tariff ?: $this->order->tariff_id;
+            $this->tariff   = (int)($shipping->tariff ?: $this->order->tariff_id);
 
             try {
                 $coreApi = new CoreApi;
 
                 $existingOrder = $coreApi->orderGet($orderId);
 
-                try {
-                    $historyCdekStatuses = $coreApi->orderHistory($existingOrder['uuid']);
-                } catch (ExceptionContract $e) {
-                    $historyCdekStatuses = [];
-                }
+                $this->order->uuid   = $existingOrder['uuid'];
+                $this->order->number = $existingOrder['track'];
+                $this->order->save();
 
-                return [
-                    'state'     => true,
-                    'code'      => $existingOrder['track'],
-                    'statuses'  => $this->outputStatusList(
-                        !empty($historyCdekStatuses),
-                        array_merge(
-                            [$existingOrder['status']],
-                            $historyCdekStatuses,
-                        ),
-                    ),
-                    'available' => !empty($historyCdekStatuses),
-                    'door'      => Tariff::isFromDoor($this->tariff),
-                ];
+                return new ValidationResult(true);
             } catch (CoreAuthException|ApiException|CacheException $e) {
                 //Do nothing
             }
 
             try {
-                return $this->createOrder($packages);
+                $this->createOrder($packages);
+
+                return new ValidationResult(true);
             } catch (InvalidPhoneException $e) {
                 Note::send(
                     $this->order->id,
@@ -105,10 +91,7 @@ namespace Cdek\Actions {
                     ),
                 );
 
-                return [
-                    'state'   => false,
-                    'message' => $e->getMessage(),
-                ];
+                return new ValidationResult(false, $e->getMessage());
             } catch (Throwable $e) {
                 if ($attempt < 1 || $attempt > 5) {
                     throw $e;
@@ -116,22 +99,8 @@ namespace Cdek\Actions {
 
                 wp_schedule_single_event(time() + 60 * 5, Config::ORDER_AUTOMATION_HOOK_NAME, [$orderId, $attempt + 1]);
 
-                return [
-                    'state'   => false,
-                    'message' => $e->getMessage(),
-                ];
+                return new ValidationResult(false, $e->getMessage());
             }
-        }
-
-        private function outputStatusList(bool $actionAvailable, array $statuses = []): string
-        {
-            $cdekStatuses         = $statuses;
-            $actionOrderAvailable = $actionAvailable;
-            ob_start();
-
-            include(Loader::getPluginPath('templates/admin/status_list.php'));
-
-            return ob_get_clean();
         }
 
         /**
@@ -142,7 +111,7 @@ namespace Cdek\Actions {
          * @throws InvalidPhoneException
          * @throws InvalidRequestException
          */
-        private function createOrder(array $packages): array
+        private function createOrder(array $packages): void
         {
             $param             = $this->buildRequestData();
             $param['packages'] = $this->buildPackagesData($packages);
@@ -157,14 +126,6 @@ namespace Cdek\Actions {
             $this->order->uuid   = $orderData['entity']['uuid'];
             $this->order->save();
 
-            try {
-                $cdekStatuses         = $this->order->loadLegacyStatuses();
-                $actionOrderAvailable = $this->order->isLocked();
-            } catch (Exception $e) {
-                $cdekStatuses         = [];
-                $actionOrderAvailable = true;
-            }
-
             if (!empty($cdekNumber)) {
                 Note::send(
                     $this->order->id,
@@ -177,14 +138,6 @@ namespace Cdek\Actions {
                     true,
                 );
             }
-
-            return [
-                'state'     => true,
-                'code'      => $cdekNumber,
-                'statuses'  => $this->outputStatusList($actionOrderAvailable, $cdekStatuses),
-                'available' => $actionOrderAvailable,
-                'door'      => Tariff::isFromDoor($this->tariff),
-            ];
         }
 
         /**
@@ -193,7 +146,13 @@ namespace Cdek\Actions {
         private function buildRequestData(): array
         {
             $countryCode     = $this->order->country ?: 'RU';
-            $recipientNumber = PhoneValidator::new()($this->order->phone, $countryCode);
+            $recipientNumber = $this->order->phone ?: '';
+
+            try {
+                $recipientNumber = PhoneValidator::new()($recipientNumber, $countryCode);
+            } catch (CoreAuthException|ApiException|CacheException $e) {
+                //Do nothing
+            }
 
             $deliveryMethod = $this->shipping->getMethod();
 
@@ -327,7 +286,7 @@ namespace Cdek\Actions {
                             'id'       => $product->get_id(),
                             'name'     => $product->get_name(),
                             'weight'   => $product->get_weight(),
-                            'quantity' => $el['quantity'],
+                            'quantity' => $el['qty'],
                             'price'    => $product->get_price(),
                         ];
                     }, $package['items']);

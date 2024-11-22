@@ -266,12 +266,8 @@ namespace Cdek\Model {
                    self::DATA[$code]['mode'] === self::DOOR_PICKUP;
         }
 
-        public static function getNameByCode(int $code): string
+        public static function getName(int $code, string $name): string
         {
-            if (!isset(self::DATA[$code])) {
-                throw new RuntimeException("Unknown tariff $code");
-            }
-
             $tariffNameEdit = ShippingMethod::factory()->tariff_name;
 
             if (!empty($tariffNameEdit)) {
@@ -285,7 +281,7 @@ namespace Cdek\Model {
                 }
             }
 
-            return self::DATA[$code]['name'];
+            return "CDEK: $name";
         }
 
         public static function list(): array

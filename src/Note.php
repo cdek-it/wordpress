@@ -14,7 +14,7 @@ namespace Cdek {
 
         public static function send(int $orderId, string $message, bool $notifyCustomer = false): void
         {
-            $note  = '[CDEKDelivery] '.$message;
+            $note  = '['.Loader::getPluginName().'] '.$message;
             $order = wc_get_order($orderId);
             $order->add_order_note($note, $notifyCustomer ? 1 : 0);
             $order->save();

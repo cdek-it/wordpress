@@ -14,6 +14,7 @@ namespace Cdek {
     use Cdek\Contracts\ExceptionContract;
     use Cdek\Traits\SettingsFields;
     use Throwable;
+    use WC_Admin_Settings;
     use WC_Settings_API;
     use WC_Shipping_Method;
 
@@ -168,6 +169,21 @@ namespace Cdek {
         public function __isset(string $key): bool
         {
             return $this->get_option($key, self::DEFAULTS[$key] ?? null) !== (self::DEFAULTS[$key] ?? null);
+        }
+
+        final public function admin_options(): void
+        {
+            if (!(new CdekApi)->checkAuth()) {
+                WC_Admin_Settings::add_error(
+                    esc_html__(
+                        'Error receiving token from CDEK API. Make sure the integration keys are correct',
+                        'cdekdelivery',
+                    ),
+                );
+                WC_Admin_Settings::show_messages();
+            }
+
+            parent::admin_options();
         }
 
         final public function calculate_shipping($package = []): void

@@ -24,11 +24,12 @@ namespace Cdek\Actions {
                 return;
             }
 
-            if (!Tariff::isToOffice($shipping->tariff)) {
+            if (!Tariff::isToOffice((int)$shipping->tariff)) {
                 return;
             }
 
             $shipping->office = CheckoutHelper::getValueFromCurrentSession('office_code');
+            $shipping->save();
         }
     }
 }

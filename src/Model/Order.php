@@ -12,9 +12,9 @@ namespace Cdek\Model {
     use Cdek\CdekApi;
     use Cdek\Contracts\MetaModelContract;
     use Cdek\Exceptions\OrderNotFoundException;
-    use DateTime;
+    use DateTimeImmutable;
+    use DateTimeInterface;
     use InvalidArgumentException;
-    use RuntimeException;
     use WC_Order;
     use WP_Post;
 
@@ -49,6 +49,7 @@ namespace Cdek\Model {
                 'payment_method',
                 'items',
                 'billing_email',
+                'shipping_total',
             ];
         private const CHECKOUT_FIELDS
             = [
@@ -67,7 +68,7 @@ namespace Cdek\Model {
             ];
         private const META_KEY = 'order_data';
         private WC_Order $order;
-        private array $meta;
+        private ?ShippingItem $shipping = null;
         private ?bool $locked = null;
 
         /**
@@ -78,20 +79,19 @@ namespace Cdek\Model {
          */
         public function __construct($order)
         {
-            $this->meta  = $this->order->get_meta(self::META_KEY) ?: [];
-
-            if($order instanceof WC_Order) {
+            if ($order instanceof WC_Order) {
                 $this->order = $order;
-                return;
+            } else {
+                $orderSearch = wc_get_order($order);
+
+                if ($orderSearch === false) {
+                    throw new OrderNotFoundException;
+                }
+
+                $this->order = $orderSearch;
             }
 
-            $orderSearch = wc_get_order($order);
-
-            if($orderSearch === false) {
-                throw new OrderNotFoundException;
-            }
-
-            $this->order = $orderSearch;
+            $this->meta = $this->order->get_meta(self::META_KEY) ?: [];
         }
 
         /** @noinspection MissingReturnTypeInspection */
@@ -122,7 +122,9 @@ namespace Cdek\Model {
 
         final public function clean(): void
         {
-            unset($this->meta['order_uuid'], $this->meta['order_number'], $this->meta['cdek_order_uuid'], $this->meta['cdek_order_waybill']);
+            unset(
+                $this->meta['number'], $this->meta['uuid'], $this->meta['order_uuid'], $this->meta['order_number'], $this->meta['cdek_order_uuid'], $this->meta['cdek_order_waybill'],
+            );
 
             $this->order->update_meta_data(self::META_KEY, $this->meta);
             $this->order->save();
@@ -141,11 +143,17 @@ namespace Cdek\Model {
 
         final public function getShipping(): ?ShippingItem
         {
+            if ($this->shipping !== null) {
+                return $this->shipping;
+            }
+
             $shippingMethods = $this->order->get_shipping_methods();
 
             foreach ($shippingMethods as $method) {
                 try {
-                    return new ShippingItem($method);
+                    $this->shipping = new ShippingItem($method);
+
+                    return $this->shipping;
                 } catch (InvalidArgumentException $e) {
                     continue;
                 }
@@ -164,25 +172,35 @@ namespace Cdek\Model {
             return $this->order->is_paid();
         }
 
-        final public function loadLegacyStatuses(): array
+        /**
+         * @throws \Cdek\Exceptions\OrderNotFoundException
+         * @throws \Cdek\Exceptions\External\ApiException
+         * @throws \Cdek\Exceptions\External\UnparsableAnswerException
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         */
+        final public function loadLegacyStatuses(?array $statuses = null): array
         {
             if (empty($this->uuid)) {
-                throw new RuntimeException('[CDEKDelivery] Не найден UUID заказа.');
+                return [];
             }
 
-            $orderInfo = (new CdekApi)->orderGet($this->uuid);
-            if ($orderInfo->entity() === null) {
-                throw new RuntimeException('[CDEKDelivery] Статусы не найдены. Заказ не найден.');
+            if ($statuses === null) {
+                $orderInfo = (new CdekApi)->orderGet($this->uuid);
+                if ($orderInfo->entity() === null) {
+                    throw new OrderNotFoundException;
+                }
+
+                $statuses = $orderInfo->entity()['statuses'];
             }
 
             $statuses = array_map(static fn(array $st)
                 => [
-                'time' => DateTime::createFromFormat('Y-m-d\TH:i:sO', $st['date_time']),
+                'time' => DateTimeImmutable::createFromFormat(DateTimeInterface::ATOM, $st['date_time']),
                 'name' => $st['name'],
                 'code' => $st['code'],
-            ], $orderInfo->entity()['statuses']);
+            ], $statuses);
 
-            $this->locked = $statuses[0]['code'] === 'CREATED' || $statuses[0]['code'] === 'INVALID';
+            $this->locked = $statuses[0]['code'] !== 'CREATED' && $statuses[0]['code'] !== 'INVALID';
 
             return $statuses;
         }

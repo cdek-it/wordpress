@@ -13,6 +13,7 @@ namespace Cdek\UI {
     use Cdek\Helpers\UI;
     use Cdek\Loader;
     use Cdek\Traits\CanBeCreated;
+    use WC_Admin_Settings;
 
     class Admin
     {
@@ -55,24 +56,19 @@ namespace Cdek\UI {
 
         public static function registerAdminScripts(): void
         {
+            global $current_section, $current_tab;
+
             // Not on Settings page.
-            /** @noinspection GlobalVariableUsageInspection */
-            if (!isset($_GET['tab']) || $_GET['tab'] !== 'shipping') {
+            if($current_section !== Config::DELIVERY_NAME || $current_tab !== 'shipping') {
                 return;
             }
 
-            UI::enqueueScript('cdek-admin-settings', 'cdek-admin-settings', true);
-            wp_localize_script('cdek-admin-settings', 'cdek_admin_settings', [
-                'api' => [
-                    'cities'    => UI::buildRestUrl('/cities'),
-                    'check_auth' => UI::buildRestUrl('/check-auth'),
-                ],
-            ]);
+            UI::enqueueScript('cdek-admin-settings', 'cdek-admin-settings', true, false, true);
         }
 
         public function __invoke(): void
         {
-            add_action('load-woocommerce_page_wc-settings', [__CLASS__, 'registerAdminScripts']);
+            add_action('woocommerce_settings_start', [__CLASS__, 'registerAdminScripts']);
         }
     }
 }

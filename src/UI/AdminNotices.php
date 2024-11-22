@@ -11,12 +11,13 @@ namespace {
 namespace Cdek\UI {
 
     use Cdek\Config;
+    use Cdek\Helpers\WeightConverter;
+    use Cdek\Loader;
     use Cdek\Traits\CanBeCreated;
 
     class AdminNotices
     {
         use CanBeCreated;
-        private const AVAILABLE_MEASUREMENTS = ['g', 'kg', 'lbs', 'oz'];
 
         public static function weightUnitsConflict(): void
         {
@@ -27,17 +28,19 @@ namespace Cdek\UI {
             }
 
             $measurement = get_option('woocommerce_weight_unit');
-            if (!in_array($measurement, self::AVAILABLE_MEASUREMENTS, true)) {
-                echo '<div class="notice notice-info is-dismissible"><p> '.sprintf(
-                        __(
-                            "CDEKDelivery: The selected weight unit %s is not supported by this plugin.\nYou can use the default value for product dimensions.\nYou can also contact plugin support for more information.\nOtherwise, the unit of measurement will be automatically treated as grams.",
-                            'cdekdelivery',
-                        ),
-                        esc_html($measurement),
-                    ).
 
-                     '</p></div>';
+            if (WeightConverter::isSupported($measurement)) {
+                return;
             }
+
+            echo '<div class="notice notice-info is-dismissible"><p> '.Loader::getPluginName().': '.sprintf(
+                    __(
+                        "The selected weight unit %s is not supported by this plugin.\nYou can use the default value for product dimensions.\nYou can also contact plugin support for more information.\nOtherwise, the unit of measurement will be automatically treated as grams.",
+                        'cdekdelivery',
+                    ),
+                    esc_html($measurement),
+                ).'</p></div>';
+
         }
 
         public function __invoke(): void

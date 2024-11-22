@@ -93,20 +93,6 @@ namespace Cdek {
          * @throws CoreAuthException
          * @throws \Cdek\Exceptions\CacheException
          */
-        public function orderHistory(int $orderId): array
-        {
-            return HttpClient::sendJsonRequest(
-                $this->getEndpoint("orders/$orderId/history"),
-                'GET',
-                $this->getToken(),
-            )->data();
-        }
-
-        /**
-         * @throws ApiException
-         * @throws CoreAuthException
-         * @throws \Cdek\Exceptions\CacheException
-         */
         public function validatePhone(string $phone, ?string $country = null): string
         {
             return HttpClient::sendJsonRequest(

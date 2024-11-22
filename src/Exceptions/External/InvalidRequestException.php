@@ -13,12 +13,13 @@ namespace Cdek\Exceptions\External {
     {
         protected string $key = 'http.validation';
 
-        public function __construct(array $error)
+        public function __construct(array $errors, ?array $request = null)
         {
-            $this->message = $this->message ?: $error['message'];
+            $this->message = $this->message ?: esc_html__('Invalid API request', 'cdekdelivery');
 
             parent::__construct([
-                'error' => $error['code'],
+                'errors' => $errors,
+                'request' => $request,
             ]);
         }
     }

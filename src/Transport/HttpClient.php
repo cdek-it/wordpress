@@ -48,11 +48,11 @@ namespace Cdek\Transport {
             $result = self::processRequest($url, $method, $config);
 
             if ($result->isServerError()) {
-                throw new HttpServerException($result->error());
+                throw new HttpServerException($result->error() ?: ['plain' => $result->body()]);
             }
 
             if ($result->getStatusCode() === 422) {
-                throw new InvalidRequestException($result->error()['fields']);
+                throw new InvalidRequestException($result->error()['fields'], Loader::debug() ? $data : null);
             }
 
             if ($result->getStatusCode() === 404) {
@@ -60,7 +60,7 @@ namespace Cdek\Transport {
             }
 
             if (!$result->missInvalidLegacyRequest()) {
-                throw new InvalidRequestException($result->legacyRequestErrors());
+                throw new InvalidRequestException($result->legacyRequestErrors(), Loader::debug() ? $data : null);
             }
 
             if ($result->isClientError()) {

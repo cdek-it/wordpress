@@ -9,7 +9,7 @@ namespace {
 
 namespace Cdek\Contracts {
 
-    use Cdek\Config;
+    use Cdek\Loader;
     use Exception;
 
     abstract class ExceptionContract extends Exception
@@ -21,7 +21,10 @@ namespace Cdek\Contracts {
         public function __construct(?array $data = null)
         {
             $this->data    = $data ?? [];
-            $this->message = '['.Config::PLUGIN_NAME.'] '.($this->message ?: 'Unknown error');
+            $this->message = '['.
+                             Loader::getPluginName().
+                             '] '.
+                             ($this->message ?: esc_html__('Unknown error', 'cdekdelivery'));
 
             parent::__construct($this->message);
         }

@@ -16,7 +16,7 @@ namespace Cdek\Actions {
     use Cdek\Model\ValidationResult;
     use Cdek\Note;
     use Cdek\Traits\CanBeCreated;
-    use Cdek\Validator\IntakeValidator;
+    use DateTimeImmutable;
 
     class IntakeCreateAction
     {
@@ -35,32 +35,39 @@ namespace Cdek\Actions {
          * @throws \Cdek\Exceptions\ShippingNotFoundException
          * @throws \Cdek\Exceptions\OrderNotFoundException
          */
-        public function __invoke(int $orderId, array $data): ValidationResult
+        public function __invoke(Order $order, array $data): ValidationResult
         {
-            $validate = IntakeValidator::validate($data);
-            if (!$validate->state) {
-                return $validate;
-            }
-
-            $order    = new Order($orderId);
             $shipping = $order->getShipping();
 
             if ($shipping === null) {
                 throw new ShippingNotFoundException;
             }
 
-            $tariffId = $shipping->tariff ?: $order->tariff_id;
+            $method = $shipping->getMethod();
 
-            if (Tariff::isFromDoor($tariffId)) {
-                $orderNumber = $order->number;
-                $param       = $this->createRequestDataWithOrderNumber($data, $orderNumber);
+            $param = [
+                'need_call'        => $data['call'] === 'true',
+                'intake_date'      => (new DateTimeImmutable($data['date']))->format('Y-m-d'),
+                'intake_time_from' => $data['from'],
+                'intake_time_to'   => $data['to'],
+                'comment'          => $data['comment'] ?? null,
+            ];
+
+            if (Tariff::isFromDoor((int)($shipping->tariff ?: $order->tariff_id))) {
+                $param['cdek_number'] = $order->number;
             } else {
-                $validate = IntakeValidator::validatePackage($data);
-                if (!$validate->state) {
-                    return $validate;
-                }
-
-                $param = $this->createRequestData($data);
+                $param['name']          = $data['desc'];
+                $param['weight']        = $data['weight'];
+                $param['from_location'] = [
+                    'address' => $method->address,
+                    'code'    => $method->city_code,
+                ];
+                $param['sender']        = [
+                    'name'   => $method->seller_name,
+                    'phones' => [
+                        'number' => $method->seller_phone,
+                    ],
+                ];
             }
 
             $result = $this->api->intakeCreate($param);
@@ -118,74 +125,18 @@ namespace Cdek\Actions {
             $intake->save();
 
             Note::send(
-                $orderId,
+                $order->id,
                 sprintf(
                     esc_html__(/* translators: 1: number of intake 2: uuid of intake*/
                         'Intake has been created: Number: %1$s | Uuid: %2$s',
                         'cdekdelivery',
                     ),
-                    $courierInfo['entity']['intake_number'],
+                    $courierInfo['intake_number'],
                     $courierInfo['uuid'],
                 ),
             );
 
-            return new ValidationResult(
-                true, sprintf(
-                esc_html__(/* translators: %s: uuid of application*/ 'Intake number: %s', 'cdekdelivery'),
-                $courierInfo['intake_number'],
-            ),
-            );
-        }
-
-        private function createRequestDataWithOrderNumber(array $data, string $orderNumber): array
-        {
-            $param['cdek_number']      = $orderNumber;
-            $param['intake_date']      = $data['date'];
-            $param['intake_time_from'] = $data['starttime'];
-            $param['intake_time_to']   = $data['endtime'];
-            $param['comment']          = $data['comment'];
-            $param['sender']           = [
-                'name'   => $data['name'],
-                'phones' => [
-                    'number' => $data['phone'],
-                ],
-            ];
-            $param['from_location']    = [
-                'address' => $data['address'],
-            ];
-            if ($data['need_call'] === "true") {
-                $param['need_call'] = true;
-            } else {
-                $param['need_call'] = false;
-            }
-
-            return $param;
-        }
-
-        private function createRequestData(array $data): array
-        {
-            $param['intake_date']      = $data['date'];
-            $param['intake_time_from'] = $data['starttime'];
-            $param['intake_time_to']   = $data['endtime'];
-            $param['name']             = $data['desc'];
-            $param['weight']           = $data['weight'];
-            $param['length']           = $data['length'];
-            $param['width']            = $data['width'];
-            $param['height']           = $data['height'];
-            $param['comment']          = $data['comment'];
-            $param['sender']           = [
-                'name'   => $data['name'],
-                'phones' => [
-                    'number' => $data['phone'],
-                ],
-            ];
-            $param['from_location']    = [
-                'address' => $data['address'],
-            ];
-
-            $param['need_call'] = $data['need_call'] === 'true';
-
-            return $param;
+            return new ValidationResult(true);
         }
     }
 }

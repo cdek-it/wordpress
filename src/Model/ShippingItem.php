@@ -14,14 +14,16 @@ namespace Cdek\Model {
     use Cdek\MetaKeys;
     use Cdek\ShippingMethod;
     use InvalidArgumentException;
+    use WC_Meta_Data;
     use WC_Order_Item_Shipping;
 
     /**
-     * @property int tariff
+     * @property string tariff
      * @property string|null $office
      * @property string $length
      * @property string $height
      * @property string $width
+     * @property string $weight
      */
     class ShippingItem extends MetaModelContract
     {
@@ -32,6 +34,7 @@ namespace Cdek\Model {
                 'length' => MetaKeys::LENGTH,
                 'height' => MetaKeys::HEIGHT,
                 'width'  => MetaKeys::WIDTH,
+                'weight' => MetaKeys::WEIGHT,
             ];
         protected const ALIASES
             = [
@@ -40,6 +43,7 @@ namespace Cdek\Model {
                 MetaKeys::LENGTH      => ['length'],
                 MetaKeys::HEIGHT      => ['height'],
                 MetaKeys::WIDTH       => ['width'],
+                MetaKeys::WEIGHT      => ['weight'],
             ];
         private int $instanceId;
         private WC_Order_Item_Shipping $originalItem;
@@ -54,18 +58,14 @@ namespace Cdek\Model {
             }
 
             $this->originalItem = $wcShippingItem;
-            $this->instanceId   = $wcShippingItem->get_data()['instance_id'];
-            $this->meta         = $wcShippingItem->get_meta_data();
-        }
+            $this->instanceId   = (int)$wcShippingItem->get_data()['instance_id'];
+            $this->meta         = [];
 
-        final public function getInstanceId(): int
-        {
-            return $this->instanceId;
-        }
-
-        final public function getMethod(): ShippingMethod
-        {
-            return ShippingMethod::factory()($this->instanceId);
+            foreach ($wcShippingItem->get_meta_data() as $meta) {
+                assert($meta instanceof WC_Meta_Data);
+                $data                     = $meta->get_data();
+                $this->meta[$data['key']] = $data['value'];
+            }
         }
 
         /** @noinspection MissingReturnTypeInspection */
@@ -78,9 +78,37 @@ namespace Cdek\Model {
             return parent::__get(self::FIELDS_MAPPER[$key]);
         }
 
-        final public function updateTotal(float $val): void
+        public function __set(string $key, $value): void
         {
-            $this->originalItem->set_total($val);
+            if (!array_key_exists($key, self::FIELDS_MAPPER)) {
+                parent::__set($key, $value);
+            }
+
+            parent::__set(self::FIELDS_MAPPER[$key], $value);
+        }
+
+        final public function clean(): void
+        {
+            // Doing nothing, since we don't need to clean anything
+        }
+
+        final public function getInstanceId(): int
+        {
+            return $this->instanceId;
+        }
+
+        final public function getMethod(): ShippingMethod
+        {
+            return ShippingMethod::factory($this->instanceId);
+        }
+
+        final public function save(): void
+        {
+            foreach ($this->dirty as $key) {
+                $this->originalItem->add_meta_data($key, $this->meta[$key], true);
+            }
+            $this->dirty = [];
+            $this->originalItem->save();
         }
 
         final public function updateName(string $val): void
@@ -88,15 +116,9 @@ namespace Cdek\Model {
             $this->originalItem->set_name($val);
         }
 
-        final public function save(): void
+        final public function updateTotal(float $val): void
         {
-            $this->originalItem->set_meta_data($this->meta);
-            $this->originalItem->save();
-        }
-
-        final public function clean(): void
-        {
-            // Doing nothing, since we don't need to clean anything
+            $this->originalItem->set_total($val);
         }
     }
 }

@@ -42,30 +42,27 @@ namespace Cdek\Actions {
         {
             $courierMeta = new Intake($orderId);
 
-            if (empty($courierMeta->uuid)) {
+            if (empty($courierMeta->uuid) || empty($courierMeta->number)) {
                 $courierMeta->clean();
 
-                return new ValidationResult(true);
+                return new ValidationResult(true, esc_html__('Intake is not found in system', 'cdekdelivery'));
             }
 
             try {
-                $intake = $this->api->intakeDelete($courierMeta['courier_uuid']);
+                $this->api->intakeDelete($courierMeta->uuid);
             } catch (InvalidRequestException $e) {
-                if ($e->getData()[0]['code'] === 'v2_entity_has_final_status') {
-                    return new ValidationResult(true);
+                if (($e->getData()['errors'][0]['code'] !== 'v2_entity_has_final_status') ||
+                    !str_contains($e->getData()['errors'][0]['message'], 'REMOVED')) {
+                    return new ValidationResult(
+                        false, sprintf(/* translators: %s: Error message */ esc_html__(
+                        'Intake has not been deleted. (%s)',
+                        'cdekdelivery',
+                    ),
+                        $e->getData()['errors'][0]['message'],
+                    ),
+                    );
                 }
-
-                return new ValidationResult(
-                    false, sprintf(/* translators: %s: Error message */ esc_html__(
-                    'Error. The courier request has not been created. (%s)',
-                    'cdekdelivery',
-                ),
-                    $e->getData()[0]['message'],
-                ),
-                );
             }
-
-            $courierMeta->clean();
 
             Note::send(
                 $orderId,
@@ -73,9 +70,11 @@ namespace Cdek\Actions {
                     esc_html__(/* translators: %s: request number */ 'Intake %s has been deleted',
                         'cdekdelivery',
                     ),
-                    $intake,
+                    $courierMeta->number,
                 ),
             );
+
+            $courierMeta->clean();
 
             return new ValidationResult(true, esc_html__('Intake has been deleted', 'cdekdelivery'));
         }

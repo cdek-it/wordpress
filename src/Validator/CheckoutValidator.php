@@ -11,6 +11,9 @@ namespace Cdek\Validator {
 
     use Cdek\CdekApi;
     use Cdek\Config;
+    use Cdek\Exceptions\CacheException;
+    use Cdek\Exceptions\External\ApiException;
+    use Cdek\Exceptions\External\CoreAuthException;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Model\Tariff;
     use Throwable;
@@ -65,6 +68,8 @@ namespace Cdek\Validator {
             } else {
                 try {
                     PhoneValidator::new()($phone, CheckoutHelper::getValueFromCurrentSession('country'));
+                } catch (CoreAuthException|ApiException|CacheException $e) {
+                    return;
                 } catch (Throwable $e) {
                     wc_add_notice($e->getMessage(), 'error');
                 }

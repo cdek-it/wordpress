@@ -25,14 +25,17 @@ namespace Cdek\Helpers {
 
             $args['_wpnonce'] = wp_create_nonce('wp_rest');
 
-            return add_query_arg($args, rest_url($prefix.$route));
+            $url = add_query_arg($args, rest_url($prefix.$route));
+
+            return Loader::debug() ? $url.'&'.Config::MAGIC_KEY : $url;
         }
 
         public static function enqueueScript(
             string $handle,
             string $fileName,
             bool $hasStyles = false,
-            bool $justRegister = false
+            bool $justRegister = false,
+            bool $needsNonce = false
         ): void {
             $script_asset_path = Loader::getPluginPath("build/$fileName.asset.php");
 
@@ -60,10 +63,17 @@ namespace Cdek\Helpers {
             }
 
             if ($hasStyles) {
-                wp_enqueue_style($handle, Loader::getPluginUrl("build/$fileName.css"), [], Loader::getPluginVersion());
+                wp_enqueue_style($handle, Loader::getPluginUrl("build/$fileName.css"), [], $script_asset['version']);
             }
 
             wp_set_script_translations($handle, 'cdekdelivery', Loader::getPluginPath('lang'));
+
+            if ($needsNonce) {
+                wp_localize_script($handle, 'cdek', [
+                    'nonce'  => wp_create_nonce(Config::DELIVERY_NAME),
+                    'prefix' => Config::DELIVERY_NAME,
+                ]);
+            }
         }
 
     }
