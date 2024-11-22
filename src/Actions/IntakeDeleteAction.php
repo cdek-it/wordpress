@@ -42,10 +42,10 @@ namespace Cdek\Actions {
         {
             $courierMeta = new Intake($orderId);
 
-            if (empty($courierMeta->uuid)) {
+            if (empty($courierMeta->uuid) || empty($courierMeta->number)) {
                 $courierMeta->clean();
 
-                return new ValidationResult(true);
+                return new ValidationResult(true, esc_html__('Intake is not found in system', 'cdekdelivery'));
             }
 
             try {
