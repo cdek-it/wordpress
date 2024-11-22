@@ -122,6 +122,7 @@ namespace Cdek\Blocks {
 
             if (Tariff::isToOffice((int)$shipping->tariff)) {
                 $shipping->office = $request['extensions'][Config::DELIVERY_NAME]['office_code'];
+                $shipping->save();
             }
         }
 
