@@ -146,7 +146,7 @@ namespace Cdek\Actions {
         private function buildRequestData(): array
         {
             $countryCode     = $this->order->country ?: 'RU';
-            $recipientNumber = $this->order->phone;
+            $recipientNumber = $this->order->phone ?: '';
             PhoneValidator::new()($recipientNumber, $countryCode);
 
             $deliveryMethod = $this->shipping->getMethod();
