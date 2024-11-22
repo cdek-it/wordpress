@@ -63,11 +63,7 @@ namespace Cdek\UI {
                 return;
             }
 
-            UI::enqueueScript('cdek-admin-settings', 'cdek-admin-settings', true);
-            wp_localize_script('cdek-admin-settings', 'cdek', [
-                'nonce' => wp_create_nonce(Config::DELIVERY_NAME),
-                'prefix' => Config::DELIVERY_NAME,
-            ]);
+            UI::enqueueScript('cdek-admin-settings', 'cdek-admin-settings', true, false, true);
         }
 
         public function __invoke(): void

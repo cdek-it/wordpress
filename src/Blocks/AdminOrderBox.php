@@ -7,7 +7,7 @@ namespace {
     defined('ABSPATH') or exit;
 }
 
-namespace Cdek\UI {
+namespace Cdek\Blocks {
 
     use Automattic\WooCommerce\Utilities\OrderUtil;
     use Cdek\CdekApi;
@@ -18,14 +18,18 @@ namespace Cdek\UI {
     use Cdek\Traits\CanBeCreated;
     use Throwable;
 
-    class MetaBoxes
+    class AdminOrderBox
     {
         use CanBeCreated;
 
         /** @noinspection MissingParameterTypeDeclarationInspection */
-        public static function createOrderMetaBox($post): void
+        public static function createOrderMetaBox($post, array $meta = []): void
         {
-            $order = new Order($post);
+            if ($post instanceof Order) {
+                $order = $post;
+            } else {
+                $order = new Order($post);
+            }
 
             $shipping = $order->getShipping();
 
@@ -33,36 +37,22 @@ namespace Cdek\UI {
                 return;
             }
 
-            $items = [];
-            foreach ($order->items as $item) {
-                /** @noinspection OnlyWritesOnParameterInspection */
-                $items[$item['product_id']] = ['name' => $item['name'], 'quantity' => $item['quantity']];
-            }
+            include Loader::getTemplate('common');
 
-            if ($order->number !== null) {
-                try {
-                    $order->loadLegacyStatuses();
-                } catch (Throwable $e) {
-                }
+            if ($order->number === null) {
+                include Loader::getTemplate(
+                    $shipping->getMethod()->has_packages_mode ? 'create_many' : 'create',
+                );
 
-                if ($order->isLocked() !== false) {
-                    echo '<div class="notice notice-warning"><p>
-                <strong>'.Loader::getPluginName().':</strong> '.esc_html__(
-                            'Editing the order is not available due to a change in the order status in the CDEK system',
-                            'cdekdelivery',
-                        ).'
-            </p></div>';
-                }
+                return;
             }
 
             try {
-                include Loader::getTemplate(
-                    $shipping->getMethod()->has_packages_mode ? 'form_package_many' : 'form_package',
-                );
-
-                include Loader::getTemplate('order_created');
+                $order->loadLegacyStatuses();
             } catch (Throwable $e) {
             }
+
+            include Loader::getTemplate('order');
         }
 
         public static function noAuthMetaBox(): void
@@ -97,15 +87,11 @@ namespace Cdek\UI {
 
             $shipping = $order->getShipping();
 
-            if ($shipping === null) {
+            if ($shipping === null || $shipping->tariff === null) {
                 return;
             }
 
             add_action('admin_enqueue_scripts', [__CLASS__, 'registerOrderScripts']);
-
-            if ($shipping->tariff === 0) {
-                return;
-            }
 
             if (!(new CdekApi($shipping->getInstanceId()))->checkAuth()) {
                 add_meta_box(
@@ -132,7 +118,7 @@ namespace Cdek\UI {
 
         public static function registerOrderScripts(): void
         {
-            UI::enqueueScript('cdek-admin-create-order', 'cdek-create-order', true);
+            UI::enqueueScript('cdek-admin-create-order', 'cdek-create-order', true, false, true);
         }
 
         public function __invoke(): void

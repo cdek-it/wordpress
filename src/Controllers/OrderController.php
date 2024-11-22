@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
 
 declare(strict_types=1);
 
@@ -13,177 +13,190 @@ namespace Cdek\Controllers {
     use Cdek\Actions\GenerateWaybillAction;
     use Cdek\Actions\OrderCreateAction;
     use Cdek\Actions\OrderDeleteAction;
+    use Cdek\Blocks\AdminOrderBox;
     use Cdek\Config;
+    use Cdek\Contracts\ExceptionContract;
+    use Cdek\Exceptions\External\InvalidRequestException;
     use Cdek\Model\Order;
-    use WP_Http;
-    use WP_REST_Request;
-    use WP_REST_Response;
-    use WP_REST_Server;
+    use JsonException;
 
     class OrderController
     {
         /**
-         * @throws \JsonException
-         * @throws \Cdek\Exceptions\External\InvalidRequestException
-         * @throws \Throwable
-         */
-        public static function createOrder(WP_REST_Request $request): WP_REST_Response
-        {
-            return new WP_REST_Response(
-                OrderCreateAction::new()(
-                    $request->get_param('id'),
-                    0,
-                    $request->get_param('packages'),
-                ), WP_Http::OK,
-            );
-        }
-
-        /**
-         * @throws \Cdek\Exceptions\External\LegacyAuthException
          * @throws \Cdek\Exceptions\External\ApiException
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
          * @throws \Cdek\Exceptions\OrderNotFoundException
          */
-        public static function deleteOrder(WP_REST_Request $request): WP_REST_Response
+        public static function barcode(): void
         {
-            return new WP_REST_Response(OrderDeleteAction::new()($request->get_param('id'))->response(), WP_Http::OK);
+            check_ajax_referer(Config::DELIVERY_NAME);
+
+            if (!current_user_can('edit_posts')) {
+                wp_die(-2, 403);
+            }
+
+            /** @noinspection GlobalVariableUsageInspection */
+            $result = GenerateBarcodeAction::new()((new Order((int)wp_unslash($_GET['id'])))->uuid);
+
+            if ($result['success']) {
+                wp_send_json_success($result['data']);
+            }
+
+            wp_send_json_error($result);
         }
 
         /**
-         * @throws \Cdek\Exceptions\External\ApiException
-         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         * @throws \Throwable
+         * @noinspection GlobalVariableUsageInspection
          */
-        public static function getWaybill(WP_REST_Request $request): WP_REST_Response
+        public static function create(): void
         {
-            return new WP_REST_Response(
-                GenerateWaybillAction::new()(
-                    (new Order($request->get_param('id')))->uuid,
-                ), WP_Http::OK,
-            );
-        }
+            check_ajax_referer(Config::DELIVERY_NAME);
 
-        /**
-         * @throws \Cdek\Exceptions\External\ApiException
-         * @throws \Cdek\Exceptions\External\LegacyAuthException
-         */
-        public static function getBarcode(WP_REST_Request $request): WP_REST_Response
-        {
-            return new WP_REST_Response(
-                GenerateBarcodeAction::new()(
-                    (new Order($request->get_param('id')))->uuid,
-                ), WP_Http::OK,
-            );
-        }
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !current_user_can('edit_posts')) {
+                wp_die(-2, 403);
+            }
 
-        public function __invoke(): void
-        {
-            register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/create', [
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => [__CLASS__, 'createOrder'],
-                'permission_callback' => static fn() => current_user_can('edit_posts'),
-                'show_in_index'       => true,
-                'args'                => [
-                    'id'       => [
-                        'description' => esc_html__('Order number', 'cdekdelivery'),
-                        'required'    => true,
-                        'type'        => 'integer',
-                    ],
-                    'packages' => [
-                        'description' => esc_html__('Packages', 'cdekdelivery'),
-                        'required'    => true,
-                        'type'        => 'array',
-                        'minItems'    => 1,
-                        'maxItems'    => 255,
-                        'items'       => [
-                            'type'                 => 'object',
-                            'additionalProperties' => false,
-                            'properties'           => [
-                                'length' => [
-                                    'description' => esc_html__('Packing length', 'cdekdelivery'),
-                                    'required'    => true,
-                                    'type'        => 'integer',
-                                ],
-                                'width'  => [
-                                    'description' => esc_html__('Packing width', 'cdekdelivery'),
-                                    'required'    => true,
-                                    'type'        => 'integer',
-                                ],
-                                'height' => [
-                                    'description' => esc_html__('Packing height', 'cdekdelivery'),
-                                    'required'    => true,
-                                    'type'        => 'integer',
-                                ],
-                                'items'  => [
-                                    'description' => esc_html__('Products in packaging', 'cdekdelivery'),
-                                    'required'    => false,
-                                    'type'        => 'array',
-                                    'minItems'    => 1,
-                                    'items'       => [
-                                        'type'       => 'object',
-                                        'properties' => [
-                                            'id'       => [
-                                                'description' => esc_html__('Product ID', 'cdekdelivery'),
-                                                'required'    => true,
-                                                'type'        => 'integer',
-                                            ],
-                                            'quantity' => [
-                                                'description' => esc_html__(
-                                                    'Quantity of goods in packaging',
-                                                    'cdekdelivery',
-                                                ),
-                                                'required'    => true,
-                                                'type'        => 'integer',
-                                            ],
-                                        ],
+            $id = (int)wp_unslash($_REQUEST['id']);
+
+            try {
+                $body = json_decode(file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);
+            } catch (JsonException $e) {
+                wp_die($e->getMessage());
+            }
+
+            $val = rest_validate_array_value_from_schema($body, [
+                'required' => true,
+                'type'     => 'array',
+                'minItems' => 1,
+                'maxItems' => 255,
+                'items'    => [
+                    'type'                 => 'object',
+                    'additionalProperties' => false,
+                    'properties'           => [
+                        'length' => [
+                            'required' => true,
+                            'type'     => 'integer',
+                        ],
+                        'width'  => [
+                            'required' => true,
+                            'type'     => 'integer',
+                        ],
+                        'height' => [
+                            'required' => true,
+                            'type'     => 'integer',
+                        ],
+                        'items'  => [
+                            'required' => false,
+                            'type'     => 'array',
+                            'minItems' => 1,
+                            'items'    => [
+                                'type'       => 'object',
+                                'properties' => [
+                                    'id'  => [
+                                        'required' => true,
+                                        'type'     => 'integer',
+                                    ],
+                                    'qty' => [
+                                        'required' => true,
+                                        'type'     => 'integer',
                                     ],
                                 ],
                             ],
                         ],
                     ],
                 ],
-            ]);
+            ], 'packages');
 
-            register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/delete', [
-                'methods'             => WP_REST_Server::CREATABLE,
-                'callback'            => [__CLASS__, 'deleteOrder'],
-                'permission_callback' => static fn() => current_user_can('edit_posts'),
-                'show_in_index'       => true,
-                'args'                => [
-                    'id' => [
-                        'description' => esc_html__('Order number', 'cdekdelivery'),
-                        'required'    => true,
-                        'type'        => 'integer',
-                    ],
-                ],
-            ]);
+            if (is_wp_error($val)) {
+                wp_die($val);
+            }
 
+            try {
+                $result   = OrderCreateAction::new()($id, 0, $body);
+                $messages = $result->state ? null : [$result->message];
+            } catch (InvalidRequestException $e) {
+                $messages = array_map(static fn(array $el) => $el['message'], $e->getData()['errors']);
+            } catch (ExceptionContract $e) {
+                $messages = [$e->getMessage()];
+            }
 
-            register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/waybill', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [__CLASS__, 'getWaybill'],
-                'permission_callback' => static fn() => current_user_can('edit_posts'),
-                'show_in_index'       => true,
-                'args'                => [
-                    'id' => [
-                        'description' => esc_html__('CDEK Order ID', 'cdekdelivery'),
-                        'required'    => true,
-                        'type'        => 'integer',
-                    ],
-                ],
-            ]);
+            AdminOrderBox::createOrderMetaBox(
+                $id,
+                ['errors' => $messages],
+            );
 
-            register_rest_route(Config::DELIVERY_NAME, '/order/(?P<id>\d+)/barcode', [
-                'methods'             => WP_REST_Server::READABLE,
-                'callback'            => [__CLASS__, 'getBarcode'],
-                'permission_callback' => static fn() => current_user_can('edit_posts'),
-                'show_in_index'       => true,
-                'args'                => [
-                    'id' => [
-                        'description' => esc_html__('CDEK Order ID', 'cdekdelivery'),
-                        'required'    => true,
-                        'type'        => 'integer',
-                    ],
-                ],
-            ]);
+            wp_die();
+        }
+
+        /**
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         * @throws \Cdek\Exceptions\External\ApiException
+         * @throws \Cdek\Exceptions\OrderNotFoundException
+         * @noinspection GlobalVariableUsageInspection
+         */
+        public static function delete(): void
+        {
+            check_ajax_referer(Config::DELIVERY_NAME);
+
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !current_user_can('edit_posts')) {
+                wp_die(-2, 403);
+            }
+
+            $id = (int)$_REQUEST['id'];
+
+            $result = OrderDeleteAction::new()($id);
+
+            if ($result->state) {
+                $meta = ['success' => [$result->message]];
+            } else {
+                $meta = ['errors' => [$result->message]];
+            }
+
+            AdminOrderBox::createOrderMetaBox($id, $meta);
+
+            wp_die();
+        }
+
+        /**
+         * @throws \Cdek\Exceptions\External\ApiException
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         * @throws \Cdek\Exceptions\OrderNotFoundException
+         */
+        public static function waybill(): void
+        {
+            check_ajax_referer(Config::DELIVERY_NAME);
+
+            if (!current_user_can('edit_posts')) {
+                wp_die(-2, 403);
+            }
+
+            try {
+                /** @noinspection GlobalVariableUsageInspection */
+                $result = GenerateWaybillAction::new()((new Order((int)wp_unslash($_GET['id'])))->uuid);
+
+                if ($result['success']) {
+                    wp_send_json_success($result['data']);
+                }
+
+                wp_send_json_error($result);
+            } catch (ExceptionContract $e) {
+                wp_send_json_error($e);
+            }
+        }
+
+        public function __invoke(): void
+        {
+            if (!wp_doing_ajax()) {
+                return;
+            }
+
+            $prefix = Config::DELIVERY_NAME;
+
+            add_action("wp_ajax_$prefix-create", [__CLASS__, 'create']);
+            add_action("wp_ajax_$prefix-delete", [__CLASS__, 'delete']);
+            add_action("wp_ajax_$prefix-waybill", [__CLASS__, 'waybill']);
+            add_action("wp_ajax_$prefix-barcode", [__CLASS__, 'barcode']);
         }
     }
 }

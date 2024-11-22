@@ -23,6 +23,7 @@ namespace Cdek\Model {
      * @property string $length
      * @property string $height
      * @property string $width
+     * @property string $weight
      */
     class ShippingItem extends MetaModelContract
     {
@@ -33,6 +34,7 @@ namespace Cdek\Model {
                 'length' => MetaKeys::LENGTH,
                 'height' => MetaKeys::HEIGHT,
                 'width'  => MetaKeys::WIDTH,
+                'weight' => MetaKeys::WEIGHT,
             ];
         protected const ALIASES
             = [
@@ -41,6 +43,7 @@ namespace Cdek\Model {
                 MetaKeys::LENGTH      => ['length'],
                 MetaKeys::HEIGHT      => ['height'],
                 MetaKeys::WIDTH       => ['width'],
+                MetaKeys::WEIGHT      => ['weight'],
             ];
         private int $instanceId;
         private WC_Order_Item_Shipping $originalItem;

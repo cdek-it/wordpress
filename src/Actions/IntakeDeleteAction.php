@@ -49,7 +49,7 @@ namespace Cdek\Actions {
             }
 
             try {
-                $intake = $this->api->intakeDelete($courierMeta['courier_uuid']);
+                $intake = $this->api->intakeDelete($courierMeta->uuid);
             } catch (InvalidRequestException $e) {
                 if ($e->getData()[0]['code'] === 'v2_entity_has_final_status') {
                     return new ValidationResult(true);

@@ -27,14 +27,15 @@ namespace Cdek\Helpers {
 
             $url = add_query_arg($args, rest_url($prefix.$route));
 
-            return Loader::debug() ? $url . '&' . Config::MAGIC_KEY : $url;
+            return Loader::debug() ? $url.'&'.Config::MAGIC_KEY : $url;
         }
 
         public static function enqueueScript(
             string $handle,
             string $fileName,
             bool $hasStyles = false,
-            bool $justRegister = false
+            bool $justRegister = false,
+            bool $needsNonce = false
         ): void {
             $script_asset_path = Loader::getPluginPath("build/$fileName.asset.php");
 
@@ -66,6 +67,13 @@ namespace Cdek\Helpers {
             }
 
             wp_set_script_translations($handle, 'cdekdelivery', Loader::getPluginPath('lang'));
+
+            if ($needsNonce) {
+                wp_localize_script($handle, 'cdek', [
+                    'nonce'  => wp_create_nonce(Config::DELIVERY_NAME),
+                    'prefix' => Config::DELIVERY_NAME,
+                ]);
+            }
         }
 
     }

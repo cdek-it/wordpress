@@ -3,320 +3,224 @@ import { __ } from '@wordpress/i18n';
 import $ from 'jquery';
 import './styles/main.scss';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 $(document).ready(() => {
-    let packageList = [];
-
-    checkOrderAvailable();
-
-    function checkOrderAvailable() {
-        const dataStatusAvailable = $('#cdek-status-block')
-          .data('status-available');
-        if (dataStatusAvailable !== undefined && !dataStatusAvailable) {
-            $('#order_data')
-              .find('input[name="order_date"]')
-              .attr('disabled', true);
-            $('#order_data')
-              .find('input[name="order_date_hour"]')
-              .attr('disabled', true);
-            $('#order_data')
-              .find('input[name="order_date_minute"]')
-              .attr('disabled', true);
-            $('#order_data')
-              .find('select[name="customer_user"]')
-              .attr('disabled', true);
-            $('#order_data').find('a[class="edit_address"]').hide();
-        }
-    }
-
-    $('#selected_product').change(function() {
-        let productId = $('#selected_product').val();
-        $('#product_' + productId).css('display', 'flex');
-    });
-    $('#save_package').click(function() {
-        $('#package_list').show();
-        let packageData = {};
-        packageData.length = $('input[name=package_length]').val();
-        packageData.width = $('input[name=package_width]').val();
-        packageData.height = $('input[name=package_height]').val();
-        packageData.items = [];
-        $('.product_list').each(function(index, item) {
-            if ($(item).css('display') !== 'none') {
-                packageData.items.push({
-                    id: $(item).find('input[name=product_id]').val(),
-                    name: $(item).find('input[type=text]').val(),
-                    quantity: $(item).find('input[type=number]').val(),
-                });
-            }
-        });
-
-        if (checkForm(packageData)) {
-            packageList.push(packageData);
-
-            let packageInfo = `${__('Package',
-              'cdekdelivery')} №${packageList.length} (${packageData.length}х${packageData.width}х${packageData.height}):`;
-
-            packageData.items.forEach(function(item) {
-                packageInfo += `${item.name} х${item.quantity}, `;
-            });
-
-            $('#package_list').append($('<p></p>').text(packageInfo.slice(0, -2)));
-
-            calculateQuantity();
-            cleanForm();
-            checkFullPackage();
-        }
-    });
-
+    const packageList = [];
     let dataUrl = null;
 
-    $('#cdek-order-waybill, #cdek-order-barcode').click(function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const loader = $('#cdek-loader');
-
+    const revokeDataUrl = () => {
         if (dataUrl !== null) {
             URL.revokeObjectURL(dataUrl);
         }
+    };
 
-        loader.show();
+    const metaBox = $('#official_cdek_order')
+      .on('change', '.create select',
+        e => metaBox.find(`.item[data-id=${e.target.value}]`)
+          .attr('aria-hidden', 'false'))
+      .on('click', '.print', e => {
+          e.preventDefault();
+          e.stopPropagation();
 
-        apiFetch({ method: 'GET', url: e.target.href }).then(resp => {
-            if (!resp.success) {
-                alert(resp.message);
-                return;
-            }
+          const loader = metaBox.find('.loader');
+          loader.attr('aria-disabled', 'false');
 
-            const binaryString = window.atob(resp.data);
-            const uint8Array = new Uint8Array(binaryString.length);
-            for (let i = 0; i < binaryString.length; i++) {
-                uint8Array[i] = binaryString.charCodeAt(i);
-            }
-            dataUrl = window.URL.createObjectURL(
-              new Blob([uint8Array], { type: 'application/pdf' }));
+          revokeDataUrl();
 
-            const a = window.document.createElement('a');
-            a.target = '_blank';
-            a.href = dataUrl;
-            window.document.body.appendChild(a);
-            a.click();
-            a.remove();
-
-            window.document.addEventListener('beforeunload',
-              () => URL.revokeObjectURL(dataUrl));
-        })
-          .catch(e => console.error(e))
-          .finally(() => loader.hide());
-    });
-
-    $('#send_package').click(function(e) {
-        const loader = $('#cdek-loader');
-        loader.show();
-
-        apiFetch({
-            method: 'POST', url: e.target.dataset.action, data: {
-                packages: packageList,
-            },
-        })
-          .then(resp => {
-              if (!resp.state) {
-                  $('#cdek-create-order-error').text(resp.message).show();
+          apiFetch({
+              method: 'GET', url: addQueryArgs(ajaxurl, {
+                  action: `${window.cdek.prefix}-${e.target.dataset.action}`,
+                  _wpnonce: window.cdek.nonce,
+                  id: e.target.dataset.id,
+              }),
+          }).then(resp => {
+              if (!resp.success) {
+                  alert(resp.message);
                   return;
               }
 
-              if (resp.door) {
-                  $('#cdek-courier-result-block').hide();
-                  $('#cdek-order-courier').show();
+              const binaryString = window.atob(resp.data);
+              const uint8Array = new Uint8Array(binaryString.length);
+              for (let i = 0; i < binaryString.length; i++) {
+                  uint8Array[i] = binaryString.charCodeAt(i);
               }
-              $('#cdek-create-order-form').hide();
-              $('#cdek-order-number').html(`№ <b>${resp.code}</b>`);
-              $('#cdek-order-number-input').val(resp.code);
-              $('#cdek-info-order').show();
+              dataUrl = window.URL.createObjectURL(
+                new Blob([uint8Array], { type: 'application/pdf' }));
+
+              const a = window.document.createElement('a');
+              a.target = '_blank';
+              a.href = dataUrl;
+              window.document.body.appendChild(a);
+              a.click();
+              a.remove();
+
+              window.document.addEventListener('beforeunload',
+                () => URL.revokeObjectURL(dataUrl));
           })
-          .catch(e => console.error(e))
-          .finally(() => loader.hide());
-    });
+            .catch(e => console.error(e))
+            .finally(() => loader.attr('aria-disabled', 'true'));
+      })
+      .on('click', '.create button.package', e => {
+          e.preventDefault();
+          e.stopPropagation();
 
-    function checkFullPackage() {
-        let option = $('#selected_product option');
-        if (option.length === 1) {
-            $('#setting_block').hide();
-            $('#save_package_btn_block').hide();
-            $('#send_package_btn_block').show();
-        }
-    }
+          const packageData = {
+              length: parseInt(metaBox.find('input[name=length]').val()),
+              width: parseInt(metaBox.find('input[name=width]').val()),
+              height: parseInt(metaBox.find('input[name=height]').val()),
+              items: metaBox.find(`.item[data-id][aria-hidden=false]`)
+                .map((i, e) => ({
+                    id: parseInt(e.dataset.id),
+                    name: $(e).text(),
+                    qty: parseInt($(e).find('input[type=number]').val()),
+                })).toArray(),
+          };
 
-    function checkForm(packageData) {
-        if (packageData.length === '') {
-            alert(__('Packing length not specified', 'cdekdelivery'));
-            return false;
-        }
-        if (packageData.width === '') {
-            alert(__('Packing width not specified', 'cdekdelivery'));
-            return false;
-        }
-        if (packageData.height === '') {
-            alert(__('Packing height not specified', 'cdekdelivery'));
-            return false;
-        }
-        if (packageData.items.length === 0) {
-            alert(__('Products not added to packaging', 'cdekdelivery'));
-            return false;
-        }
-        return true;
-    }
+          if (packageData.length < 1) {
+              alert(__('Package length not specified', 'cdekdelivery'));
+              return;
+          }
+          if (packageData.width < 1) {
+              alert(__('Package width not specified', 'cdekdelivery'));
+              return;
+          }
+          if (packageData.height < 1) {
+              alert(__('Package height not specified', 'cdekdelivery'));
+              return;
+          }
+          if (packageData.items.length < 1) {
+              alert(__('Package not added to packaging', 'cdekdelivery'));
+              return;
+          }
 
-    function calculateQuantity() {
-        $('.product_list').each(function(index, item) {
-            if ($(item).css('display') !== 'none') {
-                let max = $(item).find('input[type=number]').attr('max');
-                let current = max - $(item).find('input[type=number]').val();
-                if (current !== 0) {
-                    $(item).find('input[type=number]').attr('max', current);
-                } else {
-                    $('#selected_product option').each(function(ind, option) {
-                        if ($(option).text() ===
-                          $(item).find('input[type=text]').val()) {
-                            $(option).remove();
-                        }
-                    });
+          packageList.push(packageData);
+
+          metaBox.find('.create .list')
+            .append($('<p></p>')
+              .text(__('Package', 'cdekdelivery') +
+                ` №${packageList.length} (${packageData.length}х${packageData.width}х${packageData.height}):` +
+                packageData.items.reduce(
+                  (acc, e) => acc + `${e.name}${e.qty}, `, '').slice(0, -2)));
+
+          metaBox.find(`.create .item[data-id][aria-hidden=false]`)
+            .each((i, e) => {
+                const input = $(e).find('input[type=number]');
+
+                const left = input.attr('max') - input.val();
+
+                if (left !== 0) {
+                    input.attr('max', left);
+                    return;
                 }
-            }
-        });
-    }
 
-    function cleanForm() {
-        $('#selected_product').val(-1);
-        $('.product_list').each(function(index, item) {
-            $(item).find('input[type=number]').val(1);
-            $(item).css('display', 'none');
-            $('input[name=package_length]').val('');
-            $('input[name=package_width]').val('');
-            $('input[name=package_height]').val('');
-        });
-    }
+                metaBox.find(`.create select option[value=${e.dataset.id}]`)
+                  .remove();
+            });
 
-    $('#create-order-btn').click(function(e) {
-        $('#cdek-create-order-error').hide();
-        $('#cdek-loader').show();
-        apiFetch({
-            method: 'POST', url: e.target.dataset.action, data: {
-                packages: [
-                    {
-                        length: $('input[name=package_length]').val(),
-                        width: $('input[name=package_width]').val(),
-                        height: $('input[name=package_height]').val(),
-                    }],
-            },
-        })
-          .then(resp => {
-              if (!resp.state) {
-                  $('#cdek-create-order-error')
-                    .text(resp.message)
-                    .show();
-              } else {
-                  if (resp.door) {
-                      $('#cdek-courier-result-block').hide();
-                      $('#cdek-order-courier').show();
-                  }
-                  $('#cdek-status-block')
-                    .data('status-available', resp.available);
-                  checkOrderAvailable();
-                  $('#cdek-order-status-block').html(resp.statuses);
-                  $('#cdek-create-order-form').hide();
-                  $('#cdek-order-number')
-                    .html(`№ <b>${resp.code}</b>`);
-                  $('#cdek-order-number-input').val(resp.code);
-                  $('#cdek-info-order').show();
-              }
+          metaBox.find('.create select').val(-1);
+          metaBox.find('.create .pack input[type=text]').val('');
+          metaBox.find('.create .item[data-id][aria-hidden=false]')
+            .attr('aria-hidden', 'true');
+
+          if (metaBox.find('.create select option').length !== 1) {
+              return;
+          }
+
+          metaBox.find('.create').attr('aria-invalid', 'false');
+      })
+      .on('click', '.create button', e => {
+          if (!Object.prototype.hasOwnProperty.call(e.target.dataset, 'id')) {
+              return;
+          }
+
+          e.preventDefault();
+          e.stopPropagation();
+
+          revokeDataUrl();
+
+          const loader = metaBox.find('.loader');
+          loader.attr('aria-disabled', 'false');
+
+          apiFetch({
+              method: 'POST', url: addQueryArgs(ajaxurl, {
+                  action: `${window.cdek.prefix}-create`,
+                  _wpnonce: window.cdek.nonce,
+                  id: e.target.dataset.id,
+              }), data: packageList.length !== 0 ? packageList : [
+                  {
+                      length: metaBox.find('input[name=length]').val(),
+                      width: metaBox.find('input[name=width]').val(),
+                      height: metaBox.find('input[name=height]').val(),
+                  }], parse: false,
           })
-          .catch(e => console.log(e))
-          .finally(() => $('#cdek-loader').hide());
-    });
+            .then(r => r.text()).then(t => metaBox.find('.inside').html(t))
+            .catch(e => console.error(e))
+            .finally(() => loader.attr('aria-disabled', 'true'));
+      })
+      .on('click', '.deletion', e => {
+          e.preventDefault();
+          e.stopPropagation();
 
-    $('#delete-order-btn').click(function(event) {
-        event.preventDefault();
-        $(event.target).addClass('clicked');
-        $('#cdek-create-order-error').hide();
-        $('#cdek-courier-error').hide();
-        $('#cdek-loader').show();
-        apiFetch({
-            method: 'POST', url: event.target.href,
-        }).then(resp => {
-            if (!resp.state) {
-                $('#cdek-delete-order-error')
-                  .text(resp.message)
-                  .show();
-                $('#delete-order-btn').hide();
-            } else {
-                alert(resp.message);
-                $(event.target).removeClass('clicked');
-                $('#cdek-create-order-form').show();
-                $('#cdek-info-order').hide();
-            }
-        }).catch(e => console.error(e)).finally(() => $('#cdek-loader').hide());
-    });
+          revokeDataUrl();
 
-    $('#cdek-courier-send-call').click(function(event) {
-        $('#cdek-courier-error').hide();
-        $('#cdek-loader').show();
-        apiFetch({
-            method: 'POST', url: event.target.dataset.action, data: {
-                order_id: $('input[name=package_order_id]').val(),
-                date: $('#cdek-courier-date').val(),
-                starttime: $('#cdek-courier-startime').val(),
-                endtime: $('#cdek-courier-endtime').val(),
-                name: $('#cdek-courier-name').val(),
-                phone: $('#cdek-courier-phone').val(),
-                address: $('#cdek-courier-address').val(),
-                desc: $('#cdek-courier-package-desc').val(),
-                comment: $('#cdek-courier-comment').val(),
-                weight: $('#cdek-courier-weight').val(),
-                length: $('#cdek-courier-length').val(),
-                width: $('#cdek-courier-width').val(),
-                height: $('#cdek-courier-height').val(),
-                need_call: $('#cdek-courier-call').prop('checked'),
-            },
-        }).then(resp => {
-            if (!resp) {
-                $('#cdek-courier-error').html(resp.message).show();
-            } else {
-                $('#call-courier-form').hide();
-                $('#cdek-order-courier').hide();
-                $('#cdek-courier-info').text(resp.message).show();
-                $('#cdek-courier-result-block').show();
-            }
-        }).catch(e => console.error(e)).finally(() => $('#cdek-loader').hide());
-    });
+          const loader = metaBox.find('.loader');
+          loader.attr('aria-disabled', 'false');
 
-    $('#cdek-order-courier').click(function() {
-        $('#call-courier-form').toggle();
-    });
+          apiFetch({
+              method: 'POST', url: addQueryArgs(ajaxurl, {
+                  action: `${window.cdek.prefix}-${e.target.dataset.action}`,
+                  _wpnonce: window.cdek.nonce,
+                  id: e.target.dataset.id,
+              }), parse: false,
+          })
+            .then(r => r.text()).then(t => metaBox.find('.inside').html(t))
+            .catch(e => console.error(e))
+            .finally(() => loader.attr('aria-disabled', 'true'));
+      })
+      .on('click', '.toggle', e => {
+          const target = e.target.classList.contains('toggle')
+            ? e.target.parentElement
+            : e.target.parentElement.parentElement;
 
-    $('#cdek-courier-delete').click(function(event) {
-        $('#cdek-loader').show();
-        apiFetch({
-            method: 'POST', url: event.target.dataset.action, data: {
-                order_id: $('input[name=package_order_id]').val(),
-            },
-        }).then(resp => {
-            if (resp) {
-                $('#cdek-courier-result-block').hide();
-                $('#cdek-order-courier').show();
-            }
-        }).catch(e => console.error(e)).finally(() => $('#cdek-loader').hide());
-    });
+          target.ariaExpanded = target.ariaExpanded === 'true'
+            ? 'false'
+            : 'true';
+      })
+      .on('click', '.intake button', e => {
+          e.preventDefault();
+          e.stopPropagation();
 
-    $('#cdek-info-order')
-      .on('click', '#cdek-order-status-btn', function(event) {
-          let statusList = $('#cdek-order-status-list');
-          let arrowUp = $('#cdek-btn-arrow-up');
-          let arrowDown = $('#cdek-btn-arrow-down');
+          revokeDataUrl();
 
-          statusList.toggle();
-          arrowUp.toggle(!statusList.is(':visible'));
-          arrowDown.toggle(statusList.is(':visible'));
+          metaBox.find('.intake input[required]')
+            .each((i, e) => e.ariaInvalid = e.value === '' ? 'true' : 'false');
+
+          if (metaBox.find(
+            '.intake input[required][aria-invalid=true]').length > 0) {
+              return;
+          }
+
+          const loader = metaBox.find('.loader');
+          loader.attr('aria-disabled', 'false');
+
+          apiFetch({
+              method: 'POST', url: addQueryArgs(ajaxurl, {
+                  action: `${window.cdek.prefix}-intake_create`,
+                  _wpnonce: window.cdek.nonce,
+                  id: e.target.dataset.id,
+              }), data: {
+                  date: metaBox.find('input[name=date]').val(),
+                  from: metaBox.find('input[name=from]').val(),
+                  to: metaBox.find('input[name=to]').val(),
+                  desc: metaBox.find('input[name=desc]').val(),
+                  comment: metaBox.find('input[name=comment]').val(),
+                  weight: parseInt(metaBox.find('input[name=weight]').val()),
+                  call: metaBox.find('input[name=call]').is(':checked'),
+              }, parse: false,
+          })
+            .then(r => r.text()).then(t => metaBox.find('.inside').html(t))
+            .catch(e => console.error(e))
+            .finally(() => loader.attr('aria-disabled', 'true'));
       });
-
 });

@@ -12,7 +12,8 @@ namespace Cdek\Model {
     use Cdek\CdekApi;
     use Cdek\Contracts\MetaModelContract;
     use Cdek\Exceptions\OrderNotFoundException;
-    use DateTime;
+    use DateTimeImmutable;
+    use DateTimeInterface;
     use InvalidArgumentException;
     use WC_Order;
     use WP_Post;
@@ -67,6 +68,7 @@ namespace Cdek\Model {
             ];
         private const META_KEY = 'order_data';
         private WC_Order $order;
+        private ?ShippingItem $shipping = null;
         private ?bool $locked = null;
 
         /**
@@ -141,11 +143,17 @@ namespace Cdek\Model {
 
         final public function getShipping(): ?ShippingItem
         {
+            if ($this->shipping !== null) {
+                return $this->shipping;
+            }
+
             $shippingMethods = $this->order->get_shipping_methods();
 
             foreach ($shippingMethods as $method) {
                 try {
-                    return new ShippingItem($method);
+                    $this->shipping = new ShippingItem($method);
+
+                    return $this->shipping;
                 } catch (InvalidArgumentException $e) {
                     continue;
                 }
@@ -176,7 +184,7 @@ namespace Cdek\Model {
                 return [];
             }
 
-            if($statuses === null){
+            if ($statuses === null) {
                 $orderInfo = (new CdekApi)->orderGet($this->uuid);
                 if ($orderInfo->entity() === null) {
                     throw new OrderNotFoundException;
@@ -187,7 +195,7 @@ namespace Cdek\Model {
 
             $statuses = array_map(static fn(array $st)
                 => [
-                'time' => DateTime::createFromFormat('Y-m-d\TH:i:sO', $st['date_time']),
+                'time' => DateTimeImmutable::createFromFormat(DateTimeInterface::ATOM, $st['date_time']),
                 'name' => $st['name'],
                 'code' => $st['code'],
             ], $statuses);

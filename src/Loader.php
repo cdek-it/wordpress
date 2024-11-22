@@ -30,7 +30,7 @@ namespace Cdek {
     use Cdek\UI\CdekWidget;
     use Cdek\UI\CheckoutMap;
     use Cdek\UI\Frontend;
-    use Cdek\UI\MetaBoxes;
+    use Cdek\Blocks\AdminOrderBox;
     use Cdek\Validator\CheckoutValidator;
     use RuntimeException;
 
@@ -205,9 +205,9 @@ namespace Cdek {
             add_filter('plugin_row_meta', [Admin::class, 'addPluginRowMeta'], 10, 2);
 
             add_action('rest_api_init', new CallbackController);
-            add_action('rest_api_init', new OrderController);
-            add_action('rest_api_init', new IntakeController);
 
+            add_action('admin_init', new IntakeController);
+            add_action('admin_init', new OrderController);
             add_action('admin_init', new SettingsController);
 
             add_filter('woocommerce_hidden_order_itemmeta', [DataCleaner::class, 'hideMeta']);
@@ -261,7 +261,7 @@ namespace Cdek {
             CdekWidget::new()();
             Admin::new()();
             Frontend::new()();
-            MetaBoxes::new()();
+            AdminOrderBox::new()();
             AdminNotices::new()();
         }
 

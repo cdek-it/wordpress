@@ -1,126 +1,141 @@
-#delete-order-btn {
-  cursor: pointer;
-  color: #b32d2e;
-  text-decoration: none;
-  margin-left: auto;
-}
+#official_cdek_order {
+  .inside {
+    padding: 0;
 
-#delete-order-btn:hover {
-  text-decoration: underline;
-}
+    & > div {
+      padding: 0 12px;
 
-#delete-order-btn.clicked {
-  color: gray;
-  text-decoration: none;
-  cursor: default;
-}
+      &.submitbox {
+        padding-bottom: 12px;
+      }
+    }
+  }
 
-#cdek-create-order-error {
-  color: #b32d2e;
-}
+  .loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    position: absolute;
+    top: -13px;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    background: rgba(238, 238, 238, .5);
 
-#cdek-delete-order-error {
-  color: #b32d2e;
-}
+    &[aria-disabled=true] {
+      display: none;
+    }
 
-#cdek-courier-info {
-  margin: auto;
-}
+    span {
+      background: url(../img/loader.svg) no-repeat;
+      background-size: contain;
+      -webkit-animation: spin 1s linear infinite;
+      -moz-animation: spin 1s linear infinite;
+      animation: spin 1s linear infinite;
+      display: block;
+      width: 100px;
+      height: 100px;
+    }
+  }
 
-#cdek-courier-error {
-  color: #b32d2e;
-}
+  .print {
+    text-decoration: none;
+    margin: auto;
 
-#cdek-courier-block {
-  margin-top: 10px;
-}
+    :hover {
+      text-decoration-line: underline;
+    }
+  }
 
-#call-courier-form {
-  display: none;
-}
+  .deletion {
+    text-decoration: underline;
+  }
 
-#cdek-courier-block input {
-  margin-top: 5px;
-}
+  .intake {
+    .form {
+      margin: 10px 0;
 
-#cdek-courier-block p {
-  margin: auto;
-}
+      input {
+        margin: 2px 0;
+      }
+    }
 
-#cdek-courier-delete {
-  color: #b32d2e;
-  text-decoration: none;
-}
+    &[aria-expanded=false] .form {
+      display: none;
+    }
+  }
 
-#cdek-courier-delete:hover {
-  text-decoration-line: underline;
-}
+  .create {
+    &[aria-invalid] {
+      padding-bottom: 12px;
+    }
 
-#cdek-order-courier {
-  margin: auto;
-  color: #2271b1;
-  cursor: pointer;
-}
+    &[aria-invalid="true"] {
+      button[data-id] {
+        display: none;
+      }
+    }
 
-#cdek-order-courier:hover {
-  text-decoration-line: underline;
-}
+    &[aria-invalid="false"] > div:first-of-type {
+      display: none;
+    }
 
-#cdek-order-waybill, #cdek-order-barcode {
-  text-decoration: none;
-  margin: auto;
-}
+    .item {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
 
-#cdek-order-waybill:hover, #cdek-order-barcode:hover {
-  text-decoration-line: underline;
-}
+      span:last-of-type {
+        margin: 0 10px;
+      }
 
-#cdek-order-barcode {
-  display: block;
-}
+      input[type=number] {
+        width: 4em;
+      }
 
-#cdek-courier-delete {
-  cursor: pointer;
-}
+      &[aria-hidden=true] {
+        display: none;
+      }
+    }
+  }
 
-#cdek-loader {
-  z-index: 50;
-  /*background-color: #e3e5e5;*/
-  position: absolute;
-  top: 0;
-  width: 91%;
-  height: 94%;
-  opacity: 50%;
-  background: rgba(255, 255, 255, 0.8) url(../img/preloader.gif) center center no-repeat;
-}
+  .actions {
+    display: block;
+    cursor: pointer;
 
-.cdek-error {
-  padding: 5px;
-  background: #E58787;
-}
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 
-.cdek-order-status-elem-name {
-  padding: 3px;
-}
+  .buttons {
+    display: flex;
+    justify-content: end;
+  }
 
-#cdek-order-status-btn {
-  display: inline-flex;
-  cursor: pointer;
-  width: 100%;
-}
+  .status {
+    &[aria-expanded=false] .list {
+      display: none;
+    }
 
-#cdek-order-status-btn:hover {
-  background-color: #2271b12e;
-}
+    &[aria-expanded=true] .toggle-indicator {
+      rotate: 180deg;
+    }
 
-.cdek-btn-arrow {
-  margin-left: auto;
-}
+    .toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
 
-#cdek-btn-arrow-down {
-  display: none;
-}
+      &:hover {
+        background-color: #2271b12e;
+      }
+    }
 
-#cdek-order-status-list {
-  display: none;
+    .name {
+      padding: 3px;
+    }
+  }
 }
