@@ -19,8 +19,6 @@ namespace Cdek\UI {
     {
         use CanBeCreated;
 
-        private const AVAILABLE_MEASUREMENTS = ['g', 'kg', 'lbs', 'oz'];
-
         public static function weightUnitsConflict(): void
         {
             /** @noinspection GlobalVariableUsageInspection */

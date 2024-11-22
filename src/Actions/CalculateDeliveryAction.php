@@ -104,7 +104,7 @@ namespace Cdek\Actions {
                         continue;
                     }
 
-                    if (!$addTariffsToOffice && Tariff::isToOffice($tariff['tariff_code'])) {
+                    if (!$addTariffsToOffice && Tariff::isToOffice((int)$tariff['tariff_code'])) {
                         continue;
                     }
 
@@ -151,7 +151,7 @@ namespace Cdek\Actions {
                 $api,
                 $deliveryParam
             ) {
-                $rule = Tariff::isToOffice($tariff['meta_data'][MetaKeys::TARIFF_CODE]) ? $priceRules['office'] :
+                $rule = Tariff::isToOffice((int)$tariff['meta_data'][MetaKeys::TARIFF_CODE]) ? $priceRules['office'] :
                     $priceRules['door'];
 
                 if (isset($rule['type'])) {
@@ -173,7 +173,7 @@ namespace Cdek\Actions {
                 }
 
                 $deliveryParam['tariff_code'] = $tariff['meta_data'][MetaKeys::TARIFF_CODE];
-                $deliveryParam['type']        = Tariff::getType($deliveryParam['tariff_code']);
+                $deliveryParam['type']        = Tariff::getType((int)$deliveryParam['tariff_code']);
 
                 $serviceList = Service::factory($this->method, $deliveryParam['tariff_code']);
 
