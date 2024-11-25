@@ -7,19 +7,19 @@ import { debounce } from 'lodash';
 const billingCityInput = $('#billing_city');
 const shippingCityInput = $('#shipping_city');
 let widget = null;
+let el;
 
-
-
-if ((billingCityInput.val() || '') !== '' || (shippingCityInput.val() || '') !== '') {
+if ((billingCityInput.val() || '') !== '' || (shippingCityInput.val() || '') !==
+  '') {
     console.debug('[CDEK-MAP] City has value, initiating checkout update');
     $(document.body).trigger('update_checkout');
 }
 
-const closeMap = (el, errorMessage = null) => {
+const closeMap = (e, errorMessage = null) => {
     console.debug('[CDEK-MAP] Removing selected office info');
 
     $('.cdek-office-info').remove();
-    el.html(__('Choose pick-up', 'cdekdelivery'));
+    e.find('a').html(__('Choose pick-up', 'cdekdelivery'));
     $('.cdek-office-code').val('');
 
     if (widget !== null) {
@@ -35,19 +35,18 @@ const closeMap = (el, errorMessage = null) => {
     }
 };
 
-let el;
-
 const onChoose = (_type, _tariff, address) => {
     $('.cdek-office-code').val(address.code);
-    el.html(__('Re-select pick-up', 'cdekdelivery'));
+    el.find('a').html(__('Re-select pick-up', 'cdekdelivery'));
+
     const officeInfo = el.parent().children('.cdek-office-info');
     if (officeInfo.length === 0) {
-        el.before(
-          `<div class="cdek-office-info">${address.name}</div>`);
+        el.before($('<div class="cdek-office-info"></div>').text(address.name));
     } else {
-        officeInfo.html(`${address.name}`);
+        officeInfo.text(address.name);
     }
-    if ($('.cdek-office-code').data('map-auto-close')) {
+
+    if (window.cdek.close) {
         widget.close();
     }
 };
@@ -74,48 +73,47 @@ $(document.body)
           widget.clearSelection();
       }
   })
-  .on('change', '.shipping_method', () => {
-      $(document.body).trigger('update_checkout');
-  })
+  .on('change', '.shipping_method',
+    () => $(document.body).trigger('update_checkout'))
   .on('click', '.open-pvz-btn', null, (e) => {
-      el = $(e.target);
+      el = e.target.tagName === 'A' ? $(e.target.parentElement) : $(e.target);
       closeMap(el);
 
-      const points = el.data('points');
-      console.debug('[CDEK-MAP] Got points from backend:', points);
+      try {
+          const points = JSON.parse(el.find('script').text());
+          console.debug('[CDEK-MAP] Got points from backend', points);
 
-      if (typeof points !== 'object') {
-          console.error('[CDEK_MAP] backend points not object');
-          closeMap(el,
-                   __('CDEK was unable to load the list of available pickup points, please select another delivery method', 'cdekdelivery'));
+          if (!points.length) {
+              console.warn('[CDEK-MAP] Backend points are empty');
+              closeMap(el, __(
+                'There are no CDEK pick-up points available in this direction, please select another delivery method'));
 
-          return;
-      } else if (!points.length) {
-          console.warn('[CDEK_MAP] backend points are empty');
-          closeMap(el,
-                   __('There are no CDEK pick-up points available in this direction, please select another delivery method')
-                   );
+              return;
+          }
 
-          return;
+          if (widget === null) {
+              widget = new cdekWidget({
+                  apiKey: window.cdek.key,
+                  popup: true,
+                  debug: true,
+                  lang: window.cdek.lang,
+                  defaultLocation: el.data('city'),
+                  officesRaw: points,
+                  hideDeliveryOptions: {
+                      door: true,
+                  },
+                  onChoose,
+              });
+          } else {
+              widget.updateOfficesRaw(points);
+              widget.updateLocation(el.data('city'));
+          }
+
+          widget.open();
+      } catch (SyntaxError) {
+          console.error('[CDEK-MAP] SyntaxError during points parse');
+
+          closeMap(el, __(
+            'There are no CDEK pick-up points available in this direction, please select another delivery method'));
       }
-
-      if (widget === null) {
-          widget = new cdekWidget({
-              apiKey: window.cdek.apiKey,
-              popup: true,
-              debug: true,
-              lang: el.data('lang'),
-              defaultLocation: el.data('city'),
-              officesRaw: points,
-              hideDeliveryOptions: {
-                  door: true,
-              },
-              onChoose,
-          });
-      } else {
-          widget.updateOfficesRaw(points);
-          widget.updateLocation(el.data('city'));
-      }
-
-      widget.open();
   });

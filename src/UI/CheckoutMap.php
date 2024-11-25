@@ -13,7 +13,6 @@ namespace Cdek\UI {
     use Cdek\Config;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Model\Tariff;
-    use Cdek\ShippingMethod;
 
     class CheckoutMap
     {
@@ -34,19 +33,14 @@ namespace Cdek\UI {
 
             $city = $api->cityCodeGet($cityInput, $postcodeInput);
 
-            $points = $city !== null ? $api->officeListRaw($city) : '[]';
-
-            echo '<div class="open-pvz-btn" data-points="'.
-                 esc_attr($points).
-                 '" data-city="'.
+            echo '<div class="open-pvz-btn" data-city="'.
                  esc_attr($cityInput).
-                 '" data-lang="'.
-                 (mb_strpos(get_user_locale(), 'en') === 0 ? 'eng' : 'rus').
                  '">'.
+                 '<script type="application/cdek-offices">'.
+                 wc_esc_json($city !== null ? $api->officeListRaw($city) : '[]', true).
+                 '</script><a>'.
                  esc_html__('Choose pick-up', 'cdekdelivery').
-                 '</div><input name="office_code" class="cdek-office-code" type="hidden" data-map-auto-close="'.
-                 esc_attr(ShippingMethod::factory()->map_auto_close).
-                 '">';
+                 '</a></div><input name="office_code" class="cdek-office-code" type="hidden">';
         }
 
         private function isTariffDestinationCdekOffice($shippingMethodCurrent): bool
