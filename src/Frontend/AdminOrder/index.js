@@ -65,10 +65,29 @@ $(document).ready(() => {
           e.preventDefault();
           e.stopPropagation();
 
+          const len = metaBox.find('input[name=length]').val();
+          const wid = metaBox.find('input[name=width]').val();
+          const hei = metaBox.find('input[name=height]').val();
+
+          if (isNaN(len) || len === '') {
+              alert(__('Package length not specified', 'cdekdelivery'));
+              return;
+          }
+
+          if (isNaN(wid) || wid === '') {
+              alert(__('Package width not specified', 'cdekdelivery'));
+              return;
+          }
+
+          if (isNaN(hei) || hei === '') {
+              alert(__('Package height not specified', 'cdekdelivery'));
+              return;
+          }
+
           const packageData = {
-              length: parseInt(metaBox.find('input[name=length]').val()),
-              width: parseInt(metaBox.find('input[name=width]').val()),
-              height: parseInt(metaBox.find('input[name=height]').val()),
+              length: parseInt(len),
+              width: parseInt(wid),
+              height: parseInt(hei),
               items: metaBox.find(`.item[data-id][aria-hidden=false]`)
                 .map((i, e) => ({
                     id: parseInt(e.dataset.id),
@@ -78,15 +97,15 @@ $(document).ready(() => {
           };
 
           if (packageData.length < 1) {
-              alert(__('Package length not specified', 'cdekdelivery'));
+              alert(__('Package length should be greater 1', 'cdekdelivery'));
               return;
           }
           if (packageData.width < 1) {
-              alert(__('Package width not specified', 'cdekdelivery'));
+              alert(__('Package width be greater 1', 'cdekdelivery'));
               return;
           }
           if (packageData.height < 1) {
-              alert(__('Package height not specified', 'cdekdelivery'));
+              alert(__('Package height be greater 1', 'cdekdelivery'));
               return;
           }
           if (packageData.items.length < 1) {
