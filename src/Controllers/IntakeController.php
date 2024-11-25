@@ -17,7 +17,6 @@ namespace Cdek\Controllers {
     use Cdek\Exceptions\External\InvalidRequestException;
     use Cdek\Model\Order;
     use Cdek\Model\Tariff;
-    use DateTimeImmutable;
     use JsonException;
 
     class IntakeController
@@ -33,12 +32,28 @@ namespace Cdek\Controllers {
                 wp_die(-2, 403);
             }
 
-            $id = (int)$_REQUEST['id'];
+            $id = (int)wp_unslash($_REQUEST['id']);
+
+            try {
+                $order = new Order($id);
+            } catch (ExceptionContract $e) {
+                AdminOrderBox::createOrderMetaBox(
+                    $id,
+                    ['errors' => [$e->getMessage()]],
+                );
+
+                wp_die();
+            }
 
             try {
                 $body = json_decode(file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);
             } catch (JsonException $e) {
-                wp_die($e->getMessage());
+                AdminOrderBox::createOrderMetaBox(
+                    $order,
+                    ['errors' => [$e->getMessage()]],
+                );
+
+                wp_die();
             }
 
             $val = rest_validate_object_value_from_schema($body, [
@@ -84,10 +99,13 @@ namespace Cdek\Controllers {
             ], 'intake');
 
             if (is_wp_error($val)) {
-                wp_die($val);
-            }
+                AdminOrderBox::createOrderMetaBox(
+                    $order,
+                    ['errors' => $val->get_error_messages()],
+                );
 
-            $order = new Order($id);
+                wp_die();
+            }
 
             $shipping = $order->getShipping();
             $tariff   = $shipping !== null ? $shipping->tariff : null;
@@ -105,7 +123,12 @@ namespace Cdek\Controllers {
                 ], 'intake');
 
                 if (is_wp_error($val)) {
-                    wp_die($val);
+                    AdminOrderBox::createOrderMetaBox(
+                        $order,
+                        ['errors' => $val->get_error_messages()],
+                    );
+
+                    wp_die();
                 }
             }
 
