@@ -64,7 +64,7 @@ namespace Cdek\Transport {
             }
 
             if ($result->isClientError()) {
-                throw new HttpClientException($result->error());
+                throw new HttpClientException($result->error() ?? []);
             }
 
             return $result;

@@ -13,7 +13,8 @@
     "lint:css": "wp-scripts lint-style",
     "lint:js": "wp-scripts lint-js",
     "start": "wp-scripts start",
-    "env": "wp-env start --update"
+    "env": "wp-env start --update",
+    "destroy": "wp-env destroy"
   },
   "dependencies": {
     "@cdek-it/widget": "^3.11.0",

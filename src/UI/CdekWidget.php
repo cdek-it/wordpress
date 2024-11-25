@@ -21,8 +21,12 @@ namespace Cdek\UI {
         {
             wp_register_script('cdek-widget', Loader::getPluginUrl('build/cdek-widget.umd.js'));
 
+            $shipping = ShippingMethod::factory();
+
             wp_localize_script('cdek-widget', 'cdek', [
-                'apiKey' => ShippingMethod::factory()->yandex_map_api_key,
+                'key' => $shipping->yandex_map_api_key,
+                'close' => $shipping->map_auto_close,
+                'lang' => mb_strpos(get_user_locale(), 'en') === 0 ? 'eng' : 'rus',
             ]);
         }
 
