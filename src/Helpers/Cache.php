@@ -10,12 +10,17 @@ namespace {
 namespace Cdek\Helpers {
 
     use Cdek\Exceptions\CacheException;
-    use Cdek\Loader;
 
     class Cache
     {
-        private const CACHE_FILE_NAME = '.cache.php';
+        private const CACHE_FILE_NAME = '.cdekdelivery.php';
         private static ?array $store = null;
+
+        public static function clear(): void
+        {
+            unlink(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME);
+            self::$store = null;
+        }
 
         /**
          * @param  string  $key
@@ -50,11 +55,11 @@ namespace Cdek\Helpers {
 
         private static function loadCache(): bool
         {
-            if (!file_exists(Loader::getPluginPath(self::CACHE_FILE_NAME))) {
+            if (!file_exists(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME)) {
                 return false;
             }
 
-            self::$store = require(Loader::getPluginPath(self::CACHE_FILE_NAME));
+            self::$store = require(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME);
 
             return true;
         }
@@ -91,28 +96,18 @@ namespace Cdek\Helpers {
                 self::$store[$key] = $value;
             }
 
-            if (file_exists(Loader::getPluginPath(self::CACHE_FILE_NAME))) {
-                if (!is_writable(Loader::getPluginPath(self::CACHE_FILE_NAME))) {
-                    throw new CacheException(
-                        Loader::getPluginPath(self::CACHE_FILE_NAME),
-                    );
+            if (file_exists(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME)) {
+                if (!is_writable(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME)) {
+                    throw new CacheException(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME);
                 }
-            } elseif (!is_writable(Loader::getPluginPath())) {
-                throw new CacheException(
-                    Loader::getPluginPath(),
-                );
+            } elseif (!is_writable(WP_CONTENT_DIR)) {
+                throw new CacheException(WP_CONTENT_DIR);
             }
 
-            $fp = fopen(Loader::getPluginPath(self::CACHE_FILE_NAME), 'wb');
+            $fp = fopen(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME, 'wb');
 
-            fwrite($fp, '<?php return '.var_export(self::$store, true).';'.PHP_EOL);
+            fwrite($fp, '<?php defined("ABSPATH") or exit; return '.var_export(self::$store, true).';'.PHP_EOL);
             fclose($fp);
-        }
-
-        public static function clear(): void
-        {
-            unlink(Loader::getPluginPath(self::CACHE_FILE_NAME));
-            self::$store = null;
         }
     }
 }

@@ -3,7 +3,7 @@ Contributors: cdekit, caelan
 Tags: ecommerce, shipping, delivery, woocommerce
 Requires at least: 6.0
 Requires PHP: 7.4
-Tested up to: 6.5
+Tested up to: 6.7
 Stable tag: dev
 License: GPLv3
 

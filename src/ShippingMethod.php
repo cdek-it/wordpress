@@ -175,7 +175,7 @@ namespace Cdek {
         {
             $error = (new CdekApi)->authGetError();
             if ($error !== null) {
-                if ($error === 'invalid_client') {
+                if ($error === 'invalid_client' || $error === 'unauthorized') {
                     WC_Admin_Settings::add_error(
                         esc_html__(
                             'Error receiving token from CDEK API. Make sure the integration keys are correct',

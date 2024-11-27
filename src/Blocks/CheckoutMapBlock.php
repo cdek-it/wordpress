@@ -57,8 +57,10 @@ namespace Cdek\Blocks {
 
             try {
                 $city = $api->cityCodeGet($cityInput, $postcodeInput);
+                $points = $city !== null ? $api->officeListRaw($city) : '[]';
             } catch (ExceptionContract $e) {
                 $city = null;
+                $points = '[]';
             }
 
             return [
@@ -67,7 +69,7 @@ namespace Cdek\Blocks {
                     'postcode' => $postcodeInput,
                 ],
                 'city'   => $city,
-                'points' => $city !== null ? $api->officeListRaw($city) : '[]',
+                'points' => $points,
             ];
         }
 

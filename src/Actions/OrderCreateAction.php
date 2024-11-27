@@ -191,7 +191,7 @@ namespace Cdek\Actions {
                     ],
                 ],
                 'from_location'   => [
-                    'city'    => $deliveryMethod->city_code,
+                    'code'    => $deliveryMethod->city_code,
                     'address' => $deliveryMethod->address,
                 ],
                 'developer_key'   => Config::DEV_KEY,
