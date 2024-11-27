@@ -17,7 +17,7 @@
     "destroy": "wp-env destroy"
   },
   "dependencies": {
-    "@cdek-it/widget": "^3.11.0",
+    "@cdek-it/widget": "^3.11.1",
     "@woocommerce/data": "^5.0.0",
     "@woocommerce/settings": "^1.0.0",
     "@wordpress/api-fetch": "^7.11.0",
