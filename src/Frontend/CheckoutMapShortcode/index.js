@@ -86,7 +86,8 @@ $(document.body)
           if (!points.length) {
               console.warn('[CDEK-MAP] Backend points are empty');
               closeMap(el, __(
-                'There are no CDEK pick-up points available in this direction, please select another delivery method'));
+                'There are no CDEK pick-up points available in this direction, please select another delivery method',
+                'cdekdelivery'));
 
               return;
           }
@@ -114,6 +115,7 @@ $(document.body)
           console.error('[CDEK-MAP] SyntaxError during points parse');
 
           closeMap(el, __(
-            'There are no CDEK pick-up points available in this direction, please select another delivery method'));
+            'There are no CDEK pick-up points available in this direction, please select another delivery method',
+            'cdekdelivery'));
       }
   });
