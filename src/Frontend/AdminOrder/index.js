@@ -101,15 +101,15 @@ $(document).ready(() => {
               return;
           }
           if (packageData.width < 1) {
-              alert(__('Package width be greater 1', 'cdekdelivery'));
+              alert(__('Package width should be greater 1', 'cdekdelivery'));
               return;
           }
           if (packageData.height < 1) {
-              alert(__('Package height be greater 1', 'cdekdelivery'));
+              alert(__('Package height should be greater 1', 'cdekdelivery'));
               return;
           }
           if (packageData.items.length < 1) {
-              alert(__('Package not added to packaging', 'cdekdelivery'));
+              alert(__('Items not added to package', 'cdekdelivery'));
               return;
           }
 
