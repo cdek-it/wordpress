@@ -57,7 +57,7 @@ namespace Cdek\Actions {
                 return new ValidationResult(
                     false, sprintf(
                     esc_html__(/* translators: %s: Order number */
-                        'An error occurred while deleting the order. Order number %s was not found.',
+                        'An error occurred while deleting the order. Order number %s was not found',
                         'cdekdelivery',
                     ),
                     $orderNumber,
@@ -83,7 +83,7 @@ namespace Cdek\Actions {
                 return new ValidationResult(
                     false, sprintf(
                     esc_html__(/* translators: %s: Order number */
-                        'An error occurred while deleting the order. Order number %s was not deleted.',
+                        'An error occurred while deleting the order. Order number %s was not deleted',
                         'cdekdelivery',
                     ),
                     $orderNumber,
@@ -93,7 +93,7 @@ namespace Cdek\Actions {
 
             IntakeDeleteAction::new()($orderId);
 
-            return new ValidationResult(true, esc_html__('Waybill has been deleted.', 'cdekdelivery'));
+            return new ValidationResult(true, esc_html__('Waybill has been deleted', 'cdekdelivery'));
         }
     }
 }
