@@ -15,7 +15,7 @@
     "docs:typecheck": "tsc"
   },
   "dependencies": {
-    "@docusaurus/core": "^3.6.1",
+    "@docusaurus/core": "^3.6.3",
     "@docusaurus/plugin-ideal-image": "^3.6.1",
     "@docusaurus/preset-classic": "^3.6.1",
     "@mdx-js/react": "^3.1.0",
