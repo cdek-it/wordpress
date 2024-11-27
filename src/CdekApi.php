@@ -129,14 +129,14 @@ namespace Cdek {
             )->json();
         }
 
-        public function checkAuth(): bool
+        public function authGetError(): ?string
         {
             try {
-                $this->tokenStorage->getToken();
+                $this->fetchToken();
 
-                return true;
+                return null;
             } catch (LegacyAuthException $e) {
-                return false;
+                return $e->getData()['code'] ?? $e->getData()['error'] ?? 'unknown';
             }
         }
 

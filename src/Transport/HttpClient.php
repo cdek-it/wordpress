@@ -117,7 +117,7 @@ namespace Cdek\Transport {
             }
 
             if (!headers_sent()) {
-                header("X-Requester-IP: $ip");
+                header("X-Origin-IP: $ip");
             }
 
             return $ip;

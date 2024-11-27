@@ -173,13 +173,26 @@ namespace Cdek {
 
         final public function admin_options(): void
         {
-            if (!(new CdekApi)->checkAuth()) {
-                WC_Admin_Settings::add_error(
-                    esc_html__(
-                        'Error receiving token from CDEK API. Make sure the integration keys are correct',
-                        'cdekdelivery',
-                    ),
-                );
+            $error = (new CdekApi)->authGetError();
+            if ($error !== null) {
+                if ($error === 'invalid_client') {
+                    WC_Admin_Settings::add_error(
+                        esc_html__(
+                            'Error receiving token from CDEK API. Make sure the integration keys are correct',
+                            'cdekdelivery',
+                        ),
+                    );
+                } else {
+                    WC_Admin_Settings::add_error(
+                        sprintf(
+                            esc_html__(
+                                'Error receiving token from CDEK API. Contact plugin support. Error code: %s',
+                                'cdekdelivery',
+                            ),
+                            $error,
+                        ),
+                    );
+                }
                 WC_Admin_Settings::show_messages();
             }
 

@@ -93,7 +93,7 @@ namespace Cdek\Blocks {
 
             add_action('admin_enqueue_scripts', [__CLASS__, 'registerOrderScripts']);
 
-            if (!(new CdekApi($shipping->getInstanceId()))->checkAuth()) {
+            if ((new CdekApi($shipping->getInstanceId()))->authGetError() !== null) {
                 add_meta_box(
                     Config::ORDER_META_BOX_KEY,
                     Loader::getPluginName(),

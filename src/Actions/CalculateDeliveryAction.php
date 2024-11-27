@@ -36,7 +36,7 @@ namespace Cdek\Actions {
             $this->method = ShippingMethod::factory($instanceID);
             $api          = new CdekApi($instanceID);
 
-            if (empty($this->method->city_code) || !$api->checkAuth()) {
+            if (empty($this->method->city_code) || $api->authGetError() !== null) {
                 return [];
             }
 

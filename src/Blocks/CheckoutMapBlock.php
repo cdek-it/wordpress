@@ -14,6 +14,7 @@ namespace Cdek\Blocks {
     use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
     use Cdek\CdekApi;
     use Cdek\Config;
+    use Cdek\Contracts\ExceptionContract;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\UI;
     use Cdek\Model\Order;
@@ -54,7 +55,11 @@ namespace Cdek\Blocks {
 
             $api = new CdekApi;
 
-            $city = $api->cityCodeGet($cityInput, $postcodeInput);
+            try {
+                $city = $api->cityCodeGet($cityInput, $postcodeInput);
+            } catch (ExceptionContract $e) {
+                $city = null;
+            }
 
             return [
                 'inputs' => [
