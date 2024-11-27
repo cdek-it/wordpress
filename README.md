@@ -11,25 +11,24 @@ Integration with CDEK delivery for your WooCommerce store.
 
 == Description ==
 
-CDEKDelivery обеспечивает интеграцию с доставкой от CDEK для вашего магазина на платформе WordPress WooCommerce.
-Этот плагин позволяет настраивать параметры доставки в соответствии с требованиями вашего магазина и позволяет покупателям
-выбирать доставку от CDEK при оформлении заказов.
+CDEKDelivery provides integration with CDEK delivery for your store on the WordPress WooCommerce platform. This 
+plugin allows you to customize delivery settings according to your store requirements and allow customers to choose 
+CDEK shipping when placing orders.
 
-Плагин умеет:
+Main plugin features:
 
-* Активировать тестовый режим для проверки работы без интеграции с реальными данными.
-* Обрабатывать международные заказы и предоставлять соответствующие опции доставки.
-* Автоматически отправлять заказы в СДЭК после оформления на сайте.
-* Позволяет выбирать различные тарифы для отправки с учетом требований клиента и характеристик товаров.
-* Менять стандартные названия тарифов, чтобы адаптировать их под свои нужды.
-* Реализует режим многоместки для распределения элементов заказа по разным упаковкам.
-* Позволяет создать заявку на вызов курьера.
-* Видеть изменение статуса заказа на детальной странице заказа.
-* Добавляет дополнительные дни к расчетным дням доставки, учитывая возможные задержки.
-* Позволяет выбирать офис и адрес отправления на удобном виджете в настройках плагина.
-* Задает габариты товара по умолчанию для более точного расчета стоимости доставки.
-* Позволяет распечатывать квитанции заказов и ШК для отправки.
-* Предоставляет выбор различных дополнительных услуг, таких как страхование и примерка, а также гибкую модификацию стоимости доставки в зависимости от выбранных услуг и параметров заказа.
+* Test mode for checking operation without real data integration.
+* Processing of international orders and providing appropriate delivery options.
+* Automatically sending orders to CDEK after checkout on the website.
+* Selection of various rates for shipment based on customer requirements and product characteristics.
+* You can change standard rate names to adapt them to specific needs.
+* Multi-seater mode to distribute order items across different packages.
+* Creation of a request for courier pickup.
+* Parcel actual status on the admin order page.
+* Extra days to the estimated delivery days, considering possible delays.
+* Default product dimensions for more accurate shipping cost calculation.
+* Printing of order receipts and barcodes for shipping.
+* Provide a choice of various additional services, such as insurance and fitting, as well as flexible modification of the shipping cost depending on the selected services and order parameters.
 
 ## Особенности плагина
 * Расчет стоимости и времени доставки
