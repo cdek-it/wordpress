@@ -37,6 +37,15 @@ namespace Cdek {
             return sprintf('%s-%s', Config::TASK_MANAGER_HOOK_NAME, $taskName);
         }
 
+        public static function cancelExecution(): void
+        {
+            as_unschedule_all_actions(Config::TASK_MANAGER_HOOK_NAME);
+
+            foreach (array_keys(self::TASK_CLASSES) as $task) {
+                as_unschedule_all_actions(self::getHookName($task));
+            }
+        }
+
         public static function scheduleExecution(): void
         {
             if (as_has_scheduled_action(Config::TASK_MANAGER_HOOK_NAME) !== false) {
@@ -55,15 +64,6 @@ namespace Cdek {
             );
         }
 
-        public static function cancelExecution(): void
-        {
-            as_unschedule_all_actions(Config::TASK_MANAGER_HOOK_NAME);
-
-            foreach (array_keys(self::TASK_CLASSES) as $task) {
-                as_unschedule_all_actions(self::getHookName($task));
-            }
-        }
-
         /**
          * @throws \Cdek\Exceptions\CacheException
          * @throws \Cdek\Exceptions\External\ApiException
@@ -71,6 +71,10 @@ namespace Cdek {
          */
         public function __invoke(): void
         {
+            if (!(new CoreApi)->isAuthorized()) {
+                return;
+            }
+
             $tasks = $this->loadTasks();
 
             if (empty($tasks)) {

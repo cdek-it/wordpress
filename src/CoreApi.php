@@ -39,6 +39,16 @@ namespace Cdek {
             )->data();
         }
 
+        public function isAuthorized(): bool
+        {
+            try {
+                $this->getToken();
+                return true;
+            } catch (CoreAuthException $e) {
+                return false;
+            }
+        }
+
         /**
          * @throws CoreAuthException
          * @throws \Cdek\Exceptions\CacheException
