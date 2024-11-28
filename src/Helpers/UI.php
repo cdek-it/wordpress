@@ -14,22 +14,6 @@ namespace Cdek\Helpers {
 
     class UI
     {
-        public static function buildRestUrl(
-            string $path,
-            array $args = [],
-            string $prefix = Config::DELIVERY_NAME
-        ): string {
-            $prefix = substr($prefix, -1) === '/' ? $prefix : "$prefix/";
-
-            $route = substr($path, 0, 1) === '/' ? substr($path, 1) : $path;
-
-            $args['_wpnonce'] = wp_create_nonce('wp_rest');
-
-            $url = add_query_arg($args, rest_url($prefix.$route));
-
-            return Loader::debug() ? $url.'&'.Config::MAGIC_KEY : $url;
-        }
-
         public static function enqueueScript(
             string $handle,
             string $fileName,

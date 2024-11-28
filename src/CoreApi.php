@@ -118,7 +118,7 @@ namespace Cdek {
                     [
                         'name' => get_bloginfo('name'),
                         'url'  => [
-                            'rest'  => rest_url(),
+                            'rest'  => rest_url(Config::DELIVERY_NAME),
                             'home'  => home_url(),
                             'admin' => admin_url(),
                         ],
