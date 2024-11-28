@@ -39,7 +39,7 @@ namespace Cdek {
             )->data();
         }
 
-        public function isAuthorized(): bool
+        public function hasToken(): bool
         {
             try {
                 $this->getToken();
@@ -128,7 +128,7 @@ namespace Cdek {
                     [
                         'name' => get_bloginfo('name'),
                         'url'  => [
-                            'rest'  => rest_url(Config::DELIVERY_NAME),
+                            'rest'  => rest_url(Config::DELIVERY_NAME . '/cb'),
                             'home'  => home_url(),
                             'admin' => admin_url(),
                         ],

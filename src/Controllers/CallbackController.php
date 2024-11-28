@@ -29,7 +29,7 @@ class CallbackController
 
     public function __invoke(): void
     {
-        register_rest_route(Config::DELIVERY_NAME, '/', [
+        register_rest_route(Config::DELIVERY_NAME, '/cb', [
             'methods'             => WP_REST_Server::CREATABLE,
             'callback'            => [__CLASS__, 'handle'],
             'permission_callback' => [Tokens::class, 'checkIncomingRequest'],

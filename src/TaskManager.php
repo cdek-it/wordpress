@@ -71,7 +71,7 @@ namespace Cdek {
          */
         public function __invoke(): void
         {
-            if (!(new CoreApi)->isAuthorized()) {
+            if (!(new CoreApi)->hasToken()) {
                 return;
             }
 
