@@ -116,24 +116,24 @@ namespace Cdek\Actions {
             $param             = $this->buildRequestData();
             $param['packages'] = $this->buildPackagesData($packages);
 
-            $orderData = $this->api->orderCreate($param);
+            $uuid = $this->api->orderCreate($param);
 
             sleep(5);
 
-            $cdekNumber = $this->getCdekOrderNumber($orderData['entity']['uuid']);
+            $track = $this->getCdekOrderNumber($uuid);
 
-            $this->order->number = $cdekNumber;
-            $this->order->uuid   = $orderData['entity']['uuid'];
+            $this->order->number = $track;
+            $this->order->uuid   = $uuid;
             $this->order->save();
 
-            if (!empty($cdekNumber)) {
+            if (!empty($track)) {
                 Note::send(
                     $this->order->id,
                     sprintf(
                         esc_html__(/* translators: 1: tracking number */ 'Tracking number: %1$s',
                             'cdekdelivery',
                         ),
-                        $cdekNumber,
+                        $track,
                     ),
                     true,
                 );

@@ -137,9 +137,21 @@ namespace Cdek\Controllers {
                 $result   = OrderCreateAction::new()($id, 0, $body);
                 $messages = $result->state ? null : [$result->message];
             } catch (InvalidRequestException $e) {
-                $messages = array_map(static fn(array $el) => $el['message'], $e->getData()['errors']);
+                $messages = array_map(
+                    static fn(array $el)
+                        => sprintf(
+                        esc_html__('Server returned validation error: %s', 'cdekdelivery'),
+                        $el['message'],
+                    ),
+                    $e->getData()['errors'],
+                );
             } catch (ExceptionContract $e) {
-                $messages = [$e->getMessage()];
+                $messages = [
+                    sprintf(
+                        esc_html__('Server returned an error: %s', 'cdekdelivery'),
+                        $e->getMessage(),
+                    ),
+                ];
             }
 
             AdminOrderBox::createOrderMetaBox(

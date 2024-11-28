@@ -13,6 +13,7 @@ namespace Cdek {
     use Cdek\Exceptions\External\ApiException;
     use Cdek\Exceptions\External\InvalidRequestException;
     use Cdek\Exceptions\External\LegacyAuthException;
+    use Cdek\Helpers\Cache;
     use Cdek\Helpers\LegacyTokenStorage;
     use Cdek\Transport\HttpClient;
     use Cdek\Transport\HttpResponse;
@@ -42,6 +43,57 @@ namespace Cdek {
 
             /** @noinspection GlobalVariableUsageInspection */
             $this->apiUrl = $_ENV['CDEK_REST_API'] ?? Config::TEST_API_URL;
+        }
+
+        public function authGetError(): ?string
+        {
+            try {
+                $this->fetchToken();
+
+                return null;
+            } catch (LegacyAuthException $e) {
+                return $e->getData()['code'] ?? $e->getData()['error'] ?? 'unknown';
+            }
+        }
+
+        /**
+         * @throws LegacyAuthException
+         */
+        public function fetchToken(): string
+        {
+            /** @noinspection GlobalVariableUsageInspection */
+            if (!isset($_ENV['CDEK_REST_API']) && $this->deliveryMethod->test_mode) {
+                $clientId     = Config::TEST_CLIENT_ID;
+                $clientSecret = Config::TEST_CLIENT_SECRET;
+            } else {
+                $clientId     = $this->deliveryMethod->client_id;
+                $clientSecret = $this->deliveryMethod->client_secret;
+            }
+
+            try {
+                $body = HttpClient::processRequest(
+                    "{$this->apiUrl}oauth/token?".http_build_query([
+                        'grant_type'    => 'client_credentials',
+                        'client_id'     => $clientId,
+                        'client_secret' => $clientSecret,
+                    ]),
+                    'POST',
+                );
+
+                if (!isset($body->json()['access_token'])) {
+                    throw new LegacyAuthException([
+                        ...$body->json(),
+                        'host'   => parse_url($this->apiUrl, PHP_URL_HOST),
+                        'client' => $clientId,
+                    ]);
+                }
+
+                return $body->json()['access_token'];
+            } catch (ApiException $e) {
+                throw new LegacyAuthException(
+                    [...$e->getData(), 'host' => parse_url($this->apiUrl, PHP_URL_HOST), 'client' => $clientId],
+                );
+            }
         }
 
         /**
@@ -94,6 +146,10 @@ namespace Cdek {
                 'services'      => array_key_exists('services', $deliveryParam) ? $deliveryParam['services'] : [],
             ];
 
+            if ($log = wc_get_logger()) {
+                $log->debug("Fetching tariff for {$deliveryParam['tariff_code']}", $request);
+            }
+
             $resp = HttpClient::sendJsonRequest(
                 "{$this->apiUrl}calculator/tariff",
                 'POST',
@@ -102,10 +158,20 @@ namespace Cdek {
             )->json();
 
             if (empty($resp['total_sum'])) {
+                if ($log = wc_get_logger()) {
+                    $log->debug("Got empty total sum for tariff {$deliveryParam['tariff_code']}");
+                }
+
                 return null;
             }
 
-            return (float)$resp['total_sum'];
+            $total = (float)$resp['total_sum'];
+
+            if ($log = wc_get_logger()) {
+                $log->debug("Got total for tariff {$deliveryParam['tariff_code']}: $total");
+            }
+
+            return $total;
         }
 
         /**
@@ -121,23 +187,22 @@ namespace Cdek {
                 'packages'      => $deliveryParam['packages'],
             ];
 
-            return HttpClient::sendJsonRequest(
+            if ($log = wc_get_logger()) {
+                $log->debug('Fetching tarifflist', $request);
+            }
+
+            $result = HttpClient::sendJsonRequest(
                 "{$this->apiUrl}calculator/tarifflist",
                 'POST',
                 $this->tokenStorage->getToken(),
                 $request,
             )->json();
-        }
 
-        public function authGetError(): ?string
-        {
-            try {
-                $this->fetchToken();
-
-                return null;
-            } catch (LegacyAuthException $e) {
-                return $e->getData()['code'] ?? $e->getData()['error'] ?? 'unknown';
+            if ($log = wc_get_logger()) {
+                $log->debug('Got tarifflist', $result);
             }
+
+            return $result;
         }
 
         /**
@@ -161,6 +226,13 @@ namespace Cdek {
             ?string $postcode = null
         ): ?string {
             try {
+                if ($log = wc_get_logger()) {
+                    $log->debug('Fetching city', [
+                        'city'        => $city,
+                        'postal_code' => $postcode,
+                    ]);
+                }
+
                 $result = HttpClient::sendJsonRequest(
                     "{$this->apiUrl}location/cities",
                     'GET',
@@ -171,7 +243,13 @@ namespace Cdek {
                     ],
                 )->json();
 
-                return !empty($result[0]['code']) ? (string)$result[0]['code'] : null;
+                $result = !empty($result[0]['code']) ? (string)$result[0]['code'] : null;
+
+                if ($log = wc_get_logger()) {
+                    $log->debug("Got city with code $result");
+                }
+
+                return $result;
             } catch (ApiException $e) {
                 return null;
             }
@@ -187,6 +265,14 @@ namespace Cdek {
                 $city .= ' микрорайон';
             }
 
+            if ($log = wc_get_logger()) {
+                $log->debug('Fetching city', [
+                    'city'          => $city,
+                    'postal_code'   => $postcode,
+                    'country_codes' => $country === null ? null : [$country],
+                ]);
+            }
+
             try {
                 $result = HttpClient::sendJsonRequest(
                     "{$this->apiUrl}location/cities",
@@ -199,7 +285,13 @@ namespace Cdek {
                     ],
                 )->json();
 
-                return $result[0] ?: null;
+                $result = $result[0] ?: null;
+
+                if ($log = wc_get_logger()) {
+                    $log->debug('Got city', $result);
+                }
+
+                return $result;
             } catch (ApiException $e) {
                 return null;
             }
@@ -220,46 +312,6 @@ namespace Cdek {
                     'country_code' => $country,
                 ],
             )->json();
-        }
-
-        /**
-         * @throws LegacyAuthException
-         */
-        public function fetchToken(): string
-        {
-            /** @noinspection GlobalVariableUsageInspection */
-            if (!isset($_ENV['CDEK_REST_API']) && $this->deliveryMethod->test_mode) {
-                $clientId     = Config::TEST_CLIENT_ID;
-                $clientSecret = Config::TEST_CLIENT_SECRET;
-            } else {
-                $clientId     = $this->deliveryMethod->client_id;
-                $clientSecret = $this->deliveryMethod->client_secret;
-            }
-
-            try {
-                $body = HttpClient::processRequest(
-                    "{$this->apiUrl}oauth/token?".http_build_query([
-                        'grant_type'    => 'client_credentials',
-                        'client_id'     => $clientId,
-                        'client_secret' => $clientSecret,
-                    ]),
-                    'POST',
-                );
-
-                if (!isset($body->json()['access_token'])) {
-                    throw new LegacyAuthException([
-                        ...$body->json(),
-                        'host'   => parse_url($this->apiUrl, PHP_URL_HOST),
-                        'client' => $clientId,
-                    ]);
-                }
-
-                return $body->json()['access_token'];
-            } catch (ApiException $e) {
-                throw new LegacyAuthException(
-                    [...$e->getData(), 'host' => parse_url($this->apiUrl, PHP_URL_HOST), 'client' => $clientId],
-                );
-            }
         }
 
         /**
@@ -353,14 +405,24 @@ namespace Cdek {
          * @throws ApiException
          * @throws InvalidRequestException
          */
-        public function orderCreate(array $params): array
+        public function orderCreate(array $params): ?string
         {
-            return HttpClient::sendJsonRequest(
+            if ($log = wc_get_logger()) {
+                $log->debug('Creating order', $params);
+            }
+
+            $result = HttpClient::sendJsonRequest(
                 "{$this->apiUrl}orders/",
                 'POST',
                 $this->tokenStorage->getToken(),
                 $params,
-            )->json();
+            )->entity()['uuid'] ?? null;
+
+            if ($log = wc_get_logger()) {
+                $log->debug("Created order with uuid $result");
+            }
+
+            return $result;
         }
 
         /**

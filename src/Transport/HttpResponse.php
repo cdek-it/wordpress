@@ -107,6 +107,11 @@ namespace Cdek\Transport {
             return $this->statusCode;
         }
 
+        public function isSuccess(): bool
+        {
+            return $this->statusCode >= 200 && $this->statusCode < 300;
+        }
+
         public function isClientError(): bool
         {
             return $this->statusCode >= 400 && $this->statusCode < 500;

@@ -47,6 +47,13 @@ namespace Cdek\Transport {
 
             $result = self::processRequest($url, $method, $config);
 
+            if (($log = wc_get_logger()) && !$result->isSuccess()) {
+                $log->debug('API returned error', [
+                    'code' => $result->getStatusCode(),
+                    'resp' => $result->body(),
+                ]);
+            }
+
             if ($result->isServerError()) {
                 throw new HttpServerException($result->error() ?: ['plain' => $result->body()]);
             }
