@@ -126,14 +126,12 @@ namespace Cdek {
                 );
 
                 if (empty($response->getHeaders()['x-entity-id'])) {
-                    throw new ShopRegistrationException(
-                        'Failed to get shop uuid', $response->data(),
-                    );
+                    throw new ShopRegistrationException;
                 }
 
                 return $response->getHeaders()['x-entity-id'];
             } catch (ApiException $e) {
-                throw new ShopRegistrationException('Register shop failed');
+                throw new ShopRegistrationException;
             }
         }
 
