@@ -97,9 +97,20 @@ namespace Cdek {
                     continue;
                 }
 
-                if (!empty($existingAction = as_get_scheduled_actions(['hook' => $hookName])) &&
-                    $existingAction[0]['schedule'] === $task['schedule']) {
-                    continue;
+                $existingActions = as_get_scheduled_actions(['hook' => $hookName]);
+
+                if (!empty($existingActions)){
+                    if($existingActions[0]['schedule'] === $task['schedule']) {
+                        continue;
+                    }
+
+                    foreach ($existingActions as $existingAction){
+                        assert($existingAction instanceof \ActionScheduler_Action);
+
+                        if ($existingAction->get_args()[0] === $task['id']) {
+                            continue 2;
+                        }
+                    }
                 }
 
                 as_schedule_cron_action(
