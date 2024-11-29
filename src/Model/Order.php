@@ -209,8 +209,8 @@ namespace Cdek\Model {
 
                 $statuses = $orderInfo->entity()['statuses'];
 
-                if(empty($this->number)){
-                    $this->number = $orderInfo->entity()['number'];
+                if (empty($this->number)) {
+                    $this->number = $orderInfo->entity()['cdek_number'];
                     $this->save();
                 }
             }

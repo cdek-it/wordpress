@@ -269,7 +269,7 @@ namespace Cdek\Actions {
             return array_map(function (array $p) use (&$shouldConvert, &$orderItems, &$shouldPay) {
                 $weight = 0;
 
-                $items = array_filter(array_map(function ($item) use (
+                $items = array_values(array_filter(array_map(function ($item) use (
                     &$shouldConvert,
                     &$shouldPay,
                     &$orderItems,
@@ -315,7 +315,7 @@ namespace Cdek\Actions {
                         'weight'       => $w,
                         'weight_gross' => $w + 1,
                     ];
-                }, $p['items'] ?: $orderItems));
+                }, $p['items'] ?: $orderItems)));
 
                 $package = [
                     'number'  => sprintf('%s_%s', $this->order->id, StringHelper::generateRandom(5)),
