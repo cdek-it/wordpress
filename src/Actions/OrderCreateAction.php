@@ -32,12 +32,12 @@ namespace Cdek\Actions {
     use Cdek\Traits\CanBeCreated;
     use Cdek\Validator\PhoneValidator;
     use Throwable;
+    use WC_Order_Item_Product;
 
     class OrderCreateAction
     {
         use CanBeCreated;
 
-        private const ALLOWED_PRODUCT_TYPES = ['variation', 'simple'];
         private int $tariff;
         private CdekApi $api;
         private ShippingItem $shipping;
@@ -50,7 +50,7 @@ namespace Cdek\Actions {
          * @throws \Cdek\Exceptions\ShippingNotFoundException
          * @throws \Cdek\Exceptions\OrderNotFoundException
          */
-        public function __invoke(int $orderId, int $attempt = 0, array $packages = null): ValidationResult
+        public function __invoke(int $orderId, int $attempt = 0, ?array $packages = null): ValidationResult
         {
             $this->api   = new CdekApi;
             $this->order = new Order($orderId);
@@ -79,7 +79,7 @@ namespace Cdek\Actions {
             }
 
             try {
-                $this->createOrder($packages);
+                $this->createOrder($this->buildPackagesData($packages));
 
                 return new ValidationResult(true);
             } catch (InvalidPhoneException $e) {
@@ -114,13 +114,13 @@ namespace Cdek\Actions {
         private function createOrder(array $packages): void
         {
             $param             = $this->buildRequestData();
-            $param['packages'] = $this->buildPackagesData($packages);
+            $param['packages'] = $packages;
 
             $uuid = $this->api->orderCreate($param);
 
             sleep(5);
 
-            $track = $this->getCdekOrderNumber($uuid);
+            $track = $this->getTrack($uuid);
 
             $this->order->number = $track;
             $this->order->uuid   = $uuid;
@@ -233,133 +233,105 @@ namespace Cdek\Actions {
             return $param;
         }
 
-        private function buildPackagesData(array $packages = null): array
+        /**
+         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         * @throws \Cdek\Exceptions\External\ApiException
+         */
+        private function getTrack(string $uuid, int $iteration = 1): ?string
         {
-            $items = array_filter(
-                $this->order->items,
-                static fn($el) => in_array($el->get_product()->get_type(), self::ALLOWED_PRODUCT_TYPES, true),
-            );
+            sleep(1);
 
-            if ($packages === null) {
-                $packageItems = array_map(static function ($item) {
-                    $product = $item->get_product();
-
-                    return [
-                        'id'       => $product->get_id(),
-                        'name'     => $product->get_name(),
-                        'weight'   => $product->get_weight(),
-                        'quantity' => $item->get_quantity(),
-                        'price'    => $product->get_price(),
-                    ];
-                }, $items);
-
-                return [
-                    $this->buildItemsData(
-                        (int)$this->shipping->length,
-                        (int)$this->shipping->width,
-                        (int)$this->shipping->height,
-                        $packageItems,
-                    ),
-                ];
+            if ($iteration === 5) {
+                return null;
             }
 
-            $output = [];
-
-            foreach ($packages as $package) {
-                if (empty($package['items'])) {
-                    $package['items'] = array_map(static function ($item) {
-                        $product = $item->get_product();
-
-                        return [
-                            'id'       => $product->get_id(),
-                            'name'     => $product->get_name(),
-                            'weight'   => $product->get_weight(),
-                            'quantity' => $item->get_quantity(),
-                            'price'    => $product->get_price(),
-                        ];
-                    }, $items);
-                } else {
-                    $package['items'] = array_map(static function ($el) {
-                        $product = wc_get_product($el['id']);
-
-                        return [
-                            'id'       => $product->get_id(),
-                            'name'     => $product->get_name(),
-                            'weight'   => $product->get_weight(),
-                            'quantity' => $el['qty'],
-                            'price'    => $product->get_price(),
-                        ];
-                    }, $package['items']);
-                }
-                $output[] = $this->buildItemsData(
-                    (int)$package['length'],
-                    (int)$package['width'],
-                    (int)$package['height'],
-                    $package['items'],
-                );
-            }
-
-            return $output;
+            return $this->api->orderGet($uuid)->entity()['cdek_number'] ?? $this->getTrack($uuid, $iteration + 1);
         }
 
-        private function buildItemsData(
-            int $length,
-            int $width,
-            int $height,
-            array $items
-        ): array {
-            $deliveryMethod = $this->shipping->getMethod();
-
-            $totalWeight = 0;
-            $itemsData   = [];
-
-            foreach ($items as $item) {
-                $weight      = WeightConverter::getWeightInGrams($item['weight']);
-                $quantity    = (int)$item['quantity'];
-                $totalWeight += $quantity * $weight;
-                $cost        = $item['price'];
-
-                if ($this->order->currency !== 'RUB' && function_exists('wcml_get_woocommerce_currency_option')) {
-                    $cost = $this->convertCurrencyToRub($cost, $this->order->currency);
-                }
-
-                if ($this->order->shouldBePaidUponDelivery()) {
-                    $percentCod = (int)$deliveryMethod->get_option('percentcod');
-
-                    if ($percentCod !== 0) {
-                        $paymentValue = (int)(($percentCod / 100) * $cost);
-                    } else {
-                        $paymentValue = $cost;
-                    }
-                } else {
-                    $paymentValue = 0;
-                }
-
-                $itemsData[] = [
-                    'ware_key'     => $item['id'],
-                    'payment'      => ['value' => $paymentValue],
-                    'name'         => $item['name'],
-                    'cost'         => $cost,
-                    'amount'       => $item['quantity'],
-                    'weight'       => $weight,
-                    'weight_gross' => $weight + 1,
-                ];
-            }
-
-            $package = [
-                'number'  => sprintf('%s_%s', $this->order->id, StringHelper::generateRandom(5)),
-                'length'  => $length,
-                'width'   => $width,
-                'height'  => $height,
-                'weight'  => $totalWeight,
-                'comment' => __('inventory attached', 'cdekdelivery'),
+        private function buildPackagesData(?array $packages = null): array
+        {
+            $packages = $packages ?: [
+                [
+                    'length' => (int)$this->shipping->length,
+                    'width'  => (int)$this->shipping->width,
+                    'height' => (int)$this->shipping->height,
+                    'items'  => null,
+                ],
             ];
 
-            if (Tariff::availableForShops($this->tariff)) {
-                $package['items'] = $itemsData;
-            }
+            $orderItems = $this->order->getItems();
 
-            return $package;
+            $shouldPay     = $this->order->shouldBePaidUponDelivery() ? (int)$this->shipping->getMethod()->percentcod :
+                null;
+            $shouldConvert = $this->order->currency !== 'RUB' &&
+                             function_exists('wcml_get_woocommerce_currency_option') ? $this->order->currency : null;
+
+            return array_map(function (array $p) use (&$shouldConvert, &$orderItems, &$shouldPay) {
+                $weight = 0;
+
+                $items = array_filter(array_map(function ($item) use (
+                    &$shouldConvert,
+                    &$shouldPay,
+                    &$orderItems,
+                    &$weight
+                ) {
+                    if ($item instanceof WC_Order_Item_Product) {
+                        $qty = (int)$item->get_quantity();
+                    } else {
+                        $qty  = (int)$item['qty'];
+                        $item = $orderItems[$item['id']] ?? null;
+                    }
+
+                    if ($item === null) {
+                        return null;
+                    }
+
+                    assert($item instanceof WC_Order_Item_Product);
+                    $product = $item->get_product();
+
+                    $w      = WeightConverter::getWeightInGrams($product->get_weight());
+                    $weight += $qty * $w;
+                    $cost   = $shouldConvert === null ? (float)$item->get_total() : $this->convertCurrencyToRub(
+                        (float)$item->get_total(),
+                        $shouldConvert,
+                    );
+
+                    if ($shouldPay !== null) {
+                        if ($shouldPay !== 0) {
+                            $paymentValue = (int)(($shouldPay / 100) * $cost);
+                        } else {
+                            $paymentValue = $cost;
+                        }
+                    } else {
+                        $paymentValue = 0;
+                    }
+
+                    return [
+                        'ware_key'     => $product->get_sku() ?: $product->get_id(),
+                        'payment'      => ['value' => $paymentValue],
+                        'name'         => $item->get_name(),
+                        'cost'         => $cost,
+                        'amount'       => $qty,
+                        'weight'       => $w,
+                        'weight_gross' => $w + 1,
+                    ];
+                }, $p['items'] ?: $orderItems));
+
+                $package = [
+                    'number'  => sprintf('%s_%s', $this->order->id, StringHelper::generateRandom(5)),
+                    'length'  => $p['length'],
+                    'width'   => $p['width'],
+                    'height'  => $p['height'],
+                    'weight'  => $weight,
+                    'comment' => __('inventory attached', 'cdekdelivery'),
+                ];
+
+                if (Tariff::availableForShops($this->tariff)) {
+                    $package['items'] = $items;
+                }
+
+                return $package;
+            }, $packages);
         }
 
         private function convertCurrencyToRub(float $cost, string $currency): float
@@ -389,23 +361,6 @@ namespace Cdek\Actions {
             }
 
             return $cost;
-        }
-
-        /**
-         * @throws \Cdek\Exceptions\External\LegacyAuthException
-         * @throws \Cdek\Exceptions\External\ApiException
-         */
-        private function getCdekOrderNumber(string $orderUuid, int $iteration = 1): ?string
-        {
-            sleep(1);
-
-            if ($iteration === 5) {
-                return null;
-            }
-
-            $orderInfo = $this->api->orderGet($orderUuid);
-
-            return $orderInfo->entity()['cdek_number'] ?? $this->getCdekOrderNumber($orderUuid, $iteration + 1);
         }
     }
 }

@@ -39,7 +39,7 @@ namespace Cdek\Blocks {
 
             include Loader::getTemplate('common');
 
-            if ($order->number === null) {
+            if ($order->uuid === null) {
                 include Loader::getTemplate(
                     $shipping->getMethod()->has_packages_mode ? 'create_many' : 'create',
                 );
