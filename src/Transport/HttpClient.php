@@ -47,7 +47,7 @@ namespace Cdek\Transport {
 
             $result = self::processRequest($url, $method, $config);
 
-            if (($log = wc_get_logger()) && !$result->isSuccess()) {
+            if (($log = wc_get_logger()) && !$result->isSuccess() && $result->getStatusCode() !== 404) {
                 $log->debug('API returned error', [
                     'code' => $result->getStatusCode(),
                     'resp' => $result->body(),
