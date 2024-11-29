@@ -16,6 +16,7 @@ namespace Cdek\Model {
     use DateTimeInterface;
     use InvalidArgumentException;
     use WC_Order;
+    use WC_Order_Item_Product;
     use WP_Post;
 
     /**
@@ -38,7 +39,6 @@ namespace Cdek\Model {
      * @property string $payment_method
      * @property float $shipping_total
      * @property string $billing_email
-     * @property \WC_Order_Item[] $items
      */
     class Order extends MetaModelContract
     {
@@ -47,7 +47,6 @@ namespace Cdek\Model {
                 'id',
                 'currency',
                 'payment_method',
-                'items',
                 'billing_email',
                 'shipping_total',
             ];
@@ -67,6 +66,7 @@ namespace Cdek\Model {
                 'number' => ['order_number'],
             ];
         private const META_KEY = 'order_data';
+        private const SHIPPING_ALLOWED_PRODUCT_TYPES = ['variation', 'simple'];
         private WC_Order $order;
         private ?ShippingItem $shipping = null;
         private ?bool $locked = null;
@@ -141,6 +141,23 @@ namespace Cdek\Model {
             return new Intake($this->order);
         }
 
+        /**
+         * @param  bool  $forShipping
+         *
+         * @return WC_Order_Item_Product[]
+         */
+        final public function getItems(bool $forShipping = true): array
+        {
+            $items = $this->order->get_items('line_item');
+
+            return $forShipping ? array_filter($items, static fn(WC_Order_Item_Product $e)
+                => in_array(
+                $e->get_product()->get_type(),
+                self::SHIPPING_ALLOWED_PRODUCT_TYPES,
+                true,
+            )) : $items;
+        }
+
         final public function getShipping(): ?ShippingItem
         {
             if ($this->shipping !== null) {
@@ -191,6 +208,11 @@ namespace Cdek\Model {
                 }
 
                 $statuses = $orderInfo->entity()['statuses'];
+
+                if (empty($this->number)) {
+                    $this->number = $orderInfo->entity()['cdek_number'];
+                    $this->save();
+                }
             }
 
             $statuses = array_map(static fn(array $st)

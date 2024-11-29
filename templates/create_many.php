@@ -7,10 +7,7 @@ defined('ABSPATH') or exit;
  * @var array $items
  */
 
-$items = [];
-foreach ($order->items as $item) {
-    $items[$item['product_id']] = ['name' => $item['name'], 'qty' => $item['quantity']];
-}
+$items = $order->getItems();
 ?>
 
 <div class="create" aria-invalid="true">
@@ -21,16 +18,16 @@ foreach ($order->items as $item) {
                 <?php esc_html_e("Select product", 'cdekdelivery') ?>
             </option>
             <?php foreach ($items as $key => $item): ?>
-                <option value="<?php esc_attr_e($key) ?>">
-                    <?php esc_html_e($item['name']) ?>
+                <option value="<?php echo esc_attr($key) ?>">
+                    <?php echo esc_html($item->get_name()) ?>
                 </option>
             <?php endforeach ?>
         </select>
         <?php foreach ($items as $id => $item): ?>
-            <div class="item" aria-hidden="true" data-id="<?php esc_attr_e($id) ?>">
-                <span><?php esc_html_e($item['name']) ?></span>
+            <div class="item" aria-hidden="true" data-id="<?php echo esc_attr($id) ?>">
+                <span><?php echo esc_html($item->get_name()) ?></span>
                 <span>x</span>
-                <input name="qty" type="number" min="1" max="<?php esc_attr_e($item['qty']) ?>" value="1" />
+                <input name="qty" type="number" min="1" max="<?php echo esc_attr($item->get_quantity()) ?>" value="1" />
             </div>
         <?php endforeach ?>
         <div>

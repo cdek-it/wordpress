@@ -12,6 +12,7 @@ namespace Cdek\Blocks {
     use Automattic\WooCommerce\Utilities\OrderUtil;
     use Cdek\CdekApi;
     use Cdek\Config;
+    use Cdek\Exceptions\External\InvalidRequestException;
     use Cdek\Helpers\UI;
     use Cdek\Loader;
     use Cdek\Model\Order;
@@ -39,7 +40,7 @@ namespace Cdek\Blocks {
 
             include Loader::getTemplate('common');
 
-            if ($order->number === null) {
+            if ($order->uuid === null) {
                 include Loader::getTemplate(
                     $shipping->getMethod()->has_packages_mode ? 'create_many' : 'create',
                 );
@@ -49,7 +50,22 @@ namespace Cdek\Blocks {
 
             try {
                 $order->loadLegacyStatuses();
+            } catch (InvalidRequestException $e) {
+                $meta['errors'] = array_map(
+                    static fn(array $el)
+                        => sprintf(
+                        esc_html__('Server returned validation error: %s', 'cdekdelivery'),
+                        $el['message'],
+                    ),
+                    $e->getData()['errors'],
+                );
             } catch (Throwable $e) {
+            }
+
+            if (empty($order->number)) {
+                include Loader::getTemplate('processing');
+
+                return;
             }
 
             include Loader::getTemplate('order');
