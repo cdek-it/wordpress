@@ -16,6 +16,7 @@ namespace Cdek {
     use Cdek\Actions\ProcessWoocommerceCreateShippingAction;
     use Cdek\Actions\RecalculateShippingAction;
     use Cdek\Actions\SaveCustomCheckoutFieldsAction;
+    use Cdek\Blocks\AdminOrderBox;
     use Cdek\Blocks\CheckoutMapBlock;
     use Cdek\Controllers\CallbackController;
     use Cdek\Controllers\IntakeController;
@@ -30,9 +31,9 @@ namespace Cdek {
     use Cdek\UI\CdekWidget;
     use Cdek\UI\CheckoutMap;
     use Cdek\UI\Frontend;
-    use Cdek\Blocks\AdminOrderBox;
     use Cdek\Validator\CheckoutValidator;
     use RuntimeException;
+    use WP_Upgrader;
 
     class Loader
     {
@@ -62,31 +63,6 @@ namespace Cdek {
         private static string $pluginName;
         private static string $pluginMainFile;
 
-        public static function debug(): bool
-        {
-            return self::$debug;
-        }
-
-        public static function getPluginVersion(): string
-        {
-            return self::$pluginVersion;
-        }
-
-        public static function getPluginName(): string
-        {
-            return self::$pluginName;
-        }
-
-        public static function getPluginUrl(?string $path = null): string
-        {
-            return plugin_dir_url(self::$pluginMainFilePath).($path !== null ? ltrim($path, '/') : '');
-        }
-
-        public static function getPluginFile(): string
-        {
-            return self::$pluginMainFile;
-        }
-
         /**
          * @throws RuntimeException
          */
@@ -97,7 +73,7 @@ namespace Cdek {
             }
 
             self::checkRequirements();
-            self::upgrade(true);
+            self::upgrade();
         }
 
         /**
@@ -135,27 +111,29 @@ namespace Cdek {
             TaskManager::cancelExecution();
         }
 
-        /**
-         * @param \WP_Upgrader|true $up
-         * @param  array  $options
-         *
-         * @return void
-         * @noinspection MissingParameterTypeDeclarationInspection
-         */
-        public static function upgrade($up, array $options = []): void
+        public static function debug(): bool
         {
-            if ($up !== true &&
-                ($options['action'] !== 'update' ||
-                 $options['type'] !== 'plugin' ||
-                 !in_array(self::$pluginMainFile, $options['plugins'] ?? [], true))) {
-                return;
-            }
+            return self::$debug;
+        }
 
-            TaskManager::scheduleExecution();
+        public static function getPluginFile(): string
+        {
+            return self::$pluginMainFile;
+        }
 
-            foreach (self::MIGRATORS as $migrator) {
-                (new $migrator)();
-            }
+        public static function getPluginName(): string
+        {
+            return self::$pluginName;
+        }
+
+        public static function getPluginUrl(?string $path = null): string
+        {
+            return plugin_dir_url(self::$pluginMainFilePath).($path !== null ? ltrim($path, '/') : '');
+        }
+
+        public static function getPluginVersion(): string
+        {
+            return self::$pluginVersion;
         }
 
         public static function getTemplate(string $name): string
@@ -166,6 +144,26 @@ namespace Cdek {
         public static function getPluginPath(?string $path = null): string
         {
             return plugin_dir_path(self::$pluginMainFilePath).($path !== null ? ltrim($path, DIRECTORY_SEPARATOR) : '');
+        }
+
+        public static function scheduleUpgrade(WP_Upgrader $_wp, array $options): void
+        {
+            if (($options['action'] !== 'update' ||
+                 $options['type'] !== 'plugin' ||
+                 !in_array(self::$pluginMainFile, $options['plugins'] ?? [], true))) {
+                return;
+            }
+
+            as_schedule_single_action(time() + 60, Config::UPGRADE_HOOK_NAME, [], 'cdekdelivery', true);
+        }
+
+        public static function upgrade(): void
+        {
+            TaskManager::scheduleExecution();
+
+            foreach (self::MIGRATORS as $migrator) {
+                (new $migrator)();
+            }
         }
 
         public function __invoke(string $pluginMainFile): void
@@ -192,7 +190,7 @@ namespace Cdek {
             add_action("activate_".self::$pluginMainFile, [__CLASS__, 'activate']);
             add_action("deactivate_".self::$pluginMainFile, [__CLASS__, 'deactivate']);
 
-            add_action('upgrader_process_complete', [__CLASS__, 'upgrade'], 30, 2);
+            add_action('upgrader_process_complete', [__CLASS__, 'scheduleUpgrade'], 30, 2);
 
             self::declareCompatibility();
 
@@ -257,6 +255,7 @@ namespace Cdek {
 
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, OrderCreateAction::new(), 10, 2);
             add_action(Config::TASK_MANAGER_HOOK_NAME, new TaskManager, 20);
+            add_action(Config::UPGRADE_HOOK_NAME, [__CLASS__, 'upgrade']);
 
             CdekWidget::new()();
             Admin::new()();

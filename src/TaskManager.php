@@ -92,6 +92,7 @@ namespace Cdek {
                     as_enqueue_async_action(
                         $hookName,
                         [$task['id']],
+                        'cdekdelivery',
                     );
 
                     continue;
