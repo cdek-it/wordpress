@@ -20,10 +20,10 @@ namespace Cdek\Migrators {
         private CdekApi $api;
         private ShippingMethod $shipping;
 
-        final public function __invoke(): void
+        final public function __invoke(?ShippingMethod $method = null): void
         {
-            $this->shipping = ShippingMethod::factory();
-            $this->api      = new CdekApi;
+            $this->shipping = $method ?: ShippingMethod::factory();
+            $this->api      = new CdekApi($this->shipping);
 
             $this->migrateOffice();
             $this->migrateAddress();

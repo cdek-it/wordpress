@@ -7,14 +7,14 @@ namespace {
     defined('ABSPATH') or exit;
 }
 
-namespace Cdek\Actions\Schedule {
+namespace Cdek\Tasks {
 
     use Cdek\Contracts\TaskContract;
     use Cdek\Model\TaskResult;
     use Iterator;
     use WC_Order_Query;
 
-    class CollectOrders extends TaskContract
+    class CollectOrphanedOrders extends TaskContract
     {
         private const ORDERS_LIMIT = 1000;
 
@@ -45,6 +45,11 @@ namespace Cdek\Actions\Schedule {
                     ], $page, $maxPages,
                 );
             }
+        }
+
+        public static function getName(): string
+        {
+            return 'collect-orphaned-orders';
         }
     }
 }

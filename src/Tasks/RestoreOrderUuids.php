@@ -7,7 +7,7 @@ namespace {
     defined('ABSPATH') or exit;
 }
 
-namespace Cdek\Actions\Schedule {
+namespace Cdek\Tasks {
 
     use Cdek\Contracts\TaskContract;
     use Cdek\Exceptions\OrderNotFoundException;
@@ -16,7 +16,7 @@ namespace Cdek\Actions\Schedule {
     use Cdek\Model\TaskResult;
     use Iterator;
 
-    class ReindexOrders extends TaskContract
+    class RestoreOrderUuids extends TaskContract
     {
         /**
          * @throws ScheduledTaskException
@@ -24,7 +24,7 @@ namespace Cdek\Actions\Schedule {
         final protected function process(): Iterator
         {
             if ($this->taskMeta === null) {
-                throw new ScheduledTaskException('Failed to get orders meta info');
+                throw new ScheduledTaskException;
             }
 
             $failedOrders = [];
@@ -44,6 +44,11 @@ namespace Cdek\Actions\Schedule {
             } else {
                 yield new TaskResult('warning', ['failed' => $failedOrders]);
             }
+        }
+
+        public static function getName(): string
+        {
+            return 'restore-order-uuids';
         }
     }
 }

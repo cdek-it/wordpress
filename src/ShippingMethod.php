@@ -12,6 +12,7 @@ namespace Cdek {
     use Cdek\Actions\CalculateDeliveryAction;
     use Cdek\Actions\FlushTokenCacheAction;
     use Cdek\Contracts\ExceptionContract;
+    use Cdek\Migrators\MigrateCityCodeFromMap;
     use Cdek\Traits\SettingsFields;
     use Throwable;
     use WC_Admin_Settings;
@@ -92,7 +93,6 @@ namespace Cdek {
             $this->init_settings();
             $this->init_form_fields();
             add_action("woocommerce_update_options_shipping_$this->id", [$this, 'process_admin_options']);
-            add_action("woocommerce_update_options_shipping_$this->id", FlushTokenCacheAction::new());
         }
 
         public static function factory(?int $instanceId = null): self
@@ -133,7 +133,6 @@ namespace Cdek {
             return $value;
         }
 
-
         /** @noinspection MissingParameterTypeDeclarationInspection */
         public function __set(string $key, $value): void
         {
@@ -141,7 +140,6 @@ namespace Cdek {
         }
 
         /** @noinspection MissingReturnTypeInspection */
-
         final public function get_option($key, $empty_value = null)
         {
             // Instance options take priority over global options.
@@ -196,6 +194,10 @@ namespace Cdek {
                 WC_Admin_Settings::show_messages();
             }
 
+            if (!empty($this->get_option('pvz_code')) && empty($this->get_option('city_code'))) {
+                (new MigrateCityCodeFromMap)($this);
+            }
+
             parent::admin_options();
         }
 
@@ -210,6 +212,13 @@ namespace Cdek {
             } catch (ExceptionContract $e) {
                 return;
             }
+        }
+
+        final public function process_admin_options(): bool
+        {
+            FlushTokenCacheAction::new()();
+
+            return parent::process_admin_options();
         }
     }
 }

@@ -13,7 +13,6 @@ namespace Cdek {
     use Cdek\Exceptions\External\ApiException;
     use Cdek\Exceptions\External\InvalidRequestException;
     use Cdek\Exceptions\External\LegacyAuthException;
-    use Cdek\Helpers\Cache;
     use Cdek\Helpers\LegacyTokenStorage;
     use Cdek\Transport\HttpClient;
     use Cdek\Transport\HttpResponse;
@@ -29,10 +28,14 @@ namespace Cdek {
 
         private LegacyTokenStorage $tokenStorage;
 
-
-        public function __construct(?int $shippingInstanceId = null)
+        /**
+         * @param  int|\Cdek\ShippingMethod|null  $method
+         *
+         * @noinspection MissingParameterTypeDeclarationInspection
+         */
+        public function __construct($method = null)
         {
-            $this->deliveryMethod = ShippingMethod::factory($shippingInstanceId);
+            $this->deliveryMethod = is_a($method, ShippingMethod::class) ? $method : ShippingMethod::factory($method);
             $this->tokenStorage   = new LegacyTokenStorage();
 
             if (!$this->deliveryMethod->test_mode) {

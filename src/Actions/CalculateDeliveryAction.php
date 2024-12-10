@@ -34,7 +34,7 @@ namespace Cdek\Actions {
         public function __invoke(array $package, int $instanceID, bool $addTariffsToOffice = true): array
         {
             $this->method = ShippingMethod::factory($instanceID);
-            $api          = new CdekApi($instanceID);
+            $api          = new CdekApi($this->method);
 
             if (empty($this->method->city_code) || $api->authGetError() !== null) {
                 return [];

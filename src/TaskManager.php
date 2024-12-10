@@ -9,26 +9,36 @@ namespace {
 
 namespace Cdek {
 
-    use Cdek\Actions\Schedule\CollectOrders;
-    use Cdek\Actions\Schedule\ReindexOrders;
+    use Cdek\Tasks\CollectOrphanedOrders;
+    use Cdek\Tasks\Migrate;
+    use Cdek\Tasks\RestoreOrderUuids;
     use DateTime;
 
     class TaskManager
     {
-        private const TASK_CLASSES
+        private const TASKS
             = [
-                'restore-order-uuids'     => ReindexOrders::class,
-                'collect-orphaned-orders' => CollectOrders::class,
+                RestoreOrderUuids::class,
+                CollectOrphanedOrders::class,
+                Migrate::class,
             ];
+
+        private array $taskNames = [];
 
         public function __construct()
         {
-            foreach (self::TASK_CLASSES as $key => $value) {
+            foreach (self::TASKS as $class) {
+                $task = new $class;
+
+                assert($task instanceof Contracts\TaskContract);
+
                 add_action(
-                    self::getHookName($key),
-                    new $value,
+                    self::getHookName($task::getName()),
+                    $class,
                     20,
                 );
+
+                $this->taskNames[] = $task::getName();
             }
         }
 
@@ -41,16 +51,17 @@ namespace Cdek {
         {
             as_unschedule_all_actions(Config::TASK_MANAGER_HOOK_NAME);
 
-            foreach (array_keys(self::TASK_CLASSES) as $task) {
-                as_unschedule_all_actions(self::getHookName($task));
+            foreach (self::TASKS as $class) {
+                $task = new $class;
+
+                assert($task instanceof Contracts\TaskContract);
+                as_unschedule_all_actions(self::getHookName($task::getName()));
             }
         }
 
         public static function scheduleExecution(): void
         {
-            if (as_has_scheduled_action(Config::TASK_MANAGER_HOOK_NAME) !== false) {
-                as_unschedule_all_actions(Config::TASK_MANAGER_HOOK_NAME);
-            }
+            as_unschedule_all_actions(Config::TASK_MANAGER_HOOK_NAME);
 
             $dateTime = new DateTime('now + 1 hour');
 
@@ -82,13 +93,17 @@ namespace Cdek {
             }
 
             foreach ($tasks as $task) {
-                if (!isset(self::TASK_CLASSES[$task['name']])) {
+                if (!in_array($task['name'], $this->taskNames, true)) {
                     continue;
                 }
 
                 $hookName = self::getHookName($task['name']);
 
                 if ($task['schedule'] === null) {
+                    if (as_has_scheduled_action($hookName, [$task['id']], 'cdekdelivery')) {
+                        continue;
+                    }
+
                     as_enqueue_async_action(
                         $hookName,
                         [$task['id']],
@@ -98,24 +113,8 @@ namespace Cdek {
                     continue;
                 }
 
-                $existingActions = as_get_scheduled_actions(['hook' => $hookName]);
-
-                if (!empty($existingActions)){
-                    if($existingActions[0]['schedule'] === $task['schedule']) {
-                        continue;
-                    }
-
-                    foreach ($existingActions as $existingAction){
-                        assert($existingAction instanceof \ActionScheduler_Action);
-
-                        if ($existingAction->get_args()[0] === $task['id']) {
-                            continue 2;
-                        }
-                    }
-                }
-
                 as_schedule_cron_action(
-                    time() + 5 * 60,
+                    time() + 60,
                     $task['schedule'],
                     $hookName,
                     [$task['id']],

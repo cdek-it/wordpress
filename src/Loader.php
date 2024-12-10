@@ -51,7 +51,7 @@ namespace Cdek {
                 'openssl',
             ];
 
-        private const MIGRATORS
+        public const MIGRATORS
             = [
                 Migrators\MigrateCityCodeFromMap::class,
             ];

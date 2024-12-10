@@ -35,5 +35,7 @@ namespace Cdek\Contracts {
             }
         }
         abstract protected function process(): Iterator;
+
+        abstract public static function getName(): string;
     }
 }
