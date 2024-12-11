@@ -83,6 +83,20 @@ Frequently asked questions about the plugin
 </details>
 
 <details>
+    <summary>What algorithm is used to determining the weight for price calculation in cart</summary>
+
+    * if neither dimensions nor weight are specified in the product, the ‘Default weight of one unit’ field from the plugin settings will be used for calculation;
+    * if several units of one product are specified in the order:
+        for weight: weight is summarized
+        for dimensions: dimensions are not recalculated, when calculating for the same goods will be taken into account the dimensions of one unit.
+    That is, the weight to be calculated will be determined on the basis of the highest of the values - dimensions of one unit or the sum of the weight of all units.
+    * for different units of goods:
+        order dimensions are determined on the basis of the largest of the values in the basket;
+        the weight of the package is determined based on the sum of the weight of the goods.
+
+</details>
+
+<details>
     <summary>Can I specify my online store shipment number</summary>
 
     This is not possible yet; online store number field is always filled in with order UUID. For version 3.11.0 — with
