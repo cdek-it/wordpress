@@ -118,7 +118,7 @@ namespace Cdek {
          * @throws CoreAuthException
          * @throws \Cdek\Exceptions\CacheException
          */
-        public function shopSync(string $authIntToken): string
+        public function shopSync(string $authIntToken, string $name, string $rest, string $home, string $admin): string
         {
             try {
                 $response = HttpClient::sendJsonRequest(
@@ -126,11 +126,11 @@ namespace Cdek {
                     'POST',
                     $authIntToken,
                     [
-                        'name' => get_bloginfo('name'),
+                        'name' => $name,
                         'url'  => [
-                            'rest'  => rest_url(Config::DELIVERY_NAME . '/cb'),
-                            'home'  => home_url(),
-                            'admin' => admin_url(),
+                            'rest'  => $rest,
+                            'home'  => $home,
+                            'admin' => $admin,
                         ],
                     ],
                 );

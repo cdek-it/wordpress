@@ -7,6 +7,7 @@ namespace Cdek\Controllers;
 use Cdek\Commands\TokensSyncCommand;
 use Cdek\Config;
 use Cdek\Helpers\Tokens;
+use Cdek\TaskManager;
 use WP_Http;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -20,6 +21,12 @@ class CallbackController
 
         if ($command === 'tokens.refresh') {
             TokensSyncCommand::new()($request->get_json_params());
+
+            return new WP_REST_Response(null, WP_Http::ACCEPTED);
+        }
+
+        if ($command === 'tasks') {
+            TaskManager::executeNow();
 
             return new WP_REST_Response(null, WP_Http::ACCEPTED);
         }

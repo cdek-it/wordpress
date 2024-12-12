@@ -12,11 +12,11 @@ namespace {
 namespace Cdek\Helpers {
 
     use Cdek\Commands\TokensSyncCommand;
+    use Cdek\Config;
     use Cdek\CoreApi;
     use Cdek\Exceptions\External\CoreAuthException;
     use Cdek\Exceptions\External\LegacyAuthException;
     use Cdek\Exceptions\ShopRegistrationException;
-    use JsonException;
     use ParagonIE\Paseto\Exception\PasetoException;
     use ParagonIE\Paseto\Keys\Version4\AsymmetricPublicKey;
     use ParagonIE\Paseto\Parser;
@@ -27,69 +27,6 @@ namespace Cdek\Helpers {
 
     class Tokens
     {
-        /**
-         * @throws \Cdek\Exceptions\CacheException
-         */
-        public static function getEndpoint(string $tokenType = 'wordpress'): ?string
-        {
-            $endpoints = Cache::get('endpoints');
-
-            if ($endpoints !== null && !empty($endpoints[$tokenType])) {
-                return $endpoints[$tokenType];
-            }
-
-            return null;
-        }
-
-        /**
-         * @throws \Cdek\Exceptions\CacheException
-         */
-        public static function get(string $tokenType): ?string
-        {
-            return self::exchangeableGet($tokenType);
-        }
-
-        /**
-         * @throws \Cdek\Exceptions\CacheException
-         */
-        private static function exchangeableGet(string $tokenType, bool $exchangeForbidden = false): ? string
-        {
-            $tokens = Cache::get('tokens');
-
-            if (!empty($tokens[$tokenType])) {
-                return "Bearer $tokens[$tokenType]";
-            }
-
-            if ($exchangeForbidden) {
-                return null;
-            }
-
-            self::tryExchangeLegacyToken();
-
-            return self::exchangeableGet($tokenType, true);
-        }
-
-        /**
-         * @throws \Cdek\Exceptions\CacheException
-         */
-        public static function tryExchangeLegacyToken(): void
-        {
-            try {
-                $token = (new LegacyTokenStorage)->getToken();
-            } catch (LegacyAuthException $e) {
-                return;
-            }
-
-            try {
-                $api    = new CoreApi;
-                $tokens = $api->shopTokensFetch($token, $api->shopSync($token));
-            } catch (ShopRegistrationException|CoreAuthException $e) {
-                return;
-            }
-
-            TokensSyncCommand::new()($tokens);
-        }
-
         /**
          * @throws \Cdek\Exceptions\CacheException
          * @throws \Cdek\Exceptions\External\ApiException
@@ -129,6 +66,78 @@ namespace Cdek\Helpers {
             } catch (PasetoException $e) {
                 return false;
             }
+        }
+
+        /**
+         * @throws \Cdek\Exceptions\CacheException
+         */
+        public static function getEndpoint(string $tokenType = 'wordpress'): ?string
+        {
+            $endpoints = Cache::get('endpoints');
+
+            if ($endpoints !== null && !empty($endpoints[$tokenType])) {
+                return $endpoints[$tokenType];
+            }
+
+            return null;
+        }
+
+        /**
+         * @throws \Cdek\Exceptions\CacheException
+         */
+        public static function get(string $tokenType): ?string
+        {
+            return self::exchangeableGet($tokenType);
+        }
+
+        /**
+         * @throws \Cdek\Exceptions\CacheException
+         */
+        private static function exchangeableGet(string $tokenType, bool $exchangeForbidden = false): ?string
+        {
+            $tokens = Cache::get('tokens');
+
+            if (!empty($tokens[$tokenType])) {
+                return "Bearer $tokens[$tokenType]";
+            }
+
+            if ($exchangeForbidden) {
+                return null;
+            }
+
+            self::tryExchangeLegacyToken();
+
+            return self::exchangeableGet($tokenType, true);
+        }
+
+        /**
+         * @throws \Cdek\Exceptions\CacheException
+         */
+        public static function tryExchangeLegacyToken(): void
+        {
+            try {
+                $token = (new LegacyTokenStorage)->getToken();
+            } catch (LegacyAuthException $e) {
+                return;
+            }
+
+            try {
+                $api    = new CoreApi;
+                $tokens = $api->shopTokensFetch(
+                    $token,
+                    $api->shopSync(
+                        $token,
+                        get_bloginfo('name'),
+                        rest_url(Config::DELIVERY_NAME.'/cb'),
+                        home_url(),
+                        admin_url(),
+                    ),
+                );
+            } catch (ShopRegistrationException|CoreAuthException $e) {
+                return;
+            }
+
+            TokensSyncCommand::new()($tokens);
         }
     }
 }

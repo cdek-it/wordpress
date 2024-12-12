@@ -75,6 +75,11 @@ namespace Cdek {
             );
         }
 
+        public static function executeNow(): void
+        {
+            as_enqueue_async_action(Config::TASK_MANAGER_HOOK_NAME, [], 'cdekdelivery');
+        }
+
         /**
          * @throws \Cdek\Exceptions\CacheException
          * @throws \Cdek\Exceptions\External\ApiException
