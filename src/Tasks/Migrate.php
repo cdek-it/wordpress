@@ -27,7 +27,7 @@ namespace Cdek\Tasks {
 
         public static function getName(): string
         {
-            return 'wp-migrate';
+            return 'migrate-connector';
         }
     }
 }
