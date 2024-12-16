@@ -1924,7 +1924,7 @@ __metadata:
     "@woocommerce/settings": "npm:^1.0.0"
     "@wordpress/api-fetch": "npm:^7.11.0"
     "@wordpress/block-editor": "npm:^14.6.0"
-    "@wordpress/data": "npm:^10.11.0"
+    "@wordpress/data": "npm:^10.14.0"
     "@wordpress/element": "npm:^6.12.0"
     "@wordpress/env": "npm:^10.11.0"
     "@wordpress/i18n": "npm:^5.11.0"
@@ -6713,7 +6713,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wordpress/data@npm:*, @wordpress/data@npm:^10.11.0":
+"@wordpress/data@npm:*":
   version: 10.11.0
   resolution: "@wordpress/data@npm:10.11.0"
   dependencies:
@@ -6735,6 +6735,31 @@ __metadata:
   peerDependencies:
     react: ^18.0.0
   checksum: 10c0/be815dbce0211afc49cda2668337c76fc1fb5dbdb861c27bbc4a1d6b2db7d9f7150f280ef53ea393f86be9fd5c67efedeef229acc0e87a6d299e53d3c62ea451
+  languageName: node
+  linkType: hard
+
+"@wordpress/data@npm:^10.14.0":
+  version: 10.14.0
+  resolution: "@wordpress/data@npm:10.14.0"
+  dependencies:
+    "@babel/runtime": "npm:7.25.7"
+    "@wordpress/compose": "npm:*"
+    "@wordpress/deprecated": "npm:*"
+    "@wordpress/element": "npm:*"
+    "@wordpress/is-shallow-equal": "npm:*"
+    "@wordpress/priority-queue": "npm:*"
+    "@wordpress/private-apis": "npm:*"
+    "@wordpress/redux-routine": "npm:*"
+    deepmerge: "npm:^4.3.0"
+    equivalent-key-map: "npm:^0.2.2"
+    is-plain-object: "npm:^5.0.0"
+    is-promise: "npm:^4.0.0"
+    redux: "npm:^5.0.1"
+    rememo: "npm:^4.0.2"
+    use-memo-one: "npm:^1.1.1"
+  peerDependencies:
+    react: ^18.0.0
+  checksum: 10c0/4772f28c17285c5e810e0ca29aa553db54288e61599c447d8b3a821e2588c54c8f5dcf384fab21ebef936c1fe4a260f9cdc824f61d4b03513fc596e904b9e503
   languageName: node
   linkType: hard
 
@@ -20588,6 +20613,13 @@ __metadata:
   dependencies:
     "@babel/runtime": "npm:^7.9.2"
   checksum: 10c0/136d98b3d5dbed1cd6279c8c18a6a74c416db98b8a432a46836bdd668475de6279a2d4fd9d1363f63904e00f0678a8a3e7fa532c897163340baf1e71bb42c742
+  languageName: node
+  linkType: hard
+
+"redux@npm:^5.0.1":
+  version: 5.0.1
+  resolution: "redux@npm:5.0.1"
+  checksum: 10c0/b10c28357194f38e7d53b760ed5e64faa317cc63de1fb95bc5d9e127fab956392344368c357b8e7a9bedb0c35b111e7efa522210cfdc3b3c75e5074718e9069c
   languageName: node
   linkType: hard
 
