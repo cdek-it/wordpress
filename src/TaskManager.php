@@ -34,7 +34,7 @@ namespace Cdek {
 
                 add_action(
                     self::getHookName($task::getName()),
-                    $class,
+                    $task,
                     20,
                 );
 
