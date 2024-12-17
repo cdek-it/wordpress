@@ -1,9 +1,8 @@
-# Copyright 2024 (C) CDEK-IT
 # Translation of Plugins - CDEKDelivery - Development (trunk) in Russian
 # This file is distributed under the same license as the Plugins - CDEKDelivery - Development (trunk) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2024-10-10 08:43:52+0000\n"
+"PO-Revision-Date: 2024-12-17 12:39:53+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -11,6 +10,28 @@ msgstr ""
 "X-Generator: GlotPress/4.0.1\n"
 "Language: ru\n"
 "Project-Id-Version: Plugins - CDEKDelivery - Development (trunk)\n"
+
+#: templates/processing.php:32
+msgid "Clear waybill from local DB"
+msgstr ""
+
+#: templates/processing.php:24
+msgid "Waybill"
+msgstr ""
+
+#: templates/processing.php:16
+msgid "Waybill info is not available due to a processing of the order status in the CDEK system"
+msgstr ""
+
+#: src/Controllers/IntakeController.php:150
+#: src/Controllers/OrderController.php:151
+msgid "Server returned an error: %s"
+msgstr ""
+
+#: src/Blocks/AdminOrderBox.php:57 src/Controllers/IntakeController.php:142
+#: src/Controllers/OrderController.php:143
+msgid "Server returned validation error: %s"
+msgstr ""
 
 #: build/cdek-create-order.js:1
 msgid "Items not added to package"
@@ -76,7 +97,7 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-#: templates/create.php:26 templates/create_many.php:55
+#: templates/create.php:26 templates/create_many.php:52
 msgid "Sync to CDEK"
 msgstr ""
 
@@ -100,7 +121,7 @@ msgstr ""
 msgid "Address"
 msgstr ""
 
-#: src/ShippingMethod.php:188
+#: src/ShippingMethod.php:186
 msgid "Error receiving token from CDEK API. Contact plugin support. Error code: %s"
 msgstr ""
 
@@ -163,7 +184,7 @@ msgid "Unknown error"
 msgstr ""
 
 #: src/Actions/OrderDeleteAction.php:96
-msgid "Waybill has been deleted."
+msgid "Waybill has been deleted"
 msgstr ""
 
 #: src/Actions/IntakeDeleteAction.php:79
@@ -253,11 +274,11 @@ msgstr ""
 msgid "Full name"
 msgstr ""
 
-#: src/Blocks/CheckoutMapBlock.php:101
+#: src/Blocks/CheckoutMapBlock.php:103
 msgid "Code of selected CDEK office for delivery"
 msgstr ""
 
-#: src/Blocks/CheckoutMapBlock.php:80
+#: src/Blocks/CheckoutMapBlock.php:82
 msgid "JSONifiend array of available CDEK offices"
 msgstr ""
 
@@ -304,7 +325,7 @@ msgstr ""
 msgid "Pickups map from CDEK"
 msgstr ""
 
-#: src/ShippingMethod.php:180
+#: src/ShippingMethod.php:178
 msgid "Error receiving token from CDEK API. Make sure the integration keys are correct"
 msgstr ""
 
@@ -365,27 +386,27 @@ msgstr ""
 msgid "Call the courier"
 msgstr ""
 
-#: templates/create_many.php:48
+#: templates/create_many.php:45
 msgid "Save"
 msgstr ""
 
-#: templates/create_many.php:21
+#: templates/create_many.php:18
 msgid "Select product"
 msgstr ""
 
-#: templates/create.php:11 templates/create_many.php:18
+#: templates/create.php:11 templates/create_many.php:15
 msgid "Packaging dimensions"
 msgstr ""
 
-#: templates/create.php:21 templates/create_many.php:44
+#: templates/create.php:21 templates/create_many.php:41
 msgid "Height in cm"
 msgstr ""
 
-#: templates/create.php:17 templates/create_many.php:41
+#: templates/create.php:17 templates/create_many.php:38
 msgid "Width in cm"
 msgstr ""
 
-#: templates/create.php:13 templates/create_many.php:38
+#: templates/create.php:13 templates/create_many.php:35
 msgid "Length in cm"
 msgstr ""
 
@@ -411,7 +432,7 @@ msgstr ""
 
 #. translators: %s: Order number
 #: src/Actions/OrderDeleteAction.php:59
-msgid "An error occurred while deleting the order. Order number %s was not found."
+msgid "An error occurred while deleting the order. Order number %s was not found"
 msgstr ""
 
 #. translators: %s: Order number
@@ -421,7 +442,7 @@ msgstr ""
 
 #. translators: %s: Order number
 #: src/Actions/OrderDeleteAction.php:85
-msgid "An error occurred while deleting the order. Order number %s was not deleted."
+msgid "An error occurred while deleting the order. Order number %s was not deleted"
 msgstr ""
 
 #. translators: %s: Order number
@@ -516,11 +537,11 @@ msgid "Editing of waybill is not available due to a change in the order status i
 msgstr ""
 
 #. translators: %s: Name of the plugin
-#: src/Blocks/AdminOrderBox.php:68
+#: src/Blocks/AdminOrderBox.php:84
 msgid "Enter the correct client ID and secret key in <a>the settings</a> plugin named %s"
 msgstr ""
 
-#: src/Blocks/AdminOrderBox.php:61
+#: src/Blocks/AdminOrderBox.php:77
 msgid "Authorization failed"
 msgstr ""
 
@@ -880,11 +901,11 @@ msgstr ""
 msgid "Use delivery amount display rules for a zone"
 msgstr ""
 
-#: src/ShippingMethod.php:78 src/ShippingMethod.php:91
+#: src/ShippingMethod.php:79 src/ShippingMethod.php:92
 msgid "CDEK Shipping"
 msgstr ""
 
-#: src/ShippingMethod.php:79
+#: src/ShippingMethod.php:80
 msgid "Official Shipping Method for Cdek"
 msgstr ""
 
@@ -931,7 +952,7 @@ msgid ""
 "You may need to cancel existing one (if that button exists)"
 msgstr ""
 
-#: src/Actions/OrderCreateAction.php:355
+#: src/Actions/OrderCreateAction.php:326
 msgid "inventory attached"
 msgstr ""
 
