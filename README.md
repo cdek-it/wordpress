@@ -3,17 +3,16 @@ Contributors: cdekit, caelan
 Tags: ecommerce, shipping, delivery, woocommerce
 Requires at least: 6.0
 Requires PHP: 7.4
-Tested up to: 6.7
-Stable tag: dev
+Tested up to: 6.5
+Stable tag: 3.22.5
 License: GPLv3
 
 Integration with CDEK delivery for your WooCommerce store.
 
 == Description ==
 
-CDEKDelivery provides integration with CDEK delivery for your store on the WordPress WooCommerce platform. This 
-plugin allows you to customize delivery settings according to your store requirements and allow customers to choose 
-CDEK shipping when placing orders.
+CDEKDelivery provides integration with CDEK delivery for your store on the WordPress WooCommerce platform. This
+plugin allows you to customize delivery settings according to your store requirements and allow customers to choose CDEK shipping when placing orders.
 
 Main plugin features:
 
@@ -41,11 +40,9 @@ Main plugin features:
 
 The CDEKDelivery plugin uses the following third-party services to provide its functionality:
 
-1. **api.cdek.ru**: The CDEK API is used to calculate the cost and delivery time of an order. The privacy policy of 
-   this service is available at [site](https://www.cdek.ru/ru/privacy_policy/)
+1. **api.cdek.ru**: The CDEK API is used to calculate the cost and delivery time of an order. The privacy policy of this service is available at [site](https://www.cdek.ru/ru/privacy_policy/)
 
-2. **api.edu.cdek.ru**: The CDEK API is used in test mode to calculate the cost and delivery time of an order.
-   The privacy policy of this service is available at [site](https://www.cdek.ru/ru/privacy_policy/)
+2. **api.edu.cdek.ru**: The CDEK API is used in test mode to calculate the cost and delivery time of an order. The privacy policy of this service is available at [site](https://www.cdek.ru/ru/privacy_policy/)
 
 == Installation ==
 
@@ -91,8 +88,7 @@ You can find full version of changelog at [GitHub](https://github.com/cdek-it/wo
 == Upgrade Notice ==
 
 = 4.0 =
-Plugin has new storage system and migrations for it. Please check the settings after updating the plugin for correct 
-operation.
+Plugin has new storage system and migrations for it. Please check the settings after updating the plugin for correct operation.
 
 = 3.7 =
 The map has been replaced by our own development and no longer contains erroneous data from OSM
