@@ -30,137 +30,74 @@ Main plugin features:
 * Printing of order receipts and barcodes for shipping.
 * Provide a choice of various additional services, such as insurance and fitting, as well as flexible modification of the shipping cost depending on the selected services and order parameters.
 
-## Особенности плагина
-* Расчет стоимости и времени доставки
-* Выбор пункта выдачи товаров через карту
-* Простота установки, интеграция в WooCommerce
-* Настройка данных магазина: адрес, выбор тарифа и типа отправки
-* Возможность передачи актуальных данных об упаковке и автоматический подсчет веса заказа
+## Plugin functions
+* Calculation of cost and delivery time
+* Selection of the pickup point via the map
+* Easy installation, integration into WooCommerce
+* Setting up store data: address, choice of tariff and type of shipment
+* Possibility of transferring current data on packaging and automatic calculation of the order weight
 
-## Доступы к сторонним сервисам
+## Access to third-party services
 
-Плагин CDEKDelivery использует следующие сторонние сервисы для обеспечения своей функциональности:
+The CDEKDelivery plugin uses the following third-party services to provide its functionality:
 
-1. **api.cdek.ru**: Для расчета стоимости и времени доставки заказа используется API CDEK. Политика конфиденциальности этого сервиса доступна по [ссылке](https://www.cdek.ru/ru/privacy_policy/)
+1. **api.cdek.ru**: The CDEK API is used to calculate the cost and delivery time of an order. The privacy policy of 
+   this service is available at [site](https://www.cdek.ru/ru/privacy_policy/)
 
-2. **api.edu.cdek.ru**: Для расчета стоимости и времени доставки заказа в тестовом режиме используется API CDEK.
-Политика конфиденциальности этого сервиса доступна по [ссылке](https://www.cdek.ru/ru/privacy_policy/)
+2. **api.edu.cdek.ru**: The CDEK API is used in test mode to calculate the cost and delivery time of an order.
+   The privacy policy of this service is available at [site](https://www.cdek.ru/ru/privacy_policy/)
 
 == Installation ==
 
-1. Установите плагин через меню "Плагины" в WordPress или загрузите архив в панели администратора.
-2. Активируйте плагин.
-3. Перейдите в раздел "WooCommerce" -> "Настройки" -> "Доставка" и выберите "CDEKDelivery".
-4. Введите данные для подключения к API CDEK и настройте параметры доставки.
-5. Заполните прочие настройки плагина и сохраните изменения.
+1. Install the plugin via the "Plugins" menu in WordPress or upload the archive in the admin panel.
+2. Activate the plugin.
+3. Go to "WooCommerce" -> "Settings" -> "Delivery" and select "CDEKDelivery".
+4. Enter the data to connect to the CDEK API and configure the delivery parameters.
+5. Fill in other plugin settings and save the changes.
 
-Более подробная инструкция доступна по [ссылке](https://cdek-it.github.io/wordpress/)
+More detailed instructions are available at [site](https://cdek-it.github.io/wordpress/)
 
 == Frequently Asked Questions ==
 
-= Куда можно задать вопрос по использованию плагина =
+= Where can I ask a question about using the plugin? =
 
-Все вопросы и замечания по использованию плагина можно задать на integrator@cdek.ru
+All questions and comments on the use of the plugin can be asked at integrator@cdek.ru
 
-== Сhangelog ==
+== Changelog ==
 
-Историю версий плагина после 3.18 вы можете найти в [Github](https://github.com/cdek-it/wordpress/releases)
+= 4.0 =
+* WP-40 Replaced the map in the plugin settings with address input fields
+* WP-57 Changed used API paths
+* WP-55 Changed the logic of automatic order creation (subscription to the payment hook)
+* WP-73 Added refresh of security tokens upon request from the API
+* WP-74 Added functionality for validating incoming requests from the API
+* WP-81 Fixed 500 error when registering an order
+* WP-85 Updated the version of the used map to prevent blocking the key from Yandex
+* WP-90 Fixed 500 error when sending an order via API
+* WP-96 Fixed translations in the plugin
+* WP-100 Fixed creation of duplicate tasks from the API
 
-= 3.18.0 =
-* CMS-830 Добавлено обрезание крайних пробелов в строках адреса
+= 3.22 =
+* WP-30 Changed the logic of automatic order creation: added a selector for waiting for payment from payment systems
+* WP-50 Reworked the method for loading available payment gateways in the settings
+* [#22](https://github.com/cdek-it/wordpress/issues/22) Added processing of an empty phone number
+* WP-50 Reworked the method for loading available payment gateways in the settings
+* WP-60 Added translations for shipping dates
+* WP-67 Fixed a bug with a negative shipping amount due to the applied cost calculation rules
+* WP-109 Fixed the migration system for the new storage
 
-= 3.17.0 =
-* CMS-842 Переделано определение локации виджета на чекауте для подгрузки в него значений, использованных для калькулятора
-* CMS-839 Исправлен расчет доставки на бою
-* CMS-833 Исправлена ошибка при передаче веса по умолчанию
-* CMS-851 Исправлена ошибка Uncaught TypeError: Cannot read properties of undefined (reading 'method_id')
-
-= 3.16.1 =
-* CMS-819 Исправлена ошибка создания накладной с вариативными товарами
-* CMS-818 Исправлена ошибка при изменении метода доставки у заказа
-* CMS-786 Увеличен интервал времени до автосоздания накладной, чтобы успела завершиться оплата и прогрузится товары
-(5-10 минут)
-
-= 3.16.0 =
-* CMS-475 Добавлен чекбокс вкл/выкл автозакрытие карты ПВЗ
-* CMS-784 В виджете показываются пвз, которые использовались для расчета калькулятора
-* CMS-750 Исправлена ошибка при расчете комплекта товаров
-* CMS-786 Хук автосоздания заказов перенесен на событие оформления заказа из вп
-
-= 3.15.0 =
-* CMS-317 Добавлена услуга "Запрет на осмотр"
-* CMS-379 Добавлен вывод статусов в виджет на детальной заказа
-* CMS-539 Добавлена услуга "Примерка" и "Частичная доставка"
-* CMS-644 Исправлено позиционирование виджета
-
-= 3.14.0 =
-* CMS-408 Добавлена возможность настройть цену доставки в зависимости от режима
-* CMS-554 Поле billing_postcode сделано необязательным для чекаута
-* CMS-568 Поле billing_last_name сделано необязательным для чекаута
-* CMS-576 Исправлена ошибка при пересчете стоимости доставки
-
-= 3.13.0 =
-* CMS-381 Добавлена совместимость с новым виджетом оформления заказа
-* CMS-552 Исправлена ошибка Uncaught TypeError: Cdek\CdekApi::getCityCodeByCityName()
-* CMS-553 Исправлена ошибка с дубликатами значений в логике подсчета габаритов коробки
-* CMS-561 Исправлен конфликт с плагином управления полей Saphali
-
-= 3.12.0 =
-* CMS-262 При выборе доставки до пвз - адрес пвз не перезаписывает адрес клиента
-* CMS-547 Исправлена ошибка с конвертацией веса в граммы при создании заказа
-
-= 3.11.0 =
-* CMS-343 Добавлена передача полей телефона, названия и электронной почты компании из настроек при создании накладной в
-СДЭК
-* CMS-370 Добавлена автоматическое создание накладных в СДЭК
-* CMS-401 Добавлена возможность указания веса меньше 1кг в настройках
-* CMS-499 Добавлен функционал кэширования авторизационного токена СДЭК для сокращения времени обработки запросов
-* CMS-435 Добавлен IP исходящего соединения к сообщениям об ошибке
-* CMS-494 При создании заказа передается его номер в вордпрессе
-* CMS-488 Исправлен сбой при расчете стоимости доставки в чекауте
-
-= 3.10.0 =
-* CMS-400 Названия тарифы переименованы в соответствии с документацией к apiv2
-* CMS-331 Доработан метод вычисления габаритов отправления с более точным алгоритмом
-* CMS-292 Добавлена возможность пересчитать стоимость доставки в уже созданном заказе (beta версия, без контроля заказа
-с измененными параметрами в СДЭК)
-* CMS-260 В форму создания заказа в СДЭК подставляются значения, которые использовались калькулятором для вычислений
-* CMS-486 Исправлен чекаут с требованием к наличию в заказе пвз при отправке тарифом ОТ офиса, а не ДО
-* CMS-487 Возвращена возможность задать кастомное имя для тарифа
-
-= 3.9.0 =
-* CMS-253 Добавлена возможность использовать тариф "Сборный груз"
-* CMS-476 Виджет-карта больше не подгружается на каждую страницу в админке
-* CMS-472 Исправлен баг с открытием карты на старом городе при его изменении в чекауте
-* CMS-482 Исправлен расчет доставки при отправке из-за границы в РФ
-
-= 3.8.0 =
-* CMS-405 Убрано ограничение на число символов ПД
-* CMS-464 Создание заказа при не заполненных полях адреса отправителя теперь недоступно
-* CMS-470 Исправлена ошибка с возможностью выбора нескольких пвз
-
-= 3.7.0 =
-* CMS-438 Отключена карта OSM и заменена картой с виджета
-* CMS-450 Переписан чекаут на использование карты из виджета для совместимости с темами, создающими много кнопок выбора
-карты
-* CMS-453 Исправлена ошибка с созданием многоместки
-
-= 3.6.0 =
-* CMS-394 Постаматы при оформлении заказа теперь показываются отдельно цветом и названием на карте
-* CMS-390 Поддержана функциональность Высокопроизводительного хранилища заказов Woocommerce
-* CMS-248 Добавлена возможность настраивать параметры доставки СДЭК для каждой отдельной зоны доставки
-* CMS-226 Переработана карта при выборе заказа. Теперь можно выбирать пункты из списка, расширена информация о каждом
-пункте.
-* CMS-208 Добавлена возможность печатать ШК
-* CMS-395 Исправил конфликт с плагином avyyash-addons, из-за которого скрывались точки пвз на карте
-* CMS-385 Плагин больше не перезаписывает обязательные поля у чекаута, если они уже существуют на странице
+You can find full version of changelog at [GitHub](https://github.com/cdek-it/wordpress/releases)
 
 == Upgrade Notice ==
 
-= 3.7.0 =
-Карта заменена собственной разработкой от СДЭК и больше не содержит ошибочный данных из OSM
+= 4.0 =
+Plugin has new storage system and migrations for it. Please check the settings after updating the plugin for correct 
+operation.
+
+= 3.7 =
+The map has been replaced by our own development and no longer contains erroneous data from OSM
 
 == Screenshots ==
 
-1. Страница настроек CDEKDelivery.
-2. Страница оформления заказа с выбором способа доставки CDEK.
+1. CDEKDelivery Settings Page.
+2. Checkout page with choice of CDEK delivery method.
