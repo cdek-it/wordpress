@@ -11,8 +11,7 @@ Integration with CDEK delivery for your WooCommerce store.
 
 == Description ==
 
-CDEKDelivery provides integration with CDEK delivery for your store on the WordPress WooCommerce platform. This
-plugin allows you to customize delivery settings according to your store requirements and allow customers to choose CDEK shipping when placing orders.
+CDEKDelivery provides integration with CDEK delivery for your store on the WordPress WooCommerce platform. This plugin allows you to customize delivery settings according to your store requirements and allow customers to choose CDEK shipping when placing orders.
 
 Main plugin features:
 
