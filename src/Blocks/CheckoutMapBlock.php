@@ -20,6 +20,8 @@ namespace Cdek\Blocks {
     use Cdek\Model\Order;
     use Cdek\Model\Tariff;
     use Cdek\ShippingMethod;
+    use JsonException;
+    use Throwable;
     use WC_Customer;
     use WC_Order;
     use WP_REST_Request;
@@ -41,6 +43,7 @@ namespace Cdek\Blocks {
                 'namespace'       => Config::DELIVERY_NAME,
                 'schema_callback' => [__CLASS__, 'extend_checkout_schema'],
                 'schema_type'     => ARRAY_A,
+                'data_callback'   => [__CLASS__, 'extend_checkout_data'],
             ]);
         }
 
@@ -56,10 +59,10 @@ namespace Cdek\Blocks {
             $api = new CdekApi;
 
             try {
-                $city = $api->cityCodeGet($cityInput, $postcodeInput);
+                $city   = $api->cityCodeGet($cityInput, $postcodeInput);
                 $points = $city !== null ? $api->officeListRaw($city) : '[]';
             } catch (ExceptionContract $e) {
-                $city = null;
+                $city   = null;
                 $points = '[]';
             }
 
@@ -89,6 +92,23 @@ namespace Cdek\Blocks {
 
         public static function extend_checkout_data(): array
         {
+            try {
+                $request    = json_decode(file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);
+                $officeCode = $request['extensions'][Config::DELIVERY_NAME]['office_code'] ?? null;
+
+                if ($officeCode !== null) {
+                    try {
+                        WC()->session->set(Config::DELIVERY_NAME.'_office_code', $officeCode);
+                    } catch (Throwable $e) {
+                    }
+
+                    return [
+                        'office_code' => $officeCode,
+                    ];
+                }
+            } catch (JsonException $e) {
+            }
+
             return [
                 'office_code' => null,
             ];
