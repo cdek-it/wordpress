@@ -211,7 +211,7 @@ namespace Cdek {
         /**
          * @throws LegacyAuthException
          */
-        public function cityCodeGet(string $city, string $postcode): ?string
+        public function cityCodeGet(string $city, ?string $postcode = null): ?string
         {
             //по запросу к api v2 климовск записан как "климовск микрорайон" поэтому добавляем "микрорайон"
             if (mb_strtolower($city) === 'климовск') {
