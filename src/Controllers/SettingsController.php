@@ -27,11 +27,17 @@ namespace Cdek\Controllers {
                 wp_die(-2, 403);
             }
 
+            $country = get_option('woocommerce_default_country', 'RU');
+
+            if(mb_strlen($country) !== 2){
+                $country = 'RU';
+            }
+
             /** @noinspection GlobalVariableUsageInspection */
             wp_send_json_success(
                 (new CdekApi)->citySuggest(
                     sanitize_text_field(wp_unslash($_GET['q'])),
-                    get_option('woocommerce_default_country', 'RU'),
+                    $country,
                 ),
             );
         }
