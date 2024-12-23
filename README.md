@@ -72,6 +72,11 @@ All questions and comments on the use of the plugin can be asked at integrator@c
 * WP-90 Fixed 500 error when sending an order via API
 * WP-96 Fixed translations in the plugin
 * WP-100 Fixed creation of duplicate tasks from the API
+* WP-114 Fixed autocomplete cities in settings
+* WP-115 Fixed work with yookassa acquiring
+* WP-117 Fixed checkout, then post index empty
+* WP-118 Fixed bug with settings save
+* WP-124 Auto create order fix
 
 = 3.22 =
 * WP-30 Changed the logic of automatic order creation: added a selector for waiting for payment from payment systems
