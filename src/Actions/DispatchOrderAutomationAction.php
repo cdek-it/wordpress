@@ -6,12 +6,10 @@ namespace Cdek\Actions;
 
 use Cdek\Config;
 use Cdek\CoreApi;
-use Cdek\Exceptions\External\CoreAuthException;
-use Cdek\Exceptions\External\HttpClientException;
-use Cdek\Exceptions\External\HttpServerException;
 use Cdek\Helpers\ScheduleLocker;
 use Cdek\Model\Order;
 use Cdek\Note;
+use Throwable;
 use WC_Order;
 
 class DispatchOrderAutomationAction
@@ -29,6 +27,10 @@ class DispatchOrderAutomationAction
         $shipping = $order->getShipping();
 
         if ($shipping === null) {
+            return;
+        }
+
+        if ($order->number !== null) {
             return;
         }
 
@@ -52,18 +54,12 @@ class DispatchOrderAutomationAction
 
         try {
             (new CoreApi)->orderGet($order->id);
-        } catch (CoreAuthException|HttpServerException $e) {
-            Note::send($orderId, $e->getCode().': '.$e->getMessage(), true);
-        } catch (HttpClientException $e) {
-            if ($e->getCode() === 404) {
-                if (as_schedule_single_action(time() + 60 * 5, Config::ORDER_AUTOMATION_HOOK_NAME, [
-                    $order->id,
-                    1,
-                ], 'cdekdelivery')) {
-                    Note::send($order->id, esc_html__('Created order automation task', 'cdekdelivery'));
-                }
-            } else {
-                Note::send($order->id, $e->getMessage(), true);
+        } catch (Throwable $e) {
+            if (as_schedule_single_action(time() + 60 * 5, Config::ORDER_AUTOMATION_HOOK_NAME, [
+                $order->id,
+                1,
+            ], 'cdekdelivery')) {
+                Note::send($order->id, esc_html__('Created order automation task', 'cdekdelivery'));
             }
         }
     }
