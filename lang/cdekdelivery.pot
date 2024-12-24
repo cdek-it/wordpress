@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Plugins - CDEKDelivery - Development (trunk) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2024-12-17 12:39:53+0000\n"
+"PO-Revision-Date: 2024-12-23 12:19:34+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -10,6 +10,11 @@ msgstr ""
 "X-Generator: GlotPress/4.0.1\n"
 "Language: ru\n"
 "Project-Id-Version: Plugins - CDEKDelivery - Development (trunk)\n"
+
+#. translators: 1: attempt number
+#: src/Actions/OrderCreateAction.php:89
+msgid "Order created automatically after %1$s attempts"
+msgstr ""
 
 #: templates/processing.php:32
 msgid "Clear waybill from local DB"
@@ -227,7 +232,7 @@ msgstr ""
 msgid "%s, (%s day)"
 msgstr ""
 
-#: src/Actions/DispatchOrderAutomationAction.php:63
+#: src/Actions/DispatchOrderAutomationAction.php:62
 msgid "Created order automation task"
 msgstr ""
 
@@ -248,7 +253,7 @@ msgid "Automation"
 msgstr ""
 
 #. translators: 1: tracking number
-#: src/Actions/OrderCreateAction.php:133
+#: src/Actions/OrderCreateAction.php:101
 msgid "Tracking number: %1$s"
 msgstr ""
 
@@ -261,6 +266,9 @@ msgid ""
 "Try re-creating the order.\n"
 "You may need to cancel existing one (if that button exists)"
 msgstr ""
+"Не удалось создать ШК.\n"
+"Необходимо попробовать пересоздать заказ.\n"
+"Возможно, потребуется отменить существующий (если такая кнопка есть)"
 
 #: templates/intake.php:73
 msgid "Telephone call required"
@@ -274,11 +282,11 @@ msgstr ""
 msgid "Full name"
 msgstr ""
 
-#: src/Blocks/CheckoutMapBlock.php:103
+#: src/Blocks/CheckoutMapBlock.php:123
 msgid "Code of selected CDEK office for delivery"
 msgstr ""
 
-#: src/Blocks/CheckoutMapBlock.php:82
+#: src/Blocks/CheckoutMapBlock.php:85
 msgid "JSONifiend array of available CDEK offices"
 msgstr ""
 
@@ -952,12 +960,12 @@ msgid ""
 "You may need to cancel existing one (if that button exists)"
 msgstr ""
 
-#: src/Actions/OrderCreateAction.php:326
+#: src/Actions/OrderCreateAction.php:341
 msgid "inventory attached"
 msgstr ""
 
 #. translators: 1: error message
-#: src/Actions/OrderCreateAction.php:89
+#: src/Actions/OrderCreateAction.php:115
 msgid "Cdek shipping error: %1$s"
 msgstr ""
 
