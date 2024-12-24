@@ -7,6 +7,8 @@ import { debounce } from 'lodash';
 const billingCityInput = $('#billing_city');
 const shippingCityInput = $('#shipping_city');
 const buttonNormalSize = 200;
+const baseFontSize = 14;
+const smallFontSize = 10;
 
 let needChange;
 let isNormalSize;
@@ -89,7 +91,7 @@ const resizeObserver = new ResizeObserver(entries => {
             }
 
             if(targetNode && needChange) {
-                targetNode.style.fontSize = isNormalSize ? '14px' : '10px';
+                targetNode.style.fontSize = (isNormalSize ? baseFontSize : smallFontSize) + 'px';
                 needChange = false;
             }
         }
