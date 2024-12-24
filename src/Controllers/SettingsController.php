@@ -15,6 +15,19 @@ namespace Cdek\Controllers {
 
     class SettingsController
     {
+        public static function cache(): void
+        {
+            check_ajax_referer(Config::DELIVERY_NAME);
+
+            if (!current_user_can('manage_woocommerce')) {
+                wp_die(-2, 403);
+            }
+
+            FlushTokenCacheAction::new()();
+
+            wp_send_json_success();
+        }
+
         /**
          * @throws \Cdek\Exceptions\External\ApiException
          * @throws \Cdek\Exceptions\External\LegacyAuthException
@@ -27,26 +40,24 @@ namespace Cdek\Controllers {
                 wp_die(-2, 403);
             }
 
+            $country = get_option('woocommerce_default_country', 'RU');
+
+            if (mb_strlen($country) !== 2) {
+                $exCountry = explode(':', $country);
+                if (count($exCountry) === 2) {
+                    $country = $exCountry[0];
+                } else {
+                    $country = 'RU';
+                }
+            }
+
             /** @noinspection GlobalVariableUsageInspection */
             wp_send_json_success(
                 (new CdekApi)->citySuggest(
                     sanitize_text_field(wp_unslash($_GET['q'])),
-                    get_option('woocommerce_default_country', 'RU'),
+                    $country,
                 ),
             );
-        }
-
-        public static function cache(): void
-        {
-            check_ajax_referer(Config::DELIVERY_NAME);
-
-            if (!current_user_can('manage_woocommerce')) {
-                wp_die(-2, 403);
-            }
-
-            FlushTokenCacheAction::new()();
-
-            wp_send_json_success();
         }
 
         public function __invoke(): void

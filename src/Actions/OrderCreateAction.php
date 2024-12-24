@@ -79,7 +79,33 @@ namespace Cdek\Actions {
             }
 
             try {
-                $this->createOrder($this->buildPackagesData($packages));
+                $track = $this->createOrder($this->buildPackagesData($packages));
+
+                if (!empty($track)) {
+                    if ($attempt > 0) {
+                        Note::send(
+                            $this->order->id,
+                            sprintf(
+                                esc_html__(/* translators: 1: attempt number */
+                                    'Order created automatically after %1$s attempts',
+                                    'cdekdelivery',
+                                ),
+                                $attempt,
+                            ),
+                        );
+                    }
+
+                    Note::send(
+                        $this->order->id,
+                        sprintf(
+                            esc_html__(/* translators: 1: tracking number */ 'Tracking number: %1$s',
+                                'cdekdelivery',
+                            ),
+                            $track,
+                        ),
+                        true,
+                    );
+                }
 
                 return new ValidationResult(true);
             } catch (InvalidPhoneException $e) {
@@ -111,7 +137,7 @@ namespace Cdek\Actions {
          * @throws InvalidPhoneException
          * @throws InvalidRequestException
          */
-        private function createOrder(array $packages): void
+        private function createOrder(array $packages): ?string
         {
             $param             = $this->buildRequestData();
             $param['packages'] = $packages;
@@ -126,18 +152,7 @@ namespace Cdek\Actions {
             $this->order->uuid   = $uuid;
             $this->order->save();
 
-            if (!empty($track)) {
-                Note::send(
-                    $this->order->id,
-                    sprintf(
-                        esc_html__(/* translators: 1: tracking number */ 'Tracking number: %1$s',
-                            'cdekdelivery',
-                        ),
-                        $track,
-                    ),
-                    true,
-                );
-            }
+            return $track;
         }
 
         /**
