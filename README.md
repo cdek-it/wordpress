@@ -34,6 +34,8 @@ Main plugin features:
 * Easy installation, integration into WooCommerce
 * Setting up store data: address, choice of tariff and type of shipment
 * Possibility of transferring current data on packaging and automatic calculation of the order weight
+* Compatible with [High-Performance Order Storage](https://woocommerce.com/document/high-performance-order-storage/)
+* Works well with [Block checkout](https://woocommerce.com/checkout-blocks/) and [Classic checkout](https://woocommerce.com/document/woocommerce-shortcodes/page-shortcodes/#checkout)
 
 ## Access to third-party services
 
