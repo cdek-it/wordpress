@@ -21,15 +21,6 @@
     white-space: nowrap;
     margin-bottom: 10px;
     margin-top: 10px;
-
-    & a {
-        color: inherit;
-        font-size: inherit;
-    }
-
-    @media only screen and (max-width: 400px){
-        font-size: 10px;
-    }
 }
 
 .cdek-office-info {

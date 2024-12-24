@@ -6,6 +6,10 @@ import { debounce } from 'lodash';
 
 const billingCityInput = $('#billing_city');
 const shippingCityInput = $('#shipping_city');
+const buttonNormalSize = 200;
+
+let needChange;
+let isNormalSize;
 let widget = null;
 let el;
 
@@ -62,19 +66,64 @@ const debouncedCheckoutUpdate = debounce(() => {
     $(document.body).trigger('update_checkout');
 }, 500);
 
+const initChanges = () => {
+    needChange = false;
+    isNormalSize = true;
+}
+
+const resizeObserver = new ResizeObserver(entries => {
+    for (let entry of entries) {
+        if(entry.contentRect){
+            const targetNode = entry.target;
+
+            if(entry.contentRect.width < buttonNormalSize){
+                if(isNormalSize){
+                    isNormalSize = false;
+                    needChange = true;
+                }
+            }else{
+                if(!isNormalSize){
+                    isNormalSize = true;
+                    needChange = true;
+                }
+            }
+
+            if(targetNode && needChange) {
+                targetNode.style.fontSize = isNormalSize ? '14px' : '10px';
+                needChange = false;
+            }
+        }
+    }
+});
+
 $(document.body)
   .on('input',
     '#billing_city, #billing_postcode, #shipping_city, #shipping_postcode',
     debouncedCheckoutUpdate)
   .on('updated_checkout', () => {
+      const targetNode = document.querySelector('.open-pvz-btn');
+
       if (widget !== null) {
           console.debug('[CDEK-MAP] Clearing widget selection');
 
           widget.clearSelection();
       }
+
+      if(targetNode) {
+          initChanges();
+          resizeObserver.observe(targetNode);
+      }
   })
   .on('change', '.shipping_method',
-    () => $(document.body).trigger('update_checkout'))
+    () => {
+      $(document.body).trigger('update_checkout')
+        const targetNode = document.querySelector('.open-pvz-btn');
+
+        if(targetNode) {
+            initChanges();
+            resizeObserver.observe(targetNode);
+        }
+  })
   .on('click', '.open-pvz-btn', null, (e) => {
       el = e.target.tagName === 'A' ? $(e.target.parentElement) : $(e.target);
       closeMap(el);
