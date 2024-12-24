@@ -70,32 +70,32 @@ const debouncedCheckoutUpdate = debounce(() => {
 const initChanges = () => {
     needChange = false;
     isNormalSize = true;
-}
+};
 
 const resizeObserver = new ResizeObserver(entries => {
     for (let entry of entries) {
-        if(entry.contentRect){
+        if (entry.contentRect) {
             const targetNode = entry.target;
 
-            if(entry.contentRect.width < buttonNormalSize){
-                if(isNormalSize){
+            if (entry.contentRect.width < buttonNormalSize) {
+                if (isNormalSize) {
                     isNormalSize = false;
                     needChange = true;
                 }
-            }else{
-                if(!isNormalSize){
+            } else {
+                if (!isNormalSize) {
                     isNormalSize = true;
                     needChange = true;
                 }
             }
 
-            if(targetNode && needChange) {
-                if(isNormalSize){
-                    if(targetNode.classList.contains(smallFontClass)){
+            if (targetNode && needChange) {
+                if (isNormalSize) {
+                    if (targetNode.classList.contains(smallFontClass)) {
                         targetNode.classList.remove(smallFontClass);
                     }
-                }else{
-                    if(!targetNode.classList.contains(smallFontClass)){
+                } else {
+                    if (!targetNode.classList.contains(smallFontClass)) {
                         targetNode.classList.add(smallFontClass);
                     }
                 }
@@ -118,21 +118,21 @@ $(document.body)
           widget.clearSelection();
       }
 
-      if(targetNode) {
+      if (targetNode) {
           initChanges();
           resizeObserver.observe(targetNode);
       }
   })
   .on('change', '.shipping_method',
     () => {
-      $(document.body).trigger('update_checkout')
+        $(document.body).trigger('update_checkout');
         const targetNode = document.querySelector('.open-pvz-btn');
 
-        if(targetNode) {
+        if (targetNode) {
             initChanges();
             resizeObserver.observe(targetNode);
         }
-  })
+    })
   .on('click', '.open-pvz-btn', null, (e) => {
       el = e.target.tagName === 'A' ? $(e.target.parentElement) : $(e.target);
       closeMap(el);
