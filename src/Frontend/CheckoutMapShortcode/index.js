@@ -7,7 +7,7 @@ import { debounce } from 'lodash';
 const billingCityInput = $('#billing_city');
 const shippingCityInput = $('#shipping_city');
 const buttonNormalSize = 160;
-const smallFontClass = 'small-open-pvz-btn';
+const smallFontAttribute = 'aria-small';
 
 let needChange;
 let isNormalSize;
@@ -91,12 +91,12 @@ const resizeObserver = new ResizeObserver(entries => {
 
             if (targetNode && needChange) {
                 if (isNormalSize) {
-                    if (targetNode.classList.contains(smallFontClass)) {
-                        targetNode.classList.remove(smallFontClass);
+                    if (targetNode.hasAttribute(smallFontAttribute)) {
+                        targetNode.removeAttribute(smallFontAttribute);
                     }
                 } else {
-                    if (!targetNode.classList.contains(smallFontClass)) {
-                        targetNode.classList.add(smallFontClass);
+                    if (!targetNode.hasAttribute(smallFontAttribute)) {
+                        targetNode.setAttribute(smallFontAttribute, '');
                     }
                 }
                 needChange = false;

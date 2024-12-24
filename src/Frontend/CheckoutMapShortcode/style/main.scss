@@ -22,7 +22,7 @@
     margin-bottom: 10px;
     margin-top: 10px;
 
-    &.small-open-pvz-btn {
+    &[aria-small]{
         font-size: 10px;
     }
 
