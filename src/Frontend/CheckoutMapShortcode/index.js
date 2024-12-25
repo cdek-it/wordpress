@@ -74,7 +74,7 @@ const initChanges = () => {
 
 const resizeObserver = new ResizeObserver(entries => {
     for (const entry of entries) {
-        if(!entry.contentRect || !entry.target) {
+        if(!('contentRect' in entry) || !('target' in entry) ) {
             continue;
         }
 
