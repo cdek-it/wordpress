@@ -73,35 +73,34 @@ const initChanges = () => {
 };
 
 const resizeObserver = new ResizeObserver(entries => {
-    for (let entry of entries) {
-        if (entry.contentRect) {
-            const targetNode = entry.target;
-
-            if (entry.contentRect.width < buttonNormalSize) {
-                if (isNormalSize) {
-                    isNormalSize = false;
-                    needChange = true;
-                }
-            } else {
-                if (!isNormalSize) {
-                    isNormalSize = true;
-                    needChange = true;
-                }
-            }
-
-            if (targetNode && needChange) {
-                if (isNormalSize) {
-                    if (targetNode.hasAttribute(smallFontAttribute)) {
-                        targetNode.removeAttribute(smallFontAttribute);
-                    }
-                } else {
-                    if (!targetNode.hasAttribute(smallFontAttribute)) {
-                        targetNode.setAttribute(smallFontAttribute, '');
-                    }
-                }
-                needChange = false;
-            }
+    for (const entry of entries) {
+        if(!entry.contentRect || !entry.target) {
+            continue;
         }
+
+        if (entry.contentRect.width < buttonNormalSize) {
+            if (isNormalSize) {
+                isNormalSize = false;
+                needChange = true;
+            }
+        } else if (!isNormalSize) {
+            isNormalSize = true;
+            needChange = true;
+        }
+
+        if(!needChange){
+            continue;
+        }
+
+        if (isNormalSize) {
+            if (entry.target.hasAttribute(smallFontAttribute)) {
+                entry.target.removeAttribute(smallFontAttribute);
+            }
+        } else if (!entry.target.hasAttribute(smallFontAttribute)) {
+            entry.target.setAttribute(smallFontAttribute, '');
+        }
+
+        needChange = false;
     }
 });
 
@@ -124,15 +123,7 @@ $(document.body)
       }
   })
   .on('change', '.shipping_method',
-    () => {
-        $(document.body).trigger('update_checkout');
-        const targetNode = document.querySelector('.open-pvz-btn');
-
-        if (targetNode) {
-            initChanges();
-            resizeObserver.observe(targetNode);
-        }
-    })
+    () => $(document.body).trigger('update_checkout'))
   .on('click', '.open-pvz-btn', null, (e) => {
       el = e.target.tagName === 'A' ? $(e.target.parentElement) : $(e.target);
       closeMap(el);
