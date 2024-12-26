@@ -270,12 +270,12 @@ namespace Cdek\Model {
         {
             $tariffNameEdit = ShippingMethod::factory()->tariff_name;
 
-            if (!empty($tariffNameEdit)) {
+            if ( !empty($tariffNameEdit) ) {
                 $tariffNameEditArray = explode(';', $tariffNameEdit);
 
                 foreach ($tariffNameEditArray as $tariffEdit) {
                     $tariffConcrete = explode('-', $tariffEdit);
-                    if ($tariffConcrete[0] === (string)$code) {
+                    if ( ($tariffConcrete[0] === (string)$code) && !empty($tariffConcrete[1]) ) {
                         return $tariffConcrete[1];
                     }
                 }
