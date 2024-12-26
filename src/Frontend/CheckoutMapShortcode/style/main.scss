@@ -21,6 +21,15 @@
     white-space: nowrap;
     margin-bottom: 10px;
     margin-top: 10px;
+
+    &[aria-small]{
+        font-size: 10px;
+    }
+
+    & a {
+        color: inherit;
+        font-size: inherit;
+    }
 }
 
 .cdek-office-info {
