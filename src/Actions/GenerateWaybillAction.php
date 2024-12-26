@@ -27,9 +27,9 @@ namespace Cdek\Actions {
 
             ini_set(
                 'max_execution_time',
-                30 +
+                (string)(30 +
                 Config::GRAPHICS_FIRST_SLEEP +
-                Config::GRAPHICS_TIMEOUT_SEC * Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS,
+                Config::GRAPHICS_TIMEOUT_SEC * Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS),
             );
 
             $order = $api->orderGet($orderUuid);
