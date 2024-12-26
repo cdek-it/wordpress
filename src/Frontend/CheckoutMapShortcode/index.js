@@ -6,6 +6,11 @@ import { debounce } from 'lodash';
 
 const billingCityInput = $('#billing_city');
 const shippingCityInput = $('#shipping_city');
+const buttonNormalSize = 160;
+const smallFontAttribute = 'aria-small';
+
+let needChange;
+let isNormalSize;
 let widget = null;
 let el;
 
@@ -62,15 +67,59 @@ const debouncedCheckoutUpdate = debounce(() => {
     $(document.body).trigger('update_checkout');
 }, 500);
 
+const initChanges = () => {
+    needChange = false;
+    isNormalSize = true;
+};
+
+const resizeObserver = new ResizeObserver(entries => {
+    for (const entry of entries) {
+        if(!('contentRect' in entry) || !('target' in entry) ) {
+            continue;
+        }
+
+        if (entry.contentRect.width < buttonNormalSize) {
+            if (isNormalSize) {
+                isNormalSize = false;
+                needChange = true;
+            }
+        } else if (!isNormalSize) {
+            isNormalSize = true;
+            needChange = true;
+        }
+
+        if(!needChange){
+            continue;
+        }
+
+        if (isNormalSize) {
+            if (entry.target.hasAttribute(smallFontAttribute)) {
+                entry.target.removeAttribute(smallFontAttribute);
+            }
+        } else if (!entry.target.hasAttribute(smallFontAttribute)) {
+            entry.target.setAttribute(smallFontAttribute, '');
+        }
+
+        needChange = false;
+    }
+});
+
 $(document.body)
   .on('input',
     '#billing_city, #billing_postcode, #shipping_city, #shipping_postcode',
     debouncedCheckoutUpdate)
   .on('updated_checkout', () => {
+      const targetNode = document.querySelector('.open-pvz-btn');
+
       if (widget !== null) {
           console.debug('[CDEK-MAP] Clearing widget selection');
 
           widget.clearSelection();
+      }
+
+      if (targetNode) {
+          initChanges();
+          resizeObserver.observe(targetNode);
       }
   })
   .on('change', '.shipping_method',
