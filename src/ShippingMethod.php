@@ -116,7 +116,7 @@ namespace Cdek {
                 }
             }
 
-            return static::$instance ?? WC()->shipping()->load_shipping_methods()[Config::DELIVERY_NAME];
+            return static::$instance ?: WC()->shipping()->load_shipping_methods()[Config::DELIVERY_NAME];
         }
 
         /** @noinspection MissingReturnTypeInspection */
