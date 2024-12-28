@@ -22,7 +22,7 @@ namespace Cdek\Helpers {
             return [
                 'message' => $e->getMessage(),
                 'file'    => "{$e->getFile()}:{$e->getLine()}",
-                'line'    => $e->getLine(),
+                'trace'    => $e->getTrace(),
             ];
         }
 
