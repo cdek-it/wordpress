@@ -21,6 +21,7 @@ namespace Cdek\Actions {
     use Cdek\Exceptions\External\LegacyAuthException;
     use Cdek\Exceptions\InvalidPhoneException;
     use Cdek\Exceptions\ShippingNotFoundException;
+    use Cdek\Helpers\Logger;
     use Cdek\Helpers\StringHelper;
     use Cdek\Helpers\WeightConverter;
     use Cdek\Model\Order;
@@ -119,6 +120,11 @@ namespace Cdek\Actions {
 
                 return new ValidationResult(false, $e->getMessage());
             } catch (Throwable $e) {
+                Logger::warning(
+                    "Error while order create",
+                    Logger::exceptionParser($e),
+                );
+
                 if ($attempt < 1 || $attempt > 5) {
                     throw $e;
                 }
@@ -166,7 +172,10 @@ namespace Cdek\Actions {
             try {
                 $recipientNumber = PhoneValidator::new()($recipientNumber, $countryCode);
             } catch (CoreAuthException|ApiException|CacheException $e) {
-                //Do nothing
+                Logger::warning(
+                    'Phone validation fail',
+                    Logger::exceptionParser($e),
+                );
             }
 
             $deliveryMethod = $this->shipping->getMethod();

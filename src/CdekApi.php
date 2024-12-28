@@ -14,6 +14,7 @@ namespace Cdek {
     use Cdek\Exceptions\External\InvalidRequestException;
     use Cdek\Exceptions\External\LegacyAuthException;
     use Cdek\Helpers\LegacyTokenStorage;
+    use Cdek\Helpers\Logger;
     use Cdek\Transport\HttpClient;
     use Cdek\Transport\HttpResponse;
 
@@ -151,9 +152,7 @@ namespace Cdek {
                 'services'      => array_key_exists('services', $deliveryParam) ? $deliveryParam['services'] : [],
             ];
 
-            if ($log = wc_get_logger()) {
-                $log->debug("Fetching tariff for {$deliveryParam['tariff_code']}", $request);
-            }
+            Logger::debug("Fetching tariff for {$deliveryParam['tariff_code']}", $request);
 
             $resp = HttpClient::sendJsonRequest(
                 "{$this->apiUrl}calculator/tariff",
@@ -163,18 +162,14 @@ namespace Cdek {
             )->json();
 
             if (empty($resp['total_sum'])) {
-                if ($log = wc_get_logger()) {
-                    $log->debug("Got empty total sum for tariff {$deliveryParam['tariff_code']}");
-                }
+                Logger::debug("Got empty total sum for tariff {$deliveryParam['tariff_code']}");
 
                 return null;
             }
 
             $total = (float)$resp['total_sum'];
 
-            if ($log = wc_get_logger()) {
-                $log->debug("Got total for tariff {$deliveryParam['tariff_code']}: $total");
-            }
+            Logger::debug("Got total for tariff {$deliveryParam['tariff_code']}: $total");
 
             return $total;
         }
@@ -192,9 +187,7 @@ namespace Cdek {
                 'packages'      => $deliveryParam['packages'],
             ];
 
-            if ($log = wc_get_logger()) {
-                $log->debug('Fetching tarifflist', $request);
-            }
+            Logger::debug('Fetching tarifflist', $request);
 
             $result = HttpClient::sendJsonRequest(
                 "{$this->apiUrl}calculator/tarifflist",
@@ -203,9 +196,7 @@ namespace Cdek {
                 $request,
             )->json();
 
-            if ($log = wc_get_logger()) {
-                $log->debug('Got tarifflist', $result);
-            }
+            Logger::debug('Got tarifflist', $result);
 
             return $result;
         }
@@ -231,12 +222,10 @@ namespace Cdek {
             ?string $postcode = null
         ): ?string {
             try {
-                if ($log = wc_get_logger()) {
-                    $log->debug('Fetching city', [
-                        'city'        => $city,
-                        'postal_code' => $postcode,
-                    ]);
-                }
+                Logger::debug('Fetching city', [
+                    'city'        => $city,
+                    'postal_code' => $postcode,
+                ]);
 
                 $result = HttpClient::sendJsonRequest(
                     "{$this->apiUrl}location/cities",
@@ -250,9 +239,7 @@ namespace Cdek {
 
                 $result = !empty($result[0]['code']) ? (string)$result[0]['code'] : null;
 
-                if ($log = wc_get_logger()) {
-                    $log->debug("Got city with code $result");
-                }
+                Logger::debug("Got city with code $result");
 
                 return $result;
             } catch (ApiException $e) {
@@ -270,13 +257,11 @@ namespace Cdek {
                 $city .= ' микрорайон';
             }
 
-            if ($log = wc_get_logger()) {
-                $log->debug('Fetching city', [
-                    'city'          => $city,
-                    'postal_code'   => $postcode,
-                    'country_codes' => $country === null ? null : [$country],
-                ]);
-            }
+            Logger::debug('Fetching city', [
+                'city'          => $city,
+                'postal_code'   => $postcode,
+                'country_codes' => $country === null ? null : [$country],
+            ]);
 
             try {
                 $result = HttpClient::sendJsonRequest(
@@ -292,9 +277,7 @@ namespace Cdek {
 
                 $result = $result[0] ?: null;
 
-                if ($log = wc_get_logger()) {
-                    $log->debug('Got city', $result);
-                }
+                Logger::debug('Got city', $result);
 
                 return $result;
             } catch (ApiException $e) {
@@ -412,9 +395,7 @@ namespace Cdek {
          */
         public function orderCreate(array $params): ?string
         {
-            if ($log = wc_get_logger()) {
-                $log->debug('Creating order', $params);
-            }
+            Logger::debug('Creating order', $params);
 
             $result = HttpClient::sendJsonRequest(
                 "{$this->apiUrl}orders/",
@@ -423,9 +404,7 @@ namespace Cdek {
                 $params,
             )->entity()['uuid'] ?? null;
 
-            if ($log = wc_get_logger()) {
-                $log->debug("Created order with uuid $result");
-            }
+            Logger::debug("Created order with uuid $result");
 
             return $result;
         }
