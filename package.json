@@ -20,7 +20,7 @@
     "@cdek-it/widget": "^3.11.1",
     "@woocommerce/data": "^5.0.0",
     "@woocommerce/settings": "^1.0.0",
-    "@wordpress/api-fetch": "^7.14.0",
+    "@wordpress/api-fetch": "^7.15.1",
     "@wordpress/block-editor": "^14.9.0",
     "@wordpress/data": "^10.14.0",
     "@wordpress/element": "^6.14.0",
