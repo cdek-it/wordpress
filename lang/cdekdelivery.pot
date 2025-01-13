@@ -126,7 +126,7 @@ msgstr ""
 msgid "Address"
 msgstr ""
 
-#: src/ShippingMethod.php:186
+#: src/ShippingMethod.php:188
 msgid "Error receiving token from CDEK API. Contact plugin support. Error code: %s"
 msgstr ""
 
@@ -266,9 +266,6 @@ msgid ""
 "Try re-creating the order.\n"
 "You may need to cancel existing one (if that button exists)"
 msgstr ""
-"Не удалось создать ШК.\n"
-"Необходимо попробовать пересоздать заказ.\n"
-"Возможно, потребуется отменить существующий (если такая кнопка есть)"
 
 #: templates/intake.php:73
 msgid "Telephone call required"
@@ -333,7 +330,7 @@ msgstr ""
 msgid "Pickups map from CDEK"
 msgstr ""
 
-#: src/ShippingMethod.php:178
+#: src/ShippingMethod.php:180
 msgid "Error receiving token from CDEK API. Make sure the integration keys are correct"
 msgstr ""
 
@@ -909,11 +906,11 @@ msgstr ""
 msgid "Use delivery amount display rules for a zone"
 msgstr ""
 
-#: src/ShippingMethod.php:79 src/ShippingMethod.php:92
+#: src/ShippingMethod.php:80 src/ShippingMethod.php:94
 msgid "CDEK Shipping"
 msgstr ""
 
-#: src/ShippingMethod.php:80
+#: src/ShippingMethod.php:81
 msgid "Official Shipping Method for Cdek"
 msgstr ""
 
@@ -960,7 +957,7 @@ msgid ""
 "You may need to cancel existing one (if that button exists)"
 msgstr ""
 
-#: src/Actions/OrderCreateAction.php:341
+#: src/Actions/OrderCreateAction.php:343
 msgid "inventory attached"
 msgstr ""
 
