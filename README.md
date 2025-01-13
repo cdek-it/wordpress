@@ -83,6 +83,7 @@ All questions and comments on the use of the plugin can be asked at integrator@c
 * WP-129 Fixed empty value for custom tariff name
 * WP-130 Settings data updated after changes without screen reload
 * WP-131 Fixed bug with print barcode and invoice
+* WP-133 Fixed items total in order details for invoice
 
 = 3.22 =
 * WP-30 Changed the logic of automatic order creation: added a selector for waiting for payment from payment systems
