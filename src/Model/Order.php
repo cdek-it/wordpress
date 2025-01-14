@@ -189,6 +189,11 @@ namespace Cdek\Model {
             return $this->order->is_paid();
         }
 
+        final public function isCancelled(): bool
+        {
+            return $this->order->has_status('cancelled');
+        }
+
         /**
          * @throws \Cdek\Exceptions\OrderNotFoundException
          * @throws \Cdek\Exceptions\External\ApiException
