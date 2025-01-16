@@ -88,14 +88,6 @@ namespace Cdek\Actions {
                     ];
                 }
             } catch (HttpClientException $e) {
-                Logger::warning(
-                    'Failed to create barcode',
-                    [
-                        'message' => $e->getMessage(),
-                        Logger::exceptionParser($e),
-                    ]
-                );
-
                 return [
                     'success' => false,
                     'message' => esc_html__(
