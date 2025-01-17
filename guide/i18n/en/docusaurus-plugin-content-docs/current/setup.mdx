@@ -1,7 +1,6 @@
 ---
 sidebar_position: 2
 ---
-import Image from '@theme/IdealImage';
 
 # Setup
 
@@ -28,25 +27,8 @@ button to apply them.
 <details>
     <summary>Where to find `Yandex map key`</summary>
 
-    Go to the [Developer's Area](https://developer.tech.yandex.ru/) page and click the Get Key button. Select JavaScript
-    API and HTTP Geocoder in the popup window that appears.
+    You can find the instruction on the [Yandex map](./yandex) page.
 
-    :::note
-
-    Yandex key has timeout up to 1 hour before any changes will apply
-
-    :::
-
-    When the form is completed, the "Service successfully connected" message will appear. The generated key will be
-    available in the Keys section. It will be required later for the API connection.
-
-    :::warning
-
-    Make sure to set the HTTP Referrer equal to your website address for the key.
-
-    Read more at https://yandex.ru/dev/jsapi30/doc/ru/limit
-
-    :::
 </details>
 
 Then you should select addresses for the cargo shipment (orders) on map — pick-up point (for "from warehouse" rates) or
@@ -67,9 +49,10 @@ Press and hold CTRL to select several rates at once
 
     <Image img={require('./img/yandex.png')} />
 
-    Please, check the Yandex map key and HTTP Referrer settings. Also try to wait up to 1 hour after the last changes
-    to the key.
-    If the problem persists, please, contact the [plugin support](mailto:integrator@cdek.ru).
+    Please check that you have followed the [key setup instruction](./yandex) precisely and waited for the specified
+    time.
+
+    If the problem persists, please contact [support](mailto:integrator@cdek.ru).
 
 </details>
 

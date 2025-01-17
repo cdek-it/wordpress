@@ -61,6 +61,10 @@ More detailed instructions are available at [site](https://cdek-it.github.io/wor
 
 All questions and comments on the use of the plugin can be asked at integrator@cdek.ru
 
+= Where can I find more information about the plugin? =
+
+You can check out the plugin documentation at [site](https://cdek-it.github.io/wordpress/)
+
 == Changelog ==
 
 = 4.0 =
