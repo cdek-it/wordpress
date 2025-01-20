@@ -27,6 +27,7 @@ namespace Cdek {
         public const DEV_KEY = '7wV8tk&r6VH4zK:1&0uDpjOkvM~qngLl';
         public const DOCS_URL = 'https://cdek-it.github.io/wordpress/';
         public const FAQ_URL = 'https://cdek-it.github.io/wordpress/faq';
+        public const KEY_URL = 'https://cdek-it.github.io/wordpress/yandex';
         public const MAGIC_KEY = 'cdeksik';
     }
 }
