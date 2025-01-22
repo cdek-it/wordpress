@@ -109,7 +109,7 @@ namespace Cdek\Transport {
             return new HttpResponse(
                 wp_remote_retrieve_response_code($resp),
                 wp_remote_retrieve_body($resp),
-                ($headers instanceof CaseInsensitiveDictionary) ? $headers->getAll() : $headers,
+                method_exists($headers, "getAll") ? $headers->getAll() : $headers,
                 $url,
                 $method,
             );
