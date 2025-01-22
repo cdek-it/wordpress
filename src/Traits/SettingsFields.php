@@ -9,6 +9,7 @@ namespace {
 
 namespace Cdek\Traits {
 
+    use Cdek\Config;
     use Cdek\Enums\BarcodeFormat;
     use Cdek\Loader;
     use Cdek\Model\Tariff;
@@ -81,7 +82,7 @@ namespace Cdek\Traits {
                         esc_html('</a>'),
                     ],
                         [
-                            '<a rel="noopener nofollower" href="https://yandex.ru/dev/jsapi-v2-1/doc/ru/#get-api-key" target="_blank">',
+                            '<a rel="noopener nofollower" href="' . Config::KEY_URL . '" target="_blank">',
                             '</a>',
                         ],
                         esc_html__(
