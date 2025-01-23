@@ -12,6 +12,7 @@ namespace Cdek\Tasks {
     use Cdek\Contracts\TaskContract;
     use Cdek\Exceptions\OrderNotFoundException;
     use Cdek\Exceptions\ScheduledTaskException;
+    use Cdek\Helpers\Logger;
     use Cdek\Model\Order;
     use Cdek\Model\TaskResult;
     use Iterator;
@@ -23,7 +24,10 @@ namespace Cdek\Tasks {
          */
         final protected function process(): Iterator
         {
+            Logger::debug('Restore process started');
+
             if ($this->taskMeta === null) {
+                Logger::debug('Restore order uuids task meta is empty');
                 throw new ScheduledTaskException;
             }
 
@@ -40,8 +44,12 @@ namespace Cdek\Tasks {
             }
 
             if (empty($failedOrders)) {
+                Logger::debug('Restore process success');
+
                 yield new TaskResult('success');
             } else {
+                Logger::debug('Restore process failed', ['failed' => $failedOrders]);
+
                 yield new TaskResult('warning', ['failed' => $failedOrders]);
             }
         }

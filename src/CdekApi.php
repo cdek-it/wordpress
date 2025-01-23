@@ -152,8 +152,6 @@ namespace Cdek {
                 'services'      => array_key_exists('services', $deliveryParam) ? $deliveryParam['services'] : [],
             ];
 
-            Logger::debug("Fetching tariff for {$deliveryParam['tariff_code']}", $request);
-
             $resp = HttpClient::sendJsonRequest(
                 "{$this->apiUrl}calculator/tariff",
                 'POST',
@@ -162,16 +160,10 @@ namespace Cdek {
             )->json();
 
             if (empty($resp['total_sum'])) {
-                Logger::debug("Got empty total sum for tariff {$deliveryParam['tariff_code']}");
-
                 return null;
             }
 
-            $total = (float)$resp['total_sum'];
-
-            Logger::debug("Got total for tariff {$deliveryParam['tariff_code']}: $total");
-
-            return $total;
+            return (float)$resp['total_sum'];
         }
 
         /**
@@ -187,16 +179,12 @@ namespace Cdek {
                 'packages'      => $deliveryParam['packages'],
             ];
 
-            Logger::debug('Fetching tarifflist', $request);
-
             $result = HttpClient::sendJsonRequest(
                 "{$this->apiUrl}calculator/tarifflist",
                 'POST',
                 $this->tokenStorage->getToken(),
                 $request,
             )->json();
-
-            Logger::debug('Got tarifflist', $result);
 
             return $result;
         }
@@ -257,12 +245,6 @@ namespace Cdek {
                 $city .= ' микрорайон';
             }
 
-            Logger::debug('Fetching city', [
-                'city'          => $city,
-                'postal_code'   => $postcode,
-                'country_codes' => $country === null ? null : [$country],
-            ]);
-
             try {
                 $result = HttpClient::sendJsonRequest(
                     "{$this->apiUrl}location/cities",
@@ -275,11 +257,7 @@ namespace Cdek {
                     ],
                 )->json();
 
-                $result = $result[0] ?: null;
-
-                Logger::debug('Got city', $result);
-
-                return $result;
+                return $result[0] ?: null;
             } catch (ApiException $e) {
                 return null;
             }

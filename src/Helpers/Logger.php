@@ -18,7 +18,11 @@ namespace Cdek\Helpers {
 
         public function __construct()
         {
-            $this->logger = wc_get_logger();
+            $logger = wc_get_logger();
+
+            if ( $logger instanceof WC_Logger_Interface ){
+                $this->logger = $logger;
+            }
         }
 
         public static function init(): ?Logger
