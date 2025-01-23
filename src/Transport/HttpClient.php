@@ -109,7 +109,7 @@ namespace Cdek\Transport {
             return new HttpResponse(
                 wp_remote_retrieve_response_code($resp),
                 wp_remote_retrieve_body($resp),
-                method_exists($headers, "getAll") ? $headers->getAll() : $headers,
+                method_exists($headers, 'getAll') ? $headers->getAll() : (array) $headers,
                 $url,
                 $method,
             );
