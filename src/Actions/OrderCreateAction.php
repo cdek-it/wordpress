@@ -122,7 +122,7 @@ namespace Cdek\Actions {
             } catch (Throwable $e) {
                 Logger::warning(
                     "Error while order create",
-                    Logger::exceptionParser($e),
+                    [Logger::EXCEPTION_CONTEXT => $e],
                 );
 
                 if ($attempt < 1 || $attempt > 5) {
@@ -174,7 +174,7 @@ namespace Cdek\Actions {
             } catch (CoreAuthException|ApiException|CacheException $e) {
                 Logger::warning(
                     'Phone validation fail',
-                    Logger::exceptionParser($e),
+                    [Logger::EXCEPTION_CONTEXT => $e],
                 );
             }
 

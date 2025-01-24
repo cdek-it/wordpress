@@ -68,7 +68,7 @@ namespace Cdek\Migrators {
             try {
                 $cityInfo = $this->api->cityGet($city, $postal, $country);
             } catch (Exception $e) {
-                Logger::debug('Exchange city get error', Logger::exceptionParser($e));
+                Logger::debug('Exchange city get error', [Logger::EXCEPTION_CONTEXT => $e]);
 
                 return;
             }

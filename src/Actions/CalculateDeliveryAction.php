@@ -68,7 +68,7 @@ namespace Cdek\Actions {
             } catch (Throwable $e) {
                 Logger::warning(
                     "Calculate: could not set data in session",
-                    Logger::exceptionParser($e)
+                    [Logger::EXCEPTION_CONTEXT => $e],
                 );
             }
 

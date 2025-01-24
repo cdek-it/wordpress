@@ -71,7 +71,7 @@ namespace Cdek\Actions {
             } catch (InvalidRequestException $e) {
                 Logger::warning(
                     'Failed to delete order',
-                    Logger::exceptionParser($e),
+                    [Logger::EXCEPTION_CONTEXT => $e],
                 );
 
                 Note::send(

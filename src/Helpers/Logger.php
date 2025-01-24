@@ -13,6 +13,7 @@ namespace Cdek\Helpers {
 
     class Logger
     {
+        public const EXCEPTION_CONTEXT = 'exception';
         private static ?Logger $instance = null;
         private ?WC_Logger_Interface $logger = null;
 
@@ -25,7 +26,7 @@ namespace Cdek\Helpers {
             }
         }
 
-        public static function init(): ?Logger
+        public static function init(): Logger
         {
             if(static::$instance === null){
                 static::$instance = new static();
@@ -34,20 +35,11 @@ namespace Cdek\Helpers {
             return static::$instance;
         }
 
-        public static function exceptionParser(\Throwable $e): array
-        {
-            return [
-                'message' => $e->getMessage(),
-                'file'    => "{$e->getFile()}:{$e->getLine()}",
-                'trace'   => $e->getTrace(),
-            ];
-        }
-
         /** @noinspection PhpUnused */
         public static function debug(string $message, array $context = []): void
         {
             if ( $log = static::init()->logger ) {
-                $log->debug($message, $context);
+                $log->debug($message, static::exceptionParser($context));
             }
         }
 
@@ -55,7 +47,7 @@ namespace Cdek\Helpers {
         public static function info(string $message, array $context = []): void
         {
             if ( $log = static::init()->logger ) {
-                $log->info($message, $context);
+                $log->info($message, static::exceptionParser($context));
             }
         }
 
@@ -63,7 +55,7 @@ namespace Cdek\Helpers {
         public static function notice(string $message, array $context = []): void
         {
             if ( $log = static::init()->logger ) {
-                $log->notice($message, $context);
+                $log->notice($message, static::exceptionParser($context));
             }
         }
 
@@ -71,7 +63,7 @@ namespace Cdek\Helpers {
         public static function warning(string $message, array $context = []): void
         {
             if ( $log = static::init()->logger ) {
-                $log->warning($message, $context);
+                $log->warning($message, static::exceptionParser($context));
             }
         }
 
@@ -79,7 +71,7 @@ namespace Cdek\Helpers {
         public static function error(string $message, array $context = []): void
         {
             if ( $log = static::init()->logger ) {
-                $log->error($message, $context);
+                $log->error($message, static::exceptionParser($context));
             }
         }
 
@@ -87,7 +79,7 @@ namespace Cdek\Helpers {
         public static function critical(string $message, array $context = []): void
         {
             if ( $log = static::init()->logger ) {
-                $log->critical($message, $context);
+                $log->critical($message, static::exceptionParser($context));
             }
         }
 
@@ -95,7 +87,7 @@ namespace Cdek\Helpers {
         public static function alert(string $message, array $context = []): void
         {
             if ( $log = static::init()->logger ) {
-                $log->alert($message, $context);
+                $log->alert($message, static::exceptionParser($context));
             }
         }
 
@@ -103,8 +95,21 @@ namespace Cdek\Helpers {
         public static function emergency(string $message, array $context = []): void
         {
             if ( $log = static::init()->logger ) {
-                $log->emergency($message, $context);
+                $log->emergency($message, static::exceptionParser($context));
             }
+        }
+
+        private static function exceptionParser(array $context = []): array
+        {
+            if( isset($context[self::EXCEPTION_CONTEXT]) && $context[self::EXCEPTION_CONTEXT] instanceof \Throwable ){
+                $context[self::EXCEPTION_CONTEXT] = [
+                    'message' => $context[self::EXCEPTION_CONTEXT]->getMessage(),
+                    'file'    => "{$context[self::EXCEPTION_CONTEXT]->getFile()}:{$context[self::EXCEPTION_CONTEXT]->getLine()}",
+                    'trace'   => $context[self::EXCEPTION_CONTEXT]->getTrace(),
+                ];
+            }
+
+            return $context;
         }
     }
 }
