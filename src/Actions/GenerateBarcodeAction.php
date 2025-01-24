@@ -13,7 +13,6 @@ namespace Cdek\Actions {
     use Cdek\Config;
     use Cdek\Enums\BarcodeFormat;
     use Cdek\Exceptions\External\HttpClientException;
-    use Cdek\Helpers\Logger;
     use Cdek\ShippingMethod;
     use Cdek\Traits\CanBeCreated;
 

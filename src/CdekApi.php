@@ -15,6 +15,7 @@ namespace Cdek {
     use Cdek\Exceptions\External\LegacyAuthException;
     use Cdek\Helpers\LegacyTokenStorage;
     use Cdek\Helpers\Logger;
+    use Cdek\Model\Log;
     use Cdek\Transport\HttpClient;
     use Cdek\Transport\HttpResponse;
 
@@ -210,10 +211,15 @@ namespace Cdek {
             ?string $postcode = null
         ): ?string {
             try {
-                Logger::debug('Fetching city', [
-                    'city'        => $city,
-                    'postal_code' => $postcode,
-                ]);
+                Logger::debug(
+                    Log::initWithContext(
+                        'Fetching city',
+                        [
+                            'city'        => $city,
+                            'postal_code' => $postcode,
+                        ]
+                    )
+                );
 
                 $result = HttpClient::sendJsonRequest(
                     "{$this->apiUrl}location/cities",
@@ -227,7 +233,7 @@ namespace Cdek {
 
                 $result = !empty($result[0]['code']) ? (string)$result[0]['code'] : null;
 
-                Logger::debug("Got city with code $result");
+                Logger::debug(Log::initOnlyMessage("Got city with code $result"));
 
                 return $result;
             } catch (ApiException $e) {
@@ -373,7 +379,7 @@ namespace Cdek {
          */
         public function orderCreate(array $params): ?string
         {
-            Logger::debug('Creating order', $params);
+            Logger::debug(Log::initWithContext('Creating order', $params));
 
             $result = HttpClient::sendJsonRequest(
                 "{$this->apiUrl}orders/",
@@ -382,7 +388,7 @@ namespace Cdek {
                 $params,
             )->entity()['uuid'] ?? null;
 
-            Logger::debug("Created order with uuid $result");
+            Logger::debug(Log::initOnlyMessage("Created order with uuid $result"));
 
             return $result;
         }

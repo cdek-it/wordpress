@@ -24,6 +24,7 @@ namespace Cdek\Actions {
     use Cdek\Helpers\Logger;
     use Cdek\Helpers\StringHelper;
     use Cdek\Helpers\WeightConverter;
+    use Cdek\Model\Log;
     use Cdek\Model\Order;
     use Cdek\Model\Service;
     use Cdek\Model\ShippingItem;
@@ -121,8 +122,10 @@ namespace Cdek\Actions {
                 return new ValidationResult(false, $e->getMessage());
             } catch (Throwable $e) {
                 Logger::warning(
-                    "Error while order create",
-                    [Logger::EXCEPTION_CONTEXT => $e],
+                    Log::initWithException(
+                        "Error while order create",
+                        $e,
+                    )
                 );
 
                 if ($attempt < 1 || $attempt > 5) {
@@ -173,8 +176,10 @@ namespace Cdek\Actions {
                 $recipientNumber = PhoneValidator::new()($recipientNumber, $countryCode);
             } catch (CoreAuthException|ApiException|CacheException $e) {
                 Logger::warning(
-                    'Phone validation fail',
-                    [Logger::EXCEPTION_CONTEXT => $e],
+                    Log::initWithException(
+                        'Phone validation fail',
+                        $e,
+                    )
                 );
             }
 

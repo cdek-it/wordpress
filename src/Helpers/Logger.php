@@ -3,12 +3,12 @@
 declare(strict_types=1);
 
 namespace {
-
     defined('ABSPATH') or exit;
 }
 
 namespace Cdek\Helpers {
 
+    use Cdek\Model\Log;
     use WC_Logger_Interface;
 
     class Logger
@@ -36,80 +36,67 @@ namespace Cdek\Helpers {
         }
 
         /** @noinspection PhpUnused */
-        public static function debug(string $message, array $context = []): void
+        public static function debug(Log $obLog): void
         {
             if ( $log = static::init()->logger ) {
-                $log->debug($message, static::exceptionParser($context));
+                $log->debug($obLog->getMessage(), $obLog->getLog());
             }
         }
 
         /** @noinspection PhpUnused */
-        public static function info(string $message, array $context = []): void
+        public static function info(Log $obLog): void
         {
             if ( $log = static::init()->logger ) {
-                $log->info($message, static::exceptionParser($context));
+                $log->info($obLog->getMessage(), $obLog->getLog());
             }
         }
 
         /** @noinspection PhpUnused */
-        public static function notice(string $message, array $context = []): void
+        public static function notice(Log $obLog): void
         {
             if ( $log = static::init()->logger ) {
-                $log->notice($message, static::exceptionParser($context));
+                $log->notice($obLog->getMessage(), $obLog->getLog());
             }
         }
 
         /** @noinspection PhpUnused */
-        public static function warning(string $message, array $context = []): void
+        public static function warning(Log $obLog): void
         {
             if ( $log = static::init()->logger ) {
-                $log->warning($message, static::exceptionParser($context));
+                $log->warning($obLog->getMessage(), $obLog->getLog());
             }
         }
 
         /** @noinspection PhpUnused */
-        public static function error(string $message, array $context = []): void
+        public static function error(Log $obLog): void
         {
             if ( $log = static::init()->logger ) {
-                $log->error($message, static::exceptionParser($context));
+                $log->error($obLog->getMessage(), $obLog->getLog());
             }
         }
 
         /** @noinspection PhpUnused */
-        public static function critical(string $message, array $context = []): void
+        public static function critical(Log $obLog): void
         {
             if ( $log = static::init()->logger ) {
-                $log->critical($message, static::exceptionParser($context));
+                $log->critical($obLog->getMessage(), $obLog->getLog());
             }
         }
 
         /** @noinspection PhpUnused */
-        public static function alert(string $message, array $context = []): void
+        public static function alert(Log $obLog): void
         {
             if ( $log = static::init()->logger ) {
-                $log->alert($message, static::exceptionParser($context));
+                $log->alert($obLog->getMessage(), $obLog->getLog());
             }
         }
 
         /** @noinspection PhpUnused */
-        public static function emergency(string $message, array $context = []): void
+        public static function emergency(Log $obLog): void
         {
             if ( $log = static::init()->logger ) {
-                $log->emergency($message, static::exceptionParser($context));
+                $log->emergency($obLog->getMessage(), $obLog->getLog());
             }
-        }
-
-        private static function exceptionParser(array $context = []): array
-        {
-            if( isset($context[self::EXCEPTION_CONTEXT]) && $context[self::EXCEPTION_CONTEXT] instanceof \Throwable ){
-                $context[self::EXCEPTION_CONTEXT] = [
-                    'message' => $context[self::EXCEPTION_CONTEXT]->getMessage(),
-                    'file'    => "{$context[self::EXCEPTION_CONTEXT]->getFile()}:{$context[self::EXCEPTION_CONTEXT]->getLine()}",
-                    'trace'   => $context[self::EXCEPTION_CONTEXT]->getTrace(),
-                ];
-            }
-
-            return $context;
         }
     }
 }

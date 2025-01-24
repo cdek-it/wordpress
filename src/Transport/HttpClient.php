@@ -16,6 +16,7 @@ namespace Cdek\Transport {
     use Cdek\Exceptions\External\InvalidRequestException;
     use Cdek\Helpers\Logger;
     use Cdek\Loader;
+    use Cdek\Model\Log;
     use WP_Error;
     use WP_REST_Server;
     use WpOrg\Requests\Utility\CaseInsensitiveDictionary;
@@ -49,10 +50,15 @@ namespace Cdek\Transport {
             $result = self::processRequest($url, $method, $config);
 
             if (!$result->isSuccess() && $result->getStatusCode() !== 404) {
-                Logger::debug('API returned error', [
-                    'code' => $result->getStatusCode(),
-                    'resp' => $result->body(),
-                ]);
+                Logger::debug(
+                    Log::initWithContext(
+                        'API returned error',
+                        [
+                            'code' => $result->getStatusCode(),
+                            'resp' => $result->body(),
+                        ],
+                    )
+                );
             }
 
             if ($result->isServerError()) {
