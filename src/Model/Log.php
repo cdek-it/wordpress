@@ -22,11 +22,6 @@ namespace Cdek\Model {
             $this->exception = $exception;
         }
 
-        public static function initOnlyMessage(string $message): Log
-        {
-            return new static($message);
-        }
-
         public static function initWithContext(string $message, array $context): Log
         {
             return new static($message, $context);

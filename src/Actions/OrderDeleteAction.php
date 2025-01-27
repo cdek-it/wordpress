@@ -12,7 +12,6 @@ namespace Cdek\Actions {
     use Cdek\CdekApi;
     use Cdek\Exceptions\External\InvalidRequestException;
     use Cdek\Helpers\Logger;
-    use Cdek\Model\Log;
     use Cdek\Model\Order;
     use Cdek\Model\ValidationResult;
     use Cdek\Note;
@@ -71,10 +70,8 @@ namespace Cdek\Actions {
                 $this->api->orderDelete($orderUuid);
             } catch (InvalidRequestException $e) {
                 Logger::warning(
-                    Log::initWithException(
-                        'Failed to delete order',
-                        $e,
-                    ),
+                    'Failed to delete order',
+                    $e,
                 );
 
                 Note::send(

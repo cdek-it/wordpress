@@ -11,7 +11,6 @@ namespace Cdek\Tasks {
 
     use Cdek\Contracts\TaskContract;
     use Cdek\Helpers\Logger;
-    use Cdek\Model\Log;
     use Cdek\Model\TaskResult;
     use Iterator;
     use WC_Order_Query;
@@ -32,7 +31,7 @@ namespace Cdek\Tasks {
                 ],
             );
 
-            Logger::debug(Log::initOnlyMessage('Collect orphaned orders started'));
+            Logger::debug('Collect orphaned orders started');
 
             for ($page = 1, $maxPages = 1; $page <= $maxPages; $page++) {
                 $query->set('page', $page);
@@ -45,13 +44,11 @@ namespace Cdek\Tasks {
                 );
 
                 Logger::debug(
-                    Log::initWithContext(
-                        "Collect orphaned start page {$page}",
-                        [
-                            'max_pages' => $maxPages,
-                            'orders' => $orders,
-                        ],
-                    )
+                    "Collect orphaned start page {$page}",
+                    [
+                        'max_pages' => $maxPages,
+                        'orders' => $orders,
+                    ],
                 );
 
                 yield new TaskResult(

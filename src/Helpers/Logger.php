@@ -10,10 +10,10 @@ namespace Cdek\Helpers {
 
     use Cdek\Model\Log;
     use WC_Logger_Interface;
+    use Throwable;
 
     class Logger
     {
-        public const EXCEPTION_CONTEXT = 'exception';
         private static ?Logger $instance = null;
         private ?WC_Logger_Interface $logger = null;
 
@@ -35,68 +35,126 @@ namespace Cdek\Helpers {
             return static::$instance;
         }
 
-        /** @noinspection PhpUnused */
-        public static function debug(Log $obLog): void
+        /**
+         * @noinspection PhpUnused
+         * @param  string  $message
+         * @param array|Throwable $context
+         *
+         * @return void
+         */
+        public static function debug(string $message, $context = []): void
         {
-            if ( $log = static::init()->logger ) {
+            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
                 $log->debug($obLog->getMessage(), $obLog->getLog());
             }
         }
 
-        /** @noinspection PhpUnused */
-        public static function info(Log $obLog): void
+        /**
+         * @noinspection PhpUnused
+         * @param  string  $message
+         * @param array|Throwable $context
+         *
+         * @return void
+         */
+        public static function info(string $message, $context = []): void
         {
-            if ( $log = static::init()->logger ) {
+            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
                 $log->info($obLog->getMessage(), $obLog->getLog());
             }
         }
 
-        /** @noinspection PhpUnused */
-        public static function notice(Log $obLog): void
+        /**
+         * @noinspection PhpUnused
+         * @param  string  $message
+         * @param array|Throwable $context
+         *
+         * @return void
+         */
+        public static function notice(string $message, $context = []): void
         {
-            if ( $log = static::init()->logger ) {
+            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
                 $log->notice($obLog->getMessage(), $obLog->getLog());
             }
         }
 
-        /** @noinspection PhpUnused */
-        public static function warning(Log $obLog): void
+
+        /**
+         * @noinspection PhpUnused
+         * @param  string  $message
+         * @param array|Throwable $context
+         *
+         * @return void
+         */
+        public static function warning(string $message, $context = []): void
         {
-            if ( $log = static::init()->logger ) {
+            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
                 $log->warning($obLog->getMessage(), $obLog->getLog());
             }
         }
 
-        /** @noinspection PhpUnused */
-        public static function error(Log $obLog): void
+        /**
+         * @noinspection PhpUnused
+         * @param  string  $message
+         * @param array|Throwable $context
+         *
+         * @return void
+         */
+        public static function error(string $message, $context = []): void
         {
-            if ( $log = static::init()->logger ) {
+            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
                 $log->error($obLog->getMessage(), $obLog->getLog());
             }
         }
 
-        /** @noinspection PhpUnused */
-        public static function critical(Log $obLog): void
+        /**
+         * @noinspection PhpUnused
+         * @param  string  $message
+         * @param array|Throwable $context
+         *
+         * @return void
+         */
+        public static function critical(string $message, $context = []): void
         {
-            if ( $log = static::init()->logger ) {
+            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
                 $log->critical($obLog->getMessage(), $obLog->getLog());
             }
         }
 
-        /** @noinspection PhpUnused */
-        public static function alert(Log $obLog): void
+        /**
+         * @noinspection PhpUnused
+         * @param  string  $message
+         * @param array|Throwable $context
+         *
+         * @return void
+         */
+        public static function alert(string $message, $context = []): void
         {
-            if ( $log = static::init()->logger ) {
+            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
                 $log->alert($obLog->getMessage(), $obLog->getLog());
             }
         }
 
-        /** @noinspection PhpUnused */
-        public static function emergency(Log $obLog): void
+        /**
+         * @noinspection PhpUnused
+         * @param  string  $message
+         * @param array|Throwable $context
+         *
+         * @return void
+         */
+        public static function emergency(string $message, $context = []): void
         {
-            if ( $log = static::init()->logger ) {
+            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
                 $log->emergency($obLog->getMessage(), $obLog->getLog());
             }
+        }
+
+        private static function initLog(string $message, $context = []): Log
+        {
+            if ( $context instanceof Throwable ) {
+                return Log::initWithException($message, $context);
+            }
+
+            return Log::initWithContext($message, $context);
         }
     }
 }

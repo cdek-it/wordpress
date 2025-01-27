@@ -15,7 +15,6 @@ namespace Cdek\Actions {
     use Cdek\Helpers\Logger;
     use Cdek\Helpers\WeightConverter;
     use Cdek\MetaKeys;
-    use Cdek\Model\Log;
     use Cdek\Model\Service;
     use Cdek\Model\Tariff;
     use Cdek\ShippingMethod;
@@ -39,13 +38,13 @@ namespace Cdek\Actions {
             $api          = new CdekApi($this->method);
 
             if (empty($this->method->city_code)) {
-                Logger::debug(Log::initOnlyMessage("Calculate: empty city code"));
+                Logger::debug("Calculate: empty city code");
 
                 return [];
             }
 
             if($api->authGetError() !== null){
-                Logger::warning(Log::initOnlyMessage("Calculate: auth error"));
+                Logger::warning("Calculate: auth error");
 
                 return [];
             }
@@ -68,10 +67,8 @@ namespace Cdek\Actions {
                 WC()->session->set(Config::DELIVERY_NAME.'_city', $deliveryParam['to']['city']);
             } catch (Throwable $e) {
                 Logger::warning(
-                    Log::initWithException(
-                        "Calculate: could not set data in session",
-                        $e,
-                    ),
+                    "Calculate: could not set data in session",
+                    $e,
                 );
             }
 
@@ -104,14 +101,14 @@ namespace Cdek\Actions {
                 );
             }
 
-            Logger::debug(Log::initWithContext("Calculate: delivery params before calculate list", $deliveryParam,));
+            Logger::debug("Calculate: delivery params before calculate list", $deliveryParam,);
 
             foreach ([Tariff::SHOP_TYPE, Tariff::DELIVERY_TYPE] as $deliveryType) {
                 $deliveryParam['type'] = $deliveryType;
 
                 $calcResult = $api->calculateList($deliveryParam);
 
-                Logger::debug(Log::initWithContext("Calculate: calculate list result", $calcResult,));
+                Logger::debug("Calculate: calculate list result", $calcResult,);
 
                 if (empty($calcResult)) {
                     continue;
@@ -165,7 +162,7 @@ namespace Cdek\Actions {
                 }
             }
 
-            Logger::debug(Log::initWithContext("Calculate: rates", $this->rates));
+            Logger::debug("Calculate: rates", $this->rates);
 
             return array_map(function ($tariff) use (
                 $priceRules,
@@ -179,7 +176,7 @@ namespace Cdek\Actions {
                     if ($rule['type'] === 'free') {
                         $tariff['cost'] = 0;
 
-                        Logger::debug(Log::initWithContext("Calculate: type free", $tariff,));
+                        Logger::debug("Calculate: type free", $tariff,);
 
                         return $tariff;
                     }
@@ -191,7 +188,7 @@ namespace Cdek\Actions {
                             0,
                         );
 
-                        Logger::debug(Log::initWithContext("Calculate: type fixed", $tariff,));
+                        Logger::debug("Calculate: type fixed", $tariff,);
 
                         return $tariff;
                     }
@@ -207,16 +204,14 @@ namespace Cdek\Actions {
                 }
 
                 Logger::debug(
-                    Log::initWithContext(
-                        "Calculate: delivery params before tariff calculate",
-                        $deliveryParam,
-                    )
+                    "Calculate: delivery params before tariff calculate",
+                    $deliveryParam,
                 );
 
                 if($cost = $api->calculateGet($deliveryParam)){
-                    Logger::debug(Log::initOnlyMessage("Calculate: Got total for tariff {$deliveryParam['tariff_code']}: $cost"));
+                    Logger::debug("Calculate: Got total for tariff {$deliveryParam['tariff_code']}: $cost");
                 }else{
-                    Logger::debug(Log::initOnlyMessage("Calculate: Got tariff cost total for tariff {$deliveryParam['tariff_code']}: {$tariff['cost']}"));
+                    Logger::debug("Calculate: Got tariff cost total for tariff {$deliveryParam['tariff_code']}: {$tariff['cost']}");
 
                     $cost = $tariff['cost'];
                 }
@@ -235,7 +230,7 @@ namespace Cdek\Actions {
 
                 $tariff['cost'] = max(ceil($cost), 0);
 
-                Logger::debug(Log::initWithContext("Calculate: tariff", $tariff,));
+                Logger::debug("Calculate: tariff", $tariff,);
 
                 return $tariff;
             }, $this->rates);
