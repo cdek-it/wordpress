@@ -88,6 +88,7 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 * WP-130 Settings data updated after changes without screen reload
 * WP-131 Fixed bug with print barcode and invoice
 * WP-133 Fixed items total in order details for invoice
+* WP-143 Fixed 500 error related to response headers array on old Wordpress versions
 
 = 3.22 =
 * WP-30 Changed the logic of automatic order creation: added a selector for waiting for payment from payment systems
