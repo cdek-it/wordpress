@@ -116,13 +116,19 @@ namespace Cdek\Helpers {
             return base64_encode($iv.$encryptedToken);
         }
 
-        private function decryptToken(string $token, string $clientId): string
+        private function decryptToken(string $token, string $clientId): ?string
         {
             $data          = base64_decode($token);
             $iv            = substr($data, 0, openssl_cipher_iv_length(self::CIPHER));
             $encryptedData = substr($data, openssl_cipher_iv_length(self::CIPHER));
 
-            return openssl_decrypt($encryptedData, self::CIPHER, $clientId, 0, $iv);
+            $dt = openssl_decrypt($encryptedData, self::CIPHER, $clientId, 0, $iv);
+
+            if(!empty($dt)){
+                return $dt;
+            }
+
+            return null;
         }
     }
 }
