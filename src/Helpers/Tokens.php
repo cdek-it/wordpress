@@ -34,6 +34,10 @@ namespace Cdek\Helpers {
          */
         public static function checkIncomingRequest(WP_REST_Request $request): bool
         {
+            if (!headers_sent()) {
+                header('X-Robots-Tag: noindex, nofollow');
+            }
+
             $token = $request->get_header('x_auth_token');
 
             if (empty($token)) {
