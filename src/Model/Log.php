@@ -22,6 +22,19 @@ namespace Cdek\Model {
             $this->exception = $exception;
         }
 
+        /**
+         * @param  string  $message
+         * @param  array|Throwable  $context
+         */
+        public static function initLog(string $message, $context = []): self
+        {
+            if ( $context instanceof Throwable ) {
+                return static::initWithException($message, $context);
+            }
+
+            return static::initWithContext($message, $context);
+        }
+
         public static function initWithContext(string $message, array $context): Log
         {
             return new static($message, $context);

@@ -44,7 +44,7 @@ namespace Cdek\Helpers {
          */
         public static function debug(string $message, $context = []): void
         {
-            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
+            if ( ($log = static::init()->logger) && ($obLog = Log::initLog($message, $context))) {
                 $log->debug($obLog->getMessage(), $obLog->getLog());
             }
         }
@@ -58,7 +58,7 @@ namespace Cdek\Helpers {
          */
         public static function info(string $message, $context = []): void
         {
-            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
+            if ( ($log = static::init()->logger) && ($obLog = Log::initLog($message, $context))) {
                 $log->info($obLog->getMessage(), $obLog->getLog());
             }
         }
@@ -72,7 +72,7 @@ namespace Cdek\Helpers {
          */
         public static function notice(string $message, $context = []): void
         {
-            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
+            if ( ($log = static::init()->logger) && ($obLog = Log::initLog($message, $context))) {
                 $log->notice($obLog->getMessage(), $obLog->getLog());
             }
         }
@@ -87,7 +87,7 @@ namespace Cdek\Helpers {
          */
         public static function warning(string $message, $context = []): void
         {
-            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
+            if ( ($log = static::init()->logger) && ($obLog = Log::initLog($message, $context))) {
                 $log->warning($obLog->getMessage(), $obLog->getLog());
             }
         }
@@ -101,7 +101,7 @@ namespace Cdek\Helpers {
          */
         public static function error(string $message, $context = []): void
         {
-            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
+            if ( ($log = static::init()->logger) && ($obLog = Log::initLog($message, $context))) {
                 $log->error($obLog->getMessage(), $obLog->getLog());
             }
         }
@@ -115,7 +115,7 @@ namespace Cdek\Helpers {
          */
         public static function critical(string $message, $context = []): void
         {
-            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
+            if ( ($log = static::init()->logger) && ($obLog = Log::initLog($message, $context))) {
                 $log->critical($obLog->getMessage(), $obLog->getLog());
             }
         }
@@ -129,7 +129,7 @@ namespace Cdek\Helpers {
          */
         public static function alert(string $message, $context = []): void
         {
-            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
+            if ( ($log = static::init()->logger) && ($obLog = Log::initLog($message, $context))) {
                 $log->alert($obLog->getMessage(), $obLog->getLog());
             }
         }
@@ -143,18 +143,9 @@ namespace Cdek\Helpers {
          */
         public static function emergency(string $message, $context = []): void
         {
-            if ( ($log = static::init()->logger) && ($obLog = static::initLog($message, $context))) {
+            if ( ($log = static::init()->logger) && ($obLog = Log::initLog($message, $context))) {
                 $log->emergency($obLog->getMessage(), $obLog->getLog());
             }
-        }
-
-        private static function initLog(string $message, $context = []): Log
-        {
-            if ( $context instanceof Throwable ) {
-                return Log::initWithException($message, $context);
-            }
-
-            return Log::initWithContext($message, $context);
         }
     }
 }
