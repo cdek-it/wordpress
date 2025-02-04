@@ -1,0 +1,63 @@
+---
+sidebar_position: 3
+---
+
+# Yandex.Maps
+
+To get the key, go to the Developer's Dashboard page and select the service `JavaScript API and Geocoder HTTP API`.
+
+<Image img={require('./img/yandex/select.png')} />
+
+<details>
+    <summary>The `JavaScript API and Geocoder HTTP API` service does not appear in the list</summary>
+
+    If the service does not show up in the list, then you need to use the functionality of connecting it.
+
+    <Image img={require('./img/yandex/new.png')} />
+
+    Then select service in the list and confirm the connection.
+
+    <Image img={require('./img/yandex/connect.png')} />
+
+    Fill out the form and confirm sending it.
+
+    <Image img={require('./img/yandex/form.png')} />
+
+</details>
+
+You need to edit the key parameters by going to its settings.
+
+<Image img={require('./img/yandex/edit.png')} />
+
+<details>
+    <summary>There are no available keys on the page</summary>
+
+    If there are no available keys, you can create a new one using the appropriate functionality.
+
+    <Image img={require('./img/yandex/create.png')} />
+
+    Enter the key name and confirm adding the key.
+
+    <Image img={require('./img/yandex/key.png')} />
+
+</details>
+
+In the `HTTP Referrer Restriction` field, you must specify your website domain and save the changes.
+
+:::note
+
+You can read more about restrictions on the https://yandex.ru/dev/jsapi30/doc/ru/limit
+
+:::
+
+<Image img={require('./img/yandex/save.png')} />
+
+:::warning
+
+It may take up to 1 hour after the last changes before the key starts working.
+
+:::
+
+The resulting key string must be used in the plugin settings.
+
+<Image img={require('./img/yandex/export.png')} />

@@ -49,7 +49,7 @@ const config: Config = {
       {
         docs: {
           routeBasePath: '/',
-          sidebarPath: './sidebars.ts',
+          sidebarPath: './sidebars.json',
         },
         blog: false,
         theme: {
@@ -62,6 +62,11 @@ const config: Config = {
   themeConfig: {
     // Replace with your project's social card
     image: 'img/banner.png',
+    algolia: {
+      appId: 'X22O3RCFN8',
+      apiKey: '66bf4ae3650f1b4b010e61f4d442186f',
+      indexName: 'cdek-itio',
+    },
     navbar: {
       hideOnScroll: true,
       title: 'Delivery',
@@ -89,7 +94,7 @@ const config: Config = {
           items: [
             {
               label: 'Информация о версиях',
-              to: 'https://github.com/cdek-it/wordpress/releases',
+              href: 'https://github.com/cdek-it/wordpress/releases',
             },
             {
               label: 'Страница плагина',

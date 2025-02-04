@@ -48,6 +48,10 @@ class DispatchOrderAutomationAction
             return;
         }
 
+        if($order->isCancelled()){
+            return;
+        }
+
         if (!ScheduleLocker::instance()->set($order->id)) {
             return;
         }
