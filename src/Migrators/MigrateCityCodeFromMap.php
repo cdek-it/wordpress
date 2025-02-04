@@ -11,6 +11,7 @@ namespace {
 namespace Cdek\Migrators {
 
     use Cdek\CdekApi;
+    use Cdek\Helpers\Logger;
     use Cdek\ShippingMethod;
     use Exception;
     use JsonException;
@@ -22,6 +23,8 @@ namespace Cdek\Migrators {
 
         final public function __invoke(?ShippingMethod $method = null): void
         {
+            Logger::debug('Migrate cityCode from map started');
+
             $this->shipping = $method ?: ShippingMethod::factory();
             $this->api      = new CdekApi($this->shipping);
 
@@ -31,6 +34,8 @@ namespace Cdek\Migrators {
 
         private function migrateOffice(): void
         {
+            Logger::debug('Migrate office started');
+
             $legacyOfficeData = $this->shipping->get_option('pvz_code');
 
             if (empty($legacyOfficeData)) {
@@ -54,6 +59,8 @@ namespace Cdek\Migrators {
         {
             $existingCity = $this->shipping->get_option('city_code');
 
+            Logger::debug('Exchange city code data', ['data' => $existingCity]);
+
             if (!empty($existingCity)) {
                 return;
             }
@@ -61,8 +68,12 @@ namespace Cdek\Migrators {
             try {
                 $cityInfo = $this->api->cityGet($city, $postal, $country);
             } catch (Exception $e) {
+                Logger::debug('Exchange city get error', $e);
+
                 return;
             }
+
+            Logger::debug('Exchange city info', ['data' => $cityInfo]);
 
             if ($cityInfo === null) {
                 return;
@@ -75,6 +86,8 @@ namespace Cdek\Migrators {
         private function migrateAddress(): void
         {
             $legacyAddressData = $this->shipping->get_option('address');
+
+            Logger::debug('Legacy address data', ['data' => $legacyAddressData]);
 
             if (empty($legacyAddressData)) {
                 return;
