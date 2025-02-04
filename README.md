@@ -67,6 +67,9 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 
 == Changelog ==
 
+= 4.1 =
+* WP-97 Cdek delivery logger
+
 = 4.0 =
 * WP-40 Replaced the map in the plugin settings with address input fields
 * WP-57 Changed used API paths
