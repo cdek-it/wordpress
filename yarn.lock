@@ -1927,8 +1927,8 @@ __metadata:
     lodash: "npm:^4.17.21"
     moment: "npm:^2.30.1"
     prettier: "npm:^3.4.2"
-    react: "npm:^19.0.0"
-    react-dom: "npm:^19.0.0"
+    react: "npm:^18.3.1"
+    react-dom: "npm:^18.3.1"
     webpack: "npm:^5.97.1"
   languageName: unknown
   linkType: soft
@@ -21162,7 +21162,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-dom@npm:^18.3.0":
+"react-dom@npm:^18.3.0, react-dom@npm:^18.3.1":
   version: 18.3.1
   resolution: "react-dom@npm:18.3.1"
   dependencies:
@@ -21546,7 +21546,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react@npm:^18.3.0":
+"react@npm:^18.3.0, react@npm:^18.3.1":
   version: 18.3.1
   resolution: "react@npm:18.3.1"
   dependencies:
