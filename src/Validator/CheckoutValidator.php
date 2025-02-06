@@ -29,7 +29,11 @@ namespace Cdek\Validator {
 
             $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
 
-            if (strpos($shippingMethodIdSelected, Config::DELIVERY_NAME) === false) {
+            if (
+                empty($shippingMethodIdSelected)
+                ||
+                strpos($shippingMethodIdSelected, Config::DELIVERY_NAME) === false
+            ) {
                 return;
             }
 
