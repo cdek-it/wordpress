@@ -27,13 +27,15 @@ namespace Cdek\Validator {
                 return;
             }
 
-            if ( empty(WC()->session->get('chosen_shipping_methods')[0]) ) {
+            $shippingMethods = WC()->session->get('chosen_shipping_methods');
+
+            if ( empty($shippingMethods[0]) ) {
                 wc_add_notice(esc_html__('No shipping methods.', 'cdekdelivery'), 'error');
 
                 return;
             }
 
-            $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods')[0];
+            $shippingMethodIdSelected = $shippingMethods[0];
 
             if ( strpos($shippingMethodIdSelected, Config::DELIVERY_NAME) === false ) {
                 return;
