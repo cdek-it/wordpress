@@ -129,7 +129,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © 2024 ООО "СДЭК ДИДЖИТАЛ"`,
+      copyright: `Copyright © 2025 ООО "СДЭК ДИДЖИТАЛ"`,
     },
     prism: {
       theme: prismThemes.github,
