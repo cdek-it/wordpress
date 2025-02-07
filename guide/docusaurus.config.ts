@@ -93,7 +93,7 @@ const config: Config = {
           title: 'О плагине',
           items: [
             {
-              label: 'Информация о версиях',
+              label: 'История изменений',
               href: 'https://github.com/cdek-it/wordpress/releases',
             },
             {
