@@ -48,11 +48,15 @@ namespace Cdek\Migrators {
                 return;
             }
 
-            $this->exchangeCityCode(
-                $legacyOfficeData['city'],
-                $legacyOfficeData['postal'],
-                $legacyOfficeData['country'],
-            );
+            if ( $legacyOfficeData['city'] && $legacyOfficeData['postal'] && $legacyOfficeData['country'] ) {
+                $this->exchangeCityCode(
+                    $legacyOfficeData['city'],
+                    $legacyOfficeData['postal'],
+                    $legacyOfficeData['country'],
+                );
+            }else{
+                Logger::debug('Legacy office data missed', ['data' => $legacyOfficeData]);
+            }
         }
 
         private function exchangeCityCode(string $city, string $postal, string $country): void
@@ -101,12 +105,17 @@ namespace Cdek\Migrators {
 
             $this->shipping->update_option('legacy_address', $legacyAddressData);
 
-            if ($this->shipping->get_option('city_code') === null) {
-                $this->exchangeCityCode(
-                    $parsedLegacyAddressData['city'],
-                    $parsedLegacyAddressData['postal'],
-                    $parsedLegacyAddressData['country'],
-                );
+
+            if ( $parsedLegacyAddressData['city'] && $parsedLegacyAddressData['postal'] && $parsedLegacyAddressData['country'] ) {
+                if ( $this->shipping->get_option('city_code') === null ) {
+                    $this->exchangeCityCode(
+                        $parsedLegacyAddressData['city'],
+                        $parsedLegacyAddressData['postal'],
+                        $parsedLegacyAddressData['country'],
+                    );
+                }
+            }else{
+                Logger::debug('Legacy address data missed', ['data' => $parsedLegacyAddressData]);
             }
 
             $this->shipping->update_option('address', $parsedLegacyAddressData['address']);
