@@ -93,7 +93,7 @@ const config: Config = {
           title: 'О плагине',
           items: [
             {
-              label: 'Информация о версиях',
+              label: 'История изменений',
               href: 'https://github.com/cdek-it/wordpress/releases',
             },
             {
@@ -129,7 +129,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Copyright © 2024 ООО "СДЭК ДИДЖИТАЛ"`,
+      copyright: `Copyright © 2025 ООО "СДЭК ДИДЖИТАЛ"`,
     },
     prism: {
       theme: prismThemes.github,
