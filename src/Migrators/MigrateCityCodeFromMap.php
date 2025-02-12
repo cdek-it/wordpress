@@ -48,15 +48,16 @@ namespace Cdek\Migrators {
                 return;
             }
 
-            if ( $legacyOfficeData['city'] && $legacyOfficeData['postal'] && $legacyOfficeData['country'] ) {
-                $this->exchangeCityCode(
-                    $legacyOfficeData['city'],
-                    $legacyOfficeData['postal'],
-                    $legacyOfficeData['country'],
-                );
-            }else{
+            if ( empty($legacyOfficeData['city']) || empty($legacyOfficeData['postal']) || empty($legacyOfficeData['country']) ) {
                 Logger::debug('Legacy office data missed', ['data' => $legacyOfficeData]);
+                return;
             }
+
+            $this->exchangeCityCode(
+                $legacyOfficeData['city'],
+                $legacyOfficeData['postal'],
+                $legacyOfficeData['country'],
+            );
         }
 
         private function exchangeCityCode(string $city, string $postal, string $country): void
@@ -105,17 +106,14 @@ namespace Cdek\Migrators {
 
             $this->shipping->update_option('legacy_address', $legacyAddressData);
 
-
-            if ( $parsedLegacyAddressData['city'] && $parsedLegacyAddressData['postal'] && $parsedLegacyAddressData['country'] ) {
-                if ( $this->shipping->get_option('city_code') === null ) {
-                    $this->exchangeCityCode(
-                        $parsedLegacyAddressData['city'],
-                        $parsedLegacyAddressData['postal'],
-                        $parsedLegacyAddressData['country'],
-                    );
-                }
-            }else{
+            if ( empty($parsedLegacyAddressData['city']) || empty($parsedLegacyAddressData['postal']) || empty($parsedLegacyAddressData['country']) ) {
                 Logger::debug('Legacy address data missed', ['data' => $parsedLegacyAddressData]);
+            }elseif( $this->shipping->get_option('city_code') === null ){
+                $this->exchangeCityCode(
+                    $parsedLegacyAddressData['city'],
+                    $parsedLegacyAddressData['postal'],
+                    $parsedLegacyAddressData['country'],
+                );
             }
 
             $this->shipping->update_option('address', $parsedLegacyAddressData['address']);
