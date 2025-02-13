@@ -108,7 +108,10 @@ namespace Cdek\Migrators {
 
             if ( empty($parsedLegacyAddressData['city']) || empty($parsedLegacyAddressData['postal']) || empty($parsedLegacyAddressData['country']) ) {
                 Logger::debug('Legacy address data missed', ['data' => $parsedLegacyAddressData]);
-            }elseif( $this->shipping->get_option('city_code') === null ){
+                return;
+            }
+
+            if( $this->shipping->get_option('city_code') === null ){
                 $this->exchangeCityCode(
                     $parsedLegacyAddressData['city'],
                     $parsedLegacyAddressData['postal'],
