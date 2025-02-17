@@ -1913,7 +1913,7 @@ __metadata:
     "@woocommerce/dependency-extraction-webpack-plugin": "npm:^3.1.0"
     "@woocommerce/eslint-plugin": "npm:^2.3.0"
     "@woocommerce/settings": "npm:^1.0.0"
-    "@wordpress/api-fetch": "npm:^7.16.0"
+    "@wordpress/api-fetch": "npm:^7.18.0"
     "@wordpress/block-editor": "npm:^14.11.0"
     "@wordpress/data": "npm:^10.16.0"
     "@wordpress/element": "npm:^6.16.0"
@@ -7083,6 +7083,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@wordpress/api-fetch@npm:^7.18.0":
+  version: 7.18.0
+  resolution: "@wordpress/api-fetch@npm:7.18.0"
+  dependencies:
+    "@babel/runtime": "npm:7.25.7"
+    "@wordpress/i18n": "npm:^5.18.0"
+    "@wordpress/url": "npm:^4.18.0"
+  checksum: 10c0/d24578330511ecb5fea70da293919031716a7f2bc6ec64da040193d55e50b1b277d2b86458e72884b24cd4709292d74cd72ebde536fa5a933233ce959c2079cd
+  languageName: node
+  linkType: hard
+
 "@wordpress/api-fetch@npm:wp-6.0":
   version: 6.3.1
   resolution: "@wordpress/api-fetch@npm:6.3.1"
@@ -8002,6 +8013,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@wordpress/hooks@npm:^4.18.0":
+  version: 4.18.0
+  resolution: "@wordpress/hooks@npm:4.18.0"
+  dependencies:
+    "@babel/runtime": "npm:7.25.7"
+  checksum: 10c0/5b7297c8ea06e7066296776fdfc8ccc1785a30e980a949f8a7509730b9ee14f32d40ab637e7883f054ae7dfe64460e061716c08d9f485951c371bc8abacbe56e
+  languageName: node
+  linkType: hard
+
 "@wordpress/hooks@npm:wp-6.0":
   version: 3.6.1
   resolution: "@wordpress/hooks@npm:3.6.1"
@@ -8058,6 +8078,22 @@ __metadata:
   bin:
     pot-to-php: ./tools/pot-to-php.js
   checksum: 10c0/3d50e865423cb2c7c89de8aca52308fefb4088713112a0fcc2fb64a30603b281bb270febe673a9ca068b55474d996e7cb0392ca5326d5461aa55d66982112f16
+  languageName: node
+  linkType: hard
+
+"@wordpress/i18n@npm:^5.18.0":
+  version: 5.18.0
+  resolution: "@wordpress/i18n@npm:5.18.0"
+  dependencies:
+    "@babel/runtime": "npm:7.25.7"
+    "@wordpress/hooks": "npm:^4.18.0"
+    gettext-parser: "npm:^1.3.1"
+    memize: "npm:^2.1.0"
+    sprintf-js: "npm:^1.1.1"
+    tannin: "npm:^1.2.0"
+  bin:
+    pot-to-php: ./tools/pot-to-php.js
+  checksum: 10c0/f93904a679b66519a3230ade2971e361801157f2e5236fc7cd074bd68069af3b382d2a23341d24d8604c3654c08cfe49afff541690024b00539aad72735c1f2c
   languageName: node
   linkType: hard
 
@@ -8559,6 +8595,16 @@ __metadata:
     "@babel/runtime": "npm:7.25.7"
     remove-accents: "npm:^0.5.0"
   checksum: 10c0/a8af9d219976e579f584fe575e396bfb16c9005e6a76fa657d583c08c3ffdcd09740f4e04b46b1db696c96dc9ce917937fd7c56a69e335f18e0b8c5d9b394132
+  languageName: node
+  linkType: hard
+
+"@wordpress/url@npm:^4.18.0":
+  version: 4.18.0
+  resolution: "@wordpress/url@npm:4.18.0"
+  dependencies:
+    "@babel/runtime": "npm:7.25.7"
+    remove-accents: "npm:^0.5.0"
+  checksum: 10c0/e1c641b482860cb62fd5aa52470bb3c06ba9930c33d4834954ae739cd3f5df7e0ab55634576afd54771eb9fa37262480f9ed35b033af86a24764c99d0a5e9335
   languageName: node
   linkType: hard
 
