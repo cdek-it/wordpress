@@ -250,7 +250,7 @@ namespace Cdek\Actions {
 
             if ($this->order->shouldBePaidUponDelivery()) {
                 $param['delivery_recipient_cost'] = [
-                    'value' => $this->order->shipping_total,
+                    'value' => $this->order->shipping_total ?: 0,
                 ];
             }
 
