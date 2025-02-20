@@ -248,9 +248,9 @@ namespace Cdek\Actions {
                 $param['services'] = $serviceList;
             }
 
-            if ($this->order->shouldBePaidUponDelivery()) {
+            if ($this->order->shipping_total > 0 && $this->order->shouldBePaidUponDelivery()) {
                 $param['delivery_recipient_cost'] = [
-                    'value' => $this->order->shipping_total ?: 0,
+                    'value' => $this->order->shipping_total,
                 ];
             }
 
