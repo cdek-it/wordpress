@@ -216,7 +216,7 @@ namespace Cdek\Actions {
                     $cost = $tariff['cost'];
                 }
 
-                if (isset($rule['type'])) {
+                if (isset($rule['type']) && is_numeric($rule['value'])) {
                     if ($rule['type'] === 'amount') {
                         $cost += $rule['value'];
                     } elseif ($rule['type'] === 'percentage') {
