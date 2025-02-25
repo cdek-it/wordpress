@@ -72,6 +72,8 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 * WP-148 Fixed 500 error when no available shipments detected
 * WP-150 React version downgraded to save compatibility with WP React components
 * WP-153 Fix error settings city migration
+* WP-163 Fix error if no shipping methods found
+* WP-159 Fix error for paid on delivery with zero price
 
 = 4.0 =
 * WP-40 Replaced the map in the plugin settings with address input fields
