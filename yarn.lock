@@ -1920,7 +1920,7 @@ __metadata:
     "@wordpress/env": "npm:^10.16.0"
     "@wordpress/i18n": "npm:^5.16.0"
     "@wordpress/icons": "npm:^10.16.0"
-    "@wordpress/prettier-config": "npm:^4.16.0"
+    "@wordpress/prettier-config": "npm:^4.19.0"
     "@wordpress/scripts": "npm:^30.9.0"
     "@wordpress/url": "npm:^4.16.0"
     jquery: "npm:^3.7.1"
@@ -8262,6 +8262,15 @@ __metadata:
   peerDependencies:
     prettier: ">=3"
   checksum: 10c0/f5241ec01127cc468d48f9123efeb732a8f992cd9ab813fd88841073975df93adac3049b46d748102effa67f1cc1ff860a47b578a1c0b0b6dd45d2e631f76840
+  languageName: node
+  linkType: hard
+
+"@wordpress/prettier-config@npm:^4.19.0":
+  version: 4.19.0
+  resolution: "@wordpress/prettier-config@npm:4.19.0"
+  peerDependencies:
+    prettier: ">=3"
+  checksum: 10c0/40fccced89e52051c92ec4cfb55e7ddb266d387f82269833cd2b39b99bfc3feb78f59259081549647e01312b5697e4b67a6a8bbda67fd6edf93096a46eceeb4f
   languageName: node
   linkType: hard
 
