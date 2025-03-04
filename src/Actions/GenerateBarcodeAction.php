@@ -24,7 +24,7 @@ namespace Cdek\Actions {
          * @throws \Cdek\Exceptions\External\LegacyAuthException
          * @throws \Cdek\Exceptions\External\ApiException
          */
-        public function __invoke(string $uuid): array
+        public function __invoke(string $cdekNumber): array
         {
             $api = new CdekApi;
 
@@ -36,7 +36,7 @@ namespace Cdek\Actions {
             );
 
             try {
-                $order = $api->orderGet($uuid);
+                $order = $api->orderGetByNumber($cdekNumber);
             } catch (HttpClientException $e) {
                 return [
                     'success' => false,
@@ -75,7 +75,7 @@ namespace Cdek\Actions {
             }
 
             try {
-                $barcode = $api->barcodeCreate($order->entity()['uuid']);
+                $barcode = $api->barcodeCreate($order->entity()['cdek_number']);
 
                 if ($barcode === null) {
                     return [

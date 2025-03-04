@@ -103,41 +103,6 @@ namespace Cdek {
         }
 
         /**
-         * @throws LegacyAuthException
-         * @throws ApiException
-         */
-        public function barcodeCreate(string $orderUuid): ?string
-        {
-            return HttpClient::sendJsonRequest(
-                "{$this->apiUrl}print/barcodes/",
-                'POST',
-                $this->tokenStorage->getToken(),
-                [
-                    'orders' => ['order_uuid' => $orderUuid],
-                    'format' => BarcodeFormat::getByIndex(
-                        (int)$this->deliveryMethod->get_option(
-                            'barcode_format',
-                            0,
-                        ),
-                    ),
-                ],
-            )->entity()['uuid'] ?? null;
-        }
-
-        /**
-         * @throws LegacyAuthException
-         * @throws ApiException
-         */
-        public function barcodeGet(string $uuid): ?array
-        {
-            return HttpClient::sendJsonRequest(
-                "{$this->apiUrl}print/barcodes/$uuid",
-                'GET',
-                $this->tokenStorage->getToken(),
-            )->entity();
-        }
-
-        /**
          * @throws ApiException
          * @throws LegacyAuthException
          */
@@ -420,14 +385,62 @@ namespace Cdek {
          * @throws ApiException
          * @throws LegacyAuthException
          */
-        public function waybillCreate(string $orderUuid): ?string
+        public function orderGetByNumber(string $cdekNumber): HttpResponse
+        {
+            return HttpClient::sendJsonRequest(
+                "{$this->apiUrl}orders?" . http_build_query(["cdek_number" => $cdekNumber]),
+                'GET',
+                $this->tokenStorage->getToken(),
+            );
+        }
+
+        /**
+         * @throws ApiException
+         * @throws LegacyAuthException
+         */
+        public function waybillCreate(string $cdekNumber): ?string
         {
             return HttpClient::sendJsonRequest(
                 "{$this->apiUrl}print/orders/",
                 'POST',
                 $this->tokenStorage->getToken(),
-                ['orders' => ['order_uuid' => $orderUuid]],
+                ['orders' => ['cdek_number' => $cdekNumber]],
             )->entity()['uuid'] ?? null;
+        }
+
+        /**
+         * @throws LegacyAuthException
+         * @throws ApiException
+         */
+        public function barcodeCreate(string $orderUuid): ?string
+        {
+            return HttpClient::sendJsonRequest(
+                "{$this->apiUrl}print/barcodes",
+                'POST',
+                $this->tokenStorage->getToken(),
+                [
+                    'orders' => ['order_uuid' => $orderUuid],
+                    'format' => BarcodeFormat::getByIndex(
+                        (int)$this->deliveryMethod->get_option(
+                            'barcode_format',
+                            0,
+                        ),
+                    ),
+                ],
+            )->entity()['uuid'] ?? null;
+        }
+
+        /**
+         * @throws LegacyAuthException
+         * @throws ApiException
+         */
+        public function barcodeGet(string $uuid): ?array
+        {
+            return HttpClient::sendJsonRequest(
+                "{$this->apiUrl}print/barcodes/$uuid",
+                'GET',
+                $this->tokenStorage->getToken(),
+            )->entity();
         }
 
         /**

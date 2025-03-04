@@ -202,20 +202,20 @@ namespace Cdek\Model {
          */
         final public function loadLegacyStatuses(?array $statuses = null): array
         {
-            if (empty($this->uuid)) {
+            if (empty($this->number)) {
                 return [];
             }
 
             if ($statuses === null) {
-                $orderInfo = (new CdekApi)->orderGet($this->uuid);
+                $orderInfo = (new CdekApi)->orderGetByNumber($this->number);
                 if ($orderInfo->entity() === null) {
                     throw new OrderNotFoundException;
                 }
 
                 $statuses = $orderInfo->entity()['statuses'];
 
-                if (empty($this->number)) {
-                    $this->number = $orderInfo->entity()['cdek_number'];
+                if (empty($this->uuid)) {
+                    $this->uuid = $orderInfo->entity()['uuid'];
                     $this->save();
                 }
             }
