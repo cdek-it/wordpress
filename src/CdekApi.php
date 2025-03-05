@@ -398,13 +398,13 @@ namespace Cdek {
          * @throws ApiException
          * @throws LegacyAuthException
          */
-        public function waybillCreate(string $cdekNumber): ?string
+        public function waybillCreate(string $orderUuid): ?string
         {
             return HttpClient::sendJsonRequest(
                 "{$this->apiUrl}print/orders/",
                 'POST',
                 $this->tokenStorage->getToken(),
-                ['orders' => ['cdek_number' => $cdekNumber]],
+                ['orders' => ['order_uuid' => $orderUuid]],
             )->entity()['uuid'] ?? null;
         }
 

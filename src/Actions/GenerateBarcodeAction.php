@@ -75,7 +75,7 @@ namespace Cdek\Actions {
             }
 
             try {
-                $barcode = $api->barcodeCreate($order->entity()['cdek_number']);
+                $barcode = $api->barcodeCreate($order->entity()['uuid']);
 
                 if ($barcode === null) {
                     return [
