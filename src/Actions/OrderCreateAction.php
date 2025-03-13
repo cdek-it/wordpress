@@ -28,6 +28,7 @@ namespace Cdek\Actions {
     use Cdek\Model\Service;
     use Cdek\Model\ShippingItem;
     use Cdek\Model\Tariff;
+    use Cdek\Model\Tax;
     use Cdek\Model\ValidationResult;
     use Cdek\Note;
     use Cdek\Traits\CanBeCreated;
@@ -320,23 +321,32 @@ namespace Cdek\Actions {
                         $shouldConvert,
                     );
 
-                    $cost /= $qty;
+                    $productCost = $cost / $qty;
 
                     if ($shouldPay !== null) {
                         if ($shouldPay !== 0) {
-                            $paymentValue = (int)(($shouldPay / 100) * $cost);
+                            $payment = ['value' => (int)(($shouldPay / 100) * $productCost)];
                         } else {
-                            $paymentValue = $cost;
+                            $payment = ['value' => $productCost];
                         }
                     } else {
-                        $paymentValue = 0;
+                        $payment = ['value' => 0];
+                    }
+
+                    if(!empty($product->is_taxable())){
+                        $payment['vat_sum'] = $shouldConvert === null ? (float)$item->get_total_tax() : $this->convertCurrencyToRub(
+                            (float)$item->get_total_tax(),
+                            $shouldConvert,
+                        );
+
+                        $payment['vat_rate'] = Tax::getTax($product->get_tax_class());
                     }
 
                     return [
                         'ware_key'     => $product->get_sku() ?: $product->get_id(),
-                        'payment'      => ['value' => $paymentValue],
+                        'payment'      => $payment,
                         'name'         => $item->get_name(),
-                        'cost'         => $cost,
+                        'cost'         => $productCost,
                         'amount'       => $qty,
                         'weight'       => $w,
                         'weight_gross' => $w + 1,
