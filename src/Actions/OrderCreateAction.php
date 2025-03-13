@@ -321,13 +321,13 @@ namespace Cdek\Actions {
                         $shouldConvert,
                     );
 
-                    $productCost = $cost / $qty;
+                    $cost /= $qty;
 
                     if ($shouldPay !== null) {
                         if ($shouldPay !== 0) {
-                            $payment = ['value' => (int)(($shouldPay / 100) * $productCost)];
+                            $payment = ['value' => (int)(($shouldPay / 100) * $cost)];
                         } else {
-                            $payment = ['value' => $productCost];
+                            $payment = ['value' => $cost];
                         }
                     } else {
                         $payment = ['value' => 0];
@@ -346,7 +346,7 @@ namespace Cdek\Actions {
                         'ware_key'     => $product->get_sku() ?: $product->get_id(),
                         'payment'      => $payment,
                         'name'         => $item->get_name(),
-                        'cost'         => $productCost,
+                        'cost'         => $cost,
                         'amount'       => $qty,
                         'weight'       => $w,
                         'weight_gross' => $w + 1,
