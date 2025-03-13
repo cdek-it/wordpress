@@ -11,6 +11,7 @@ namespace Cdek\Traits {
 
     use Cdek\Config;
     use Cdek\Enums\BarcodeFormat;
+    use Cdek\Helpers\VatRule;
     use Cdek\Loader;
     use Cdek\Model\Tariff;
 
@@ -412,6 +413,15 @@ namespace Cdek\Traits {
                     'type'        => 'checkbox',
                     'desc_tip'    => true,
                     'description' => esc_html__('Calculated based on the amount of goods in the order', 'cdekdelivery'),
+                ],
+                'delivery_vat_rules'             => [
+                    'title'       => esc_html__('Rules how calculate vat for invoice', 'cdekdelivery'),
+                    'type'        => 'select',
+                    'options'     => VatRule::data(),
+                    'description' => esc_html__(
+                        'Plugin will cost price of goods for delivery invoice according to selected rule',
+                        'cdekdelivery',
+                    ),
                 ],
                 'delivery_price_rules'               => [
                     'title' => esc_html__('Rules for displaying the delivery amount', 'cdekdelivery'),
