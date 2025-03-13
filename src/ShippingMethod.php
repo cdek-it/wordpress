@@ -58,7 +58,6 @@ namespace Cdek {
      * @property bool $services_trying_on
      * @property bool $services_part_deliv
      * @property bool $insurance
-     * @property string $delivery_vat_rules
      * @property string $delivery_price_rules
      * @property string $percentcod
      * @property string $barcode_format

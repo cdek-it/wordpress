@@ -23,7 +23,6 @@ namespace Cdek\Actions {
     use Cdek\Exceptions\ShippingNotFoundException;
     use Cdek\Helpers\Logger;
     use Cdek\Helpers\StringHelper;
-    use Cdek\Helpers\VatRule;
     use Cdek\Helpers\WeightConverter;
     use Cdek\Model\Order;
     use Cdek\Model\Service;
@@ -291,17 +290,14 @@ namespace Cdek\Actions {
             $shouldConvert = $this->order->currency !== 'RUB' &&
                              function_exists('wcml_get_woocommerce_currency_option') ? $this->order->currency : null;
 
-            $priceRule = $this->shipping->getMethod()->delivery_price_rules;
-
-            return array_map(function (array $p) use (&$shouldConvert, &$orderItems, &$shouldPay, $priceRule) {
+            return array_map(function (array $p) use (&$shouldConvert, &$orderItems, &$shouldPay) {
                 $weight = 0;
 
                 $items = array_values(array_filter(array_map(function ($item) use (
                     &$shouldConvert,
                     &$shouldPay,
                     &$orderItems,
-                    &$weight,
-                    $priceRule
+                    &$weight
                 ) {
                     if ($item instanceof WC_Order_Item_Product) {
                         $qty = (int)$item->get_quantity();
@@ -319,11 +315,8 @@ namespace Cdek\Actions {
 
                     $w      = WeightConverter::getWeightInGrams($product->get_weight());
                     $weight += $qty * $w;
-
-                    $itemPrice = VatRule::calculate((float)$item->get_total(), (float)$item->get_total_tax(), intval($priceRule));
-
-                    $cost   = $shouldConvert === null ? $itemPrice : $this->convertCurrencyToRub(
-                        $itemPrice,
+                    $cost   = $shouldConvert === null ? (float)$item->get_total() : $this->convertCurrencyToRub(
+                        (float)$item->get_total(),
                         $shouldConvert,
                     );
 
