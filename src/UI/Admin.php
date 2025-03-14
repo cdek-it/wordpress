@@ -12,8 +12,8 @@ namespace Cdek\UI {
     use Cdek\Config;
     use Cdek\Helpers\UI;
     use Cdek\Loader;
+    use Cdek\ShippingMethod;
     use Cdek\Traits\CanBeCreated;
-    use WC_Admin_Settings;
 
     class Admin
     {
@@ -58,12 +58,24 @@ namespace Cdek\UI {
         {
             global $current_section, $current_tab;
 
-            // Not on Settings page.
-            if($current_section !== Config::DELIVERY_NAME || $current_tab !== 'shipping') {
-                return;
-            }
+            // Is Settings page.
+            if($current_tab === 'shipping') {
+                if ($current_section !== Config::DELIVERY_NAME){
+                    $instance_id = $_REQUEST['instance_id'];
 
-            UI::enqueueScript('cdek-admin-settings', 'cdek-admin-settings', true, false, true);
+                    if ( !isset( $instance_id ) ) {
+                        return;
+                    }
+
+                    $shippingMethodCurrent = \WC_Shipping_Zones::get_shipping_method( $instance_id );
+
+                    if(!$shippingMethodCurrent instanceof ShippingMethod) {
+                        return;
+                    }
+                }
+
+                UI::enqueueScript('cdek-admin-settings', 'cdek-admin-settings', true, false, true);
+            }
         }
 
         public function __invoke(): void
