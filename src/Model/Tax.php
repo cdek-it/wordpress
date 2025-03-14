@@ -15,7 +15,6 @@ namespace Cdek\Model {
         private const TAX_10 = 10;
         private const TAX_12 = 12;
         private const TAX_20 = 20;
-        private const DEFAULT_TAX = self::NO_TAX;
 
         private const AVAILABLE_TAX = [
             self::NO_TAX,
@@ -32,7 +31,7 @@ namespace Cdek\Model {
 
             if(is_array($taxRates)){
                 if(count($taxRates) == 0){
-                    return self::DEFAULT_TAX;
+                    return self::NO_TAX;
                 }
 
                 $taxValue = intval(
@@ -48,7 +47,7 @@ namespace Cdek\Model {
                 }
             }
 
-            return self::DEFAULT_TAX;
+            return self::NO_TAX;
         }
     }
 }

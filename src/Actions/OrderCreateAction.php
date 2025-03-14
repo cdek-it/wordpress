@@ -322,24 +322,36 @@ namespace Cdek\Actions {
                     );
 
                     $cost /= $qty;
+                    $taxCost = 0;
+
+                    if(!empty($product->is_taxable())){
+                        $taxCost = $shouldConvert === null ? (float)$item->get_total_tax() :
+                            $this->convertCurrencyToRub(
+                                (float)$item->get_total_tax(),
+                                $shouldConvert,
+                            );
+
+                        if($taxCost > 0){
+                            $taxCost /= $qty;
+                            $cost += $taxCost;
+                        }
+                    }
 
                     if ($shouldPay !== null) {
                         if ($shouldPay !== 0) {
-                            $payment = ['value' => (int)(($shouldPay / 100) * $cost)];
+                            $payment = [
+                                'value' => (int)(($shouldPay / 100) * $cost),
+                            ];
+
+                            if($taxCost > 0){
+                                $payment['vat_sum'] = (int)(($shouldPay / 100) * $taxCost);
+                                $payment['vat_rate'] = Tax::getTax($product->get_tax_class());
+                            }
                         } else {
                             $payment = ['value' => $cost];
                         }
                     } else {
                         $payment = ['value' => 0];
-                    }
-
-                    if(!empty($product->is_taxable())){
-                        $payment['vat_sum'] = $shouldConvert === null ? (float)$item->get_total_tax() : $this->convertCurrencyToRub(
-                            (float)$item->get_total_tax(),
-                            $shouldConvert,
-                        );
-
-                        $payment['vat_rate'] = Tax::getTax($product->get_tax_class());
                     }
 
                     return [
