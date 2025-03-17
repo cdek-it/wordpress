@@ -59,23 +59,23 @@ namespace Cdek\UI {
             global $current_section, $current_tab;
 
             // Is Settings page.
-            if($current_tab === 'shipping') {
-                if ($current_section !== Config::DELIVERY_NAME){
-                    $instance_id = $_REQUEST['instance_id'];
+            if($current_tab !== 'shipping') { return; }
 
-                    if ( !isset( $instance_id ) ) {
-                        return;
-                    }
+            if ($current_section !== Config::DELIVERY_NAME){
+                $instance_id = $_REQUEST['instance_id'];
 
-                    $shippingMethodCurrent = \WC_Shipping_Zones::get_shipping_method( $instance_id );
-
-                    if(!$shippingMethodCurrent instanceof ShippingMethod) {
-                        return;
-                    }
+                if ( !isset( $instance_id ) ) {
+                    return;
                 }
 
-                UI::enqueueScript('cdek-admin-settings', 'cdek-admin-settings', true, false, true);
+                $shippingMethodCurrent = \WC_Shipping_Zones::get_shipping_method( $instance_id );
+
+                if($shippingMethodCurrent === false || $shippingMethodCurrent->id !== Config::DELIVERY_NAME) {
+                    return;
+                }
             }
+
+            UI::enqueueScript('cdek-admin-settings', 'cdek-admin-settings', true, false, true);
         }
 
         public function __invoke(): void
