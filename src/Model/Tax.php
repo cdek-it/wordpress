@@ -9,29 +9,17 @@ namespace {
 namespace Cdek\Model {
     class Tax
     {
-        private const NO_TAX = null;
-        private const TAX_ZERO = 0;
-        private const TAX_5 = 5;
-        private const TAX_10 = 10;
-        private const TAX_12 = 12;
-        private const TAX_20 = 20;
-
         private const AVAILABLE_TAX = [
-            self::NO_TAX,
-            self::TAX_ZERO,
-            self::TAX_5,
-            self::TAX_10,
-            self::TAX_12,
-            self::TAX_20,
+            0, 5, 10, 12, 20
         ];
 
-        public static function getTax($rateClass): int
+        public static function getTax(string $rateClass): ?int
         {
             $taxRates = \WC_Tax::get_rates_for_tax_class($rateClass);
 
             if(is_array($taxRates)){
                 if(count($taxRates) == 0){
-                    return self::NO_TAX;
+                    return null;
                 }
 
                 $taxValue = intval(
@@ -47,7 +35,7 @@ namespace Cdek\Model {
                 }
             }
 
-            return self::NO_TAX;
+            return null;
         }
     }
 }
