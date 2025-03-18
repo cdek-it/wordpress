@@ -298,7 +298,7 @@ namespace Cdek\Actions {
                     array_filter(
                         array_map(
                             static fn($item) =>
-                            $this->buildItemData($item, $shouldConvert, $shouldPay, $orderItems,$weight),
+                            $this->buildItemData($item, $shouldConvert, $shouldPay, $orderItems, $weight),
                             $p['items'] ?: $orderItems
                         )
                     )
