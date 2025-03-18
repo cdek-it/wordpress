@@ -58,19 +58,17 @@ namespace Cdek\UI {
         {
             global $current_section, $current_tab;
 
-            // Is Settings page.
-            if($current_tab !== 'shipping') { return; }
+            // Is not shipping settings page.
+            if ($current_tab !== 'shipping') {
+                return;
+            }
 
-            if ($current_section !== Config::DELIVERY_NAME){
-                $instance_id = $_REQUEST['instance_id'];
+            if ($current_section !== Config::DELIVERY_NAME) {
+                $shippingMethodCurrent =
+                    \WC_Shipping_Zones::get_shipping_method(absint(wp_unslash($_REQUEST['instance_id'])));
 
-                if ( !isset( $instance_id ) ) {
-                    return;
-                }
-
-                $shippingMethodCurrent = \WC_Shipping_Zones::get_shipping_method( $instance_id );
-
-                if($shippingMethodCurrent === false || $shippingMethodCurrent->id !== Config::DELIVERY_NAME) {
+                // Is not CDEK shipping page
+                if ($shippingMethodCurrent === false || $shippingMethodCurrent->id !== Config::DELIVERY_NAME) {
                     return;
                 }
             }
