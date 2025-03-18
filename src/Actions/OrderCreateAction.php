@@ -291,74 +291,18 @@ namespace Cdek\Actions {
             $shouldConvert = $this->order->currency !== 'RUB' &&
                              function_exists('wcml_get_woocommerce_currency_option') ? $this->order->currency : null;
 
-            return array_map(function (array $p) use (&$shouldConvert, &$orderItems, &$shouldPay) {
+            return array_map(function (array $p) use ($shouldConvert, $orderItems, $shouldPay) {
                 $weight = 0;
 
-                $items = array_values(array_filter(array_map(function ($item) use (
-                    &$shouldConvert,
-                    &$shouldPay,
-                    &$orderItems,
-                    &$weight
-                ) {
-                    if ($item instanceof WC_Order_Item_Product) {
-                        $qty = (int)$item->get_quantity();
-                    } else {
-                        $qty  = (int)$item['qty'];
-                        $item = $orderItems[$item['id']] ?? null;
-                    }
-
-                    if ($item === null) {
-                        return null;
-                    }
-
-                    assert($item instanceof WC_Order_Item_Product);
-                    $product = $item->get_product();
-
-                    $w      = WeightConverter::getWeightInGrams($product->get_weight());
-                    $weight += $qty * $w;
-                    $cost   = $shouldConvert === null ? (float)wc_get_price_including_tax($product) :
-                        $this->convertCurrencyToRub(
-                        (float)wc_get_price_including_tax($product),
-                        $shouldConvert,
-                    );
-
-                    $taxCost = 0;
-
-                    if(!empty($product->is_taxable())){
-                        $taxCost = $shouldConvert === null ? (float)$item->get_total_tax() :
-                            $this->convertCurrencyToRub(
-                                (float)$item->get_total_tax(),
-                                $shouldConvert,
-                            );
-                    }
-
-                    if ($shouldPay !== null) {
-                        if ($shouldPay !== 0) {
-                            $payment = [
-                                'value' => (int)(($shouldPay / 100) * $cost),
-                            ];
-
-                            if($taxCost > 0){
-                                $payment['vat_sum'] = (int)(($shouldPay / 100) * $taxCost);
-                                $payment['vat_rate'] = Tax::getTax($product->get_tax_class());
-                            }
-                        } else {
-                            $payment = ['value' => $cost];
-                        }
-                    } else {
-                        $payment = ['value' => 0];
-                    }
-
-                    return [
-                        'ware_key'     => $product->get_sku() ?: $product->get_id(),
-                        'payment'      => $payment,
-                        'name'         => $item->get_name(),
-                        'cost'         => $cost,
-                        'amount'       => $qty,
-                        'weight'       => $w,
-                        'weight_gross' => $w + 1,
-                    ];
-                }, $p['items'] ?: $orderItems)));
+                $items = array_values(
+                    array_filter(
+                        array_map(
+                            static fn($item) =>
+                            $this->buildItemData($item, $shouldConvert, $shouldPay, $orderItems,$weight),
+                            $p['items'] ?: $orderItems
+                        )
+                    )
+                );
 
                 $package = [
                     'number'  => sprintf('%s_%s', $this->order->id, StringHelper::generateRandom(5)),
@@ -375,6 +319,72 @@ namespace Cdek\Actions {
 
                 return $package;
             }, $packages);
+        }
+
+        private function buildItemData(
+            $item,
+            $shouldConvert,
+            $shouldPay,
+            $orderItems,
+            &$weight
+        )
+        {
+            if ($item instanceof WC_Order_Item_Product) {
+                $qty = (int)$item->get_quantity();
+            } else {
+                $qty  = (int)$item['qty'];
+                $item = $orderItems[$item['id']] ?? null;
+            }
+
+            if ($item === null) {
+                return null;
+            }
+
+            assert($item instanceof WC_Order_Item_Product);
+            $product = $item->get_product();
+
+            $w      = WeightConverter::getWeightInGrams($product->get_weight());
+            $weight += $qty * $w;
+            $cost   = $shouldConvert === null ? (float)wc_get_price_including_tax($product) :
+                $this->convertCurrencyToRub(
+                    (float)wc_get_price_including_tax($product),
+                    $shouldConvert,
+                );
+
+            if ($shouldPay !== null) {
+                if ($shouldPay !== 0) {
+                    $payment = [
+                        'value' => (int)(($shouldPay / 100) * $cost),
+                    ];
+
+                    if($product->is_taxable()){
+                        $taxCost = $shouldConvert === null ? (float)$item->get_total_tax() :
+                            $this->convertCurrencyToRub(
+                                (float)$item->get_total_tax(),
+                                $shouldConvert,
+                            );
+
+                        if($taxCost > 0){
+                            $payment['vat_sum'] = (int)(($shouldPay / 100) * $taxCost);
+                            $payment['vat_rate'] = Tax::getTax($product->get_tax_class());
+                        }
+                    }
+                } else {
+                    $payment = ['value' => $cost];
+                }
+            } else {
+                $payment = ['value' => 0];
+            }
+
+            return [
+                'ware_key'     => $product->get_sku() ?: $product->get_id(),
+                'payment'      => $payment,
+                'name'         => $item->get_name(),
+                'cost'         => $cost,
+                'amount'       => $qty,
+                'weight'       => $w,
+                'weight_gross' => $w + 1,
+            ];
         }
 
         private function convertCurrencyToRub(float $cost, string $currency): float
