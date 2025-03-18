@@ -316,8 +316,9 @@ namespace Cdek\Actions {
 
                     $w      = WeightConverter::getWeightInGrams($product->get_weight());
                     $weight += $qty * $w;
-                    $cost   = $shouldConvert === null ? (float)$item->get_total() : $this->convertCurrencyToRub(
-                        (float)$item->get_total(),
+                    $cost   = $shouldConvert === null ? (float)wc_get_price_including_tax($product) :
+                        $this->convertCurrencyToRub(
+                        (float)wc_get_price_including_tax($product),
                         $shouldConvert,
                     );
 
@@ -330,11 +331,6 @@ namespace Cdek\Actions {
                                 (float)$item->get_total_tax(),
                                 $shouldConvert,
                             );
-
-                        if($taxCost > 0){
-                            $taxCost /= $qty;
-                            $cost += $taxCost;
-                        }
                     }
 
                     if ($shouldPay !== null) {
