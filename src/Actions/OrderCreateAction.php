@@ -322,7 +322,6 @@ namespace Cdek\Actions {
                         $shouldConvert,
                     );
 
-                    $cost /= $qty;
                     $taxCost = 0;
 
                     if(!empty($product->is_taxable())){
