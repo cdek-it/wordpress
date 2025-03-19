@@ -351,11 +351,11 @@ namespace Cdek\Actions {
                     $shouldConvert,
                 );
 
+            $payment = ['value' => 0];
+
             if ($shouldPay !== null) {
                 if ($shouldPay !== 0) {
-                    $payment = [
-                        'value' => (int)(($shouldPay / 100) * $cost),
-                    ];
+                    $payment['value'] = (int)(($shouldPay / 100) * $cost);
 
                     if($product->is_taxable()){
                         $taxCost = $shouldConvert === null ? (float)$item->get_total_tax() :
@@ -370,10 +370,8 @@ namespace Cdek\Actions {
                         }
                     }
                 } else {
-                    $payment = ['value' => $cost];
+                    $payment['value'] = $cost;
                 }
-            } else {
-                $payment = ['value' => 0];
             }
 
             return [
