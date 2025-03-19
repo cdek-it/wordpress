@@ -12,8 +12,8 @@ namespace Cdek\UI {
     use Cdek\Config;
     use Cdek\Helpers\UI;
     use Cdek\Loader;
-    use Cdek\ShippingMethod;
     use Cdek\Traits\CanBeCreated;
+    use WC_Shipping_Zones;
 
     class Admin
     {
@@ -64,8 +64,7 @@ namespace Cdek\UI {
             }
 
             if ($current_section !== Config::DELIVERY_NAME) {
-                $shippingMethodCurrent =
-                    \WC_Shipping_Zones::get_shipping_method(absint(wp_unslash($_REQUEST['instance_id'])));
+                $shippingMethodCurrent = WC_Shipping_Zones::get_shipping_method(absint(wp_unslash($_REQUEST['instance_id'])));
 
                 // Is not CDEK shipping page
                 if ($shippingMethodCurrent === false || $shippingMethodCurrent->id !== Config::DELIVERY_NAME) {
