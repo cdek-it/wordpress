@@ -206,7 +206,7 @@ namespace Cdek\Controllers {
 
             try {
                 /** @noinspection GlobalVariableUsageInspection */
-                $result = GenerateWaybillAction::new()((new Order((int)wp_unslash($_GET['id'])))->uuid);
+                $result = GenerateWaybillAction::new()((new Order((int)wp_unslash($_GET['id'])))->number);
 
                 if ($result['success']) {
                     wp_send_json_success($result['data']);
