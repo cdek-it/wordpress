@@ -53,7 +53,7 @@ namespace Cdek\Actions {
                 }
             }
 
-            $waybill = $api->waybillCreate($order->entity()['uuid']);
+            $waybill = $api->waybillCreate($cdekNumber);
 
             if ($waybill === null) {
                 return [

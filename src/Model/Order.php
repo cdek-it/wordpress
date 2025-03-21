@@ -20,7 +20,6 @@ namespace Cdek\Model {
     use WP_Post;
 
     /**
-     * @property string|null $uuid
      * @property string|null $number
      *
      * @property-read int $tariff_id
@@ -62,7 +61,6 @@ namespace Cdek\Model {
             ];
         protected const ALIASES
             = [
-                'uuid'   => ['order_uuid'],
                 'number' => ['order_number'],
             ];
         private const META_KEY = 'order_data';
@@ -123,6 +121,7 @@ namespace Cdek\Model {
         final public function clean(): void
         {
             unset(
+                //legacy uuid is clean too
                 $this->meta['number'], $this->meta['uuid'], $this->meta['order_uuid'], $this->meta['order_number'], $this->meta['cdek_order_uuid'], $this->meta['cdek_order_waybill'],
             );
 
@@ -213,11 +212,6 @@ namespace Cdek\Model {
                 }
 
                 $statuses = $orderInfo->entity()['statuses'];
-
-                if (empty($this->uuid)) {
-                    $this->uuid = $orderInfo->entity()['uuid'];
-                    $this->save();
-                }
             }
 
             $statuses = array_map(static fn(array $st)

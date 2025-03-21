@@ -62,7 +62,7 @@ namespace Cdek\Blocks {
             } catch (Throwable $e) {
             }
 
-            if (empty($order->uuid)) {
+            if (empty($order->number)) {
                 include Loader::getTemplate('processing');
 
                 return;

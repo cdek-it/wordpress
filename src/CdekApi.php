@@ -398,13 +398,13 @@ namespace Cdek {
          * @throws ApiException
          * @throws LegacyAuthException
          */
-        public function waybillCreate(string $orderUuid): ?string
+        public function waybillCreate(string $cdekNumber): ?string
         {
             return HttpClient::sendJsonRequest(
                 "{$this->apiUrl}print/orders/",
                 'POST',
                 $this->tokenStorage->getToken(),
-                ['orders' => ['order_uuid' => $orderUuid]],
+                ['orders' => ['cdek_number' => $cdekNumber]],
             )->entity()['uuid'] ?? null;
         }
 
@@ -412,14 +412,14 @@ namespace Cdek {
          * @throws LegacyAuthException
          * @throws ApiException
          */
-        public function barcodeCreate(string $orderUuid): ?string
+        public function barcodeCreate(string $cdekNumber): ?string
         {
             return HttpClient::sendJsonRequest(
                 "{$this->apiUrl}print/barcodes",
                 'POST',
                 $this->tokenStorage->getToken(),
                 [
-                    'orders' => ['order_uuid' => $orderUuid],
+                    'orders' => ['cdek_number' => $cdekNumber],
                     'format' => BarcodeFormat::getByIndex(
                         (int)$this->deliveryMethod->get_option(
                             'barcode_format',

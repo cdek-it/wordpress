@@ -60,7 +60,7 @@ namespace Cdek\Actions {
 
             foreach ($order->related() as $entity) {
                 if ($entity['type'] === 'barcode' && isset($entity['url'])) {
-                    $barcodeInfo = $api->barcodeGet($entity['uuid']);
+                    $barcodeInfo = $api->barcodeGet($cdekNumber);
 
                     if ($barcodeInfo['format'] !==
                         BarcodeFormat::getByIndex((int)ShippingMethod::factory()->barcode_format)) {
@@ -75,7 +75,7 @@ namespace Cdek\Actions {
             }
 
             try {
-                $barcode = $api->barcodeCreate($order->entity()['uuid']);
+                $barcode = $api->barcodeCreate($cdekNumber);
 
                 if ($barcode === null) {
                     return [
