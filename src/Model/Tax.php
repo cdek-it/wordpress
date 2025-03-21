@@ -17,10 +17,12 @@ namespace Cdek\Model {
         {
             $taxRates = \WC_Tax::get_rates_for_tax_class($rateClass);
 
-            if(!is_array($taxRates)){ return null; }
+            if(!is_array($taxRates)){
+                return self::AVAILABLE_TAX[0];
+            }
 
             if(count($taxRates) === 0){
-                return null;
+                return self::AVAILABLE_TAX[0];
             }
 
             $taxValue = intval(
@@ -35,7 +37,7 @@ namespace Cdek\Model {
                 return $taxValue;
             }
 
-            return null;
+            return self::AVAILABLE_TAX[0];
         }
     }
 }
