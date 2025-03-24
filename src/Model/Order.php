@@ -61,6 +61,7 @@ namespace Cdek\Model {
             ];
         protected const ALIASES
             = [
+                'uuid'   => ['order_uuid'],
                 'number' => ['order_number'],
             ];
         private const META_KEY = 'order_data';
