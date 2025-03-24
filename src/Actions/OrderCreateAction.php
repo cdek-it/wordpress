@@ -297,8 +297,22 @@ namespace Cdek\Actions {
                 $items = array_values(
                     array_filter(
                         array_map(
-                            static fn($item) =>
-                            $this->buildItemData($item, $shouldConvert, $shouldPay, $orderItems, $weight),
+                            static function($item) use ($shouldConvert, $shouldPay, $orderItems, &$weight){
+                                if ($item instanceof WC_Order_Item_Product) {
+                                    $qty = (int)$item->get_quantity();
+                                } else {
+                                    $qty  = (int)$item['qty'];
+                                    $item = $orderItems[$item['id']] ?? null;
+                                }
+
+                                if ($item === null) {
+                                    return null;
+                                }
+
+                                assert($item instanceof WC_Order_Item_Product);
+
+                                return $this->buildItemData($item, $qty, $shouldConvert, $shouldPay, $weight);
+                            },
                             $p['items'] ?: $orderItems
                         )
                     )
@@ -322,25 +336,13 @@ namespace Cdek\Actions {
         }
 
         private function buildItemData(
-            $item,
-            $shouldConvert,
-            $shouldPay,
-            $orderItems,
-            &$weight
-        )
+            WC_Order_Item_Product $item,
+            ?int $qty,
+            ?string $shouldConvert,
+            ?int $shouldPay,
+            int &$weight
+        ): ?array
         {
-            if ($item instanceof WC_Order_Item_Product) {
-                $qty = (int)$item->get_quantity();
-            } else {
-                $qty  = (int)$item['qty'];
-                $item = $orderItems[$item['id']] ?? null;
-            }
-
-            if ($item === null) {
-                return null;
-            }
-
-            assert($item instanceof WC_Order_Item_Product);
             $product = $item->get_product();
 
             $w      = WeightConverter::getWeightInGrams($product->get_weight());
