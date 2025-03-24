@@ -206,6 +206,12 @@ namespace Cdek {
                 static fn() => load_plugin_textdomain('cdekdelivery', false, dirname(self::$pluginMainFile).'/lang'),
             );
 
+            add_filter('clearfy_rest_api_white_list', static function (array $wl): array {
+                $wl[] = Config::DELIVERY_NAME;
+
+                return $wl;
+            });
+
             add_filter('plugin_action_links_'.self::$pluginMainFile, [Admin::class, 'addPluginLinks']);
             add_filter('plugin_row_meta', [Admin::class, 'addPluginRowMeta'], 10, 2);
 
