@@ -11,7 +11,7 @@ namespace Cdek\Model {
 
     class Tax
     {
-        private const array AVAILABLE_TAX = [
+        private const AVAILABLE_TAX = [
             null, 0, 5, 10, 12, 20
         ];
 
