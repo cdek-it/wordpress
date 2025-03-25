@@ -337,11 +337,11 @@ namespace Cdek\Actions {
 
         private function buildItemData(
             WC_Order_Item_Product $item,
-            ?int $qty,
+            int $qty,
             ?string $shouldConvert,
             ?int $shouldPay,
             int &$weight
-        ): ?array
+        ): array
         {
             $product = $item->get_product();
 
