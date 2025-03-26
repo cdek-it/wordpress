@@ -37,12 +37,11 @@ namespace Cdek\Actions {
         {
             $order       = new Order($orderId);
             $orderNumber = $order->number;
-            $orderUuid   = $order->uuid;
 
             $order->clean();
 
             try {
-                $this->api->orderGet($orderUuid);
+                $orderUuid = $this->api->orderGetByNumber($orderNumber)->entity()['uuid'];
             } catch (InvalidRequestException $e) {
                 Note::send(
                     $orderId,

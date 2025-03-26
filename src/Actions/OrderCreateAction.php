@@ -70,7 +70,6 @@ namespace Cdek\Actions {
 
                 $existingOrder = $coreApi->orderGet($orderId);
 
-                $this->order->uuid   = $existingOrder['uuid'];
                 $this->order->number = $existingOrder['track'];
                 $this->order->save();
 
@@ -155,7 +154,6 @@ namespace Cdek\Actions {
             $track = $this->getTrack($uuid);
 
             $this->order->number = $track;
-            $this->order->uuid   = $uuid;
             $this->order->save();
 
             return $track;
