@@ -20,7 +20,6 @@ namespace Cdek\Model {
     use WP_Post;
 
     /**
-     * @property string|null $uuid
      * @property string|null $number
      *
      * @property-read int $tariff_id
@@ -123,6 +122,7 @@ namespace Cdek\Model {
         final public function clean(): void
         {
             unset(
+                //legacy uuid is clean too
                 $this->meta['number'], $this->meta['uuid'], $this->meta['order_uuid'], $this->meta['order_number'], $this->meta['cdek_order_uuid'], $this->meta['cdek_order_waybill'],
             );
 
@@ -202,22 +202,17 @@ namespace Cdek\Model {
          */
         final public function loadLegacyStatuses(?array $statuses = null): array
         {
-            if (empty($this->uuid)) {
+            if (empty($this->number)) {
                 return [];
             }
 
             if ($statuses === null) {
-                $orderInfo = (new CdekApi)->orderGet($this->uuid);
+                $orderInfo = (new CdekApi)->orderGetByNumber($this->number);
                 if ($orderInfo->entity() === null) {
                     throw new OrderNotFoundException;
                 }
 
                 $statuses = $orderInfo->entity()['statuses'];
-
-                if (empty($this->number)) {
-                    $this->number = $orderInfo->entity()['cdek_number'];
-                    $this->save();
-                }
             }
 
             $statuses = array_map(static fn(array $st)

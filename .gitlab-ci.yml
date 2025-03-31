@@ -124,7 +124,11 @@ github:
   tags:
     - docker
   rules:
-    - if: $CI_COMMIT_REF_PROTECTED == "true"
+    - if: $CI_COMMIT_REF_PROTECTED != "true"
+      when: never
+    - if: $CI_COMMIT_TAG
+      when: never
+    - when: always
   before_script:
     - git config checkout.defaultRemote origin
     - git remote add -f github "https://${GITHUB_AUTH_USERNAME}:${GITHUB_AUTH_TOKEN}@${GITHUB_REPO}" || true

@@ -21,7 +21,7 @@ namespace Cdek\Actions {
          * @throws \Cdek\Exceptions\External\LegacyAuthException
          * @throws \Cdek\Exceptions\External\ApiException
          */
-        public function __invoke(string $orderUuid): array
+        public function __invoke(string $cdekNumber): array
         {
             $api = new CdekApi;
 
@@ -32,7 +32,7 @@ namespace Cdek\Actions {
                 Config::GRAPHICS_TIMEOUT_SEC * Config::MAX_REQUEST_RETRIES_FOR_GRAPHICS),
             );
 
-            $order = $api->orderGet($orderUuid);
+            $order = $api->orderGetByNumber($cdekNumber);
 
             if ($order->entity() === null) {
                 return [
@@ -53,7 +53,7 @@ namespace Cdek\Actions {
                 }
             }
 
-            $waybill = $api->waybillCreate($order->entity()['uuid']);
+            $waybill = $api->waybillCreate($cdekNumber);
 
             if ($waybill === null) {
                 return [

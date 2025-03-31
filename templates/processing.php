@@ -22,7 +22,7 @@ defined('ABSPATH') or exit;
 
 <div>
     <p><?php esc_html_e('Waybill', 'cdekdelivery') ?> <b>
-            <?php echo esc_html($order->uuid) ?></b></p>
+            <?php echo esc_html($order->number) ?></b></p>
 </div>
 
 <hr>

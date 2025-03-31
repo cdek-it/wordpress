@@ -119,6 +119,22 @@ namespace Cdek {
             return static::$instance ?: WC()->shipping()->load_shipping_methods()[Config::DELIVERY_NAME];
         }
 
+        final public function init_instance_settings(): void {
+            parent::init_instance_settings();
+
+            if (doing_action("woocommerce_update_options_shipping_$this->id")){
+                $this->instance_settings['token'] = null;
+            }
+        }
+
+        final public function init_settings(): void {
+            parent::init_settings();
+
+            if (doing_action("woocommerce_update_options_shipping_$this->id")){
+                $this->settings['token'] = null;
+            }
+        }
+
         /** @noinspection MissingReturnTypeInspection */
         public function __get(string $key)
         {
@@ -214,13 +230,6 @@ namespace Cdek {
             } catch (ExceptionContract $e) {
                 return;
             }
-        }
-
-        final public function process_admin_options(): bool
-        {
-            FlushTokenCacheAction::new()();
-
-            return parent::process_admin_options();
         }
     }
 }
