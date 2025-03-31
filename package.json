@@ -27,7 +27,7 @@
     "@wordpress/env": "^10.16.0",
     "@wordpress/i18n": "^5.16.0",
     "@wordpress/icons": "^10.16.0",
-    "@wordpress/prettier-config": "^4.16.0",
+    "@wordpress/prettier-config": "^4.21.0",
     "@wordpress/scripts": "^30.9.0",
     "@wordpress/url": "^4.16.0",
     "jquery": "^3.7.1",
