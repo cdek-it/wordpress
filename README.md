@@ -78,7 +78,7 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 * WP-158 Fixed missing delivery invoice information on order page
 * WP-173 Fixed save plugin settings with WP cache plugins
 * WP-160 Product tax settings now set in delivery invoice
-* WP-183 Fixed errors or warnings on admin page without instance_id
+* WP-183 Fixed errors or warnings on admin pages
 
 = 4.0 =
 * WP-40 Replaced the map in the plugin settings with address input fields
