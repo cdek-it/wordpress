@@ -64,6 +64,10 @@ namespace Cdek\UI {
             }
 
             if ($current_section !== Config::DELIVERY_NAME) {
+                if (empty($_REQUEST['instance_id'])) {
+                    return;
+                }
+
                 $shippingMethodCurrent = WC_Shipping_Zones::get_shipping_method(absint(wp_unslash($_REQUEST['instance_id'])));
 
                 // Is not CDEK shipping page
