@@ -74,6 +74,11 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 * WP-153 Fix error settings city migration
 * WP-163 Fix error if no shipping methods found
 * WP-159 Fix error for paid on delivery with zero price
+* WP-156 Restore plugin settings on delivery zone page
+* WP-158 Fixed missing delivery invoice information on order page
+* WP-173 Fixed save plugin settings with WP cache plugins
+* WP-160 Product tax settings now set in delivery invoice
+* WP-183 Fixed errors or warnings on admin page without instance_id
 
 = 4.0 =
 * WP-40 Replaced the map in the plugin settings with address input fields
