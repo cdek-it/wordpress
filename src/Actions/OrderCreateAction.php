@@ -295,7 +295,7 @@ namespace Cdek\Actions {
                 $items = array_values(
                     array_filter(
                         array_map(
-                            static function($item) use ($shouldConvert, $shouldPay, $orderItems, &$weight){
+                            function($item) use ($shouldConvert, $shouldPay, $orderItems, &$weight){
                                 if ($item instanceof WC_Order_Item_Product) {
                                     $qty = (int)$item->get_quantity();
                                 } else {
