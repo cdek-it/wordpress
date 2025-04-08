@@ -28,7 +28,7 @@ namespace Cdek\Actions {
                 return;
             }
 
-            $shipping->office = CheckoutHelper::getValueFromCurrentSession('office_code');
+            $shipping->office = CheckoutHelper::getCurrentValue('office_code');
             $shipping->save();
         }
     }
