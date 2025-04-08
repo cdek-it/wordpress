@@ -51,6 +51,12 @@ const onChoose = (_type, _tariff, address) => {
         officeInfo.text(address.name);
     }
 
+    console.debug('[CDEK-MAP] Office selected', address);
+
+    if (window.cdek.saver !== undefined){
+        $.post(window.cdek.saver, { code: address.code })
+    }
+
     if (window.cdek.close) {
         widget.close();
     }
@@ -64,13 +70,12 @@ const debouncedCheckoutUpdate = debounce(() => {
     }
     console.debug(
       '[CDEK-MAP] City or postcode changed, initiating checkout update');
+    if (window.cdek.saver !== undefined){
+        $.post(window.cdek.saver, { code: null })
+    }
+
     $(document.body).trigger('update_checkout');
 }, 500);
-
-const initChanges = () => {
-    needChange = false;
-    isNormalSize = true;
-};
 
 const resizeObserver = new ResizeObserver(entries => {
     for (const entry of entries) {
@@ -118,7 +123,8 @@ $(document.body)
       }
 
       if (targetNode) {
-          initChanges();
+          needChange = false;
+          isNormalSize = true;
           resizeObserver.observe(targetNode);
       }
   })

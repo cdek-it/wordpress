@@ -54,6 +54,7 @@ namespace Cdek\UI {
             return $links;
         }
 
+        /** @noinspection GlobalVariableUsageInspection */
         public static function registerAdminScripts(): void
         {
             global $current_section, $current_tab;
