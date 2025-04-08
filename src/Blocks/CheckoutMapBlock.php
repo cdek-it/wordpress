@@ -49,8 +49,8 @@ namespace Cdek\Blocks {
 
         public static function extend_cart_data(): array
         {
-            $cityInput     = CheckoutHelper::getValueFromCurrentSession('city');
-            $postcodeInput = CheckoutHelper::getValueFromCurrentSession('postcode');
+            $cityInput     = CheckoutHelper::getCurrentValue('city');
+            $postcodeInput = CheckoutHelper::getCurrentValue('postcode');
 
             if (empty($cityInput)) {
                 return ['points' => '[]'];

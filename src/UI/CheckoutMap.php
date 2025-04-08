@@ -13,6 +13,7 @@ namespace Cdek\UI {
     use Cdek\Config;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Model\Tariff;
+    use Throwable;
 
     class CheckoutMap
     {
@@ -22,8 +23,8 @@ namespace Cdek\UI {
                 return;
             }
 
-            $cityInput     = CheckoutHelper::getValueFromCurrentSession('city');
-            $postcodeInput = CheckoutHelper::getValueFromCurrentSession('postcode');
+            $cityInput     = CheckoutHelper::getCurrentValue('city');
+            $postcodeInput = CheckoutHelper::getCurrentValue('postcode');
 
             if (empty($cityInput)) {
                 return;
@@ -33,14 +34,30 @@ namespace Cdek\UI {
 
             $city = $api->cityCodeGet($cityInput, $postcodeInput);
 
-            echo '<div class="open-pvz-btn" data-city="'.
-                 esc_attr($cityInput).
-                 '">'.
-                 '<script type="application/cdek-offices">'.
-                 wc_esc_json($city !== null ? $api->officeListRaw($city) : '[]', true).
-                 '</script><a>'.
-                 esc_html__('Choose pick-up', 'cdekdelivery').
-                 '</a></div><input name="office_code" class="cdek-office-code" type="hidden">';
+            $selectedOffice = CheckoutHelper::getCurrentValue('office_code');
+
+            try{
+                $officeInfo = empty($selectedOffice) ? null : $api->officeGet($selectedOffice);
+            }catch (Throwable $e) {
+                $officeInfo = null;
+            }
+
+            if (!is_null($officeInfo)){
+                printf(
+                    '<div class="cdek-office-info">%s, %s, %s</div>',
+                    esc_html($officeInfo['code']),
+                    esc_html($officeInfo['location']['city']),
+                    esc_html($officeInfo['location']['address']),
+                );
+            }
+
+            printf(
+                '<div class="open-pvz-btn" data-city="%s"><script type="application/cdek-offices">%s</script><a>%s</a></div><input name="office_code" class="cdek-office-code" type="hidden" value="%s"/>',
+                esc_attr($cityInput),
+                wc_esc_json($city !== null ? $api->officeListRaw($city) : '[]', true),
+                is_null($officeInfo) ? esc_html__('Choose pick-up', 'cdekdelivery') : esc_html__('Re-select pick-up', 'cdekdelivery'),
+                esc_attr($selectedOffice),
+            );
         }
 
         private function isTariffDestinationCdekOffice($shippingMethodCurrent): bool

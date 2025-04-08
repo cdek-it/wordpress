@@ -23,7 +23,8 @@ namespace Cdek\Helpers {
                 InternationalOrderFields::class,
             ];
 
-        public static function getValueFromCurrentSession(string $valueName, string $defaultValue = null): ?string
+        /** @noinspection GlobalVariableUsageInspection */
+        public static function getCurrentValue(string $valueName, string $defaultValue = null): ?string
         {
             try {
                 $cdekValue = WC()->session->get(Config::DELIVERY_NAME."_$valueName");
@@ -71,9 +72,7 @@ namespace Cdek\Helpers {
                 return $fields;
             }
 
-            $checkout = WC()->checkout();
-
-            $originalFields = $checkout->get_checkout_fields('billing');
+            $originalFields = WC()->checkout()->get_checkout_fields('billing');
 
             foreach (self::AVAILABLE_FIELDSETS as $fieldset) {
                 $fieldsetInstance = new $fieldset;

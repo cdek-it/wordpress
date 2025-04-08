@@ -43,11 +43,8 @@
     "prettier": "^3.4.2",
     "webpack": "^5.97.1"
   },
-  "volta": {
-    "node": "22.10.0",
-    "yarn": "4.5.3"
-  },
   "workspaces": [
     "guide"
-  ]
+  ],
+  "packageManager": "yarn@4.8.1"
 }
