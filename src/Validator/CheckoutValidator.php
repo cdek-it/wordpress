@@ -26,7 +26,7 @@ namespace Cdek\Validator {
         {
             $shippingDetector = ShippingDetector::new();
 
-            if( !$shippingDetector->isCdekShipping() ) {
+            if( !$shippingDetector->initShippingAndDetect() ) {
                 return;
             }
 
