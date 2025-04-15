@@ -10,7 +10,6 @@ namespace {
 namespace Cdek\Validator {
 
     use Cdek\CdekApi;
-    use Cdek\Config;
     use Cdek\Exceptions\CacheException;
     use Cdek\Exceptions\External\ApiException;
     use Cdek\Exceptions\External\CoreAuthException;
@@ -26,7 +25,7 @@ namespace Cdek\Validator {
         {
             $shippingDetector = ShippingDetector::new();
 
-            if( !$shippingDetector->initShippingAndDetect() ) {
+            if( $shippingDetector->getShipping() === null ) {
                 return;
             }
 

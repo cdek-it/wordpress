@@ -68,7 +68,9 @@ namespace Cdek\Helpers {
 
         public static function restoreFields(array $fields): array
         {
-            if (!ShippingDetector::new()->onNeedsCartAndEmptyShipping()->initShippingAndDetect()) {
+            $shippingDetector = ShippingDetector::new();
+
+            if ( $shippingDetector->isShippingEmpty() === false && $shippingDetector->getShipping() === null ) {
                 return $fields;
             }
 

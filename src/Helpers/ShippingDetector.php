@@ -15,55 +15,39 @@ namespace Cdek\Helpers {
     {
         use CanBeCreated;
 
-        private bool $needsCart = false;
-        private bool $shippingCanBeEmpty = false;
+        private bool $shippingEmpty = false;
         private ?string $shippingMethod = null;
 
-        public function initShippingAndDetect(): ?bool
+        public function __construct()
         {
-            if($this->needsCart && WC()->cart === false) {
-                return null;
-            }
-
-            if(WC()->cart->needs_shipping() === false) {
-                return null;
+            if(WC()->cart === false || WC()->cart->needs_shipping() === false) {
+                return;
             }
 
             $shippingMethods = WC()->session->get('chosen_shipping_methods');
 
             if ( empty($shippingMethods[0]) ) {
-                return $this->shippingCanBeEmpty ? true : null;
+                $this->shippingEmpty = true;
+                return;
             }
 
             $shippingMethodIdSelected = $shippingMethods[0];
 
             if ( strpos($shippingMethodIdSelected, Config::DELIVERY_NAME) === false ) {
-                return false;
+                return;
             }
 
             $this->shippingMethod = $shippingMethodIdSelected;
-
-            return true;
         }
 
         public function getShipping(): ?string
         {
-            if($this->shippingMethod !== null) {
-                return $this->shippingMethod;
-            }
-
-            if($this->initShippingAndDetect()){
-                return $this->shippingMethod;
-            }
-
-            return null;
+            return $this->shippingMethod;
         }
 
-        public function onNeedsCartAndEmptyShipping(): self
+        public function isShippingEmpty(): bool
         {
-            $this->needsCart = true;
-            $this->shippingCanBeEmpty = true;
-            return $this;
+            return $this->shippingEmpty;
         }
     }
 }
