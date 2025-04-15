@@ -79,6 +79,9 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 * WP-173 Fixed save plugin settings with WP cache plugins
 * WP-160 Product tax settings now set in delivery invoice
 * WP-183 Fixed errors or warnings on admin pages
+* WP-184 Fixed set PVZ code to order after checkout payment
+* WP-186 Fixes with item build in order creation
+* WP-190 Fixed set item tax value without NDS
 
 = 4.0 =
 * WP-40 Replaced the map in the plugin settings with address input fields
