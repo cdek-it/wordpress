@@ -12,6 +12,7 @@ namespace Cdek\UI {
     use Cdek\CdekApi;
     use Cdek\Config;
     use Cdek\Helpers\CheckoutHelper;
+    use Cdek\Helpers\ShippingDetector;
     use Cdek\Model\Tariff;
     use Throwable;
 
@@ -66,14 +67,16 @@ namespace Cdek\UI {
                 return false;
             }
 
-            $shippingMethodIdSelected = WC()->session->get('chosen_shipping_methods', []);
+            $shippingMethodIdSelected = ShippingDetector::new()->getShipping();
 
-            if (empty($shippingMethodIdSelected[0]) ||
-                $shippingMethodCurrent->get_id() !== $shippingMethodIdSelected[0]) {
+            if (
+                empty($shippingMethodIdSelected) ||
+                $shippingMethodCurrent->get_id() !== $shippingMethodIdSelected
+            ) {
                 return false;
             }
 
-            $tariffCode = explode(':', $shippingMethodIdSelected[0])[1];
+            $tariffCode = explode(':', $shippingMethodIdSelected)[1];
 
             return Tariff::isToOffice((int)$tariffCode);
         }

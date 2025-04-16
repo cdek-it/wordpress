@@ -70,7 +70,13 @@ namespace Cdek\Helpers {
         {
             $shippingDetector = ShippingDetector::new();
 
-            if ( $shippingDetector->isShippingEmpty() === false && $shippingDetector->getShipping() === null ) {
+            if (
+                !$shippingDetector->needShipping() ||
+                (
+                    !$shippingDetector->isShippingEmpty() &&
+                    $shippingDetector->getShipping() === null
+                )
+            ) {
                 return $fields;
             }
 

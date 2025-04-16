@@ -14,9 +14,7 @@ namespace Cdek\Helpers {
     class ShippingDetector
     {
         use CanBeCreated;
-
-        private bool $shippingEmpty = false;
-        private ?string $shippingMethod = null;
+        private ?array $shippingMethods = null;
 
         public function __construct()
         {
@@ -24,30 +22,32 @@ namespace Cdek\Helpers {
                 return;
             }
 
-            $shippingMethods = WC()->session->get('chosen_shipping_methods');
+            $this->shippingMethods = WC()->session->get('chosen_shipping_methods', []);
+        }
 
-            if ( empty($shippingMethods[0]) ) {
-                $this->shippingEmpty = true;
-                return;
-            }
-
-            $shippingMethodIdSelected = $shippingMethods[0];
-
-            if ( strpos($shippingMethodIdSelected, Config::DELIVERY_NAME) === false ) {
-                return;
-            }
-
-            $this->shippingMethod = $shippingMethodIdSelected;
+        public function needShipping(): bool
+        {
+            return $this->shippingMethods !== null;
         }
 
         public function getShipping(): ?string
         {
-            return $this->shippingMethod;
+            if($this->isShippingEmpty()){
+                return null;
+            }
+
+            $shippingMethodIdSelected = $this->shippingMethods[0];
+
+            if ( strpos($shippingMethodIdSelected, Config::DELIVERY_NAME) === false ) {
+                return null;
+            }
+
+            return $shippingMethodIdSelected;
         }
 
         public function isShippingEmpty(): bool
         {
-            return $this->shippingEmpty;
+            return empty($this->shippingMethods[0]);
         }
     }
 }
