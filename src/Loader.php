@@ -28,6 +28,7 @@ namespace Cdek {
     use Cdek\Traits\CanBeCreated;
     use Cdek\UI\Admin;
     use Cdek\UI\AdminNotices;
+    use Cdek\UI\AdminOrderProductFields;
     use Cdek\UI\AdminShippingFields;
     use Cdek\UI\CdekWidget;
     use Cdek\UI\CheckoutMap;
@@ -262,6 +263,9 @@ namespace Cdek {
             );
 
             add_action('woocommerce_before_order_itemmeta', new AdminShippingFields, 10, 2);
+            add_action('woocommerce_after_order_itemmeta', new AdminOrderProductFields, 20, 3);
+
+            add_action('wc_ajax_' . Config::DELIVERY_NAME . '_save-uin', [AdminOrderProductFields::class, 'save']);
 
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, OrderCreateAction::new(), 10, 2);
             add_action(Config::TASK_MANAGER_HOOK_NAME, new TaskManager, 20);

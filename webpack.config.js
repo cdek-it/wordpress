@@ -16,6 +16,8 @@ module.exports = {
           'CheckoutMapShortcode', 'index.js'),
         'cdek-create-order': resolve(process.cwd(), 'src', 'Frontend',
           'AdminOrder', 'index.js'),
+        'cdek-order-item': resolve(process.cwd(), 'src', 'Frontend',
+             'AdminOrderItem', 'index.js'),
     }, plugins: [
         ...defaultConfig.plugins.filter((plugin) => plugin.constructor.name !==
           'DependencyExtractionWebpackPlugin'),

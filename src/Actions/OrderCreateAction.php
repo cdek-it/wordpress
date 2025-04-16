@@ -24,6 +24,7 @@ namespace Cdek\Actions {
     use Cdek\Helpers\Logger;
     use Cdek\Helpers\StringHelper;
     use Cdek\Helpers\WeightConverter;
+    use Cdek\MetaKeys;
     use Cdek\Model\Order;
     use Cdek\Model\Service;
     use Cdek\Model\ShippingItem;
@@ -377,6 +378,8 @@ namespace Cdek\Actions {
                 }
             }
 
+            $jewelUin = $item->get_meta(MetaKeys::JEWEL_UIN);
+
             return [
                 'ware_key'     => $product->get_sku() ?: $product->get_id(),
                 'payment'      => $payment,
@@ -385,7 +388,7 @@ namespace Cdek\Actions {
                 'amount'       => $qty,
                 'weight'       => $w,
                 'weight_gross' => $w + 1,
-            ];
+            ] + (!empty($jewelUin) ? ['jewel_uin' => $jewelUin] : []);
         }
 
         private function convertCurrencyToRub(float $cost, string $currency): float
