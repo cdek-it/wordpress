@@ -19,8 +19,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const itemId = event.target.closest('.uin-input-container').dataset.id;
             const input = document.querySelector(`#official_cdek_jewel_uin_${itemId}`);
 
-            if (window.cdek.saver !== undefined) {
-                fetch(window.cdek.saver, {
+            if (window.cdek_order_item.saver !== undefined) {
+                fetch(window.cdek_order_item.saver, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/x-www-form-urlencoded",
