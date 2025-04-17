@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Cdek\UI {
 
     use Cdek\Config;
+    use Cdek\Helpers\UI;
     use Cdek\Loader;
     use Cdek\MetaKeys;
     use WC_AJAX;
@@ -111,20 +112,15 @@ namespace Cdek\UI {
 
         private function enqueueScript(): void
         {
-            wp_register_script(
-                'cdek-order-item',
-                Loader::getPluginUrl('build/cdek-order-item.umd.js')
-            );
+            UI::enqueueScript('cdek-order-item', 'cdek-order-item');
 
             wp_localize_script(
                 'cdek-order-item',
-                'cdek',
+                'cdek_order_item',
                 [
                     'saver' => WC_AJAX::get_endpoint(Config::DELIVERY_NAME . '_save-uin'),
                 ]
             );
-
-            wp_enqueue_script('cdek-order-item');
         }
     }
 }
