@@ -12,7 +12,7 @@
  * Author: CDEKIT
  * Author URI: https://cdek.ru
  * WC requires at least: 6.9
- * WC tested up to: 9.4
+ * WC tested up to: 9.7
  * License: GPLv3
  */
 
