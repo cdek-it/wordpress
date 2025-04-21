@@ -378,8 +378,6 @@ namespace Cdek\Actions {
                 }
             }
 
-            $jewelUin = $item->get_meta(MetaKeys::JEWEL_UIN);
-
             $orderItem = [
                 'ware_key'     => $product->get_sku() ?: $product->get_id(),
                 'payment'      => $payment,
@@ -389,6 +387,8 @@ namespace Cdek\Actions {
                 'weight'       => $w,
                 'weight_gross' => $w + 1,
             ];
+
+            $jewelUin = $item->get_meta(MetaKeys::JEWEL_UIN);
 
             if(!empty($jewelUin)){
                 $orderItem['jewel_uin'] = $jewelUin;
