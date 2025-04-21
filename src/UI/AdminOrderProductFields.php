@@ -102,7 +102,7 @@ namespace Cdek\UI {
 
         private function enqueueScript(): void
         {
-            UI::enqueueScript('cdek-order-item', 'cdek-order-item');
+            UI::enqueueScript('cdek-order-item', 'cdek-order-item', true);
 
             wp_localize_script(
                 'cdek-order-item',
