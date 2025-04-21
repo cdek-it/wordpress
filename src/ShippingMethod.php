@@ -10,7 +10,6 @@ namespace {
 namespace Cdek {
 
     use Cdek\Actions\CalculateDeliveryAction;
-    use Cdek\Actions\FlushTokenCacheAction;
     use Cdek\Contracts\ExceptionContract;
     use Cdek\Migrators\MigrateCityCodeFromMap;
     use Cdek\Traits\SettingsFields;
