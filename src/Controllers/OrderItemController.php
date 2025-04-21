@@ -12,6 +12,7 @@ namespace Cdek\Controllers {
     use Cdek\Config;
     use Cdek\Helpers\Logger;
     use Cdek\MetaKeys;
+    use JsonException;
 
     class OrderItemController
     {
@@ -34,12 +35,29 @@ namespace Cdek\Controllers {
                 wp_die(-2, 403);
             }
 
-            if (!isset($_POST['jewel_uin'], $_POST['item_id'])) {
-                wp_send_json_error(['message' => __('Invalid request data.', 'cdekdelivery')]);
+            try {
+                $body = json_decode(file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);
+            } catch (JsonException $e) {
+                wp_send_json_error(
+                    [
+                        'success' => false,
+                        'message' => __('Invalid request data.', 'cdekdelivery'),
+                    ]
+                );
             }
 
-            $item_id = (int)$_POST['item_id'];
-            $jewel_uin = sanitize_text_field($_POST['jewel_uin']);
+            if (!isset($body['jewel_uin'], $body['item_id'])) {
+                wp_send_json_error(
+                    [
+                        'success' => false,
+                        'message' => __('Invalid request data.', 'cdekdelivery'),
+                    ]
+                );
+                die();
+            }
+
+            $item_id = (int)$body['item_id'];
+            $jewel_uin = sanitize_text_field($body['jewel_uin']);
 
             try {
                 if (wc_update_order_item_meta($item_id, MetaKeys::JEWEL_UIN, $jewel_uin)) {

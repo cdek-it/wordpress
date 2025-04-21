@@ -57,24 +57,35 @@ $(document).ready(() => {
             resp => {
                 console.debug('[CDEK-MAP] Save UIN response', resp);
 
+                if(resp.data.length === 0) {
+                    const $messageContainer = $('<div></div>')
+                        .addClass(`${window.cdek.prefix}-notice`)
+                        .addClass('notice-error')
+                        .text(__('Error saving UIN', 'cdek-map'));
+
+                    $input.before($messageContainer);
+
+                    return;
+                }
+
                 const $messageContainer = $('<div></div>')
                     .addClass(`${window.cdek.prefix}-notice`);
 
                 if (resp.success) {
                     $messageContainer
                         .addClass('notice-success')
-                        .text(resp.message);
+                        .text(resp.data.message);
                 } else {
                     $messageContainer
                         .addClass('notice-error')
-                        .text(resp.message);
+                        .text(resp.data.message);
                 }
 
                 $input.before($messageContainer);
 
                 setTimeout(() => {
                     $messageContainer.remove();
-                }, 5000);
+                }, 15000);
             }
         ).catch(error => {
             console.error('Error catch:', error);
