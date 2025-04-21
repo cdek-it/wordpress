@@ -380,7 +380,7 @@ namespace Cdek\Actions {
 
             $jewelUin = $item->get_meta(MetaKeys::JEWEL_UIN);
 
-            return [
+            $orderItem = [
                 'ware_key'     => $product->get_sku() ?: $product->get_id(),
                 'payment'      => $payment,
                 'name'         => $item->get_name(),
@@ -388,7 +388,13 @@ namespace Cdek\Actions {
                 'amount'       => $qty,
                 'weight'       => $w,
                 'weight_gross' => $w + 1,
-            ] + (!empty($jewelUin) ? ['jewel_uin' => $jewelUin] : []);
+            ];
+
+            if(!empty($jewelUin)){
+                $orderItem['jewel_uin'] = $jewelUin;
+            }
+
+            return $orderItem;
         }
 
         private function convertCurrencyToRub(float $cost, string $currency): float

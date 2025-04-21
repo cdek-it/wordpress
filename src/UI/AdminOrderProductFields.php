@@ -5,26 +5,25 @@ declare(strict_types=1);
 namespace Cdek\UI {
 
     use Cdek\Config;
+    use Cdek\Helpers\Logger;
     use Cdek\Helpers\UI;
-    use Cdek\Loader;
     use Cdek\MetaKeys;
     use WC_AJAX;
+    use WC_Order_Item;
+    use WC_Product;
+    use WC_Order;
 
     class AdminOrderProductFields
     {
-        public function __invoke($itemId, $item, $product)
+        public function __invoke($itemId, ?WC_Order_Item $item, ?WC_Product $product): void
         {
-            if (!$item instanceof \WC_Order_Item) {
-                return;
-            }
-
-            if (!$product instanceof \WC_Product) {
+            if ($item === null || $product === null) {
                 return;
             }
 
             $order = $item->get_order();
 
-            if (!$order instanceof \WC_Order) {
+            if (!$order instanceof WC_Order) {
                 return;
             }
 
@@ -32,7 +31,20 @@ namespace Cdek\UI {
                 return;
             }
 
-            $jewel_uin_value = wc_get_order_item_meta($itemId, MetaKeys::JEWEL_UIN);
+            $itemId = (int)$itemId;
+
+            try {
+                $jewel_uin_value = wc_get_order_item_meta($itemId, MetaKeys::JEWEL_UIN);
+            } catch (\Exception $e) {
+                Logger::warning(
+                    sprintf(
+                        'Failed to get UIN for item %d: %s',
+                        $itemId,
+                        $e->getMessage()
+                    )
+                );
+                $jewel_uin_value = null;
+            }
 
             echo '<br/>';
 
@@ -42,23 +54,24 @@ namespace Cdek\UI {
                         [
                             'action' => Config::DELIVERY_NAME . "-show_uin",
                             'url' => '#',
-                            'name' => esc_html__('Add jewel UIN', 'cdekdelivery'),
+                            'name' => __('Add jewel UIN', 'cdekdelivery'),
                         ]
                     ]
                 );
             }
 
             echo sprintf(
-                '<div id="uin-input-container-%1$s" class="uin-input-container%2$s" data-id="%1$s">',
+                '<div class="uin-input-container%s" data-id="%s">',
+                empty($jewel_uin_value) ? ' hidden' : '',
                 $itemId,
-                empty($jewel_uin_value) ? ' hidden' : ''
             );
+
             woocommerce_wp_text_input(
                 [
                     'id' => Config::DELIVERY_NAME . "_jewel_uin_$itemId",
                     'name' => 'jewel_uin[' . $itemId . ']',
-                    'label' => esc_html__('UIN: ', 'cdekdelivery'),
-                    'value' => esc_attr($jewel_uin_value),
+                    'label' => __('UIN: ', 'cdekdelivery'),
+                    'value' => $jewel_uin_value,
                 ]
             );
 
@@ -67,7 +80,7 @@ namespace Cdek\UI {
                     [
                         'action' => Config::DELIVERY_NAME . '-save_uin',
                         'url' => '#',
-                        'name' => esc_html__('Save', 'cdekdelivery'),
+                        'name' => __('Save', 'cdekdelivery'),
                     ]
                 ]
             );
@@ -76,30 +89,7 @@ namespace Cdek\UI {
             $this->enqueueScript();
         }
 
-        public static function save()
-        {
-            if (isset($_POST['jewel_uin'], $_POST['item_id'])) {
-                $item_id = intval($_POST['item_id']);
-                $jewel_uin = sanitize_text_field($_POST['jewel_uin']);
-
-                if (wc_update_order_item_meta($item_id, MetaKeys::JEWEL_UIN, $jewel_uin)) {
-                    wp_send_json_success(['message' => __('UIN saved successfully.', 'cdekdelivery')]);
-                }
-
-                wp_send_json_error(
-                    [
-                        'message' => __('Failed to save UIN.', 'cdekdelivery'),
-                        'meta' => MetaKeys::JEWEL_UIN,
-                        'item_id' => $item_id,
-                        'jewel_uin' => $jewel_uin,
-                    ]
-                );
-            }
-
-            wp_send_json_error(['message' => __('Invalid request data.', 'cdekdelivery')]);
-        }
-
-        private function checkShipping($shipping_methods): bool
+        private function checkShipping(array $shipping_methods): bool
         {
             foreach ($shipping_methods as $shipping_method) {
                 if (strpos($shipping_method->get_method_id(), Config::DELIVERY_NAME) !== false) {

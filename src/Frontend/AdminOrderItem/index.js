@@ -1,39 +1,52 @@
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll('.official_cdek-show_uin').forEach(function (button) {
-        button.addEventListener("click", function (event) {
-            event.preventDefault();
+'use strict';
+import {addQueryArgs} from '@wordpress/url';
+import $ from 'jquery';
+import apiFetch from '@wordpress/api-fetch';
 
-            const element = event.target;
-            const container = element.nextElementSibling;
+$(document).ready(() => {
+    let dataUrl = null;
 
-            if (container && container.classList.contains("hidden")) {
-                element.classList.add("hidden");
-                container.classList.remove("hidden");
-            }
-        });
+    const revokeDataUrl = () => {
+        if (dataUrl !== null) {
+            URL.revokeObjectURL(dataUrl);
+        }
+    };
+
+    $('.official_cdek-show_uin').on('click', function (event) {
+        event.preventDefault();
+        const $container = $(this).next('.hidden');
+
+        if ($container.length) {
+            $(this).addClass('hidden');
+            $container.removeClass('hidden');
+        }
     });
 
-    document.querySelectorAll('.official_cdek-save_uin').forEach(function (button) {
-        button.addEventListener("click", function (event) {
-            event.preventDefault();
-            const itemId = event.target.closest('.uin-input-container').dataset.id;
-            const input = document.querySelector(`#official_cdek_jewel_uin_${itemId}`);
+    $('.official_cdek-save_uin').on('click', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
 
-            if (window.cdek_order_item.saver !== undefined) {
-                fetch(window.cdek_order_item.saver, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded",
-                    },
-                    body: new URLSearchParams({
-                                                  item_id: itemId,
-                                                  jewel_uin: input ? input.value : ""
-                                              })
-                })
-                    .then(response => response.json())
-                    .then(data => console.debug("[CDEK-MAP] UIN saved:", data))
-                    .catch(error => console.error("Error:", error));
-            }
-        });
+        revokeDataUrl();
+
+        const itemId = $(this).parent().data('id');
+        const $input = $(`#official_cdek_jewel_uin_${itemId}`);
+
+        apiFetch(
+            {
+                method: 'POST',
+                url: addQueryArgs(ajaxurl, {
+                    action: `${window.cdek_item.prefix}-jewel-uin`,
+                    _wpnonce: window.cdek_item.nonce,
+                }),
+                data: {
+                    item_id: itemId,
+                    jewel_uin: $input.length ? $input.val() : '',
+                },
+                parse: false,
+            },
+        ).then(resp => {
+            console.log('[CDEK-MAP] Save UIN response', resp);
+           }
+        ).catch(error => console.error('Error catch:', error));
     });
 });
