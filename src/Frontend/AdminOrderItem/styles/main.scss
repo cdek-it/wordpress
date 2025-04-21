@@ -1,0 +1,22 @@
+.official_cdek-uin-input-container {
+  position: relative;
+
+  .official_cdek-notice {
+    position: absolute;
+    padding: 10px;
+    top: 5px;
+    right: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1c1b22;
+
+    .notice-success {
+      background-color: #2ea44f;
+    }
+
+    .notice-error {
+      background-color: #d9534f;
+    }
+  }
+}

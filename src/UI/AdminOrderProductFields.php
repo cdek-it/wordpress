@@ -61,7 +61,7 @@ namespace Cdek\UI {
             }
 
             echo sprintf(
-                '<div class="uin-input-container%s" data-id="%s">',
+                '<div class="'. Config::DELIVERY_NAME . '-uin-input-container%s" data-id="%s">',
                 empty($jewel_uin_value) ? ' hidden' : '',
                 $itemId,
             );
