@@ -30,22 +30,22 @@ $(document).ready(() => {
         revokeDataUrl();
 
         const itemId = $(this).parent().data('id');
-        const $input = $(`#${window.cdek_item.prefix}_jewel_uin_${itemId}`);
+        const $input = $(`#${window.cdek.prefix}_jewel_uin_${itemId}`);
 
         if(!$input.length) {
             return;
         }
 
-        if($(this).parent().find(`.${window.cdek_item.prefix}-notice`).length) {
-            $(this).parent().find(`.${window.cdek_item.prefix}-notice`).remove();
+        if($(this).parent().find(`.${window.cdek.prefix}-notice`).length) {
+            $(this).parent().find(`.${window.cdek.prefix}-notice`).remove();
         }
 
         apiFetch(
             {
                 method: 'POST',
                 url: addQueryArgs(ajaxurl, {
-                    action: `${window.cdek_item.prefix}-jewel-uin`,
-                    _wpnonce: window.cdek_item.nonce,
+                    action: `${window.cdek.prefix}-jewel-uin`,
+                    _wpnonce: window.cdek.nonce,
                 }),
                 data: {
                     item_id: itemId,
@@ -58,7 +58,7 @@ $(document).ready(() => {
                 console.debug('[CDEK-MAP] Save UIN response', resp);
 
                 const $messageContainer = $('<div></div>')
-                    .addClass(`${window.cdek_item.prefix}-notice`);
+                    .addClass(`${window.cdek.prefix}-notice`);
 
                 if (resp.success) {
                     $messageContainer
@@ -80,7 +80,7 @@ $(document).ready(() => {
             console.error('Error catch:', error);
 
             const $messageContainer = $('<div></div>')
-                .addClass(`${window.cdek_item.prefix}-notice`)
+                .addClass(`${window.cdek.prefix}-notice`)
                 .addClass('notice-error')
                 .text(__('Error saving UIN', 'cdek-map'));
 
