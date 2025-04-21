@@ -3,20 +3,22 @@
 
   .official_cdek-notice {
     position: absolute;
+    box-sizing: border-box;
     padding: 10px;
-    top: 5px;
-    right: 5px;
+    bottom: 0;
+    right: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #1c1b22;
+    border: none;
+    color: #ffffff;
+  }
 
-    .notice-success {
-      background-color: #2ea44f;
-    }
+  .notice-success {
+    background-color: #2ea44f;
+  }
 
-    .notice-error {
-      background-color: #d9534f;
-    }
+  .notice-error {
+    background-color: #d9534f;
   }
 }

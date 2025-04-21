@@ -1,6 +1,7 @@
 'use strict';
 import {addQueryArgs} from '@wordpress/url';
 import { __ } from '@wordpress/i18n';
+import './styles/main.scss';
 import $ from 'jquery';
 import apiFetch from '@wordpress/api-fetch';
 
@@ -51,22 +52,10 @@ $(document).ready(() => {
                     item_id: itemId,
                     jewel_uin: $input.length ? $input.val() : '',
                 },
-                parse: false,
             },
         ).then(
             resp => {
                 console.debug('[CDEK-MAP] Save UIN response', resp);
-
-                if(resp.data.length === 0) {
-                    const $messageContainer = $('<div></div>')
-                        .addClass(`${window.cdek.prefix}-notice`)
-                        .addClass('notice-error')
-                        .text(__('Error saving UIN', 'cdek-map'));
-
-                    $input.before($messageContainer);
-
-                    return;
-                }
 
                 const $messageContainer = $('<div></div>')
                     .addClass(`${window.cdek.prefix}-notice`);
@@ -85,7 +74,7 @@ $(document).ready(() => {
 
                 setTimeout(() => {
                     $messageContainer.remove();
-                }, 15000);
+                }, 5000);
             }
         ).catch(error => {
             console.error('Error catch:', error);
@@ -93,7 +82,7 @@ $(document).ready(() => {
             const $messageContainer = $('<div></div>')
                 .addClass(`${window.cdek.prefix}-notice`)
                 .addClass('notice-error')
-                .text(__('Error saving UIN', 'cdek-map'));
+                .text(__('Error saving UIN', 'cdekdelivery'));
 
             $input.before($messageContainer);
         });
