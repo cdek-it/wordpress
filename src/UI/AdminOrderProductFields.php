@@ -70,7 +70,7 @@ namespace Cdek\UI {
             woocommerce_wp_text_input(
                 [
                     'id' => Config::DELIVERY_NAME . "_jewel_uin_$itemId",
-                    'class' => Config::DELIVERY_NAME . '-jewel_uin',
+                    'class' => Config::DELIVERY_NAME . '-jewel-uin',
                     'label' => __('UIN: ', 'cdekdelivery'),
                     'value' => $jewel_uin_value,
                 ]

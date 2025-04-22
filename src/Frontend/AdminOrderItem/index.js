@@ -10,7 +10,7 @@ $(document).ready(() => {
         event.preventDefault();
         const $container = $(this).next('.hidden');
 
-        if ($container.length === 0) {
+        if ($container.length > 0) {
             $(this).addClass('hidden');
             $container.removeClass('hidden');
         }
@@ -24,12 +24,13 @@ $(document).ready(() => {
         const $input = $container.find('.official_cdek-jewel-uin');
 
         if ($input.length === 0) {
+            console.error('Input not found');
             return;
         }
 
         let $notice = $container.find(`.${window.cdek.prefix}-notice`);
 
-        if ($notice.length !== 0) {
+        if ($notice.length > 0) {
             $notice.remove();
         }
 
