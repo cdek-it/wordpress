@@ -41,6 +41,31 @@ const config: Config = {
           webvisor: true,
         }
       ],
+    async function flomni(context, options) {
+      return {
+        name: 'flomni',
+        injectHtmlTags() {
+          return {
+            headTags: [
+              {
+                tagName: 'script',
+                innerHTML: `window.flomniConfig={clientKey:"${process.env.FLOMNI_CLIENT}",threadId:"${process.env.FLOMNI_THREAD}"}`,
+              },
+            ],
+            postBodyTags: [
+              {
+                tagName: 'div',
+                attributes: {'id': 'flomni'},
+              },
+              {
+                tagName: 'script',
+                attributes: {'src': 'https://i.v2.flomni.com/chat.corner.js'},
+              },
+            ]
+          };
+        },
+      };
+    }
   ],
 
   presets: [
