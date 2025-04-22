@@ -1,24 +1,16 @@
 'use strict';
 import {addQueryArgs} from '@wordpress/url';
-import { __ } from '@wordpress/i18n';
+import {__} from '@wordpress/i18n';
 import './styles/main.scss';
 import $ from 'jquery';
 import apiFetch from '@wordpress/api-fetch';
 
 $(document).ready(() => {
-    let dataUrl = null;
-
-    const revokeDataUrl = () => {
-        if (dataUrl !== null) {
-            URL.revokeObjectURL(dataUrl);
-        }
-    };
-
     $('.official_cdek-show_uin').on('click', function (event) {
         event.preventDefault();
         const $container = $(this).next('.hidden');
 
-        if ($container.length) {
+        if ($container.length === 0) {
             $(this).addClass('hidden');
             $container.removeClass('hidden');
         }
@@ -28,18 +20,20 @@ $(document).ready(() => {
         e.preventDefault();
         e.stopPropagation();
 
-        revokeDataUrl();
+        const $container = $(this).parent();
+        const $input = $container.find('.official_cdek-jewel-uin');
 
-        const itemId = $(this).parent().data('id');
-        const $input = $(`#${window.cdek.prefix}_jewel_uin_${itemId}`);
-
-        if(!$input.length) {
+        if ($input.length === 0) {
             return;
         }
 
-        if($(this).parent().find(`.${window.cdek.prefix}-notice`).length) {
-            $(this).parent().find(`.${window.cdek.prefix}-notice`).remove();
+        let $notice = $container.find(`.${window.cdek.prefix}-notice`);
+
+        if ($notice.length !== 0) {
+            $notice.remove();
         }
+
+        $notice = $('<div></div>').addClass(`${window.cdek.prefix}-notice`);
 
         apiFetch(
             {
@@ -49,42 +43,32 @@ $(document).ready(() => {
                     _wpnonce: window.cdek.nonce,
                 }),
                 data: {
-                    item_id: itemId,
-                    jewel_uin: $input.length ? $input.val() : '',
+                    item_id: $container.data('id'),
+                    jewel_uin: $input.val(),
                 },
             },
         ).then(
             resp => {
-                console.debug('[CDEK-MAP] Save UIN response', resp);
-
-                const $messageContainer = $('<div></div>')
-                    .addClass(`${window.cdek.prefix}-notice`);
+                console.debug('[CDEK-ORDER-ITEM] Save UIN response', resp);
 
                 if (resp.success) {
-                    $messageContainer
-                        .addClass('notice-success')
-                        .text(resp.data.message);
+                    $notice.addClass('notice-success');
                 } else {
-                    $messageContainer
-                        .addClass('notice-error')
-                        .text(resp.data.message);
+                    $notice.addClass('notice-error');
                 }
 
-                $input.before($messageContainer);
+                $input.before($notice.text(resp.data.message));
 
-                setTimeout(() => {
-                    $messageContainer.remove();
-                }, 5000);
-            }
+                setTimeout(() => $notice.remove(), 5000);
+            },
         ).catch(error => {
             console.error('Error catch:', error);
 
-            const $messageContainer = $('<div></div>')
-                .addClass(`${window.cdek.prefix}-notice`)
-                .addClass('notice-error')
-                .text(__('Error saving UIN', 'cdekdelivery'));
-
-            $input.before($messageContainer);
+            $input.before(
+                $notice
+                    .addClass('notice-error')
+                    .text(__('Error saving UIN', 'cdekdelivery')),
+            );
         });
     });
 });

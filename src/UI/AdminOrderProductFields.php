@@ -61,7 +61,8 @@ namespace Cdek\UI {
             }
 
             echo sprintf(
-                '<div class="'. Config::DELIVERY_NAME . '-uin-input-container%s" data-id="%s">',
+                '<div class="%s-uin-input-container%s" data-id="%s">',
+                Config::DELIVERY_NAME,
                 empty($jewel_uin_value) ? ' hidden' : '',
                 $itemId,
             );
@@ -69,7 +70,7 @@ namespace Cdek\UI {
             woocommerce_wp_text_input(
                 [
                     'id' => Config::DELIVERY_NAME . "_jewel_uin_$itemId",
-                    'name' => 'jewel_uin[' . $itemId . ']',
+                    'class' => Config::DELIVERY_NAME . '-jewel_uin',
                     'label' => __('UIN: ', 'cdekdelivery'),
                     'value' => $jewel_uin_value,
                 ]
