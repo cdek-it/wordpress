@@ -40,7 +40,6 @@ namespace Cdek\Controllers {
             } catch (JsonException $e) {
                 wp_send_json_error(
                     [
-                        'success' => false,
                         'message' => __('Invalid request data.', 'cdekdelivery'),
                     ]
                 );
@@ -49,7 +48,6 @@ namespace Cdek\Controllers {
             if (!isset($body['jewel_uin'], $body['item_id'])) {
                 wp_send_json_error(
                     [
-                        'success' => false,
                         'message' => __('Invalid request data.', 'cdekdelivery'),
                     ]
                 );
@@ -75,7 +73,6 @@ namespace Cdek\Controllers {
 
             wp_send_json_error(
                 [
-                    'success' => false,
                     'message'   => __('Failed to save UIN.', 'cdekdelivery'),
                     'meta'      => MetaKeys::JEWEL_UIN,
                     'item_id'   => $item_id,

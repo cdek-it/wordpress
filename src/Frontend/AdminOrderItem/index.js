@@ -6,7 +6,7 @@ import $ from 'jquery';
 import apiFetch from '@wordpress/api-fetch';
 
 $(document).ready(() => {
-    $('.official_cdek-show_uin').on('click', function (event) {
+    $(`.${window.cdek.prefix}-show_uin`).on('click', function (event) {
         event.preventDefault();
         const $container = $(this).next('.hidden');
 
@@ -16,25 +16,21 @@ $(document).ready(() => {
         }
     });
 
-    $('.official_cdek-save_uin').on('click', function (e) {
+    $(`.${window.cdek.prefix}-save_uin`).on('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
 
         const $container = $(this).parent();
-        const $input = $container.find('.official_cdek-jewel-uin');
+        const $input = $container.find(`.${window.cdek.prefix}-jewel-uin`);
 
         if ($input.length === 0) {
             console.error('Input not found');
             return;
         }
 
-        let $notice = $container.find(`.${window.cdek.prefix}-notice`);
+        $container.find(`.${window.cdek.prefix}-notice`).remove();
 
-        if ($notice.length > 0) {
-            $notice.remove();
-        }
-
-        $notice = $('<div></div>').addClass(`${window.cdek.prefix}-notice`);
+        const $notice = $('<div></div>').addClass(`${window.cdek.prefix}-notice`);
 
         apiFetch(
             {

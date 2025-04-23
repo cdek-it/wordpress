@@ -8,14 +8,13 @@ namespace Cdek\UI {
     use Cdek\Helpers\Logger;
     use Cdek\Helpers\UI;
     use Cdek\MetaKeys;
-    use WC_AJAX;
     use WC_Order_Item;
     use WC_Product;
     use WC_Order;
 
     class AdminOrderProductFields
     {
-        public function __invoke($itemId, ?WC_Order_Item $item, ?WC_Product $product): void
+        public function __invoke(int $itemId, ?WC_Order_Item $item, ?WC_Product $product): void
         {
             if ($item === null || $product === null) {
                 return;
@@ -30,8 +29,6 @@ namespace Cdek\UI {
             if (!$this->checkShipping($order->get_shipping_methods())) {
                 return;
             }
-
-            $itemId = (int)$itemId;
 
             try {
                 $jewel_uin_value = wc_get_order_item_meta($itemId, MetaKeys::JEWEL_UIN);
