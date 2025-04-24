@@ -55,8 +55,6 @@ $(document).ready(() => {
                 }
 
                 $input.before($notice.text(resp.data.message));
-
-                setTimeout(() => $notice.remove(), 5000);
             },
         ).catch(error => {
             console.error('Error catch:', error);
@@ -66,6 +64,6 @@ $(document).ready(() => {
                     .addClass('notice-error')
                     .text(__('Error saving UIN', 'cdekdelivery')),
             );
-        });
+        }).finally(() => setTimeout(() => $notice.remove(), 5000));
     });
 });

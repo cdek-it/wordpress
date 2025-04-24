@@ -51,7 +51,6 @@ namespace Cdek\Controllers {
                         'message' => __('Invalid request data.', 'cdekdelivery'),
                     ]
                 );
-                die();
             }
 
             $item_id = (int)$body['item_id'];
@@ -61,6 +60,14 @@ namespace Cdek\Controllers {
                 if (wc_update_order_item_meta($item_id, MetaKeys::JEWEL_UIN, $jewel_uin)) {
                     wp_send_json_success(['message' => __('UIN saved successfully.', 'cdekdelivery')]);
                 }
+
+                Logger::debug(
+                    sprintf(
+                        'Failed to save UIN %s for item %d',
+                        $jewel_uin,
+                        $item_id,
+                    )
+                );
             } catch (\Exception $e) {
                 Logger::warning(
                     sprintf(
