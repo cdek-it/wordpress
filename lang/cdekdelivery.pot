@@ -2,7 +2,7 @@
 # This file is distributed under the same license as the Plugins - CDEKDelivery - Development (trunk) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2024-12-23 12:19:34+0000\n"
+"PO-Revision-Date: 2025-04-28 10:34:57+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -11,8 +11,33 @@ msgstr ""
 "Language: ru\n"
 "Project-Id-Version: Plugins - CDEKDelivery - Development (trunk)\n"
 
+#: build/cdek-order-item.js:1
+msgid "Error saving UIN"
+msgstr ""
+
+#: src/UI/AdminOrderProductFields.php:71
+msgid "UIN: "
+msgstr ""
+
+#: src/UI/AdminOrderProductFields.php:54
+msgid "Add jewel UIN"
+msgstr ""
+
+#: src/Controllers/OrderItemController.php:83
+msgid "Failed to save UIN."
+msgstr ""
+
+#: src/Controllers/OrderItemController.php:61
+msgid "UIN saved successfully."
+msgstr ""
+
+#: src/Controllers/OrderItemController.php:43
+#: src/Controllers/OrderItemController.php:51
+msgid "Invalid request data."
+msgstr ""
+
 #. translators: 1: attempt number
-#: src/Actions/OrderCreateAction.php:89
+#: src/Actions/OrderCreateAction.php:91
 msgid "Order created automatically after %1$s attempts"
 msgstr ""
 
@@ -106,27 +131,27 @@ msgstr ""
 msgid "Sync to CDEK"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:303
+#: src/Traits/SettingsFields.php:304
 msgid "City Code"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:299
+#: src/Traits/SettingsFields.php:300
 msgid "Legacy Address Info"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:295
+#: src/Traits/SettingsFields.php:296
 msgid "Legacy Office Info"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:291
+#: src/Traits/SettingsFields.php:292
 msgid "City Name"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:287
+#: src/Traits/SettingsFields.php:288
 msgid "Address"
 msgstr ""
 
-#: src/ShippingMethod.php:188
+#: src/ShippingMethod.php:203
 msgid "Error receiving token from CDEK API. Contact plugin support. Error code: %s"
 msgstr ""
 
@@ -188,7 +213,7 @@ msgstr ""
 msgid "Unknown error"
 msgstr ""
 
-#: src/Actions/OrderDeleteAction.php:96
+#: src/Actions/OrderDeleteAction.php:101
 msgid "Waybill has been deleted"
 msgstr ""
 
@@ -224,36 +249,36 @@ msgstr ""
 msgid "An error occurred while creating intake. Intake for this invoice already exists"
 msgstr ""
 
-#: src/Actions/CalculateDeliveryAction.php:126
+#: src/Actions/CalculateDeliveryAction.php:142
 msgid "%s, (%s-%s days)"
 msgstr ""
 
-#: src/Actions/CalculateDeliveryAction.php:122
+#: src/Actions/CalculateDeliveryAction.php:138
 msgid "%s, (%s day)"
 msgstr ""
 
-#: src/Actions/DispatchOrderAutomationAction.php:62
+#: src/Actions/DispatchOrderAutomationAction.php:66
 msgid "Created order automation task"
 msgstr ""
 
-#: src/Validator/CheckoutValidator.php:67
+#: src/Validator/CheckoutValidator.php:63
 msgid "Phone number is required."
 msgstr ""
 
-#: src/Traits/SettingsFields.php:219
+#: src/Traits/SettingsFields.php:220
 msgid "Plugin will wait for selected gateways to finish payments before auto-creation of waybill in CDEK. If order is working with non selected payment gateway, CDEK waybill will be created right after order placement"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:216
+#: src/Traits/SettingsFields.php:217
 msgid "Wait for gateways"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:203
+#: src/Traits/SettingsFields.php:204
 msgid "Automation"
 msgstr ""
 
 #. translators: 1: tracking number
-#: src/Actions/OrderCreateAction.php:101
+#: src/Actions/OrderCreateAction.php:103
 msgid "Tracking number: %1$s"
 msgstr ""
 
@@ -275,7 +300,7 @@ msgstr ""
 msgid "Full name is required"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:108
+#: src/Traits/SettingsFields.php:109
 msgid "Full name"
 msgstr ""
 
@@ -322,7 +347,7 @@ msgstr ""
 msgid "There are no CDEK pick-up points available in this direction, please select another delivery method"
 msgstr ""
 
-#: build/cdek-checkout-map.js:1
+#: src/UI/CheckoutMap.php:59 build/cdek-checkout-map.js:1
 msgid "Re-select pick-up"
 msgstr ""
 
@@ -330,7 +355,7 @@ msgstr ""
 msgid "Pickups map from CDEK"
 msgstr ""
 
-#: src/ShippingMethod.php:180
+#: src/ShippingMethod.php:195
 msgid "Error receiving token from CDEK API. Make sure the integration keys are correct"
 msgstr ""
 
@@ -378,7 +403,7 @@ msgstr ""
 msgid "Order price"
 msgstr ""
 
-#: src/UI/CheckoutMap.php:42 build/cdek-checkout-map-block-frontend.js:1
+#: src/UI/CheckoutMap.php:59 build/cdek-checkout-map-block-frontend.js:1
 #: build/cdek-checkout-map.js:1
 msgid "Choose pick-up"
 msgstr ""
@@ -391,7 +416,7 @@ msgstr ""
 msgid "Call the courier"
 msgstr ""
 
-#: templates/create_many.php:45
+#: src/UI/AdminOrderProductFields.php:81 templates/create_many.php:45
 msgid "Save"
 msgstr ""
 
@@ -446,12 +471,12 @@ msgid "An attempt to delete order number %s failed with an error. Order not foun
 msgstr ""
 
 #. translators: %s: Order number
-#: src/Actions/OrderDeleteAction.php:85
+#: src/Actions/OrderDeleteAction.php:90
 msgid "An error occurred while deleting the order. Order number %s was not deleted"
 msgstr ""
 
 #. translators: %s: Order number
-#: src/Actions/OrderDeleteAction.php:74
+#: src/Actions/OrderDeleteAction.php:79
 msgid "An attempt to delete order number %s failed with an error. Error code: %s"
 msgstr ""
 
@@ -524,16 +549,16 @@ msgstr ""
 msgid "Error. The courier request has not been created. (%s)"
 msgstr ""
 
-#: src/Validator/CheckoutValidator.php:44
+#: src/Validator/CheckoutValidator.php:40
 msgid "No shipping address."
 msgstr ""
 
-#: src/Validator/CheckoutValidator.php:40
+#: src/Validator/CheckoutValidator.php:36
 msgid "Order pickup point not selected."
 msgstr ""
 
 #. translators: 1: Name of a city 2: ZIP code
-#: src/Validator/CheckoutValidator.php:52
+#: src/Validator/CheckoutValidator.php:48
 msgid "Failed to determine locality in %1$s %2$s"
 msgstr ""
 
@@ -551,36 +576,36 @@ msgid "Authorization failed"
 msgstr ""
 
 #. translators: %s: Code of selected tariff
-#: src/UI/AdminShippingFields.php:125
+#: src/UI/AdminShippingFields.php:129
 msgid "Tariff code: %s"
 msgstr ""
 
 #. translators: %s: Code of selected point
-#: src/UI/AdminShippingFields.php:115
+#: src/UI/AdminShippingFields.php:119
 msgid "Selected pickup point: %s"
 msgstr ""
 
 #. translators: %s: Amount with measurement
-#: src/UI/AdminShippingFields.php:107
+#: src/UI/AdminShippingFields.php:111
 msgid "Height: %s"
 msgstr ""
 
 #. translators: %s: Amount with measurement
-#: src/UI/AdminShippingFields.php:99
+#: src/UI/AdminShippingFields.php:103
 msgid "Width: %s"
 msgstr ""
 
 #. translators: %s: Amount with measurement
-#: src/UI/AdminShippingFields.php:91
+#: src/UI/AdminShippingFields.php:95
 msgid "Length: %s"
 msgstr ""
 
 #. translators: %s: Amount with measurement
-#: src/UI/AdminShippingFields.php:83
+#: src/UI/AdminShippingFields.php:87
 msgid "Weight: %s"
 msgstr ""
 
-#: src/UI/AdminShippingFields.php:56 src/UI/AdminShippingFields.php:67
+#: src/UI/AdminShippingFields.php:60 src/UI/AdminShippingFields.php:71
 msgid "Not available for order"
 msgstr ""
 
@@ -628,289 +653,289 @@ msgstr ""
 msgid "Street address"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:449
+#: src/Traits/SettingsFields.php:450
 msgid "Barcode format"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:445
+#: src/Traits/SettingsFields.php:446
 msgid "Print settings"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:432
+#: src/Traits/SettingsFields.php:433
 msgid "Calculated from the cost of the order. Changes the total amount on the receipt.%s The surcharge will only appear on the receipt.%s Therefore, it is recommended to inform the user on the checkout page about extra charges when sending by cash on delivery."
 msgstr ""
 
-#: src/Traits/SettingsFields.php:429
+#: src/Traits/SettingsFields.php:430
 msgid "Extra charge on order as a percentage"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:423
+#: src/Traits/SettingsFields.php:424
 msgid "Cash on delivery settings are applied only when sending an order from the admin panels and for the user on the checkout page are not displayed"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:421
+#: src/Traits/SettingsFields.php:422
 msgid "Cash on delivery settings"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:413
+#: src/Traits/SettingsFields.php:414
 msgid "Calculated based on the amount of goods in the order"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:410
+#: src/Traits/SettingsFields.php:411
 msgid "Add insurance quote to shipping cost"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:409
+#: src/Traits/SettingsFields.php:410
 msgid "Insurance"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:404
+#: src/Traits/SettingsFields.php:405
 msgid "Delivery cost"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:398
+#: src/Traits/SettingsFields.php:399
 msgid "Partial delivery"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:392
+#: src/Traits/SettingsFields.php:393
 msgid "Trying on"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:384
+#: src/Traits/SettingsFields.php:385
 msgid "This service is not available for tariffs to the parcel locker and is only available to clients with an IM type agreement.\\n\\r Also, the prohibition on inspecting the attachment does not work when the services of fitting at home and partial delivery are included."
 msgstr ""
 
-#: src/Traits/SettingsFields.php:383
+#: src/Traits/SettingsFields.php:384
 msgid "Prohibition of inspection of attachment"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:378
+#: src/Traits/SettingsFields.php:379
 msgid "Services"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:369
+#: src/Traits/SettingsFields.php:370
 msgid "Force the use of product dimensions (length, width and height) by default for all products"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:368
+#: src/Traits/SettingsFields.php:369
 msgid "Product dimensions on/off"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:358
+#: src/Traits/SettingsFields.php:359
 msgid "Default product height in cm"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:357
+#: src/Traits/SettingsFields.php:358
 msgid "Item height"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:347
+#: src/Traits/SettingsFields.php:348
 msgid "Default product width in cm"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:346
+#: src/Traits/SettingsFields.php:347
 msgid "Item width"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:336
+#: src/Traits/SettingsFields.php:337
 msgid "Default product length in cm"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:335
+#: src/Traits/SettingsFields.php:336
 msgid "Item length"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:320
+#: src/Traits/SettingsFields.php:321
 msgid "All goods must have their weight indicated, if there are goods without %s a specified weight, then for such goods the value from this field will be substituted. %s This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings."
 msgstr ""
 
-#: src/Traits/SettingsFields.php:314
+#: src/Traits/SettingsFields.php:315
 msgid "Default weight of one item in"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:309
+#: src/Traits/SettingsFields.php:310
 msgid "Dimensions"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:279
+#: src/Traits/SettingsFields.php:280
 msgid "If this setting is enabled, then after selecting a pick-up point on the checkout page, the card will automatically close."
 msgstr ""
 
-#: src/Traits/SettingsFields.php:276
+#: src/Traits/SettingsFields.php:277
 msgid "Close the map after selecting pick-up"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:265
+#: src/Traits/SettingsFields.php:266
 msgid "Number of days will be added to the estimated delivery time"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:262
+#: src/Traits/SettingsFields.php:263
 msgid "Add days for delivery"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:255
+#: src/Traits/SettingsFields.php:256
 msgid "When the \"Multi-seat\" mode is enabled, the detailed order page will display the ability to create several packages for one order and distribute goods among the created packages"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:252
+#: src/Traits/SettingsFields.php:253
 msgid "Multi-seater"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:244
+#: src/Traits/SettingsFields.php:245
 msgid "In the list of tariffs in the field \"Tariffs\" the tariff code is indicated in brackets.\\n\\r To change the name of the tariff, an entry in the code-name format is added to the field; for multiple changes,\\n\\r tariffs are separated by a semicolon, for example, an entry that will change the name of tariff 136 and 137 looks like this:%s If the value is not specified, the tariff names will be standard."
 msgstr ""
 
-#: src/Traits/SettingsFields.php:241
+#: src/Traits/SettingsFields.php:242
 msgid "Change tariff name"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:234
+#: src/Traits/SettingsFields.php:235
 msgid "To select multiple tariffs, hold down the \"CTRL\" key and select tariffs with the left mouse button."
 msgstr ""
 
-#: src/Traits/SettingsFields.php:230
+#: src/Traits/SettingsFields.php:231
 msgid "Tariff"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:210
+#: src/Traits/SettingsFields.php:211
 msgid "If you have information about the dimensions and correctly filled in shipping addresses, CDEK waybills will be created automatically"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:208
+#: src/Traits/SettingsFields.php:209
 msgid "Automatically create waybills in CDEK"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:225
+#: src/Traits/SettingsFields.php:226
 msgid "Delivery"
 msgstr ""
 
 #: src/Fieldsets/InternationalOrderFields.php:68
-#: src/Traits/SettingsFields.php:198
+#: src/Traits/SettingsFields.php:199
 msgid "Birthday"
 msgstr ""
 
 #: src/Fieldsets/InternationalOrderFields.php:58
-#: src/Traits/SettingsFields.php:190
+#: src/Traits/SettingsFields.php:191
 msgid "TIN"
 msgstr ""
 
 #: src/Fieldsets/InternationalOrderFields.php:52
-#: src/Traits/SettingsFields.php:186
+#: src/Traits/SettingsFields.php:187
 msgid "Passport organization"
 msgstr ""
 
 #: src/Fieldsets/InternationalOrderFields.php:46
-#: src/Traits/SettingsFields.php:181
+#: src/Traits/SettingsFields.php:182
 msgid "Passport date of issue"
 msgstr ""
 
 #: src/Fieldsets/InternationalOrderFields.php:36
-#: src/Traits/SettingsFields.php:174
+#: src/Traits/SettingsFields.php:175
 msgid "Passport number"
 msgstr ""
 
 #: src/Fieldsets/InternationalOrderFields.php:27
-#: src/Traits/SettingsFields.php:170
+#: src/Traits/SettingsFields.php:171
 msgid "Passport Series"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:167
+#: src/Traits/SettingsFields.php:168
 msgid "Shipping company address for international orders"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:164
+#: src/Traits/SettingsFields.php:165
 msgid "Shipper`s address"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:161
+#: src/Traits/SettingsFields.php:162
 msgid "Shipper`s company name for international orders"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:158
+#: src/Traits/SettingsFields.php:159
 msgid "Shipper"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:152
+#: src/Traits/SettingsFields.php:153
 msgid "Address of the actual seller. Used when printing invoices to display the address of the present seller of the product or trade name. For international orders"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:149
+#: src/Traits/SettingsFields.php:150
 msgid "True seller address"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:142
+#: src/Traits/SettingsFields.php:143
 msgid "When the international orders mode is enabled, additional fields will appear on the checkout page: passport series, passport number, date of issue, department, TIN, date of birth."
 msgstr ""
 
-#: src/Traits/SettingsFields.php:139
+#: src/Traits/SettingsFields.php:140
 msgid "Enable international order mode"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:135
+#: src/Traits/SettingsFields.php:136
 msgid "International orders"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:127
+#: src/Traits/SettingsFields.php:128
 msgid "Company email address"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:118
+#: src/Traits/SettingsFields.php:119
 msgid "Must be transmitted in international format: country code (for Russia +7) and the number itself (10 or more digits)"
 msgstr ""
 
-#: src/Fieldsets/GeneralOrderFields.php:43 src/Traits/SettingsFields.php:115
+#: src/Fieldsets/GeneralOrderFields.php:43 src/Traits/SettingsFields.php:116
 msgid "Phone"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:101
+#: src/Traits/SettingsFields.php:102
 msgid "Company name"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:96
+#: src/Traits/SettingsFields.php:97
 msgid "Client"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:87
+#: src/Traits/SettingsFields.php:88
 msgid "Yandex API access key. The generation process is described on <a>the page</a>"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:78
+#: src/Traits/SettingsFields.php:79
 msgid "Yandex map key"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:70
+#: src/Traits/SettingsFields.php:71
 msgid "The secret key"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:63
+#: src/Traits/SettingsFields.php:64
 msgid "Identifier"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:60
+#: src/Traits/SettingsFields.php:61
 msgid "When enabled, the test API is used"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:56
+#: src/Traits/SettingsFields.php:57
 msgid "Test mode"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:51
+#: src/Traits/SettingsFields.php:52
 msgid "Authorization"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:28 src/Traits/SettingsFields.php:416
+#: src/Traits/SettingsFields.php:29 src/Traits/SettingsFields.php:417
 msgid "Rules for displaying the delivery amount"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:24
+#: src/Traits/SettingsFields.php:25
 msgid "Use delivery amount display rules for a zone"
 msgstr ""
 
-#: src/ShippingMethod.php:80 src/ShippingMethod.php:94
+#: src/ShippingMethod.php:79 src/ShippingMethod.php:93
 msgid "CDEK Shipping"
 msgstr ""
 
-#: src/ShippingMethod.php:81
+#: src/ShippingMethod.php:80
 msgid "Official Shipping Method for Cdek"
 msgstr ""
 
@@ -957,12 +982,12 @@ msgid ""
 "You may need to cancel existing one (if that button exists)"
 msgstr ""
 
-#: src/Actions/OrderCreateAction.php:343
+#: src/Actions/OrderCreateAction.php:326
 msgid "inventory attached"
 msgstr ""
 
 #. translators: 1: error message
-#: src/Actions/OrderCreateAction.php:115
+#: src/Actions/OrderCreateAction.php:117
 msgid "Cdek shipping error: %1$s"
 msgstr ""
 
