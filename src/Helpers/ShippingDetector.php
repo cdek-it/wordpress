@@ -18,7 +18,7 @@ namespace Cdek\Helpers {
 
         public function __construct()
         {
-            if(WC()->cart === false || WC()->cart->needs_shipping() === false) {
+            if(empty(WC()->cart) || !WC()->cart->needs_shipping()) {
                 return;
             }
 
