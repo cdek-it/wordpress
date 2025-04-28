@@ -22,12 +22,14 @@ namespace Cdek {
     use Cdek\Controllers\CallbackController;
     use Cdek\Controllers\IntakeController;
     use Cdek\Controllers\OrderController;
+    use Cdek\Controllers\OrderItemController;
     use Cdek\Controllers\SettingsController;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\DataCleaner;
     use Cdek\Traits\CanBeCreated;
     use Cdek\UI\Admin;
     use Cdek\UI\AdminNotices;
+    use Cdek\UI\AdminOrderProductFields;
     use Cdek\UI\AdminShippingFields;
     use Cdek\UI\CdekWidget;
     use Cdek\UI\CheckoutMap;
@@ -216,6 +218,7 @@ namespace Cdek {
             add_action('admin_init', new IntakeController);
             add_action('admin_init', new OrderController);
             add_action('admin_init', new SettingsController);
+            add_action('admin_init', new OrderItemController);
 
             add_action('wc_ajax_' . Config::DELIVERY_NAME . '_save-office', new SaveOfficeToSessionAction);
 
@@ -262,6 +265,7 @@ namespace Cdek {
             );
 
             add_action('woocommerce_before_order_itemmeta', new AdminShippingFields, 10, 2);
+            add_action('woocommerce_after_order_itemmeta', new AdminOrderProductFields, 20, 3);
 
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, OrderCreateAction::new(), 10, 2);
             add_action(Config::TASK_MANAGER_HOOK_NAME, new TaskManager, 20);
