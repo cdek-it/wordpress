@@ -17,7 +17,11 @@ jobs:
         with:
           lfs: true
 
-      - uses: volta-cli/action@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 23
+
+      - run: corepack enable
 
       - name: Run install
         uses: borales/actions-yarn@v4
@@ -26,6 +30,9 @@ jobs:
 
       - name: Build production bundle
         uses: borales/actions-yarn@v4
+        env:
+          FLOMNI_CLIENT: 5fe5b6acad3a3c00132c591f
+          FLOMNI_THREAD: 67da7065b020d0fe83dbcfc4
         with:
           cmd: docs:build
 

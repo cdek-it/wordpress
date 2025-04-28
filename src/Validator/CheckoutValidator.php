@@ -10,11 +10,11 @@ namespace {
 namespace Cdek\Validator {
 
     use Cdek\CdekApi;
-    use Cdek\Config;
     use Cdek\Exceptions\CacheException;
     use Cdek\Exceptions\External\ApiException;
     use Cdek\Exceptions\External\CoreAuthException;
     use Cdek\Helpers\CheckoutHelper;
+    use Cdek\Helpers\ShippingDetector;
     use Cdek\Model\Tariff;
     use Throwable;
 
@@ -23,23 +23,13 @@ namespace Cdek\Validator {
 
         public function __invoke(): void
         {
-            if ( !WC()->cart->needs_shipping() ) {
+            $shippingDetector = ShippingDetector::new();
+
+            if( $shippingDetector->getShipping() === null ) {
                 return;
             }
 
-            $shippingMethods = WC()->session->get('chosen_shipping_methods');
-
-            if ( empty($shippingMethods[0]) ) {
-                return;
-            }
-
-            $shippingMethodIdSelected = $shippingMethods[0];
-
-            if ( strpos($shippingMethodIdSelected, Config::DELIVERY_NAME) === false ) {
-                return;
-            }
-
-            $tariffCode = explode(':', $shippingMethodIdSelected)[1];
+            $tariffCode = explode(':', $shippingDetector->getShipping())[1];
 
             if ( Tariff::isToOffice((int)$tariffCode) ) {
                 if ( empty(CheckoutHelper::getCurrentValue('office_code')) ) {
