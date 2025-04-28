@@ -67,6 +67,10 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 
 == Changelog ==
 
+= 4.2 =
+* WP-167 Add tool to set Uin for gold items in order
+* WP-148 Fixed errors with shipments detection
+
 = 4.1 =
 * WP-97 Cdek delivery logger
 * WP-148 Fixed 500 error when no available shipments detected
