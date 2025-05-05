@@ -368,7 +368,7 @@ namespace Cdek\Actions {
                         $payment['vat_rate'] = Tax::getTax($product->get_tax_class());
 
                         if($taxCost > 0 && $payment['vat_rate'] !== null){
-                            $payment['vat_sum'] = (float)(($shouldPay / 100) * $taxCost);
+                            $payment['vat_sum'] = (float)(($shouldPay / 100) * ($taxCost / $qty));
                         }else{
                             $payment['vat_sum'] = 0;
                         }
