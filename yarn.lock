@@ -1917,7 +1917,7 @@ __metadata:
     "@wordpress/block-editor": "npm:^14.11.0"
     "@wordpress/data": "npm:^10.16.0"
     "@wordpress/element": "npm:^6.16.0"
-    "@wordpress/env": "npm:^10.16.0"
+    "@wordpress/env": "npm:^10.22.0"
     "@wordpress/i18n": "npm:^5.16.0"
     "@wordpress/icons": "npm:^10.16.0"
     "@wordpress/prettier-config": "npm:^4.16.0"
@@ -7875,9 +7875,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@wordpress/env@npm:^10.16.0":
-  version: 10.16.0
-  resolution: "@wordpress/env@npm:10.16.0"
+"@wordpress/env@npm:^10.22.0":
+  version: 10.22.0
+  resolution: "@wordpress/env@npm:10.22.0"
   dependencies:
     "@inquirer/prompts": "npm:^7.2.0"
     chalk: "npm:^4.0.0"
@@ -7893,7 +7893,7 @@ __metadata:
     yargs: "npm:^17.3.0"
   bin:
     wp-env: bin/wp-env
-  checksum: 10c0/194459c8e8cd782884591a46be819ceaffdacb8f11624decd941fa8288d4573a0cfe2e39da6e57b0f194ca20d3f8949d444abbfad2f76c96cfbe4b3fffa34c97
+  checksum: 10c0/35bcb80e69d1565e7fbae958d717a85aed8417a1d98dbf5bad24a2956d2d7722a9817c3407dbc1c3a67ff6c1b089a2560a46a7eeae4350cac7d33dc68c7f5695
   languageName: node
   linkType: hard
 
