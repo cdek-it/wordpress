@@ -211,6 +211,13 @@ namespace Cdek {
             );
 
             add_filter('plugin_action_links_' . self::$pluginMainFile, [Admin::class, 'addPluginLinks']);
+
+            add_filter('clearfy_rest_api_white_list', static function (array $wl): array {
+                $wl[] = Config::DELIVERY_NAME;
+
+                return $wl;
+            });
+
             add_filter('plugin_row_meta', [Admin::class, 'addPluginRowMeta'], 10, 2);
 
             add_action('rest_api_init', new CallbackController);
