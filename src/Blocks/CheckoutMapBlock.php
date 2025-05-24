@@ -17,6 +17,7 @@ namespace Cdek\Blocks {
     use Cdek\Contracts\ExceptionContract;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\UI;
+    use Cdek\MetaKeys;
     use Cdek\Model\Order;
     use Cdek\Model\Tariff;
     use Cdek\ShippingMethod;
@@ -126,17 +127,6 @@ namespace Cdek\Blocks {
                     'context'     => ['view', 'edit'],
                 ],
             ];
-        }
-
-        public static function saveCustomerData(WC_Customer $customer, WP_REST_Request $request): void
-        {
-            if (array_key_exists(Config::DELIVERY_NAME, $request['extensions']) &&
-                !empty($request['extensions'][Config::DELIVERY_NAME]['office_code'])) {
-                $customer->add_meta_data(
-                    Config::DELIVERY_NAME.'_office_code',
-                    $request['extensions'][Config::DELIVERY_NAME]['office_code'],
-                );
-            }
         }
 
         public static function saveOrderData(WC_Order $order, WP_REST_Request $request): void

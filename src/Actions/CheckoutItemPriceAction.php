@@ -9,8 +9,7 @@ namespace {
 
 namespace Cdek\Actions {
 
-    use Cdek\Helpers\ShippingDetector;
-    use Cdek\Model\Order;
+    use Cdek\Helpers\CheckoutHelper;
     use Cdek\ShippingMethod;
     use WC_Cart;
     use WC_Product;
@@ -19,19 +18,25 @@ namespace Cdek\Actions {
     {
         private static bool $mutex = false;
 
-        public function __invoke(WC_Cart $cart)
+        public function __invoke(WC_Cart $cart): void
         {
-            if ( is_admin() && !defined( 'DOING_AJAX' ) ){
+            $rate = CheckoutHelper::getSelectedShippingRate($cart);
+
+            if(is_null($rate)) {
                 return;
             }
 
-            $shippingDetector = ShippingDetector::new();
+            $session = WC()->session;
 
-            if( $shippingDetector->getShipping() === null ) {
+            if (is_null($session)) {
                 return;
             }
 
-            $method = ShippingMethod::factory();
+            if ($session->get('chosen_payment_method') !== 'cod') {
+                return;
+            }
+
+            $method = ShippingMethod::factory($rate->get_instance_id());
 
             $shouldPay = $method->percentcod;
 

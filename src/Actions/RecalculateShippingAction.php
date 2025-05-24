@@ -53,7 +53,7 @@ namespace Cdek\Actions {
                     'country'  => $order->get_shipping_country(),
                     'postcode' => $order->get_shipping_postcode(),
                 ],
-            ], $shipping->getInstanceId(), !empty($shipping->office ?: $orderModel->pvz_code));
+            ], $shipping->getMethod(), !empty($shipping->office ?: $orderModel->pvz_code));
 
             $tariff = $shipping->tariff;
 

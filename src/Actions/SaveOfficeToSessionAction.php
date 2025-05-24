@@ -33,7 +33,7 @@ namespace Cdek\Actions {
                     return;
                 }
 
-                WC()->session->set(Config::DELIVERY_NAME.'_office_code', $officeCode);
+                $session->set(Config::DELIVERY_NAME.'_office_code', $officeCode);
             } catch (\Throwable $e) {
                 wp_send_json_error();
                 return;

@@ -10,40 +10,47 @@ namespace {
 namespace Cdek\UI {
 
     use Cdek\CdekApi;
-    use Cdek\Config;
     use Cdek\Helpers\CheckoutHelper;
-    use Cdek\Helpers\ShippingDetector;
+    use Cdek\MetaKeys;
     use Cdek\Model\Tariff;
     use Throwable;
+    use WC_Shipping_Rate;
 
     class CheckoutMap
     {
-        public function __invoke($shippingMethodCurrent): void
+        public function __invoke(WC_Shipping_Rate $rate): void
         {
-            if (!is_checkout() || !$this->isTariffDestinationCdekOffice($shippingMethodCurrent)) {
+            if (!is_checkout() || !CheckoutHelper::isShippingRateSuitable($rate)) {
                 return;
             }
 
-            $cityInput     = CheckoutHelper::getCurrentValue('city');
-            $postcodeInput = CheckoutHelper::getCurrentValue('postcode');
+            $selectedRate = CheckoutHelper::getSelectedShippingRate();
 
-            if (empty($cityInput)) {
+            if (is_null($selectedRate) || $selectedRate->get_id() !== $rate->get_id()) {
+                return;
+            }
+
+            $meta = $rate->get_meta_data();
+
+            if (!in_array((int)$meta[MetaKeys::TARIFF_MODE], Tariff::listOfficeDeliveryModes(), true)) {
+                return;
+            }
+
+            if (empty($meta[MetaKeys::CITY])) {
                 return;
             }
 
             $api = new CdekApi;
 
-            $city = $api->cityCodeGet($cityInput, $postcodeInput);
+            $city = $api->cityCodeGet($meta[MetaKeys::CITY], $meta[MetaKeys::POSTAL]);
 
-            $selectedOffice = CheckoutHelper::getCurrentValue('office_code');
-
-            try{
-                $officeInfo = empty($selectedOffice) ? null : $api->officeGet($selectedOffice);
-            }catch (Throwable $e) {
+            try {
+                $officeInfo = empty($meta[MetaKeys::OFFICE_CODE]) ? null : $api->officeGet($meta[MetaKeys::OFFICE_CODE]);
+            } catch (Throwable $e) {
                 $officeInfo = null;
             }
 
-            if (!is_null($officeInfo)){
+            if (!is_null($officeInfo)) {
                 printf(
                     '<div class="cdek-office-info">%s, %s, %s</div>',
                     esc_html($officeInfo['code']),
@@ -54,31 +61,12 @@ namespace Cdek\UI {
 
             printf(
                 '<div class="open-pvz-btn" data-city="%s"><script type="application/cdek-offices">%s</script><a>%s</a></div><input name="office_code" class="cdek-office-code" type="hidden" value="%s"/>',
-                esc_attr($cityInput),
+                esc_attr($meta[MetaKeys::CITY]),
                 wc_esc_json($city !== null ? $api->officeListRaw($city) : '[]', true),
-                is_null($officeInfo) ? esc_html__('Choose pick-up', 'cdekdelivery') : esc_html__('Re-select pick-up', 'cdekdelivery'),
-                esc_attr($selectedOffice),
+                is_null($officeInfo) ? esc_html__('Choose pick-up', 'cdekdelivery') :
+                    esc_html__('Re-select pick-up', 'cdekdelivery'),
+                esc_attr($meta[MetaKeys::OFFICE_CODE]),
             );
-        }
-
-        private function isTariffDestinationCdekOffice($shippingMethodCurrent): bool
-        {
-            if ($shippingMethodCurrent->get_method_id() !== Config::DELIVERY_NAME) {
-                return false;
-            }
-
-            $shippingMethodIdSelected = ShippingDetector::new()->getShipping();
-
-            if (
-                empty($shippingMethodIdSelected) ||
-                $shippingMethodCurrent->get_id() !== $shippingMethodIdSelected
-            ) {
-                return false;
-            }
-
-            $tariffCode = explode(':', $shippingMethodIdSelected)[1];
-
-            return Tariff::isToOffice((int)$tariffCode);
         }
     }
 }

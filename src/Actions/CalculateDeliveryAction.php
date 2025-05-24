@@ -12,6 +12,8 @@ namespace Cdek\Actions {
 
     use Cdek\CdekApi;
     use Cdek\Config;
+    use Cdek\Exceptions\External\ApiException;
+    use Cdek\Exceptions\External\LegacyAuthException;
     use Cdek\Helpers\Logger;
     use Cdek\Helpers\WeightConverter;
     use Cdek\MetaKeys;
@@ -29,12 +31,12 @@ namespace Cdek\Actions {
         private array $rates = [];
 
         /**
-         * @throws \Cdek\Exceptions\External\ApiException
-         * @throws \Cdek\Exceptions\External\LegacyAuthException
+         * @throws ApiException
+         * @throws LegacyAuthException
          */
-        public function __invoke(array $package, int $instanceID, bool $addTariffsToOffice = true): array
+        public function __invoke(array $package, ShippingMethod $method, bool $addTariffsToOffice = true): array
         {
-            $this->method = ShippingMethod::factory($instanceID);
+            $this->method = $method;
             $api          = new CdekApi($this->method);
 
             if (empty($this->method->city_code)) {
@@ -43,17 +45,17 @@ namespace Cdek\Actions {
                 return [];
             }
 
-            if($api->authGetError() !== null){
+            if ($api->authGetError() !== null) {
                 Logger::warning("Calculate: auth error");
 
                 return [];
             }
 
             $deliveryParam = [
-                'from' => [
+                'from'     => [
                     'code' => $this->method->city_code,
                 ],
-                'to'   => [
+                'to'       => [
                     'postal_code'  => trim($package['destination']['postcode']),
                     'city'         => trim($package['destination']['city']),
                     'address'      => trim($package['destination']['city']),
@@ -61,16 +63,6 @@ namespace Cdek\Actions {
                 ],
                 'packages' => $this->getPackagesData($package['contents']),
             ];
-
-            try {
-                WC()->session->set(Config::DELIVERY_NAME.'_postcode', $deliveryParam['to']['postal_code']);
-                WC()->session->set(Config::DELIVERY_NAME.'_city', $deliveryParam['to']['city']);
-            } catch (Throwable $e) {
-                Logger::warning(
-                    "Calculate: could not set data in session",
-                    $e,
-                );
-            }
 
             if ($this->method->insurance) {
                 $deliveryParam['services'][] = [
@@ -101,14 +93,14 @@ namespace Cdek\Actions {
                 );
             }
 
-            Logger::debug("Calculate: delivery params before calculate list", $deliveryParam,);
+            Logger::debug("Calculate: delivery params before calculate list", $deliveryParam);
 
             foreach ([Tariff::SHOP_TYPE, Tariff::DELIVERY_TYPE] as $deliveryType) {
                 $deliveryParam['type'] = $deliveryType;
 
                 $calcResult = $api->calculateList($deliveryParam);
 
-                Logger::debug("Calculate: calculate list result", $calcResult,);
+                Logger::debug("Calculate: calculate list result", $calcResult);
 
                 if (empty($calcResult)) {
                     continue;
@@ -147,16 +139,19 @@ namespace Cdek\Actions {
                         'cost'      => max($cost, 0),
                         'meta_data' => [
                             MetaKeys::ADDRESS_HASH => sha1(
-                                $deliveryParam['to']['postal_code'].
-                                $deliveryParam['to']['city'].
+                                $deliveryParam['to']['postal_code'] .
+                                $deliveryParam['to']['city'] .
                                 $deliveryParam['to']['country_code'],
                             ),
+                            MetaKeys::POSTAL       => $deliveryParam['to']['postal_code'],
+                            MetaKeys::CITY         => $deliveryParam['to']['city'],
                             MetaKeys::TARIFF_CODE  => $tariff['tariff_code'],
                             MetaKeys::TARIFF_MODE  => $tariff['delivery_mode'],
                             MetaKeys::WEIGHT       => $deliveryParam['packages']['weight'],
                             MetaKeys::LENGTH       => $deliveryParam['packages']['length'],
                             MetaKeys::WIDTH        => $deliveryParam['packages']['width'],
                             MetaKeys::HEIGHT       => $deliveryParam['packages']['height'],
+                            MetaKeys::OFFICE_CODE  => $package['destination'][MetaKeys::OFFICE_CODE] ?? null,
                         ],
                     ];
                 }
@@ -164,76 +159,81 @@ namespace Cdek\Actions {
 
             Logger::debug("Calculate: rates", $this->rates);
 
-            return array_map(function ($tariff) use (
-                $priceRules,
-                $api,
-                $deliveryParam
-            ) {
-                $rule = Tariff::isToOffice((int)$tariff['meta_data'][MetaKeys::TARIFF_CODE]) ? $priceRules['office'] :
-                    $priceRules['door'];
+            return array_map(
+                function ($tariff) use (
+                    $priceRules,
+                    $api,
+                    $deliveryParam
+                ) {
+                    $rule = Tariff::isToOffice((int)$tariff['meta_data'][MetaKeys::TARIFF_CODE]) ?
+                        $priceRules['office'] : $priceRules['door'];
 
-                if (isset($rule['type'])) {
-                    if ($rule['type'] === 'free') {
-                        $tariff['cost'] = 0;
+                    if (isset($rule['type'])) {
+                        if ($rule['type'] === 'free') {
+                            $tariff['cost'] = 0;
 
-                        Logger::debug("Calculate: type free", $tariff,);
+                            Logger::debug("Calculate: type free", $tariff);
 
-                        return $tariff;
+                            return $tariff;
+                        }
+
+                        if ($rule['type'] === 'fixed') {
+                            $tariff['cost'] = max(
+                                function_exists('wcml_get_woocommerce_currency_option') ?
+                                    apply_filters('wcml_raw_price_amount', $rule['value'], 'RUB') : $rule['value'],
+                                0,
+                            );
+
+                            Logger::debug("Calculate: type fixed", $tariff);
+
+                            return $tariff;
+                        }
                     }
 
-                    if ($rule['type'] === 'fixed') {
-                        $tariff['cost'] = max(
-                            function_exists('wcml_get_woocommerce_currency_option') ?
-                                apply_filters('wcml_raw_price_amount', $rule['value'], 'RUB') : $rule['value'],
-                            0,
+                    $deliveryParam['tariff_code'] = $tariff['meta_data'][MetaKeys::TARIFF_CODE];
+                    $deliveryParam['type']        = Tariff::getType((int)$deliveryParam['tariff_code']);
+
+                    $serviceList = Service::factory($this->method, $deliveryParam['tariff_code']);
+
+                    if (!empty($serviceList)) {
+                        $deliveryParam['services'] = array_merge($serviceList, $deliveryParam['services'] ?? []);
+                    }
+
+                    Logger::debug(
+                        "Calculate: delivery params before tariff calculate",
+                        $deliveryParam,
+                    );
+
+                    if ($cost = $api->calculateGet($deliveryParam)) {
+                        Logger::debug("Calculate: Got total for tariff {$deliveryParam['tariff_code']}: $cost");
+                    } else {
+                        Logger::debug(
+                            "Calculate: Got tariff cost total for tariff {$deliveryParam['tariff_code']}: {$tariff['cost']}",
                         );
 
-                        Logger::debug("Calculate: type fixed", $tariff,);
-
-                        return $tariff;
+                        $cost = $tariff['cost'];
                     }
-                }
 
-                $deliveryParam['tariff_code'] = $tariff['meta_data'][MetaKeys::TARIFF_CODE];
-                $deliveryParam['type']        = Tariff::getType((int)$deliveryParam['tariff_code']);
-
-                $serviceList = Service::factory($this->method, $deliveryParam['tariff_code']);
-
-                if (!empty($serviceList)) {
-                    $deliveryParam['services'] = array_merge($serviceList, $deliveryParam['services'] ?? []);
-                }
-
-                Logger::debug(
-                    "Calculate: delivery params before tariff calculate",
-                    $deliveryParam,
-                );
-
-                if($cost = $api->calculateGet($deliveryParam)){
-                    Logger::debug("Calculate: Got total for tariff {$deliveryParam['tariff_code']}: $cost");
-                }else{
-                    Logger::debug("Calculate: Got tariff cost total for tariff {$deliveryParam['tariff_code']}: {$tariff['cost']}");
-
-                    $cost = $tariff['cost'];
-                }
-
-                if (isset($rule['type']) && is_numeric($rule['value'])) {
-                    if ($rule['type'] === 'amount') {
-                        $cost += $rule['value'];
-                    } elseif ($rule['type'] === 'percentage') {
-                        $cost *= $rule['value'] / 100;
+                    if (isset($rule['type']) && is_numeric($rule['value'])) {
+                        if ($rule['type'] === 'amount') {
+                            $cost += $rule['value'];
+                        } elseif ($rule['type'] === 'percentage') {
+                            $cost *= $rule['value'] / 100;
+                        }
                     }
-                }
 
-                if (function_exists('wcml_get_woocommerce_currency_option')) {
-                    $cost /= apply_filters('wcml_raw_price_amount', $cost, 'RUB') / $cost;
-                }
+                    if (function_exists('wcml_get_woocommerce_currency_option')) {
+                        $cost /= apply_filters('wcml_raw_price_amount', $cost, 'RUB') / $cost;
+                    }
 
-                $tariff['cost'] = max(ceil($cost), 0);
+                    $tariff['cost'] = max(ceil($cost), 0);
 
-                Logger::debug("Calculate: tariff", $tariff,);
+                    Logger::debug("Calculate: tariff", $tariff);
 
-                return $tariff;
-            }, $this->rates);
+                    return $tariff;
+                },
+                $this->rates,
+            );
         }
 
         private function getPackagesData(array $contents): array

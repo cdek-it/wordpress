@@ -54,7 +54,8 @@ const onChoose = (_type, _tariff, address) => {
     console.debug('[CDEK-MAP] Office selected', address);
 
     if (window.cdek.saver !== undefined){
-        $.post(window.cdek.saver, { code: address.code })
+        $.post(window.cdek.saver, { code: address.code });
+        $(document.body).trigger('update_checkout');
     }
 
     if (window.cdek.close) {
@@ -69,7 +70,7 @@ const debouncedCheckoutUpdate = debounce(() => {
         return;
     }
     console.debug(
-      '[CDEK-MAP] City or postcode changed, initiating checkout update');
+      '[CDEK-MAP] Checkout values changed, initiating checkout update');
     if (window.cdek.saver !== undefined){
         $.post(window.cdek.saver, { code: null })
     }
@@ -111,7 +112,7 @@ const resizeObserver = new ResizeObserver(entries => {
 
 $(document.body)
   .on('input',
-    '#billing_city, #billing_postcode, #shipping_city, #shipping_postcode',
+    '#billing_city, #billing_postcode, #shipping_city, #shipping_postcode, input[name=payment_method]',
     debouncedCheckoutUpdate)
   .on('updated_checkout', () => {
       const targetNode = document.querySelector('.open-pvz-btn');

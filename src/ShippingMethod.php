@@ -174,7 +174,7 @@ namespace Cdek {
 
             // Return global option.
             return apply_filters(
-                'woocommerce_shipping_'.$this->id.'_option',
+                "woocommerce_shipping_{$this->id}_option",
                 WC_Settings_API::get_option($key, $empty_value),
                 $key,
                 $this,
@@ -221,7 +221,7 @@ namespace Cdek {
         final public function calculate_shipping($package = []): void
         {
             try {
-                $rates = CalculateDeliveryAction::new()($package, $this->get_instance_id());
+                $rates = CalculateDeliveryAction::new()($package, $this);
 
                 foreach ($rates as $rate) {
                     $this->add_rate($rate);

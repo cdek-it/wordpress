@@ -235,7 +235,6 @@ namespace Cdek {
             add_action('woocommerce_order_before_calculate_totals', new RecalculateShippingAction, 10, 2);
 
             add_action('woocommerce_after_shipping_rate', new CheckoutMap);
-            add_filter('woocommerce_checkout_create_order_shipping_item', new ProcessWoocommerceCreateShippingAction);
             add_action('woocommerce_checkout_create_order', new SaveCustomCheckoutFieldsAction, 10, 2);
             add_action('woocommerce_order_status_changed', new DispatchOrderAutomationAction);
             add_action('woocommerce_checkout_order_processed', new DispatchOrderAutomationAction, 10, 3);
@@ -252,13 +251,6 @@ namespace Cdek {
             add_action('woocommerce_blocks_loaded', [CheckoutMapBlock::class, 'addStoreApiData']);
 
             add_action(
-                'woocommerce_store_api_checkout_update_customer_from_request',
-                [CheckoutMapBlock::class, 'saveCustomerData'],
-                10,
-                2,
-            );
-
-            add_action(
                 'woocommerce_store_api_checkout_update_order_from_request',
                 [CheckoutMapBlock::class, 'saveOrderData'],
                 10,
@@ -273,6 +265,8 @@ namespace Cdek {
             add_action(Config::ORDER_AUTOMATION_HOOK_NAME, OrderCreateAction::new(), 10, 2);
             add_action(Config::TASK_MANAGER_HOOK_NAME, new TaskManager, 20);
             add_action(Config::UPGRADE_HOOK_NAME, [__CLASS__, 'upgrade']);
+
+            add_filter('woocommerce_cart_shipping_packages', [CheckoutHelper::class, 'passOfficeToCartPackages']);
 
             CdekWidget::new()();
             Admin::new()();
