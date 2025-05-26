@@ -403,9 +403,7 @@ namespace Cdek\Actions {
                 return 0.0;
             }
 
-            $value = str_replace([' ', ','], ['', '.'], $value);
-
-            return (float)$value;
+            return (float)str_replace([' ', ','], ['', '.'], trim($value));
         }
 
         private function convertCurrencyToRub(float $cost, string $currency): float
