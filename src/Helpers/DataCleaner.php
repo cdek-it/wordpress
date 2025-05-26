@@ -35,6 +35,9 @@ namespace Cdek\Helpers {
             $hiddenMeta[] = MetaKeys::TARIFF_CODE;
             $hiddenMeta[] = MetaKeys::TARIFF_MODE;
             $hiddenMeta[] = MetaKeys::OFFICE_CODE;
+            $hiddenMeta[] = MetaKeys::JEWEL_UIN;
+            $hiddenMeta[] = MetaKeys::POSTAL;
+            $hiddenMeta[] = MetaKeys::CITY;
 
             if (self::isOldOrderPage() || self::isNewOrderPage()) {
                 $hiddenMeta[] = 'tariff_code';

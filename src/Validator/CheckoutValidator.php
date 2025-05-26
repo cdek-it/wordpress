@@ -14,7 +14,7 @@ namespace Cdek\Validator {
     use Cdek\Exceptions\External\ApiException;
     use Cdek\Exceptions\External\CoreAuthException;
     use Cdek\Helpers\CheckoutHelper;
-    use Cdek\Helpers\ShippingDetector;
+    use Cdek\MetaKeys;
     use Cdek\Model\Tariff;
     use Throwable;
 
@@ -23,16 +23,16 @@ namespace Cdek\Validator {
 
         public function __invoke(): void
         {
-            $shippingDetector = ShippingDetector::new();
+            $rate = CheckoutHelper::getSelectedShippingRate();
 
-            if( $shippingDetector->getShipping() === null ) {
+            if( is_null($rate) ) {
                 return;
             }
 
-            $tariffCode = explode(':', $shippingDetector->getShipping())[1];
+            $meta = $rate->get_meta_data();
 
-            if ( Tariff::isToOffice((int)$tariffCode) ) {
-                if ( empty(CheckoutHelper::getCurrentValue('office_code')) ) {
+            if ( in_array((int)$meta[MetaKeys::TARIFF_MODE], Tariff::listOfficeDeliveryModes(), true) ) {
+                if ( empty($meta[MetaKeys::OFFICE_CODE]) ) {
                     wc_add_notice(esc_html__('Order pickup point not selected.', 'cdekdelivery'), 'error');
                 }
             } else {

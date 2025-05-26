@@ -20,6 +20,7 @@ namespace Cdek\Actions {
     use Cdek\Exceptions\External\InvalidRequestException;
     use Cdek\Exceptions\External\LegacyAuthException;
     use Cdek\Exceptions\InvalidPhoneException;
+    use Cdek\Exceptions\OrderNotFoundException;
     use Cdek\Exceptions\ShippingNotFoundException;
     use Cdek\Helpers\Logger;
     use Cdek\Helpers\StringHelper;
@@ -47,11 +48,11 @@ namespace Cdek\Actions {
         private Order $order;
 
         /**
-         * @throws \Cdek\Exceptions\CacheException
-         * @throws \Cdek\Exceptions\External\ApiException
-         * @throws \Cdek\Exceptions\External\CoreAuthException
-         * @throws \Cdek\Exceptions\ShippingNotFoundException
-         * @throws \Cdek\Exceptions\OrderNotFoundException
+         * @throws CacheException
+         * @throws ApiException
+         * @throws CoreAuthException
+         * @throws ShippingNotFoundException
+         * @throws OrderNotFoundException
          */
         public function __invoke(int $orderId, int $attempt = 0, ?array $packages = null): ValidationResult
         {
@@ -101,7 +102,7 @@ namespace Cdek\Actions {
                         $this->order->id,
                         sprintf(
                             esc_html__(/* translators: 1: tracking number */ 'Tracking number: %1$s',
-                                'cdekdelivery',
+                                                                             'cdekdelivery',
                             ),
                             $track,
                         ),
@@ -233,14 +234,17 @@ namespace Cdek\Actions {
             }
 
             if ($deliveryMethod->international_mode) {
-                $param['recipient'] = array_merge($param['recipient'], [
-                    'passport_date_of_birth' => $this->order->meta('_passport_date_of_birth'),
-                    'tin'                    => $this->order->meta('_tin'),
-                    'passport_organization'  => $this->order->meta('_passport_organization'),
-                    'passport_date_of_issue' => $this->order->meta('_passport_date_of_issue'),
-                    'passport_number'        => $this->order->meta('_passport_number'),
-                    'passport_series'        => $this->order->meta('_passport_series'),
-                ]);
+                $param['recipient'] = array_merge(
+                    $param['recipient'],
+                    [
+                        'passport_date_of_birth' => $this->order->meta('_passport_date_of_birth'),
+                        'tin'                    => $this->order->meta('_tin'),
+                        'passport_organization'  => $this->order->meta('_passport_organization'),
+                        'passport_date_of_issue' => $this->order->meta('_passport_date_of_issue'),
+                        'passport_number'        => $this->order->meta('_passport_number'),
+                        'passport_series'        => $this->order->meta('_passport_series'),
+                    ],
+                );
             }
 
             $serviceList = Service::factory($deliveryMethod, $param['tariff_code']);
@@ -250,7 +254,7 @@ namespace Cdek\Actions {
 
             if ($this->order->shipping_total > 0 && $this->order->shouldBePaidUponDelivery()) {
                 $param['delivery_recipient_cost'] = [
-                    'value' => $this->order->shipping_total,
+                    'value' => $this->order->shipping_total + $this->order->shipping_tax,
                 ];
             }
 
@@ -258,8 +262,8 @@ namespace Cdek\Actions {
         }
 
         /**
-         * @throws \Cdek\Exceptions\External\LegacyAuthException
-         * @throws \Cdek\Exceptions\External\ApiException
+         * @throws LegacyAuthException
+         * @throws ApiException
          */
         private function getTrack(string $uuid, int $iteration = 1): ?string
         {
@@ -283,98 +287,94 @@ namespace Cdek\Actions {
                 ],
             ];
 
-            $orderItems = $this->order->getItems();
-
-            $shouldPay     = $this->order->shouldBePaidUponDelivery() ? (int)$this->shipping->getMethod()->percentcod :
-                null;
+            $orderItems    = $this->order->getItems();
+            $shouldPay     = $this->order->shouldBePaidUponDelivery();
             $shouldConvert = $this->order->currency !== 'RUB' &&
                              function_exists('wcml_get_woocommerce_currency_option') ? $this->order->currency : null;
 
-            return array_map(function (array $p) use ($shouldConvert, $orderItems, $shouldPay) {
-                $weight = 0;
+            return array_map(
+                function (array $p) use ($shouldConvert, $orderItems, $shouldPay) {
+                    $weight = 0;
 
-                $items = array_values(
-                    array_filter(
-                        array_map(
-                            function($item) use ($shouldConvert, $shouldPay, $orderItems, &$weight){
-                                if ($item instanceof WC_Order_Item_Product) {
-                                    $qty = (int)$item->get_quantity();
-                                } else {
-                                    $qty  = (int)$item['qty'];
-                                    $item = $orderItems[$item['id']] ?? null;
-                                }
+                    $items = array_values(
+                        array_filter(
+                            array_map(
+                                function ($item) use ($shouldConvert, $shouldPay, $orderItems, &$weight) {
+                                    if ($item instanceof WC_Order_Item_Product) {
+                                        $qty = (int)$item->get_quantity();
+                                    } else {
+                                        $qty  = (int)$item['qty'];
+                                        $item = $orderItems[$item['id']] ?? null;
+                                    }
 
-                                if ($item === null) {
-                                    return null;
-                                }
+                                    if ($item === null) {
+                                        return null;
+                                    }
 
-                                assert($item instanceof WC_Order_Item_Product);
+                                    assert($item instanceof WC_Order_Item_Product);
 
-                                return $this->buildItemData($item, $qty, $shouldConvert, $shouldPay, $weight);
-                            },
-                            $p['items'] ?: $orderItems
-                        )
-                    )
-                );
+                                    return $this->buildItemData($item, $qty, $shouldConvert, $shouldPay, $weight);
+                                },
+                                $p['items'] ?: $orderItems,
+                            ),
+                        ),
+                    );
 
-                $package = [
-                    'number'  => sprintf('%s_%s', $this->order->id, StringHelper::generateRandom(5)),
-                    'length'  => $p['length'],
-                    'width'   => $p['width'],
-                    'height'  => $p['height'],
-                    'weight'  => $weight,
-                    'comment' => __('inventory attached', 'cdekdelivery'),
-                ];
+                    $package = [
+                        'number'  => sprintf('%s_%s', $this->order->id, StringHelper::generateRandom(5)),
+                        'length'  => $p['length'],
+                        'width'   => $p['width'],
+                        'height'  => $p['height'],
+                        'weight'  => $weight,
+                        'comment' => __('inventory attached', 'cdekdelivery'),
+                    ];
 
-                if (Tariff::availableForShops($this->tariff)) {
-                    $package['items'] = $items;
-                }
+                    if (Tariff::availableForShops($this->tariff)) {
+                        $package['items'] = $items;
+                    }
 
-                return $package;
-            }, $packages);
+                    return $package;
+                },
+                $packages,
+            );
         }
 
         private function buildItemData(
             WC_Order_Item_Product $item,
-            int $qty,
-            ?string $shouldConvert,
-            ?int $shouldPay,
-            int &$weight
-        ): array
-        {
+            int                   $qty,
+            ?string               $shouldConvert,
+            bool                  $shouldPay,
+            int                   &$weight
+        ): array {
             $product = $item->get_product();
 
             $w      = WeightConverter::getWeightInGrams($product->get_weight());
             $weight += $qty * $w;
-            $cost   = $shouldConvert === null ? (float)wc_get_price_including_tax($product) :
-                $this->convertCurrencyToRub(
-                    (float)wc_get_price_including_tax($product),
-                    $shouldConvert,
-                );
+
+            $tax = self::convertStringToFloat($item->get_total_tax());
+            $cost = self::convertStringToFloat($item->get_total()) + $tax;
+
+            if (!is_null($shouldConvert)) {
+                $cost = $this->convertCurrencyToRub($cost, $shouldConvert);
+                $tax = $this->convertCurrencyToRub($tax, $shouldConvert);
+            }
+
+            $tax /= $qty;
+            $cost /= $qty;
 
             $payment = ['value' => 0];
 
-            if ($shouldPay !== null) {
-                if ($shouldPay !== 0) {
-                    $payment['value'] = (int)(($shouldPay / 100) * $cost);
+            if ($shouldPay) {
+                $payment['value'] = $cost;
 
-                    if($product->is_taxable()){
-                        $taxCost = $shouldConvert === null ? (float)$item->get_total_tax() :
-                            $this->convertCurrencyToRub(
-                                (float)$item->get_total_tax(),
-                                $shouldConvert,
-                            );
+                if ($product->is_taxable()) {
+                    $payment['vat_rate'] = Tax::getTax($product->get_tax_class());
 
-                        $payment['vat_rate'] = Tax::getTax($product->get_tax_class());
-
-                        if($taxCost > 0 && $payment['vat_rate'] !== null){
-                            $payment['vat_sum'] = (float)(($shouldPay / 100) * ($taxCost / $qty));
-                        }else{
-                            $payment['vat_sum'] = 0;
-                        }
+                    if ($payment['vat_rate'] !== null) {
+                        $payment['vat_sum'] = $tax;
+                    } else {
+                        $payment['vat_sum'] = 0;
                     }
-                } else {
-                    $payment['value'] = $cost;
                 }
             }
 
@@ -390,11 +390,20 @@ namespace Cdek\Actions {
 
             $jewelUin = $item->get_meta(MetaKeys::JEWEL_UIN);
 
-            if(!empty($jewelUin)){
+            if (!empty($jewelUin)) {
                 $orderItem['jewel_uin'] = $jewelUin;
             }
 
             return $orderItem;
+        }
+
+        private static function convertStringToFloat(string $value): float
+        {
+            if ($value === '' || !is_numeric($value)) {
+                return 0.0;
+            }
+
+            return (float)str_replace([' ', ','], ['', '.'], trim($value));
         }
 
         private function convertCurrencyToRub(float $cost, string $currency): float

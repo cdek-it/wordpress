@@ -13,7 +13,10 @@ namespace Cdek\Helpers {
     use Cdek\Contracts\FieldsetContract;
     use Cdek\Fieldsets\GeneralOrderFields;
     use Cdek\Fieldsets\InternationalOrderFields;
+    use Cdek\MetaKeys;
     use Throwable;
+    use WC_Cart;
+    use WC_Shipping_Rate;
 
     class CheckoutHelper
     {
@@ -35,12 +38,14 @@ namespace Cdek\Helpers {
                 //do nothing
             }
 
-            $shippingValue = WC()->checkout()->get_value("shipping_$valueName");
+            $checkout = WC()->checkout();
+
+            $shippingValue = $checkout->get_value("shipping_$valueName");
             if (!empty($shippingValue)) {
                 return $shippingValue;
             }
 
-            $billingValue = WC()->checkout()->get_value("billing_$valueName");
+            $billingValue = $checkout->get_value("billing_$valueName");
             if (!empty($billingValue)) {
                 return $billingValue;
             }
@@ -63,20 +68,62 @@ namespace Cdek\Helpers {
                 //do nothing
             }
 
-            return WC()->checkout()->get_value($valueName) ?: $defaultValue;
+            return $checkout->get_value($valueName) ?: $defaultValue;
+        }
+
+        public static function passOfficeToCartPackages(array $packages): array {
+            return array_map(
+                static function (array $package) {
+                    $office = CheckoutHelper::getCurrentValue('office_code');
+
+                    if (!empty($office)) {
+                        $package['destination'][MetaKeys::OFFICE_CODE] = $office;
+                    }
+
+                    return $package;
+                },
+                $packages,
+            );
+        }
+
+        public static function getSelectedShippingRate(?WC_Cart $cart = null): ?WC_Shipping_Rate
+        {
+            if (is_null($cart)) {
+                $cart = WC()->cart;
+            }
+
+            if (is_null($cart)) {
+                return null;
+            }
+
+            $methods = $cart->get_shipping_methods();
+
+            if (empty($methods)) {
+                $methods = $cart->calculate_shipping();
+            }
+
+            if (is_null($methods)){
+                return null;
+            }
+
+            foreach ($methods as $method) {
+                assert($method instanceof WC_Shipping_Rate);
+                if (self::isShippingRateSuitable($method)) {
+                    return $method;
+                }
+            }
+
+            return null;
+        }
+
+        public static function isShippingRateSuitable(WC_Shipping_Rate $rate): bool
+        {
+            return $rate->get_method_id() === Config::DELIVERY_NAME;
         }
 
         public static function restoreFields(array $fields): array
         {
-            $shippingDetector = ShippingDetector::new();
-
-            if (
-                !$shippingDetector->needShipping() ||
-                (
-                    !$shippingDetector->isShippingEmpty() &&
-                    $shippingDetector->getShipping() === null
-                )
-            ) {
+            if (self::getSelectedShippingRate() === null) {
                 return $fields;
             }
 

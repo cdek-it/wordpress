@@ -37,6 +37,7 @@ namespace Cdek\Model {
      * @property string $currency
      * @property string $payment_method
      * @property float $shipping_total
+     * @property float $shipping_tax
      * @property string $billing_email
      */
     class Order extends MetaModelContract
@@ -48,6 +49,7 @@ namespace Cdek\Model {
                 'payment_method',
                 'billing_email',
                 'shipping_total',
+                'shipping_tax',
             ];
         private const CHECKOUT_FIELDS
             = [
