@@ -70,6 +70,8 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 = 4.2 =
 * WP-167 Add tool to set Uin for gold items in order
 * WP-200 Fixed errors with shipments detection
+* WP-201 Fixed error with shipment auto creation due to vat calculation
+* WP-203 Fixed vat calculation for waybills
 
 = 4.1 =
 * WP-97 Cdek delivery logger
