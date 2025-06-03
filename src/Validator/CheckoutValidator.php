@@ -10,6 +10,7 @@ namespace {
 namespace Cdek\Validator {
 
     use Cdek\CdekApi;
+    use Cdek\Config;
     use Cdek\Exceptions\CacheException;
     use Cdek\Exceptions\External\ApiException;
     use Cdek\Exceptions\External\CoreAuthException;
@@ -32,7 +33,7 @@ namespace Cdek\Validator {
             $meta = $rate->get_meta_data();
 
             if ( in_array((int)$meta[MetaKeys::TARIFF_MODE], Tariff::listOfficeDeliveryModes(), true) ) {
-                if ( empty($meta[MetaKeys::OFFICE_CODE]) ) {
+                if ( empty($meta[MetaKeys::OFFICE_CODE]) && empty($request['extensions'][Config::DELIVERY_NAME]['office_code']) ) {
                     wc_add_notice(esc_html__('Order pickup point not selected.', 'cdekdelivery'), 'error');
                 }
             } else {
