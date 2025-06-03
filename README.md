@@ -72,6 +72,7 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 * WP-200 Fixed errors with shipments detection
 * WP-201 Fixed error with shipment auto creation due to vat calculation
 * WP-203 Fixed vat calculation for waybills
+* WP-211 Fixed error with shipment creation on new checkout due to missing office
 
 = 4.1 =
 * WP-97 Cdek delivery logger
