@@ -238,7 +238,7 @@ namespace Cdek {
             );
 
             add_action('woocommerce_checkout_process', new CheckoutValidator);
-            add_action('woocommerce_store_api_checkout_update_order_meta', new CheckoutValidator);
+            add_action('woocommerce_store_api_checkout_update_order_meta', new CheckoutValidator(false));
             add_action('woocommerce_order_before_calculate_totals', new RecalculateShippingAction, 10, 2);
 
             add_action('woocommerce_after_shipping_rate', new CheckoutMap);

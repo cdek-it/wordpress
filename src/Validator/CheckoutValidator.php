@@ -21,6 +21,11 @@ namespace Cdek\Validator {
 
     class CheckoutValidator
     {
+        private bool $checkOffice;
+        public function __construct(bool $checkOffice = true)
+        {
+            $this->checkOffice = $checkOffice;
+        }
 
         public function __invoke(): void
         {
@@ -33,7 +38,7 @@ namespace Cdek\Validator {
             $meta = $rate->get_meta_data();
 
             if ( in_array((int)$meta[MetaKeys::TARIFF_MODE], Tariff::listOfficeDeliveryModes(), true) ) {
-                if ( empty($meta[MetaKeys::OFFICE_CODE]) && empty($request['extensions'][Config::DELIVERY_NAME]['office_code']) ) {
+                if ( empty($meta[MetaKeys::OFFICE_CODE]) && $this->checkOffice ) {
                     wc_add_notice(esc_html__('Order pickup point not selected.', 'cdekdelivery'), 'error');
                 }
             } else {
