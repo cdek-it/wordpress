@@ -27,10 +27,27 @@ namespace Cdek\Helpers {
             ];
 
         /** @noinspection GlobalVariableUsageInspection */
+
+        public static function passOfficeToCartPackages(array $packages): array
+        {
+            return array_map(
+                static function (array $package) {
+                    $office = CheckoutHelper::getCurrentValue('office_code');
+
+                    if (!empty($office)) {
+                        $package['destination'][MetaKeys::OFFICE_CODE] = $office;
+                    }
+
+                    return $package;
+                },
+                $packages,
+            );
+        }
+
         public static function getCurrentValue(string $valueName, string $defaultValue = null): ?string
         {
             try {
-                $cdekValue = WC()->session->get(Config::DELIVERY_NAME."_$valueName");
+                $cdekValue = WC()->session->get(Config::DELIVERY_NAME . "_$valueName");
                 if (!empty($cdekValue)) {
                     return $cdekValue;
                 }
@@ -59,7 +76,7 @@ namespace Cdek\Helpers {
             }
 
             try {
-                $cdekValue = WC()->customer->get_meta(Config::DELIVERY_NAME."_$valueName");
+                $cdekValue = WC()->customer->get_meta(Config::DELIVERY_NAME . "_$valueName");
 
                 if (!empty($cdekValue)) {
                     return $cdekValue;
@@ -69,56 +86,6 @@ namespace Cdek\Helpers {
             }
 
             return $checkout->get_value($valueName) ?: $defaultValue;
-        }
-
-        public static function passOfficeToCartPackages(array $packages): array {
-            return array_map(
-                static function (array $package) {
-                    $office = CheckoutHelper::getCurrentValue('office_code');
-
-                    if (!empty($office)) {
-                        $package['destination'][MetaKeys::OFFICE_CODE] = $office;
-                    }
-
-                    return $package;
-                },
-                $packages,
-            );
-        }
-
-        public static function getSelectedShippingRate(?WC_Cart $cart = null): ?WC_Shipping_Rate
-        {
-            if (is_null($cart)) {
-                $cart = WC()->cart;
-            }
-
-            if (is_null($cart)) {
-                return null;
-            }
-
-            $methods = $cart->get_shipping_methods();
-
-            if (empty($methods)) {
-                $methods = $cart->calculate_shipping();
-            }
-
-            if (is_null($methods)){
-                return null;
-            }
-
-            foreach ($methods as $method) {
-                assert($method instanceof WC_Shipping_Rate);
-                if (self::isShippingRateSuitable($method)) {
-                    return $method;
-                }
-            }
-
-            return null;
-        }
-
-        public static function isShippingRateSuitable(WC_Shipping_Rate $rate): bool
-        {
-            return $rate->get_method_id() === Config::DELIVERY_NAME;
         }
 
         public static function restoreFields(array $fields): array
@@ -151,6 +118,45 @@ namespace Cdek\Helpers {
             }
 
             return $fields;
+        }
+
+        public static function getSelectedShippingRate(?WC_Cart $cart = null): ?WC_Shipping_Rate
+        {
+            if (is_null($cart)) {
+                $cart = WC()->cart;
+            }
+
+            if (is_null($cart)) {
+                return null;
+            }
+
+            if (method_exists($cart, 'get_shipping_methods')) {
+                $methods = $cart->get_shipping_methods();
+            } else {
+                $methods = [];
+            }
+
+            if (empty($methods)) {
+                $methods = $cart->calculate_shipping();
+            }
+
+            if (is_null($methods)) {
+                return null;
+            }
+
+            foreach ($methods as $method) {
+                assert($method instanceof WC_Shipping_Rate);
+                if (self::isShippingRateSuitable($method)) {
+                    return $method;
+                }
+            }
+
+            return null;
+        }
+
+        public static function isShippingRateSuitable(WC_Shipping_Rate $rate): bool
+        {
+            return $rate->get_method_id() === Config::DELIVERY_NAME;
         }
     }
 }
