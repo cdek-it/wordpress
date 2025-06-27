@@ -2,7 +2,7 @@
 image:
   name: docker-web.cdek.ru/phnodenx-dev-rocky9-8.2
   entrypoint: ['']
-
+#
 stages:
   - sync
   - build
