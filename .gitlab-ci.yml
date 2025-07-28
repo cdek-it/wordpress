@@ -121,6 +121,8 @@ deploy_staging:
 github:
   image: docker-proxy.cdek.ru/bitnami/git:latest
   stage: sync
+  variables:
+    SECURE_FILES_DOWNLOAD_PATH: '~/.ssh/'
   tags:
     - docker
   rules:
@@ -130,8 +132,9 @@ github:
       when: never
     - when: always
   before_script:
+    - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
     - git config checkout.defaultRemote origin
-    - git remote add -f github "https://${GITHUB_AUTH_USERNAME}:${GITHUB_AUTH_TOKEN}@${GITHUB_REPO}" || true
+    - git remote add -f github "${GITHUB_REPO}" || true
   script:
     - git branch -D $CI_COMMIT_REF_NAME || true
     - git checkout --track origin/$CI_COMMIT_REF_NAME
