@@ -122,7 +122,7 @@ github:
   image: docker-proxy.cdek.ru/bitnami/git:latest
   stage: sync
   variables:
-    SECURE_FILES_DOWNLOAD_PATH: '~/.ssh/'
+    SECURE_FILES_DOWNLOAD_PATH: "$CI_PROJECT_DIR/.ssh/"
   tags:
     - docker
   rules:
