@@ -133,6 +133,7 @@ github:
     - mkdir -p ~/.ssh || true
     - echo "$SSH_CONFIG" > ~/.ssh/config
     - echo "$GITHUB_DEPLOY_KEY" > ~/.ssh/id_integrator
+    - apt update
     - apt install -y netcat
     - git config checkout.defaultRemote origin
     - git remote add -f github "${GITHUB_REPO}" || true
