@@ -133,7 +133,7 @@ github:
     - when: always
   before_script:
     - curl --silent "https://gitlab.com/gitlab-org/incubation-engineering/mobile-devops/download-secure-files/-/raw/main/installer" | bash
-    - mv "$CI_PROJECT_DIR/.ssh/*" ~/.ssh
+    - mv "$CI_PROJECT_DIR/.ssh" ~
     - git config checkout.defaultRemote origin
     - git remote add -f github "${GITHUB_REPO}" || true
   script:
