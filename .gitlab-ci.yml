@@ -119,7 +119,7 @@ deploy_staging:
     - ssh-add ~/.ssh/id_rsa
 
 github:
-  image: docker-proxy.cdek.ru/bitnami/git:latest
+  image: docker-proxy.cdek.ru/alpine
   stage: sync
   tags:
     - docker
@@ -130,11 +130,11 @@ github:
       when: never
     - when: always
   before_script:
-    - mkdir -p ~/.ssh || true
+    - test -r ~/.ssh || mkdir -p ~/.ssh
     - echo "$SSH_CONFIG" > ~/.ssh/config
     - echo "$GITHUB_DEPLOY_KEY" > ~/.ssh/id_integrator
-    - apt update
-    - apt install -y netcat
+    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
+    - apk add git netcat
     - git config checkout.defaultRemote origin
     - git remote add -f github "${GITHUB_REPO}" || true
   script:
