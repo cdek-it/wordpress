@@ -134,7 +134,7 @@ github:
     - echo "$SSH_CONFIG" > ~/.ssh/config
     - echo "$GITHUB_DEPLOY_KEY" > ~/.ssh/id_integrator
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
-    - apk add git netcat
+    - apk add --no-cache git netcat
     - git config checkout.defaultRemote origin
     - git remote add -f github "${GITHUB_REPO}" || true
   script:
