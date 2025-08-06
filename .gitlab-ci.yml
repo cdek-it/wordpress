@@ -121,6 +121,8 @@ deploy_staging:
 github:
   image: docker-proxy.cdek.ru/alpine
   stage: sync
+  variables:
+    GIT_DEPTH: 0
   tags:
     - docker
   rules:
@@ -139,9 +141,6 @@ github:
     - git config checkout.defaultRemote origin
     - git remote add -f github "${GITHUB_REPO}" || true
   script:
-    - git branch -D $CI_COMMIT_REF_NAME || true
-    - git checkout --track origin/$CI_COMMIT_REF_NAME
-    - git pull -f --unshallow
     - git fetch github $CI_COMMIT_REF_NAME
     - git branch -u github/$CI_COMMIT_REF_NAME
     - git push
