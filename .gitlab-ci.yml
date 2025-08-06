@@ -141,6 +141,7 @@ github:
     - git config checkout.defaultRemote origin
     - git remote add -f github "${GITHUB_REPO}" || true
   script:
+    - git checkout --track origin/$CI_COMMIT_REF_NAME
     - git fetch github $CI_COMMIT_REF_NAME
     - git branch -u github/$CI_COMMIT_REF_NAME
     - git push
