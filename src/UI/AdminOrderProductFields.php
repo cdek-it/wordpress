@@ -14,9 +14,9 @@ namespace Cdek\UI {
 
     class AdminOrderProductFields
     {
-        public function __invoke(int $itemId, ?WC_Order_Item $item, ?WC_Product $product): void
+        public function __invoke(int $itemId, ?WC_Order_Item $item, $_product): void
         {
-            if ($item === null || $product === null) {
+            if ($item === null) {
                 return;
             }
 
