@@ -83,7 +83,7 @@
   "repositories": [
     {
       "type": "composer",
-      "url": "https://repo.cdek.ru/repository/php-public"
+      "url": "https://repo-proxy.cdek.tech/repository/php-public"
     },
     {
       "packagist.org": false

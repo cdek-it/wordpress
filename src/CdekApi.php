@@ -86,7 +86,7 @@ namespace Cdek {
 
                 if (!isset($body->json()['access_token'])) {
                     throw new LegacyAuthException(array_merge($body->json(), [
-                        'host'   => parse_url($this->apiUrl, PHP_URL_HOST),
+                        'host'   => wp_parse_url($this->apiUrl, PHP_URL_HOST),
                         'client' => $clientId,
                     ]));
                 }
@@ -95,7 +95,7 @@ namespace Cdek {
             } catch (ApiException $e) {
                 throw new LegacyAuthException(
                     array_merge($e->getData(), [
-                        'host'   => parse_url($this->apiUrl, PHP_URL_HOST),
+                        'host'   => wp_parse_url($this->apiUrl, PHP_URL_HOST),
                         'client' => $clientId,
                     ]),
                 );
