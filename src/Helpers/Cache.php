@@ -18,7 +18,7 @@ namespace Cdek\Helpers {
 
         public static function clear(): void
         {
-            unlink(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME);
+            wp_delete_file(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME);
             self::$store = null;
         }
 
