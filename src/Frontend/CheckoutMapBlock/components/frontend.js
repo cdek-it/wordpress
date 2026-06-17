@@ -3,7 +3,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { debounce } from 'lodash';
+import { debounce, isEqual } from 'lodash';
 import { getSetting } from '@woocommerce/settings';
 import cdekWidget from '@cdek-it/widget';
 
@@ -17,7 +17,9 @@ export const Block = ({
 
     const { setExtensionData } = checkoutExtensionData;
 
-    const lastMapKeyRef = useRef(null);
+    const widgetRef = useRef(null);
+    const lastCityRef = useRef(null);
+    const lastOfficesRef = useRef(null);
 
     const {
         setValidationErrors, clearValidationError, getValidationError,
@@ -61,15 +63,15 @@ export const Block = ({
         });
 
         const city = shippingRates[0].destination.city;
-        const mapKey = `${city}|${points}`;
+        const officesRaw = JSON.parse(points);
 
-        if (window.widget === undefined) {
-            window.widget = new cdekWidget({
+        if (widgetRef.current === null) {
+            widgetRef.current = new cdekWidget({
                 apiKey,
                 lang,
                 debug: true,
                 defaultLocation: city,
-                officesRaw: JSON.parse(points),
+                officesRaw,
                 hideDeliveryOptions: {
                     door: true,
                 },
@@ -79,12 +81,15 @@ export const Block = ({
                     clearValidationError('official_cdek_office');
                 },
             });
-            lastMapKeyRef.current = mapKey;
-        } else if (mapKey !== lastMapKeyRef.current) {
-            window.widget.clearSelection();
-            window.widget.updateOfficesRaw(JSON.parse(points));
-            window.widget.updateLocation(city);
-            lastMapKeyRef.current = mapKey;
+            lastCityRef.current = city;
+            lastOfficesRef.current = officesRaw;
+        } else if (city !== lastCityRef.current ||
+          !isEqual(officesRaw, lastOfficesRef.current)) {
+            widgetRef.current.clearSelection();
+            widgetRef.current.updateOfficesRaw(officesRaw);
+            widgetRef.current.updateLocation(city);
+            lastCityRef.current = city;
+            lastOfficesRef.current = officesRaw;
         }
 
         setShowMap(true);
