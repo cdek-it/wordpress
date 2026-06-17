@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { debounce } from 'lodash';
 import { getSetting } from '@woocommerce/settings';
@@ -16,6 +16,8 @@ export const Block = ({
     const [validationError, setValidationError] = useState(null);
 
     const { setExtensionData } = checkoutExtensionData;
+
+    const lastMapKeyRef = useRef(null);
 
     const {
         setValidationErrors, clearValidationError, getValidationError,
@@ -58,12 +60,15 @@ export const Block = ({
             },
         });
 
+        const city = shippingRates[0].destination.city;
+        const mapKey = `${city}|${points}`;
+
         if (window.widget === undefined) {
             window.widget = new cdekWidget({
                 apiKey,
                 lang,
                 debug: true,
-                defaultLocation: shippingRates[0].destination.city,
+                defaultLocation: city,
                 officesRaw: JSON.parse(points),
                 hideDeliveryOptions: {
                     door: true,
@@ -74,10 +79,12 @@ export const Block = ({
                     clearValidationError('official_cdek_office');
                 },
             });
-        } else {
+            lastMapKeyRef.current = mapKey;
+        } else if (mapKey !== lastMapKeyRef.current) {
             window.widget.clearSelection();
             window.widget.updateOfficesRaw(JSON.parse(points));
-            window.widget.updateLocation(shippingRates[0].destination.city);
+            window.widget.updateLocation(city);
+            lastMapKeyRef.current = mapKey;
         }
 
         setShowMap(true);
