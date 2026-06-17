@@ -170,7 +170,7 @@ namespace Cdek\Controllers {
                 wp_die(-2, 403);
             }
 
-            $id = (int)$_REQUEST['id'];
+            $id = (int)wp_unslash($_REQUEST['id']);
 
             $result = IntakeDeleteAction::new()($id);
 

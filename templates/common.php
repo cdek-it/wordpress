@@ -1,4 +1,7 @@
 <?php
+
+defined('ABSPATH') or exit;
+
 /**
  * @var \Cdek\Model\Order $order
  * @var array $meta
@@ -24,7 +27,7 @@ use Cdek\Loader;
     <?php foreach ($meta['errors'] as $error): ?>
         <div class="notice notice-error">
             <p>
-                <?php esc_html_e($error) ?>
+                <?php echo esc_html($error) ?>
             </p>
         </div>
     <?php endforeach ?>
@@ -34,7 +37,7 @@ use Cdek\Loader;
     <?php foreach ($meta['messages'] as $msg): ?>
         <div class="notice notice-info">
             <p>
-                <?php esc_html_e($msg) ?>
+                <?php echo esc_html($msg) ?>
             </p>
         </div>
     <?php endforeach ?>
@@ -44,7 +47,7 @@ use Cdek\Loader;
     <?php foreach ($meta['success'] as $msg): ?>
         <div class="notice notice-success">
             <p>
-                <?php esc_html_e($msg) ?>
+                <?php echo esc_html($msg) ?>
             </p>
         </div>
     <?php endforeach ?>
