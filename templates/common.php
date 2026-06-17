@@ -27,7 +27,7 @@ use Cdek\Loader;
     <?php foreach ($meta['errors'] as $error): ?>
         <div class="notice notice-error">
             <p>
-                <?php echo esc_html($error) ?>
+                <?php esc_html_e($error, 'cdekdelivery') ?>
             </p>
         </div>
     <?php endforeach ?>
@@ -37,7 +37,7 @@ use Cdek\Loader;
     <?php foreach ($meta['messages'] as $msg): ?>
         <div class="notice notice-info">
             <p>
-                <?php echo esc_html($msg) ?>
+                <?php esc_html_e($msg, 'cdekdelivery') ?>
             </p>
         </div>
     <?php endforeach ?>
@@ -47,7 +47,7 @@ use Cdek\Loader;
     <?php foreach ($meta['success'] as $msg): ?>
         <div class="notice notice-success">
             <p>
-                <?php echo esc_html($msg) ?>
+                <?php esc_html_e($msg, 'cdekdelivery') ?>
             </p>
         </div>
     <?php endforeach ?>
