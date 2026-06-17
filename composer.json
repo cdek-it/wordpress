@@ -41,7 +41,6 @@
   },
   "require": {
     "php": "^7.4",
-    "composer/installers": "~2.0",
     "paragonie/paserk": "^1.1",
     "paragonie/paseto": "^2.4"
   },
@@ -52,9 +51,6 @@
   "config": {
     "sort-packages": true,
     "optimize-autoloader": true,
-    "allow-plugins": {
-      "composer/installers": true
-    },
     "platform": {
       "php": "7.4"
     }
@@ -83,7 +79,7 @@
   "repositories": [
     {
       "type": "composer",
-      "url": "https://repo.cdek.ru/repository/php-public"
+      "url": "https://repo-proxy.cdek.tech/repository/php-public"
     },
     {
       "packagist.org": false
