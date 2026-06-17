@@ -205,7 +205,7 @@ namespace Cdek {
                                 'Error receiving token from CDEK API. Contact plugin support. Error code: %s',
                                 'cdekdelivery',
                             ),
-                            $error,
+                            esc_html($error),
                         ),
                     );
                 }

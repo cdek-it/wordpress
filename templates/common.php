@@ -14,7 +14,7 @@ use Cdek\Loader;
 <?php if ($order->isLocked()): ?>
     <div class="notice notice-warning">
         <p>
-            <strong><?php echo Loader::getPluginName() ?>:</strong>
+            <strong><?php echo esc_html(Loader::getPluginName()) ?>:</strong>
             <?php esc_html_e(
                 'Editing of waybill is not available due to a change in the order status in the CDEK system',
                 'cdekdelivery',
