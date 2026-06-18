@@ -278,11 +278,11 @@
         },
         {
             "name": "paragonie/constant_time_encoding",
-            "version": "v2.8.2",
+            "version": "v2.7.0",
             "dist": {
                 "type": "zip",
-                "url": "https://repo-proxy.cdek.tech/repository/php-public/paragonie/constant_time_encoding/v2.8.2/paragonie-constant_time_encoding-v2.8.2.zip",
-                "reference": "e30811f7bc69e4b5b6d5783e712c06c8eabf0226",
+                "url": "https://repo-proxy.cdek.tech/repository/php-public/paragonie/constant_time_encoding/v2.7.0/paragonie-constant_time_encoding-v2.7.0.zip",
+                "reference": "52a0d99e69f56b9ec27ace92ba56897fe6993105",
                 "shasum": ""
             },
             "require": {
@@ -335,28 +335,28 @@
                 "issues": "https://github.com/paragonie/constant_time_encoding/issues",
                 "source": "https://github.com/paragonie/constant_time_encoding"
             },
-            "time": "2025-09-24T15:12:37+00:00"
+            "time": "2024-05-08T12:18:48+00:00"
         },
         {
             "name": "paragonie/easy-ecc",
-            "version": "v1.3.1",
+            "version": "v1.2.0",
             "dist": {
                 "type": "zip",
-                "url": "https://repo-proxy.cdek.tech/repository/php-public/paragonie/easy-ecc/v1.3.1/paragonie-easy-ecc-v1.3.1.zip",
-                "reference": "ee588d73919f18ee27789ec1f0af2025fe74406a",
+                "url": "https://repo-proxy.cdek.tech/repository/php-public/paragonie/easy-ecc/v1.2.0/paragonie-easy-ecc-v1.2.0.zip",
+                "reference": "0af6405f5c7ce9c98594783a5c3aaf4ffb674bee",
                 "shasum": ""
             },
             "require": {
                 "defuse/php-encryption": "^2.4",
                 "ext-gmp": "*",
                 "paragonie/constant_time_encoding": "^2.7|^3",
-                "paragonie/ecc": "^2.5",
+                "paragonie/ecc": "^2.3",
                 "paragonie/sodium_compat": "^1|^2",
                 "php": "^7.1|^8"
             },
             "require-dev": {
                 "phpunit/phpunit": "^7|^8|^9",
-                "vimeo/psalm": "^1|^3|^4|^5|^6"
+                "vimeo/psalm": "^1|^3|^4|^5"
             },
             "type": "library",
             "autoload": {
@@ -384,15 +384,15 @@
                 "issues": "https://github.com/paragonie/ionizer/issues",
                 "source": "https://github.com/paragonie/ionizer"
             },
-            "time": "2025-10-22T18:38:57+00:00"
+            "time": "2024-09-03T23:43:50+00:00"
         },
         {
             "name": "paragonie/ecc",
-            "version": "v2.5.0",
+            "version": "v2.4.0",
             "dist": {
                 "type": "zip",
-                "url": "https://repo-proxy.cdek.tech/repository/php-public/paragonie/ecc/v2.5.0/paragonie-ecc-v2.5.0.zip",
-                "reference": "d25bd2aab9b1205db1cf3aa3e83531d4549377bf",
+                "url": "https://repo-proxy.cdek.tech/repository/php-public/paragonie/ecc/v2.4.0/paragonie-ecc-v2.4.0.zip",
+                "reference": "fdba22a506492eb6e5fe38c501c0df61eaf0b54c",
                 "shasum": ""
             },
             "require": {
@@ -402,13 +402,11 @@
                 "php": "^7.1||^8.0"
             },
             "require-dev": {
-                "bitcoin/bips": "dev-master",
-                "c2sp/wycheproof": "dev-master",
                 "ext-json": "*",
                 "phpunit/phpunit": "^6|^7|^8|^9",
                 "squizlabs/php_codesniffer": "^2|^3",
-                "symfony/yaml": "^2.6|^3.0|^4|^5|^6|^7",
-                "vimeo/psalm": "^2|^3|^4|^5|^6"
+                "symfony/yaml": "^2.6|^3.0|^4",
+                "vimeo/psalm": "^2|^3|^4|^5"
             },
             "suggest": {
                 "ext-openssl": "(PHP 8.1, OpenSSL 3+) Improved performance, less worries about side-channels"
@@ -466,9 +464,9 @@
             ],
             "support": {
                 "issues": "https://github.com/paragonie/phpecc/issues",
-                "source": "https://github.com/paragonie/phpecc/tree/v2.5.0"
+                "source": "https://github.com/paragonie/phpecc/tree/v2.4.0"
             },
-            "time": "2025-07-19T01:25:49+00:00"
+            "time": "2025-01-21T17:53:03+00:00"
         },
         {
             "name": "paragonie/hidden-string",
@@ -731,11 +729,11 @@
         },
         {
             "name": "phpseclib/phpseclib",
-            "version": "2.0.55",
+            "version": "2.0.54",
             "dist": {
                 "type": "zip",
-                "url": "https://repo-proxy.cdek.tech/repository/php-public/phpseclib/phpseclib/2.0.55/phpseclib-phpseclib-2.0.55.zip",
-                "reference": "d73c9e019a895be83b18a2ccccfa7e2b0a648743",
+                "url": "https://repo-proxy.cdek.tech/repository/php-public/phpseclib/phpseclib/2.0.54/phpseclib-phpseclib-2.0.54.zip",
+                "reference": "a96a835067c39ee7a709329fe70869817da18081",
                 "shasum": ""
             },
             "require": {
@@ -815,7 +813,7 @@
             ],
             "support": {
                 "issues": "https://github.com/phpseclib/phpseclib/issues",
-                "source": "https://github.com/phpseclib/phpseclib/tree/2.0.55"
+                "source": "https://github.com/phpseclib/phpseclib/tree/2.0.54"
             },
             "funding": [
                 {
@@ -831,7 +829,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-06-14T19:53:12+00:00"
+            "time": "2026-04-27T06:59:24+00:00"
         }
     ],
     "packages-dev": [
@@ -964,11 +962,11 @@
         },
         {
             "name": "gettext/languages",
-            "version": "2.12.2",
+            "version": "2.10.0",
             "dist": {
                 "type": "zip",
-                "url": "https://repo-proxy.cdek.tech/repository/php-public/gettext/languages/2.12.2/gettext-languages-2.12.2.zip",
-                "reference": "079d6f4842cbcbf5673a70d8e93169a684e7aadd",
+                "url": "https://repo-proxy.cdek.tech/repository/php-public/gettext/languages/2.10.0/gettext-languages-2.10.0.zip",
+                "reference": "4d61d67fe83a2ad85959fe6133d6d9ba7dddd1ab",
                 "shasum": ""
             },
             "require": {
@@ -978,8 +976,7 @@
                 "phpunit/phpunit": "^4.8 || ^5.7 || ^6.5 || ^7.5 || ^8.4"
             },
             "bin": [
-                "bin/export-plural-rules",
-                "bin/import-cldr-data"
+                "bin/export-plural-rules"
             ],
             "type": "library",
             "autoload": {
@@ -1017,7 +1014,7 @@
             ],
             "support": {
                 "issues": "https://github.com/php-gettext/Languages/issues",
-                "source": "https://github.com/php-gettext/Languages/tree/2.12.2"
+                "source": "https://github.com/php-gettext/Languages/tree/2.10.0"
             },
             "funding": [
                 {
@@ -1029,15 +1026,15 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-02-23T14:05:50+00:00"
+            "time": "2022-10-18T15:00:10+00:00"
         },
         {
             "name": "mck89/peast",
-            "version": "v1.17.6",
+            "version": "v1.16.3",
             "dist": {
                 "type": "zip",
-                "url": "https://repo-proxy.cdek.tech/repository/php-public/mck89/peast/v1.17.6/mck89-peast-v1.17.6.zip",
-                "reference": "b8b4184b1e6912669f9af155caef9050509d9f18",
+                "url": "https://repo-proxy.cdek.tech/repository/php-public/mck89/peast/v1.16.3/mck89-peast-v1.16.3.zip",
+                "reference": "645ec21b650bc2aced18285c85f220d22afc1430",
                 "shasum": ""
             },
             "require": {
@@ -1050,7 +1047,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.17.6-dev"
+                    "dev-master": "1.16.3-dev"
                 }
             },
             "autoload": {
@@ -1070,9 +1067,53 @@
             "description": "Peast is PHP library that generates AST for JavaScript code",
             "support": {
                 "issues": "https://github.com/mck89/peast/issues",
-                "source": "https://github.com/mck89/peast/tree/v1.17.6"
+                "source": "https://github.com/mck89/peast/tree/v1.16.3"
             },
-            "time": "2026-04-24T08:04:05+00:00"
+            "time": "2024-07-23T14:00:32+00:00"
+        },
+        {
+            "name": "mustache/mustache",
+            "version": "v2.14.2",
+            "dist": {
+                "type": "zip",
+                "url": "https://repo-proxy.cdek.tech/repository/php-public/mustache/mustache/v2.14.2/mustache-mustache-v2.14.2.zip",
+                "reference": "e62b7c3849d22ec55f3ec425507bf7968193a6cb",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.4"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "~1.11",
+                "phpunit/phpunit": "~3.7|~4.0|~5.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Mustache": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Justin Hileman",
+                    "email": "justin@justinhileman.info",
+                    "homepage": "http://justinhileman.com"
+                }
+            ],
+            "description": "A Mustache implementation in PHP.",
+            "homepage": "https://github.com/bobthecow/mustache.php",
+            "keywords": [
+                "mustache",
+                "templating"
+            ],
+            "support": {
+                "issues": "https://github.com/bobthecow/mustache.php/issues",
+                "source": "https://github.com/bobthecow/mustache.php/tree/v2.14.2"
+            },
+            "time": "2022-08-23T13:07:01+00:00"
         },
         {
             "name": "roave/security-advisories",
@@ -2284,11 +2325,11 @@
         },
         {
             "name": "symfony/polyfill-php80",
-            "version": "v1.37.0",
+            "version": "v1.31.0",
             "dist": {
                 "type": "zip",
-                "url": "https://repo-proxy.cdek.tech/repository/php-public/symfony/polyfill-php80/v1.37.0/symfony-polyfill-php80-v1.37.0.zip",
-                "reference": "dfb55726c3a76ea3b6459fcfda1ec2d80a682411",
+                "url": "https://repo-proxy.cdek.tech/repository/php-public/symfony/polyfill-php80/v1.31.0/symfony-polyfill-php80-v1.31.0.zip",
+                "reference": "60328e362d4c2c802a54fcbf04f9d3fb892b4cf8",
                 "shasum": ""
             },
             "require": {
@@ -2338,7 +2379,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php80/tree/v1.37.0"
+                "source": "https://github.com/symfony/polyfill-php80/tree/v1.31.0"
             },
             "funding": [
                 {
@@ -2350,34 +2391,30 @@
                     "type": "github"
                 },
                 {
-                    "url": "https://github.com/nicolas-grekas",
-                    "type": "github"
-                },
-                {
                     "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-10T16:19:22+00:00"
+            "time": "2024-09-09T11:45:10+00:00"
         },
         {
             "name": "wp-cli/i18n-command",
-            "version": "v2.7.0",
+            "version": "v2.6.3",
             "dist": {
                 "type": "zip",
-                "url": "https://repo-proxy.cdek.tech/repository/php-public/wp-cli/i18n-command/v2.7.0/wp-cli-i18n-command-v2.7.0.zip",
-                "reference": "e91e6903d212486e32ed2c916171f661bfc539ce",
+                "url": "https://repo-proxy.cdek.tech/repository/php-public/wp-cli/i18n-command/v2.6.3/wp-cli-i18n-command-v2.6.3.zip",
+                "reference": "065bb3758fcbff922f1b7a01ab702aab0da79803",
                 "shasum": ""
             },
             "require": {
                 "eftec/bladeone": "3.52",
                 "gettext/gettext": "^4.8",
                 "mck89/peast": "^1.13.11",
-                "wp-cli/wp-cli": "^2.12"
+                "wp-cli/wp-cli": "^2.5"
             },
             "require-dev": {
                 "wp-cli/scaffold-command": "^1.2 || ^2",
-                "wp-cli/wp-cli-tests": "^5.0.0"
+                "wp-cli/wp-cli-tests": "^4"
             },
             "suggest": {
                 "ext-json": "Used for reading and generating JSON translation files",
@@ -2388,7 +2425,6 @@
                 "bundled": true,
                 "commands": [
                     "i18n",
-                    "i18n audit",
                     "i18n make-pot",
                     "i18n make-json",
                     "i18n make-mo",
@@ -2420,63 +2456,17 @@
             "homepage": "https://github.com/wp-cli/i18n-command",
             "support": {
                 "issues": "https://github.com/wp-cli/i18n-command/issues",
-                "source": "https://github.com/wp-cli/i18n-command/tree/v2.7.0"
+                "source": "https://github.com/wp-cli/i18n-command/tree/v2.6.3"
             },
-            "time": "2026-03-16T17:13:39+00:00"
-        },
-        {
-            "name": "wp-cli/mustache",
-            "version": "v2.14.99",
-            "dist": {
-                "type": "zip",
-                "url": "https://repo-proxy.cdek.tech/repository/php-public/wp-cli/mustache/v2.14.99/wp-cli-mustache-v2.14.99.zip",
-                "reference": "ca23b97ac35fbe01c160549eb634396183d04a59",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.6"
-            },
-            "replace": {
-                "mustache/mustache": "^2.14.2"
-            },
-            "require-dev": {
-                "friendsofphp/php-cs-fixer": "~2.19.3",
-                "yoast/phpunit-polyfills": "^2.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Mustache": "src/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Justin Hileman",
-                    "email": "justin@justinhileman.info",
-                    "homepage": "http://justinhileman.com"
-                }
-            ],
-            "description": "A Mustache implementation in PHP.",
-            "homepage": "https://github.com/bobthecow/mustache.php",
-            "keywords": [
-                "mustache",
-                "templating"
-            ],
-            "support": {
-                "source": "https://github.com/wp-cli/mustache.php/tree/v2.14.99"
-            },
-            "time": "2025-05-06T16:15:37+00:00"
+            "time": "2024-10-01T11:16:25+00:00"
         },
         {
             "name": "wp-cli/mustangostang-spyc",
-            "version": "0.6.6",
+            "version": "0.6.3",
             "dist": {
                 "type": "zip",
-                "url": "https://repo-proxy.cdek.tech/repository/php-public/wp-cli/mustangostang-spyc/0.6.6/wp-cli-mustangostang-spyc-0.6.6.zip",
-                "reference": "30f25baaaba939caaff1f4b8c7ed998632f59fe2",
+                "url": "https://repo-proxy.cdek.tech/repository/php-public/wp-cli/mustangostang-spyc/0.6.3/wp-cli-mustangostang-spyc-0.6.3.zip",
+                "reference": "6aa0b4da69ce9e9a2c8402dab8d43cf32c581cc7",
                 "shasum": ""
             },
             "require": {
@@ -2511,30 +2501,30 @@
             "description": "A simple YAML loader/dumper class for PHP (WP-CLI fork)",
             "homepage": "https://github.com/mustangostang/spyc/",
             "support": {
-                "source": "https://github.com/wp-cli/spyc/tree/0.6.6"
+                "source": "https://github.com/wp-cli/spyc/tree/autoload"
             },
-            "time": "2026-03-12T12:30:41+00:00"
+            "time": "2017-04-25T11:26:20+00:00"
         },
         {
             "name": "wp-cli/php-cli-tools",
-            "version": "v0.12.9",
+            "version": "v0.11.22",
             "dist": {
                 "type": "zip",
-                "url": "https://repo-proxy.cdek.tech/repository/php-public/wp-cli/php-cli-tools/v0.12.9/wp-cli-php-cli-tools-v0.12.9.zip",
-                "reference": "c3d25138ce46a66647ec0dc9b17bf300338494aa",
+                "url": "https://repo-proxy.cdek.tech/repository/php-public/wp-cli/php-cli-tools/v0.11.22/wp-cli-php-cli-tools-v0.11.22.zip",
+                "reference": "a6bb94664ca36d0962f9c2ff25591c315a550c51",
                 "shasum": ""
             },
             "require": {
-                "php": ">= 7.2.24"
+                "php": ">= 5.3.0"
             },
             "require-dev": {
                 "roave/security-advisories": "dev-latest",
-                "wp-cli/wp-cli-tests": "^5"
+                "wp-cli/wp-cli-tests": "^4"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "0.12.x-dev"
+                    "dev-master": "0.11.x-dev"
                 }
             },
             "autoload": {
@@ -2568,33 +2558,34 @@
             ],
             "support": {
                 "issues": "https://github.com/wp-cli/php-cli-tools/issues",
-                "source": "https://github.com/wp-cli/php-cli-tools/tree/v0.12.9"
+                "source": "https://github.com/wp-cli/php-cli-tools/tree/v0.11.22"
             },
-            "time": "2026-03-29T11:12:54+00:00"
+            "time": "2023-12-03T19:25:05+00:00"
         },
         {
             "name": "wp-cli/wp-cli",
-            "version": "v2.12.0",
+            "version": "v2.11.0",
             "dist": {
                 "type": "zip",
-                "url": "https://repo-proxy.cdek.tech/repository/php-public/wp-cli/wp-cli/v2.12.0/wp-cli-wp-cli-v2.12.0.zip",
-                "reference": "03d30d4138d12b4bffd8b507b82e56e129e0523f",
+                "url": "https://repo-proxy.cdek.tech/repository/php-public/wp-cli/wp-cli/v2.11.0/wp-cli-wp-cli-v2.11.0.zip",
+                "reference": "53f0df112901fcf95099d0f501912a209429b6a9",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
+                "mustache/mustache": "^2.14.1",
                 "php": "^5.6 || ^7.0 || ^8.0",
                 "symfony/finder": ">2.7",
-                "wp-cli/mustache": "^2.14.99",
                 "wp-cli/mustangostang-spyc": "^0.6.3",
-                "wp-cli/php-cli-tools": "~0.12.4"
+                "wp-cli/php-cli-tools": "~0.11.2"
             },
             "require-dev": {
+                "roave/security-advisories": "dev-latest",
                 "wp-cli/db-command": "^1.3 || ^2",
                 "wp-cli/entity-command": "^1.2 || ^2",
                 "wp-cli/extension-command": "^1.1 || ^2",
                 "wp-cli/package-command": "^1 || ^2",
-                "wp-cli/wp-cli-tests": "^4.3.10"
+                "wp-cli/wp-cli-tests": "^4.0.1"
             },
             "suggest": {
                 "ext-readline": "Include for a better --prompt implementation",
@@ -2607,7 +2598,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "2.12.x-dev"
+                    "dev-main": "2.11.x-dev"
                 }
             },
             "autoload": {
@@ -2633,7 +2624,7 @@
                 "issues": "https://github.com/wp-cli/wp-cli/issues",
                 "source": "https://github.com/wp-cli/wp-cli"
             },
-            "time": "2025-05-07T01:16:12+00:00"
+            "time": "2024-08-08T03:04:55+00:00"
         }
     ],
     "aliases": [],
