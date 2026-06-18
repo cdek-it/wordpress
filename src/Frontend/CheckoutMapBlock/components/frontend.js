@@ -20,6 +20,7 @@ export const Block = ({
     const widgetRef = useRef(null);
     const lastCityRef = useRef(null);
     const lastOfficesRef = useRef(null);
+    const lastOfficeCodeRef = useRef(null);
 
     const {
         setValidationErrors, clearValidationError, getValidationError,
@@ -76,6 +77,7 @@ export const Block = ({
                     door: true,
                 },
                 onChoose(_type, _tariff, address) {
+                    lastOfficeCodeRef.current = address.code;
                     debouncedSetExtensionData('official_cdek', 'office_code',
                       address.code);
                     clearValidationError('official_cdek_office');
@@ -83,13 +85,17 @@ export const Block = ({
             });
             lastCityRef.current = city;
             lastOfficesRef.current = officesRaw;
-        } else if (city !== lastCityRef.current ||
-          !isEqual(officesRaw, lastOfficesRef.current)) {
+        } else if (city !== lastCityRef.current || !isEqual(officesRaw, lastOfficesRef.current)) {
             widgetRef.current.clearSelection();
             widgetRef.current.updateOfficesRaw(officesRaw);
             widgetRef.current.updateLocation(city);
             lastCityRef.current = city;
             lastOfficesRef.current = officesRaw;
+            lastOfficeCodeRef.current = null;
+        } else if (lastOfficeCodeRef.current !== null) {
+            debouncedSetExtensionData('official_cdek', 'office_code',
+              lastOfficeCodeRef.current);
+            clearValidationError('official_cdek_office');
         }
 
         setShowMap(true);
