@@ -21,6 +21,7 @@ export const Block = ({
     const lastCityRef = useRef(null);
     const lastOfficesRef = useRef(null);
     const lastOfficeCodeRef = useRef(null);
+    const isOfficeModeRef = useRef(false);
 
     const {
         setValidationErrors, clearValidationError, getValidationError,
@@ -32,7 +33,9 @@ export const Block = ({
 
     const debouncedMapRender = useCallback(debounce((shippingRates, points) => {
         if (points === '' || !cart.cartNeedsShipping) {
+            isOfficeModeRef.current = false;
             lastOfficeCodeRef.current = null;
+            widgetRef.current?.clearSelection();
             debouncedSetExtensionData('official_cdek', 'office_code', null);
             clearValidationError('official_cdek_office');
             return;
@@ -45,7 +48,9 @@ export const Block = ({
         if (!selectedRate ||
           !Object.prototype.hasOwnProperty.call(selectedRate, 'method_id') ||
           selectedRate.method_id !== 'official_cdek') {
+            isOfficeModeRef.current = false;
             lastOfficeCodeRef.current = null;
+            widgetRef.current?.clearSelection();
             debouncedSetExtensionData('official_cdek', 'office_code', null);
             clearValidationError('official_cdek_office');
             return;
@@ -53,18 +58,24 @@ export const Block = ({
 
         if (officeDeliveryModes.indexOf(parseInt(selectedRate.meta_data.find(
           (meta) => meta.key === '_official_cdek_tariff_mode').value)) === -1) {
+            isOfficeModeRef.current = false;
             lastOfficeCodeRef.current = null;
+            widgetRef.current?.clearSelection();
             debouncedSetExtensionData('official_cdek', 'office_code', null);
             clearValidationError('official_cdek_office');
             return;
         }
 
-        setValidationErrors({
-            ['official_cdek_office']: {
-                message: __('Choose pick-up', 'cdekdelivery'),
-                hidden: true,
-            },
-        });
+        isOfficeModeRef.current = true;
+
+        if (lastOfficeCodeRef.current === null) {
+            setValidationErrors({
+                ['official_cdek_office']: {
+                    message: __('Choose pick-up', 'cdekdelivery'),
+                    hidden: true,
+                },
+            });
+        }
 
         const city = shippingRates[0].destination.city;
         const officesRaw = JSON.parse(points);
@@ -80,6 +91,9 @@ export const Block = ({
                     door: true,
                 },
                 onChoose(_type, _tariff, address) {
+                    if (!isOfficeModeRef.current) {
+                        return;
+                    }
                     lastOfficeCodeRef.current = address.code;
                     debouncedSetExtensionData('official_cdek', 'office_code',
                       address.code);
