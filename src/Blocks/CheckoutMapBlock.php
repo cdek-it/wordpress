@@ -93,21 +93,10 @@ namespace Cdek\Blocks {
 
         public static function extend_checkout_data(): array
         {
-            $officeCode = null;
-
             try {
-                $body = file_get_contents('php://input');
-
-                if (!empty($body)) {
-                    $request    = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
-                    $officeCode = $request['extensions'][Config::DELIVERY_NAME]['office_code'] ?? null;
-
-                    try {
-                        WC()->session->set(Config::DELIVERY_NAME.'_office_code', $officeCode);
-                    } catch (Throwable $e) {
-                    }
-                }
-            } catch (JsonException $e) {
+                $officeCode = WC()->session->get(Config::DELIVERY_NAME.'_office_code') ?: null;
+            } catch (Throwable $e) {
+                $officeCode = null;
             }
 
             return [
@@ -137,8 +126,15 @@ namespace Cdek\Blocks {
                 return;
             }
 
+            $officeCode = $request['extensions'][Config::DELIVERY_NAME]['office_code'] ?? null;
+
+            try {
+                WC()->session->set(Config::DELIVERY_NAME.'_office_code', $officeCode);
+            } catch (Throwable $e) {
+            }
+
             if (Tariff::isToOffice((int)$shipping->tariff)) {
-                $shipping->office = $request['extensions'][Config::DELIVERY_NAME]['office_code'];
+                $shipping->office = $officeCode;
             } else {
                 $shipping->office = null;
             }
