@@ -21,6 +21,7 @@ build_tag:
   variables:
     YARN_CACHE_FOLDER: .yarn/cache
     YARN_ENABLE_GLOBAL_CACHE: "false"
+    npm_config_cache: .npm
 
   cache:
     key:
@@ -30,6 +31,7 @@ build_tag:
     paths:
       - .yarn/cache/
       - .yarn/install-state.gz
+      - .npm/_prebuilds/
     policy: pull-push
 
   before_script:
