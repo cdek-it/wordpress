@@ -111,6 +111,7 @@ export const Block = ({
             lastOfficesRef.current = officesRaw;
             lastOfficeCodeRef.current = null;
         } else if (lastOfficeCodeRef.current !== null) {
+            debouncedSetExtensionData('official_cdek', 'office_code', lastOfficeCodeRef.current);
             clearValidationError('official_cdek_office');
         }
 
