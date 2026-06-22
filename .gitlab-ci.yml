@@ -17,24 +17,57 @@ build_tag:
     - docker
   only:
     - tags
+
+  variables:
+    YARN_CACHE_FOLDER: .yarn/cache
+    YARN_ENABLE_GLOBAL_CACHE: "false"
+    npm_config_cache: .npm
+
+  cache:
+    key:
+      files:
+        - yarn.lock
+        - package.json
+    paths:
+      - .yarn/cache/
+      - .yarn/install-state.gz
+      - .npm/_prebuilds/
+    policy: pull-push
+
   before_script:
     - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
-    - apk add nodejs-current yarn
+    - apk add nodejs-current
     - curl -v -sS https://getcomposer.org/installer | php
     - mv composer.phar /usr/local/bin/composer
-    - corepack enable
+
   script:
     - sed -i "s/\(Version:\)\( *\).*/\1\2${RELEASE_VERSION}/" cdek.php
     - sed -i "s/\(Stable tag:\)\( *\).*/\1\2${RELEASE_VERSION}/" README.md
     - sed -i "s/\(Project-Id-Version:\)\( *\).*/\1\2CDEKDelivery ${RELEASE_VERSION}\"/" lang/cdekdelivery.pot
-    - yarn
-    - yarn build
+    - |
+      for attempt in 1 2 3; do
+        echo "Yarn install attempt ${attempt}/3"
+
+        if node .yarn/releases/yarn-4.8.1.cjs install --immutable --inline-builds; then
+          break
+        fi
+
+        if [ "$attempt" -eq 3 ]; then
+          echo "Yarn install failed after 3 attempts"
+          exit 1
+        fi
+
+        echo "Yarn install failed, retrying in 20 seconds..."
+        sleep 20
+      done
+    - node .yarn/releases/yarn-4.8.1.cjs build
     - rm -rf node_modules
     - composer remove --no-install --ignore-platform-req=ext-gmp composer/installers
     - composer i -a --no-dev --ignore-platform-req=ext-gmp
     - php -r '$d = json_decode(file_get_contents("composer.json"), true); unset($d["repositories"]); file_put_contents("composer.json", json_encode($d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);'
     - composer archive -f zip --file=cdek
+
   artifacts:
     name: cdek-integration
     paths:

@@ -94,24 +94,13 @@ namespace Cdek\Blocks {
         public static function extend_checkout_data(): array
         {
             try {
-                $request    = json_decode(file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);
-                $officeCode = $request['extensions'][Config::DELIVERY_NAME]['office_code'] ?? null;
-
-                if ($officeCode !== null) {
-                    try {
-                        WC()->session->set(Config::DELIVERY_NAME.'_office_code', $officeCode);
-                    } catch (Throwable $e) {
-                    }
-
-                    return [
-                        'office_code' => $officeCode,
-                    ];
-                }
-            } catch (JsonException $e) {
+                $officeCode = WC()->session->get(Config::DELIVERY_NAME.'_office_code') ?: null;
+            } catch (Throwable $e) {
+                $officeCode = null;
             }
 
             return [
-                'office_code' => null,
+                'office_code' => $officeCode,
             ];
         }
 
@@ -137,10 +126,19 @@ namespace Cdek\Blocks {
                 return;
             }
 
-            if (Tariff::isToOffice((int)$shipping->tariff)) {
-                $shipping->office = $request['extensions'][Config::DELIVERY_NAME]['office_code'];
-                $shipping->save();
+            $officeCode = $request['extensions'][Config::DELIVERY_NAME]['office_code'] ?? null;
+
+            try {
+                WC()->session->set(Config::DELIVERY_NAME.'_office_code', $officeCode);
+            } catch (Throwable $e) {
             }
+
+            if (Tariff::isToOffice((int)$shipping->tariff)) {
+                $shipping->office = $officeCode;
+            } else {
+                $shipping->office = null;
+            }
+            $shipping->save();
         }
 
         public function get_editor_script_handles(): array
