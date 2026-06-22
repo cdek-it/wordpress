@@ -75,6 +75,7 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 * WP-211 Fixed error with shipment creation on new checkout due to missing office
 * WP-214 Fixed critical error on plugin activation and checkout
 * WP-230 Fixed error with deleted from stock items
+* WP-282 Fixed the pickup point selection reset
 
 = 4.1 =
 * WP-97 Cdek delivery logger
