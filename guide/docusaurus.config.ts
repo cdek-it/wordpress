@@ -90,7 +90,7 @@ const config: Config = {
     algolia: {
       appId: 'X22O3RCFN8',
       apiKey: '66bf4ae3650f1b4b010e61f4d442186f',
-      indexName: 'cdek-itio',
+      indexName: 'wordpress',
     },
     navbar: {
       hideOnScroll: true,
