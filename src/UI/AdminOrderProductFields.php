@@ -46,6 +46,7 @@ namespace Cdek\UI {
             echo '<br/>';
 
             if (empty($jewel_uin_value)){
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_render_action_buttons() escapes internally
                 echo wc_render_action_buttons(
                     [
                         [
@@ -73,6 +74,7 @@ namespace Cdek\UI {
                 ]
             );
 
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_render_action_buttons() escapes internally
             echo wc_render_action_buttons(
                 [
                     [

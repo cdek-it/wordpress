@@ -93,6 +93,7 @@ namespace Cdek {
 
                 return $body->json()['access_token'];
             } catch (ApiException $e) {
+                // phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- values are escaped individually via esc_html() above
                 throw new LegacyAuthException(
                     array_merge(
                         array_map(
@@ -105,6 +106,7 @@ namespace Cdek {
                         ],
                     ),
                 );
+                // phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
             }
         }
 

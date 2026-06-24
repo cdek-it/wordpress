@@ -64,7 +64,7 @@ namespace Cdek\Transport {
             }
 
             if ($result->getStatusCode() === 422) {
-                // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- values are escaped individually via esc_html() above
+                // phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- values are escaped individually via esc_html() above
                 throw new InvalidRequestException(
                     array_map(
                         static fn($field) => is_array($field) ? $field : esc_html((string) $field),
@@ -72,6 +72,7 @@ namespace Cdek\Transport {
                     ),
                     Loader::debug() ? $data : null,
                 );
+                // phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
             }
 
             if ($result->getStatusCode() === 404) {
@@ -83,7 +84,7 @@ namespace Cdek\Transport {
             }
 
             if (!$result->missInvalidLegacyRequest()) {
-                // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- values are escaped individually via esc_html() above
+                // phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- values are escaped individually via esc_html() above
                 throw new InvalidRequestException(
                     array_map(
                         static fn($err) => is_array($err) ? $err : esc_html((string) $err),
@@ -91,16 +92,18 @@ namespace Cdek\Transport {
                     ),
                     Loader::debug() ? $data : null,
                 );
+                // phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
             }
 
             if ($result->isClientError()) {
-                // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- values are escaped individually via esc_html() above
+                // phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- values are escaped individually via esc_html() above
                 throw new HttpClientException(
                     array_map(
                         static fn($value) => is_array($value) ? $value : esc_html((string) $value),
                         $result->error() ?? [],
                     ),
                 );
+                // phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
             }
 
             return $result;

@@ -40,6 +40,7 @@ class ExceptionHandler {
             self::escapeData($e->getData()),
         );
 
+        // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $error data is pre-escaped above, wp_die() handles WP_Error safely
         wp_die($error, '', $e->getStatusCode());
     }
 
