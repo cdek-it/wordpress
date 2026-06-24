@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { debounce } from 'lodash';
+import { debounce, isEqual } from 'lodash';
 import { getSetting } from '@woocommerce/settings';
 import cdekWidget from '@cdek-it/widget';
 
@@ -17,6 +17,12 @@ export const Block = ({
 
     const { setExtensionData } = checkoutExtensionData;
 
+    const widgetRef = useRef(null);
+    const lastCityRef = useRef(null);
+    const lastOfficesRef = useRef(null);
+    const lastOfficeCodeRef = useRef(null);
+    const isOfficeModeRef = useRef(false);
+
     const {
         setValidationErrors, clearValidationError, getValidationError,
     } = validation;
@@ -27,6 +33,9 @@ export const Block = ({
 
     const debouncedMapRender = useCallback(debounce((shippingRates, points) => {
         if (points === '' || !cart.cartNeedsShipping) {
+            isOfficeModeRef.current = false;
+            lastOfficeCodeRef.current = null;
+            widgetRef.current?.clearSelection();
             debouncedSetExtensionData('official_cdek', 'office_code', null);
             clearValidationError('official_cdek_office');
             return;
@@ -39,6 +48,9 @@ export const Block = ({
         if (!selectedRate ||
           !Object.prototype.hasOwnProperty.call(selectedRate, 'method_id') ||
           selectedRate.method_id !== 'official_cdek') {
+            isOfficeModeRef.current = false;
+            lastOfficeCodeRef.current = null;
+            widgetRef.current?.clearSelection();
             debouncedSetExtensionData('official_cdek', 'office_code', null);
             clearValidationError('official_cdek_office');
             return;
@@ -46,38 +58,61 @@ export const Block = ({
 
         if (officeDeliveryModes.indexOf(parseInt(selectedRate.meta_data.find(
           (meta) => meta.key === '_official_cdek_tariff_mode').value)) === -1) {
+            isOfficeModeRef.current = false;
+            lastOfficeCodeRef.current = null;
+            widgetRef.current?.clearSelection();
             debouncedSetExtensionData('official_cdek', 'office_code', null);
             clearValidationError('official_cdek_office');
             return;
         }
 
-        setValidationErrors({
-            ['official_cdek_office']: {
-                message: __('Choose pick-up', 'cdekdelivery'),
-                hidden: true,
-            },
-        });
+        isOfficeModeRef.current = true;
 
-        if (window.widget === undefined) {
-            window.widget = new cdekWidget({
+        if (lastOfficeCodeRef.current === null) {
+            setValidationErrors({
+                ['official_cdek_office']: {
+                    message: __('Choose pick-up', 'cdekdelivery'),
+                    hidden: true,
+                },
+            });
+        }
+
+        const city = shippingRates[0].destination.city;
+        const officesRaw = JSON.parse(points);
+
+        if (widgetRef.current === null) {
+            widgetRef.current = new cdekWidget({
                 apiKey,
                 lang,
                 debug: true,
-                defaultLocation: shippingRates[0].destination.city,
-                officesRaw: JSON.parse(points),
+                defaultLocation: city,
+                officesRaw,
                 hideDeliveryOptions: {
                     door: true,
                 },
                 onChoose(_type, _tariff, address) {
+                    if (!isOfficeModeRef.current) {
+                        return;
+                    }
+                    lastOfficeCodeRef.current = address.code;
                     debouncedSetExtensionData('official_cdek', 'office_code',
                       address.code);
                     clearValidationError('official_cdek_office');
                 },
             });
-        } else {
-            window.widget.clearSelection();
-            window.widget.updateOfficesRaw(JSON.parse(points));
-            window.widget.updateLocation(shippingRates[0].destination.city);
+            lastCityRef.current = city;
+            lastOfficesRef.current = officesRaw;
+        } else if (city !== lastCityRef.current ||
+            !isEqual(officesRaw, lastOfficesRef.current)) {
+            widgetRef.current.clearSelection();
+            widgetRef.current.updateOfficesRaw(officesRaw);
+            widgetRef.current.updateLocation(city);
+            lastCityRef.current = city;
+            lastOfficesRef.current = officesRaw;
+            lastOfficeCodeRef.current = null;
+        } else if (lastOfficeCodeRef.current !== null) {
+            debouncedSetExtensionData('official_cdek', 'office_code', lastOfficeCodeRef.current);
+            clearValidationError('official_cdek_office');
         }
 
         setShowMap(true);
