@@ -34,8 +34,19 @@ class ExceptionHandler {
 
         // WP_Error при выводе на экран съедает часть data 0 ошибки, поэтому оригинальную ошибку добавляем 1
         $error = new WP_Error('cdek_error', 'Error happened at ' . Loader::getPluginName());
-        $error->add($e->getKey(), $e->getMessage(), $e->getData());
+        $error->add(
+            $e->getKey(),
+            esc_html($e->getMessage()),
+            self::escapeData($e->getData()),
+        );
 
         wp_die($error, '', $e->getStatusCode());
+    }
+
+    private static function escapeData(array $data): array {
+        return array_map(
+            static fn($value) => is_array($value) ? self::escapeData($value) : esc_html((string) $value),
+            $data,
+        );
     }
 }

@@ -54,8 +54,9 @@ namespace Cdek\Blocks {
                 $meta['errors'] = array_map(
                     static fn(array $el)
                         => sprintf(
+                        /* translators: %s: Error message returned by the server */
                         esc_html__('Server returned validation error: %s', 'cdekdelivery'),
-                        $el['message'],
+                        esc_html($el['message']),
                     ),
                     $e->getData()['errors'],
                 );
@@ -81,7 +82,8 @@ namespace Cdek\Blocks {
                     esc_url(admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME)).
                     '">',
                     sprintf(
-                        esc_html__(/* translators: %s: Name of the plugin */
+                        esc_html__(
+                            /* translators: %s: Name of the plugin */
                             'Enter the correct client ID and secret key in <a>the settings</a> plugin named %s',
                             'cdekdelivery',
                         ),

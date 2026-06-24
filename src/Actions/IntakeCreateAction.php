@@ -110,7 +110,8 @@ namespace Cdek\Actions {
             if ($courierInfo === null) {
                 return new ValidationResult(
                     false, sprintf(
-                    esc_html__(/* translators: %s: uuid of request*/
+                    esc_html__(
+                        /* translators: %s: uuid of request*/
                         'Intake has been created, but an error occurred while obtaining its number. Intake uuid: %s',
                         'cdekdelivery',
                     ),
@@ -127,7 +128,8 @@ namespace Cdek\Actions {
             Note::send(
                 $order->id,
                 sprintf(
-                    esc_html__(/* translators: 1: number of intake 2: uuid of intake*/
+                    esc_html__(
+                        /* translators: 1: number of intake 2: uuid of intake*/
                         'Intake has been created: Number: %1$s | Uuid: %2$s',
                         'cdekdelivery',
                     ),

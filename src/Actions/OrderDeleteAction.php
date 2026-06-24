@@ -46,7 +46,8 @@ namespace Cdek\Actions {
                 Note::send(
                     $orderId,
                     sprintf(
-                        esc_html__(/* translators: %s: Order number */
+                        esc_html__(
+                            /* translators: %s: Order number */
                             'An attempt to delete order number %s failed with an error. Order not found.',
                             'cdekdelivery',
                         ),
@@ -56,7 +57,8 @@ namespace Cdek\Actions {
 
                 return new ValidationResult(
                     false, sprintf(
-                    esc_html__(/* translators: %s: Order number */
+                    esc_html__(
+                        /* translators: %s: Order number */
                         'An error occurred while deleting the order. Order number %s was not found',
                         'cdekdelivery',
                     ),
@@ -76,8 +78,9 @@ namespace Cdek\Actions {
                 Note::send(
                     $orderId,
                     sprintf(
-                        esc_html__(/* translators: %s: Order number */
-                            'An attempt to delete order number %s failed with an error. Error code: %s',
+                        esc_html__(
+                            /* translators: 1: Order number 2: Error code */
+                            'An attempt to delete order number %1$s failed with an error. Error code: %2$s',
                             'cdekdelivery',
                         ),
                         $orderNumber,
@@ -87,7 +90,8 @@ namespace Cdek\Actions {
 
                 return new ValidationResult(
                     false, sprintf(
-                    esc_html__(/* translators: %s: Order number */
+                    esc_html__(
+                        /* translators: %s: Order number */
                         'An error occurred while deleting the order. Order number %s was not deleted',
                         'cdekdelivery',
                     ),

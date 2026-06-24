@@ -59,23 +59,43 @@ namespace Cdek\Transport {
             }
 
             if ($result->isServerError()) {
-                throw new HttpServerException($result->error() ?: ['plain' => $result->body()]);
+                throw new HttpServerException($result->error() ?: ['plain' => esc_html($result->body())]);
             }
 
             if ($result->getStatusCode() === 422) {
-                throw new InvalidRequestException($result->error()['fields'], Loader::debug() ? $data : null);
+                throw new InvalidRequestException(
+                    array_map(
+                        static fn($field) => is_array($field) ? $field : esc_html((string) $field),
+                        (array) $result->error()['fields'],
+                    ),
+                    Loader::debug() ? $data : null,
+                );
             }
 
             if ($result->getStatusCode() === 404) {
-                throw new EntityNotFoundException($result->error());
+                $notFoundError           = $result->error();
+                $notFoundError['message'] = esc_html((string) ($notFoundError['message'] ?? ''));
+                $notFoundError['code']    = esc_html((string) ($notFoundError['code'] ?? ''));
+                throw new EntityNotFoundException($notFoundError);
             }
 
             if (!$result->missInvalidLegacyRequest()) {
-                throw new InvalidRequestException($result->legacyRequestErrors(), Loader::debug() ? $data : null);
+                throw new InvalidRequestException(
+                    array_map(
+                        static fn($err) => is_array($err) ? $err : esc_html((string) $err),
+                        $result->legacyRequestErrors(),
+                    ),
+                    Loader::debug() ? $data : null,
+                );
             }
 
             if ($result->isClientError()) {
-                throw new HttpClientException($result->error() ?? []);
+                throw new HttpClientException(
+                    array_map(
+                        static fn($value) => is_array($value) ? $value : esc_html((string) $value),
+                        $result->error() ?? [],
+                    ),
+                );
             }
 
             return $result;
@@ -103,9 +123,9 @@ namespace Cdek\Transport {
             if (is_wp_error($resp)) {
                 assert($resp instanceof WP_Error);
                 throw new ApiException([
-                    'code' => $resp->get_error_code(),
-                    'ip'   => self::tryGetRequesterIp(),
-                ], $resp->get_error_message());
+                    'code' => esc_html((string) $resp->get_error_code()),
+                    'ip'   => esc_html((string) self::tryGetRequesterIp()),
+                ], esc_html($resp->get_error_message()));
             }
 
             $headers = wp_remote_retrieve_headers($resp);

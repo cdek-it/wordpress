@@ -88,7 +88,7 @@ namespace Cdek {
 
             foreach (self::REQUIRED_PLUGINS as $plugin => $checkFields) {
                 if (!in_array($checkFields['entry'], $activePlugins, true)) {
-                    throw new RuntimeException("$plugin plugin is not activated, but required.");
+                    throw new RuntimeException(esc_html("$plugin plugin is not activated, but required."));
                 }
 
                 if (version_compare(
@@ -97,14 +97,14 @@ namespace Cdek {
                     '>',
                 )) {
                     throw new RuntimeException(
-                        "$plugin plugin version is too old, required minimum version is {$checkFields['version']}.",
+                        esc_html("$plugin plugin version is too old, required minimum version is {$checkFields['version']}."),
                     );
                 }
             }
 
             foreach (self::EXTENSIONS as $extension) {
                 if (!extension_loaded($extension)) {
-                    throw new RuntimeException("$extension is not enabled, but required.");
+                    throw new RuntimeException(esc_html("$extension is not enabled, but required."));
                 }
             }
         }

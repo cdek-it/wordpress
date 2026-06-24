@@ -102,16 +102,16 @@ namespace Cdek\Helpers {
             if (empty($wp_filesystem)) {
                 require_once ABSPATH.'wp-admin/includes/file.php';
                 if (!WP_Filesystem() || empty($wp_filesystem)) {
-                    throw new CacheException($cacheFile);
+                    throw new CacheException(esc_html($cacheFile));
                 }
             }
 
             if ($wp_filesystem->exists($cacheFile)) {
                 if (!$wp_filesystem->is_writable($cacheFile)) {
-                    throw new CacheException($cacheFile);
+                    throw new CacheException(esc_html($cacheFile));
                 }
             } elseif (!$wp_filesystem->is_writable(WP_CONTENT_DIR)) {
-                throw new CacheException(WP_CONTENT_DIR);
+                throw new CacheException(esc_html(WP_CONTENT_DIR));
             }
 
             $wp_filesystem->put_contents(

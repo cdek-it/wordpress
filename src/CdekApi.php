@@ -94,10 +94,16 @@ namespace Cdek {
                 return $body->json()['access_token'];
             } catch (ApiException $e) {
                 throw new LegacyAuthException(
-                    array_merge($e->getData(), [
-                        'host'   => wp_parse_url($this->apiUrl, PHP_URL_HOST),
-                        'client' => $clientId,
-                    ]),
+                    array_merge(
+                        array_map(
+                            static fn($value) => is_array($value) ? $value : esc_html((string) $value),
+                            $e->getData(),
+                        ),
+                        [
+                            'host'   => esc_html((string) wp_parse_url($this->apiUrl, PHP_URL_HOST)),
+                            'client' => esc_html((string) $clientId),
+                        ],
+                    ),
                 );
             }
         }

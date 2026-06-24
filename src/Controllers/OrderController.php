@@ -140,6 +140,7 @@ namespace Cdek\Controllers {
                 $messages = array_map(
                     static fn(array $el)
                         => sprintf(
+                        /* translators: %s: Error message returned by the server */
                         esc_html__('Server returned validation error: %s', 'cdekdelivery'),
                         $el['message'],
                     ),
@@ -148,6 +149,7 @@ namespace Cdek\Controllers {
             } catch (ExceptionContract $e) {
                 $messages = [
                     sprintf(
+                        /* translators: %s: Error message returned by the server */
                         esc_html__('Server returned an error: %s', 'cdekdelivery'),
                         $e->getMessage(),
                     ),
