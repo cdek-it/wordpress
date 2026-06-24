@@ -61,10 +61,10 @@ namespace Cdek\Actions {
 
 
             foreach ($order->related() as $entity) {
-                if ($entity['type'] === 'barcode' && isset($entity['url'])) {
+                if ($entity['type'] === 'barcode' && isset($entity['url'], $entity['uuid'])) {
                     $barcodeInfo = $api->barcodeGet($entity['uuid']);
 
-                    if ($barcodeInfo['format'] !==
+                    if ($barcodeInfo === null || $barcodeInfo['format'] !==
                         BarcodeFormat::getByIndex((int)ShippingMethod::factory()->barcode_format)) {
                         continue;
                     }
@@ -110,7 +110,7 @@ namespace Cdek\Actions {
                     ];
                 }
 
-                if ($barcodeInfo === null || end($barcodeInfo['statuses'])['code'] === 'INVALID') {
+                if ($barcodeInfo === null || empty($barcodeInfo['statuses']) || end($barcodeInfo['statuses'])['code'] === 'INVALID') {
                     return [
                         'success' => false,
                         'message' => esc_html__("Failed to create barcode.\nTry again", 'cdekdelivery'),
