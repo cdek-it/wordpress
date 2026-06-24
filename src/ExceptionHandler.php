@@ -33,7 +33,7 @@ class ExceptionHandler {
         }
 
         // WP_Error при выводе на экран съедает часть data 0 ошибки, поэтому оригинальную ошибку добавляем 1
-        $error = new WP_Error('cdek_error', 'Error happened at ' . Loader::getPluginName());
+        $error = new WP_Error('cdek_error', 'Error happened at ' . esc_html(Loader::getPluginName()));
         $error->add(
             $e->getKey(),
             esc_html($e->getMessage()),

@@ -76,19 +76,12 @@ namespace Cdek\Blocks {
         {
             echo '<div>
                 <h4>'.esc_html__('Authorization failed', 'cdekdelivery').'</h4>
-                <p>'.str_replace(
-                    '<a>',
-                    '<a href="'.
-                    esc_url(admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME)).
-                    '">',
-                    sprintf(
-                        esc_html__(
-                            /* translators: %s: Name of the plugin */
-                            'Enter the correct client ID and secret key in <a>the settings</a> plugin named %s',
-                            'cdekdelivery',
-                        ),
-                        esc_html(Loader::getPluginName()),
-                    ),
+                <p>'.sprintf(
+                    /* translators: 1: opening link tag, 2: closing link tag, 3: plugin name */
+                    esc_html__('Enter the correct client ID and secret key in %1$sthe settings%2$s plugin named %3$s', 'cdekdelivery'),
+                    '<a href="'.esc_url(admin_url('admin.php?page=wc-settings&tab=shipping&section='.Config::DELIVERY_NAME)).'">',
+                    '</a>',
+                    esc_html(Loader::getPluginName()),
                 ).'</p>
                 </div>';
         }

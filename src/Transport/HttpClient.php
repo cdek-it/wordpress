@@ -59,10 +59,12 @@ namespace Cdek\Transport {
             }
 
             if ($result->isServerError()) {
+                // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- values are escaped individually via esc_html() above
                 throw new HttpServerException($result->error() ?: ['plain' => esc_html($result->body())]);
             }
 
             if ($result->getStatusCode() === 422) {
+                // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- values are escaped individually via esc_html() above
                 throw new InvalidRequestException(
                     array_map(
                         static fn($field) => is_array($field) ? $field : esc_html((string) $field),
@@ -76,10 +78,12 @@ namespace Cdek\Transport {
                 $notFoundError           = $result->error();
                 $notFoundError['message'] = esc_html((string) ($notFoundError['message'] ?? ''));
                 $notFoundError['code']    = esc_html((string) ($notFoundError['code'] ?? ''));
+                // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- values are escaped individually via esc_html() above
                 throw new EntityNotFoundException($notFoundError);
             }
 
             if (!$result->missInvalidLegacyRequest()) {
+                // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- values are escaped individually via esc_html() above
                 throw new InvalidRequestException(
                     array_map(
                         static fn($err) => is_array($err) ? $err : esc_html((string) $err),
@@ -90,6 +94,7 @@ namespace Cdek\Transport {
             }
 
             if ($result->isClientError()) {
+                // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- values are escaped individually via esc_html() above
                 throw new HttpClientException(
                     array_map(
                         static fn($value) => is_array($value) ? $value : esc_html((string) $value),
@@ -122,6 +127,7 @@ namespace Cdek\Transport {
 
             if (is_wp_error($resp)) {
                 assert($resp instanceof WP_Error);
+                // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- values are escaped individually via esc_html() above
                 throw new ApiException([
                     'code' => esc_html((string) $resp->get_error_code()),
                     'ip'   => esc_html((string) self::tryGetRequesterIp()),

@@ -35,7 +35,7 @@ namespace Cdek\UI {
 
             echo '<div class="notice notice-info is-dismissible"><p> '.esc_html(Loader::getPluginName()).': '.sprintf(
                     /* translators: %s: Selected weight unit */
-                    __(
+                    esc_html__(
                         "The selected weight unit %s is not supported by this plugin.\nYou can use the default value for product dimensions.\nYou can also contact plugin support for more information.\nOtherwise, the unit of measurement will be automatically treated as grams.",
                         'cdekdelivery',
                     ),

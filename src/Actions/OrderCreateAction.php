@@ -89,11 +89,8 @@ namespace Cdek\Actions {
                         Note::send(
                             $this->order->id,
                             sprintf(
-                                esc_html__(
-                                    /* translators: 1: attempt number */
-                                    'Order created automatically after %1$s attempts',
-                                    'cdekdelivery',
-                                ),
+                                /* translators: 1: attempt number */
+                                esc_html__('Order created automatically after %1$s attempts', 'cdekdelivery'),
                                 $attempt,
                             ),
                         );
@@ -102,11 +99,8 @@ namespace Cdek\Actions {
                     Note::send(
                         $this->order->id,
                         sprintf(
-                            esc_html__(
-                                /* translators: 1: tracking number */
-                                'Tracking number: %1$s',
-                                'cdekdelivery',
-                            ),
+                            /* translators: 1: tracking number */
+                            esc_html__('Tracking number: %1$s', 'cdekdelivery'),
                             $track,
                         ),
                         true,
@@ -118,11 +112,8 @@ namespace Cdek\Actions {
                 Note::send(
                     $this->order->id,
                     sprintf(
-                        esc_html__(
-                            /* translators: 1: error message */
-                            'Cdek shipping error: %1$s',
-                            'cdekdelivery'
-                        ),
+                        /* translators: 1: error message */
+                        esc_html__('Cdek shipping error: %1$s', 'cdekdelivery'),
                         $e->getMessage(),
                     ),
                 );

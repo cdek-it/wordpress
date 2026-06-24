@@ -67,11 +67,8 @@ namespace Cdek\Actions {
             Note::send(
                 $orderId,
                 sprintf(
-                    esc_html__(
-                        /* translators: %s: request number */
-                        'Intake %s has been deleted',
-                        'cdekdelivery',
-                    ),
+                    /* translators: %s: request number */
+                    esc_html__('Intake %s has been deleted', 'cdekdelivery'),
                     $courierMeta->number,
                 ),
             );
