@@ -272,8 +272,9 @@ migrate_tag_to_github:
     - git fetch origin "refs/tags/${MIGRATE_TAG}:refs/tags/${MIGRATE_TAG}"
 
     # Commit, на который указывает GitLab tag
-    - export GITLAB_TAG_COMMIT="$(git rev-parse "${MIGRATE_TAG}^{commit}")"
-    - echo "GitLab ${MIGRATE_TAG} commit: ${GITLAB_TAG_COMMIT}"
+    - |
+      export GITLAB_TAG_COMMIT="$(git rev-parse "${MIGRATE_TAG}^{commit}")"
+      echo "GitLab ${MIGRATE_TAG} commit: ${GITLAB_TAG_COMMIT}"
 
     # Проверяем, есть ли такой тег в GitHub
     - |
