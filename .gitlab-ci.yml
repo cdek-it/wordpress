@@ -9,6 +9,7 @@ stages:
   - test
   - upload
   - deploy
+  - maintenance
 
 variables:
   SELECT_JOB:
@@ -214,7 +215,7 @@ sonarqube-check:
 
 migrate_tag_to_github:
   image: docker-proxy.cdek.tech/alpine
-  stage: sync
+  stage: maintenance
 
   variables:
     GIT_DEPTH: "0"
@@ -253,7 +254,7 @@ migrate_tag_to_github:
     - chmod 400 ~/.ssh/id_integrator
 
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
-    - apk add --no-cache git openssh-client git-lfs
+    - apk add --no-cache git netcat-openbsd openssh-client git-lfs
 
     - git lfs install --local
 
