@@ -1,0 +1,13 @@
+version: "3"
+
+vars:
+  YARN: node .yarn/releases/yarn-4.8.1.cjs
+
+tasks:
+  build-dev:
+    desc: "Сборка плагина → CDEKDelivery.zip"
+    cmds:
+      - "{{.YARN}}"
+      - "{{.YARN}} build"
+      - rm -rf node_modules
+      - composer archive -f zip --file=CDEKDelivery
