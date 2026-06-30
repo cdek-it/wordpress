@@ -252,7 +252,7 @@ migrate_tag_to_github:
     - echo "$GITHUB_DEPLOY_KEY" > ~/.ssh/id_integrator
     - chmod 400 ~/.ssh/id_integrator
 
-    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.tech\/repository/g' /etc/apk/repositories
+    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
     - apk add --no-cache git openssh-client git-lfs
 
     - git lfs install --local
