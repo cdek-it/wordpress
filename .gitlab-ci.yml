@@ -4,12 +4,12 @@ image:
   entrypoint: ['']
 #
 stages:
+  - maintenance
   - sync
   - build
   - test
   - upload
   - deploy
-  - maintenance
 
 variables:
   SELECT_JOB:
