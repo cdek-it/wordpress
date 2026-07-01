@@ -1,5 +1,5 @@
 === CDEKDelivery ===
-Contributors: cdekit, caelan
+Contributors: cdekit, au777
 Tags: ecommerce, shipping, delivery, woocommerce
 Requires at least: 6.0
 Requires PHP: 7.4

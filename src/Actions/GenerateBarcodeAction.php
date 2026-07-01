@@ -21,10 +21,12 @@ namespace Cdek\Actions {
         use CanBeCreated;
 
         /**
+         * @param  string  $CDEKNumber  Номер накладной CDEK (cdek_number)
+         *
          * @throws \Cdek\Exceptions\External\LegacyAuthException
          * @throws \Cdek\Exceptions\External\ApiException
          */
-        public function __invoke(string $cdekNumber): array
+        public function __invoke(string $CDEKNumber): array
         {
             $api = new CdekApi;
 
@@ -36,7 +38,7 @@ namespace Cdek\Actions {
             );
 
             try {
-                $order = $api->orderGetByNumber($cdekNumber);
+                $order = $api->orderGetByNumber($CDEKNumber);
             } catch (HttpClientException $e) {
                 return [
                     'success' => false,
@@ -59,10 +61,10 @@ namespace Cdek\Actions {
 
 
             foreach ($order->related() as $entity) {
-                if ($entity['type'] === 'barcode' && isset($entity['url'])) {
-                    $barcodeInfo = $api->barcodeGet($cdekNumber);
+                if ($entity['type'] === 'barcode' && isset($entity['url'], $entity['uuid'])) {
+                    $barcodeInfo = $api->barcodeGet($entity['uuid']);
 
-                    if ($barcodeInfo['format'] !==
+                    if ($barcodeInfo === null || $barcodeInfo['format'] !==
                         BarcodeFormat::getByIndex((int)ShippingMethod::factory()->barcode_format)) {
                         continue;
                     }
@@ -75,7 +77,7 @@ namespace Cdek\Actions {
             }
 
             try {
-                $barcode = $api->barcodeCreate($cdekNumber);
+                $barcode = $api->barcodeCreate($CDEKNumber);
 
                 if ($barcode === null) {
                     return [
@@ -108,7 +110,7 @@ namespace Cdek\Actions {
                     ];
                 }
 
-                if ($barcodeInfo === null || end($barcodeInfo['statuses'])['code'] === 'INVALID') {
+                if ($barcodeInfo === null || empty($barcodeInfo['statuses']) || end($barcodeInfo['statuses'])['code'] === 'INVALID') {
                     return [
                         'success' => false,
                         'message' => esc_html__("Failed to create barcode.\nTry again", 'cdekdelivery'),

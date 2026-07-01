@@ -4,11 +4,24 @@ image:
   entrypoint: ['']
 #
 stages:
+  - maintenance
   - sync
   - build
   - test
   - upload
   - deploy
+
+variables:
+  SELECT_JOB:
+    value: "none"
+    options:
+      - "none"
+      - "migrate_tag_to_github"
+    description: "Выберите запуск job"
+
+  MIGRATE_TAG:
+    value: ""
+    description: "Тег для переноса из GitLab в GitHub. Например: v4.2.5"
 
 build_tag:
   image: docker-proxy.cdek.ru/php:8.2-alpine
@@ -199,3 +212,100 @@ sonarqube-check:
   allow_failure: true
   only:
     - main
+
+migrate_tag_to_github:
+  image: docker-proxy.cdek.tech/alpine
+  stage: maintenance
+
+  variables:
+    GIT_DEPTH: "0"
+
+  tags:
+    - docker
+
+  rules:
+    # Только запуск через GitLab UI: Build → Pipelines → New pipeline
+    - if: '$CI_PIPELINE_SOURCE != "web"'
+      when: never
+
+    # Не запускать из tag pipeline
+    - if: '$CI_COMMIT_TAG'
+      when: never
+
+    # Только protected branch, чтобы были доступны protected variables
+    - if: '$CI_COMMIT_REF_PROTECTED != "true"'
+      when: never
+
+    # Запускать только если явно выбрали эту job
+    - if: '$SELECT_JOB == "migrate_tag_to_github"'
+      when: on_success
+
+    - when: never
+
+  before_script:
+    - set -eu
+
+    - test -n "${MIGRATE_TAG:-}"
+    - echo "${MIGRATE_TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'
+
+    - mkdir -p ~/.ssh
+    - echo "$SSH_CONFIG" > ~/.ssh/config
+    - echo "$GITHUB_DEPLOY_KEY" > ~/.ssh/id_integrator
+    - chmod 400 ~/.ssh/id_integrator
+
+    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
+    - apk add --no-cache git netcat-openbsd openssh-client git-lfs
+
+    - git lfs install --local
+
+    - git remote remove github 2>/dev/null || true
+    - git remote add github "${GITHUB_REPO}"
+
+  script:
+    - set -eu
+
+    - echo "Migrating tag ${MIGRATE_TAG} from GitLab to GitHub"
+
+    # Удаляем локальный тег, если он уже есть, чтобы точно взять его из GitLab origin
+    - git tag -d "${MIGRATE_TAG}" 2>/dev/null || true
+
+    # Забираем тег из GitLab
+    - git fetch origin "refs/tags/${MIGRATE_TAG}:refs/tags/${MIGRATE_TAG}"
+
+    # Commit, на который указывает GitLab tag
+    - |
+      export GITLAB_TAG_COMMIT="$(git rev-parse "${MIGRATE_TAG}^{commit}")"
+      echo "GitLab ${MIGRATE_TAG} commit: ${GITLAB_TAG_COMMIT}"
+
+    # Проверяем, есть ли такой тег в GitHub
+    - |
+      if git ls-remote --exit-code --tags github "refs/tags/${MIGRATE_TAG}" >/dev/null 2>&1; then
+        echo "Tag ${MIGRATE_TAG} already exists in GitHub. Checking commit..."
+
+        git tag -d "github-${MIGRATE_TAG}" 2>/dev/null || true
+        git fetch github "+refs/tags/${MIGRATE_TAG}:refs/tags/github-${MIGRATE_TAG}"
+
+        GITHUB_TAG_COMMIT="$(git rev-parse "github-${MIGRATE_TAG}^{commit}")"
+        echo "GitHub ${MIGRATE_TAG} commit: ${GITHUB_TAG_COMMIT}"
+
+        if [ "${GITLAB_TAG_COMMIT}" != "${GITHUB_TAG_COMMIT}" ]; then
+          echo "ERROR: GitHub tag ${MIGRATE_TAG} points to different commit"
+          exit 1
+        fi
+
+        echo "Tag ${MIGRATE_TAG} already exists in GitHub and points to the same commit. Nothing to migrate."
+        exit 0
+      fi
+
+    # Проверяем, что коммит тега уже есть на GitHub
+    - git fetch github main
+    - |
+      if ! git merge-base --is-ancestor "${GITLAB_TAG_COMMIT}" github/main; then
+        echo "ERROR: commit ${GITLAB_TAG_COMMIT} (tag ${MIGRATE_TAG}) not found in GitHub main. Sync branches to GitHub first."
+        exit 1
+      fi
+
+    # Пушим в GitHub именно существующий GitLab tag ref
+    - git push github "refs/tags/${MIGRATE_TAG}:refs/tags/${MIGRATE_TAG}"
+
+    - echo "Tag ${MIGRATE_TAG} migrated to GitHub successfully"

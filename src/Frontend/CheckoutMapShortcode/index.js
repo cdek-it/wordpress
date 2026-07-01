@@ -2,8 +2,6 @@ import $ from 'jquery';
 import cdekWidget from '@cdek-it/widget';
 import './style/main.scss';
 import { __ } from '@wordpress/i18n';
-import { debounce } from 'lodash';
-
 const billingCityInput = $('#billing_city');
 const shippingCityInput = $('#shipping_city');
 const buttonNormalSize = 160;
@@ -13,6 +11,7 @@ let needChange;
 let isNormalSize;
 let widget = null;
 let el;
+let checkoutUpdateTimer = null;
 
 if ((billingCityInput.val() || '') !== '' || (shippingCityInput.val() || '') !==
   '') {
@@ -63,20 +62,23 @@ const onChoose = (_type, _tariff, address) => {
     }
 };
 
-const debouncedCheckoutUpdate = debounce(() => {
-    if (($('#ship-to-different-address-checkbox').is(':checked')
-      ? shippingCityInput.val()
-      : billingCityInput.val()) === '') {
-        return;
-    }
-    console.debug(
-      '[CDEK-MAP] Checkout values changed, initiating checkout update');
-    if (window.cdek.saver !== undefined){
-        $.post(window.cdek.saver, { code: null })
-    }
+const debouncedCheckoutUpdate = () => {
+    clearTimeout(checkoutUpdateTimer);
+    checkoutUpdateTimer = setTimeout(() => {
+        if (($('#ship-to-different-address-checkbox').is(':checked')
+          ? shippingCityInput.val()
+          : billingCityInput.val()) === '') {
+            return;
+        }
+        console.debug(
+          '[CDEK-MAP] Checkout values changed, initiating checkout update');
+        if (window.cdek.saver !== undefined) {
+            $.post(window.cdek.saver, { code: null });
+        }
 
-    $(document.body).trigger('update_checkout');
-}, 500);
+        $(document.body).trigger('update_checkout');
+    }, 500);
+};
 
 const resizeObserver = new ResizeObserver(entries => {
     for (const entry of entries) {
