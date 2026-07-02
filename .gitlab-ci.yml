@@ -4,8 +4,8 @@ image:
   entrypoint: ['']
 #
 stages:
-  - maintenance
   - sync
+  - maintenance
   - build
   - test
   - upload
