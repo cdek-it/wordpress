@@ -127,11 +127,13 @@ namespace Cdek\Actions {
                     $this->rates[$tariff['tariff_code']] = [
                         'id'        => sprintf('%s:%s', Config::DELIVERY_NAME, $tariff['tariff_code']),
                         'label'     => ($minDay === $maxDay) ? sprintf(
-                            esc_html__('%s, (%s day)', 'cdekdelivery'),
+                            /* translators: 1: Tariff name 2: Delivery period in days */
+                            esc_html__('%1$s, (%2$s day)', 'cdekdelivery'),
                             Tariff::getName($tariff['tariff_code'], $tariff['tariff_name']),
                             $minDay,
                         ) : sprintf(
-                            esc_html__('%s, (%s-%s days)', 'cdekdelivery'),
+                            /* translators: 1: Tariff name 2: Minimum delivery days 3: Maximum delivery days */
+                            esc_html__('%1$s, (%2$s-%3$s days)', 'cdekdelivery'),
                             Tariff::getName($tariff['tariff_code'], $tariff['tariff_name']),
                             $minDay,
                             $maxDay,

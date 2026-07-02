@@ -59,7 +59,9 @@ $dateMax = gmdate('Y-m-d', strtotime($dateMin." +31 days"));
                 <label style="margin: auto">
                     <?php esc_html_e('Weight in kg', 'cdekdelivery') ?>
                 </label>
-                <?php echo wc_help_tip(
+                <?php
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_help_tip() escapes internally
+                echo wc_help_tip(
                     esc_html__(
                         'For warehouse tariffs, you can send several orders at once. Therefore, the dimensions may differ from those indicated when creating the order. For door tariffs, you can duplicate those that were specified when creating the order.',
                         'cdekdelivery',

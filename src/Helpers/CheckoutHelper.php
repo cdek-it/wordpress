@@ -68,11 +68,11 @@ namespace Cdek\Helpers {
             }
 
             if (!empty($_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName])) {
-                return wp_strip_all_tags($_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName]);
+                return wp_strip_all_tags(wp_unslash($_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName]));
             }
 
             if (!empty($_REQUEST[$valueName])) {
-                return wp_strip_all_tags($_REQUEST[$valueName]);
+                return wp_strip_all_tags(wp_unslash($_REQUEST[$valueName]));
             }
 
             try {

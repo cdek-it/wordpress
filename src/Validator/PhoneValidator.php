@@ -30,7 +30,7 @@ namespace Cdek\Validator {
                 return (new CoreApi)->validatePhone($phone, $countryCode);
             } catch (HttpClientException $e) {
                 if ($e->getCode() === 422) {
-                    throw new InvalidPhoneException($phone);
+                    throw new InvalidPhoneException(esc_html($phone));
                 }
 
                 throw $e;

@@ -27,7 +27,7 @@ namespace Cdek\Actions {
         {
             /** @noinspection GlobalVariableUsageInspection */
             if (!isset($_POST['action']) ||
-                $_POST['action'] !== 'woocommerce_calc_line_taxes' ||
+                sanitize_key(wp_unslash($_POST['action'])) !== 'woocommerce_calc_line_taxes' ||
                 !($order instanceof WC_Order) ||
                 !is_ajax() ||
                 !is_admin()) {

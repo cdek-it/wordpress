@@ -18,7 +18,7 @@ namespace Cdek\Helpers {
 
         public static function clear(): void
         {
-            unlink(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME);
+            wp_delete_file(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME);
             self::$store = null;
         }
 
@@ -96,18 +96,29 @@ namespace Cdek\Helpers {
                 self::$store[$key] = $value;
             }
 
-            if (file_exists(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME)) {
-                if (!is_writable(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME)) {
-                    throw new CacheException(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME);
+            $cacheFile = WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME;
+
+            global $wp_filesystem;
+            if (empty($wp_filesystem)) {
+                require_once ABSPATH.'wp-admin/includes/file.php';
+                if (!WP_Filesystem() || empty($wp_filesystem)) {
+                    throw new CacheException(esc_html($cacheFile));
                 }
-            } elseif (!is_writable(WP_CONTENT_DIR)) {
-                throw new CacheException(WP_CONTENT_DIR);
             }
 
-            $fp = fopen(WP_CONTENT_DIR.DIRECTORY_SEPARATOR.self::CACHE_FILE_NAME, 'wb');
+            if ($wp_filesystem->exists($cacheFile)) {
+                if (!$wp_filesystem->is_writable($cacheFile)) {
+                    throw new CacheException(esc_html($cacheFile));
+                }
+            } elseif (!$wp_filesystem->is_writable(WP_CONTENT_DIR)) {
+                throw new CacheException(esc_html(WP_CONTENT_DIR));
+            }
 
-            fwrite($fp, '<?php defined("ABSPATH") or exit; return '.var_export(self::$store, true).';'.PHP_EOL);
-            fclose($fp);
+            $wp_filesystem->put_contents(
+                $cacheFile,
+                '<?php defined("ABSPATH") or exit; return '.var_export(self::$store, true).';'.PHP_EOL,
+                FS_CHMOD_FILE
+            );
         }
     }
 }

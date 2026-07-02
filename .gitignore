@@ -31,3 +31,5 @@ lang/*.json
 
 .wp-env.override.json
 /.cache.php
+
+.idea
