@@ -57,7 +57,8 @@ validate:
   before_script:
     - set -eux
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
-    - apk add --no-cache composer
+    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer
+    - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
     - composer --version
   script:
     - composer validate
@@ -92,7 +93,9 @@ lint:
   before_script:
     - set -eux
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
-    - apk add --no-cache nodejs-current git
+    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer nodejs-current git
+    - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
+    - php -v
     - node --version
   script:
     - find src -name "*.php" -print0 | xargs -0 -n1 php -l
@@ -107,6 +110,11 @@ static-analysis:
   tags:
     - docker
   rules: *feature_branch_rules
+  before_script:
+    - set -eux
+    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
+    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer
+    - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
   script:
     - vendor/bin/phpstan analyse --no-progress
 
@@ -116,6 +124,11 @@ unit-tests:
   tags:
     - docker
   rules: *feature_branch_rules
+  before_script:
+    - set -eux
+    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
+    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer
+    - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
   script:
     - vendor/bin/phpunit --colors=never --log-junit junit-report.xml
   artifacts:
