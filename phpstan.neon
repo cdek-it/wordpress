@@ -1,0 +1,14 @@
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    level: 2
+    paths:
+        - src
+    excludePaths:
+        - vendor (?)
+        - node_modules (?)
+        - tests (?)
+    bootstrapFiles:
+        - vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
+        - .phpstan/action-scheduler-stubs.php
