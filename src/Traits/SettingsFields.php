@@ -242,6 +242,7 @@ namespace Cdek\Traits {
                     'title'       => esc_html__('Change tariff name', 'cdekdelivery'),
                     'type'        => 'text',
                     'description' => sprintf(
+                        /* translators: %s: Example of tariff code-name mapping */
                         esc_html__(
                             'In the list of tariffs in the field "Tariffs" the tariff code is indicated in brackets.\n\r To change the name of the tariff, an entry in the code-name format is added to the field; for multiple changes,\n\r tariffs are separated by a semicolon, for example, an entry that will change the name of tariff 136 and 137 looks like this:%s If the value is not specified, the tariff names will be standard.',
                             'cdekdelivery',
@@ -318,8 +319,9 @@ namespace Cdek\Traits {
                                            ')',
                     'desc_tip'          => true,
                     'description'       => sprintf(
+                        /* translators: 1: Line break 2: Line break */
                         esc_html__(
-                            'All goods must have their weight indicated, if there are goods without %s a specified weight, then for such goods the value from this field will be substituted. %s This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings.',
+                            'All goods must have their weight indicated, if there are goods without %1$s a specified weight, then for such goods the value from this field will be substituted. %2$s This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings.',
                             'cdekdelivery',
                         ),
                         "<br>",
@@ -430,8 +432,9 @@ namespace Cdek\Traits {
                     'title'             => esc_html__('Extra charge on order as a percentage', 'cdekdelivery'),
                     'type'              => 'number',
                     'description'       => sprintf(
+                        /* translators: 1: Opening markup 2: Closing markup */
                         esc_html__(
-                            'Calculated from the cost of the order. Changes the total amount on the receipt.%s The surcharge will only appear on the receipt.%s Therefore, it is recommended to inform the user on the checkout page about extra charges when sending by cash on delivery.',
+                            'Calculated from the cost of the order. Changes the total amount on the receipt.%1$s The surcharge will only appear on the receipt.%2$s Therefore, it is recommended to inform the user on the checkout page about extra charges when sending by cash on delivery.',
                             'cdekdelivery',
                         ),
                         "<br> <b> ",

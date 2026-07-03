@@ -3,7 +3,7 @@ Contributors: cdekit, au777
 Tags: ecommerce, shipping, delivery, woocommerce
 Requires at least: 6.0
 Requires PHP: 7.4
-Tested up to: 6.8
+Tested up to: 7.0
 Stable tag: 4.2.0
 License: GPLv3
 
@@ -67,6 +67,9 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 
 == Changelog ==
 
+= 5.0 =
+* CMS-1327 Add support WordPress 7.0
+
 = 4.2 =
 * WP-167 Add tool to set Uin for gold items in order
 * WP-200 Fixed errors with shipments detection
@@ -76,6 +79,8 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 * WP-214 Fixed critical error on plugin activation and checkout
 * WP-230 Fixed error with deleted from stock items
 * WP-282 Fixed the pickup point selection reset
+* WP-289 Fixed error on barcode printing
+* WP-273 Fixed the pickup point selection button
 
 = 4.1 =
 * WP-97 Cdek delivery logger

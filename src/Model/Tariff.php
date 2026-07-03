@@ -224,7 +224,7 @@ namespace Cdek\Model {
         public static function getType(int $code): int
         {
             if (!isset(self::DATA[$code])) {
-                throw new RuntimeException("Unknown tariff $code");
+                throw new RuntimeException(esc_html("Unknown tariff $code"));
             }
 
             return self::DATA[$code]['type'];
@@ -233,7 +233,7 @@ namespace Cdek\Model {
         public static function isToOffice(int $code): bool
         {
             if (!isset(self::DATA[$code])) {
-                throw new RuntimeException("Unknown tariff $code");
+                throw new RuntimeException(esc_html("Unknown tariff $code"));
             }
 
             return self::DATA[$code]['mode'] === self::DOOR_OFFICE ||
@@ -247,7 +247,7 @@ namespace Cdek\Model {
         public static function isFromOffice(int $code): bool
         {
             if (!isset(self::DATA[$code])) {
-                throw new RuntimeException("Unknown tariff $code");
+                throw new RuntimeException(esc_html("Unknown tariff $code"));
             }
 
             return self::DATA[$code]['mode'] === self::OFFICE_DOOR ||
@@ -258,7 +258,7 @@ namespace Cdek\Model {
         public static function isFromDoor(int $code): bool
         {
             if (!isset(self::DATA[$code])) {
-                throw new RuntimeException("Unknown tariff $code");
+                throw new RuntimeException(esc_html("Unknown tariff $code"));
             }
 
             return self::DATA[$code]['mode'] === self::DOOR_DOOR ||
@@ -309,7 +309,7 @@ namespace Cdek\Model {
         public static function isToPickup(int $code): bool
         {
             if (!isset(self::DATA[$code])) {
-                throw new RuntimeException("Unknown tariff $code");
+                throw new RuntimeException(esc_html("Unknown tariff $code"));
             }
 
             return self::DATA[$code]['mode'] === self::DOOR_PICKUP ||
@@ -320,7 +320,7 @@ namespace Cdek\Model {
         public static function availableForShops(int $code): bool
         {
             if (!isset(self::DATA[$code])) {
-                throw new RuntimeException("Unknown tariff $code");
+                throw new RuntimeException(esc_html("Unknown tariff $code"));
             }
 
             return self::DATA[$code]['type'] === self::SHOP_TYPE;

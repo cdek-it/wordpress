@@ -200,11 +200,12 @@ namespace Cdek {
                 } else {
                     WC_Admin_Settings::add_error(
                         sprintf(
+                            /* translators: %s: Error code returned by CDEK API */
                             esc_html__(
                                 'Error receiving token from CDEK API. Contact plugin support. Error code: %s',
                                 'cdekdelivery',
                             ),
-                            $error,
+                            esc_html($error),
                         ),
                     );
                 }

@@ -2,24 +2,35 @@
 # This file is distributed under the same license as the Plugins - CDEKDelivery - Development (trunk) package.
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2025-04-28 10:34:57+0000\n"
+"PO-Revision-Date: 2026-07-02 09:26:50+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n % 10 == 1 && n % 100 != 11) ? 0 : ((n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) ? 1 : 2);\n"
-"X-Generator: GlotPress/4.0.1\n"
+"X-Generator: GlotPress/4.0.3\n"
 "Language: ru\n"
 "Project-Id-Version: Plugins - CDEKDelivery - Development (trunk)\n"
+
+#. translators: 1: Tariff name 2: Minimum delivery days 3: Maximum delivery
+#. days
+#: src/Actions/CalculateDeliveryAction.php:136
+msgid "%1$s, (%2$s-%3$s days)"
+msgstr ""
+
+#. translators: 1: Tariff name 2: Delivery period in days
+#: src/Actions/CalculateDeliveryAction.php:131
+msgid "%1$s, (%2$s day)"
+msgstr ""
 
 #: build/cdek-order-item.js:1
 msgid "Error saving UIN"
 msgstr ""
 
-#: src/UI/AdminOrderProductFields.php:71
+#: src/UI/AdminOrderProductFields.php:72
 msgid "UIN: "
 msgstr ""
 
-#: src/UI/AdminOrderProductFields.php:54
+#: src/UI/AdminOrderProductFields.php:55
 msgid "Add jewel UIN"
 msgstr ""
 
@@ -37,7 +48,7 @@ msgid "Invalid request data."
 msgstr ""
 
 #. translators: 1: attempt number
-#: src/Actions/OrderCreateAction.php:91
+#: src/Actions/OrderCreateAction.php:93
 msgid "Order created automatically after %1$s attempts"
 msgstr ""
 
@@ -53,13 +64,15 @@ msgstr ""
 msgid "Waybill info is not available due to a processing of the order status in the CDEK system"
 msgstr ""
 
-#: src/Controllers/IntakeController.php:150
-#: src/Controllers/OrderController.php:151
+#. translators: %s: Error message returned by the server
+#: src/Controllers/IntakeController.php:152
+#: src/Controllers/OrderController.php:153
 msgid "Server returned an error: %s"
 msgstr ""
 
-#: src/Blocks/AdminOrderBox.php:57 src/Controllers/IntakeController.php:142
-#: src/Controllers/OrderController.php:143
+#. translators: %s: Error message returned by the server
+#: src/Blocks/AdminOrderBox.php:58 src/Controllers/IntakeController.php:143
+#: src/Controllers/OrderController.php:144
 msgid "Server returned validation error: %s"
 msgstr ""
 
@@ -111,7 +124,7 @@ msgstr ""
 msgid "Waybill №"
 msgstr ""
 
-#: templates/intake.php:79
+#: templates/intake.php:81
 msgid "Call"
 msgstr ""
 
@@ -131,27 +144,28 @@ msgstr ""
 msgid "Sync to CDEK"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:304
+#: src/Traits/SettingsFields.php:305
 msgid "City Code"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:300
+#: src/Traits/SettingsFields.php:301
 msgid "Legacy Address Info"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:296
+#: src/Traits/SettingsFields.php:297
 msgid "Legacy Office Info"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:292
+#: src/Traits/SettingsFields.php:293
 msgid "City Name"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:288
+#: src/Traits/SettingsFields.php:289
 msgid "Address"
 msgstr ""
 
-#: src/ShippingMethod.php:203
+#. translators: %s: Error code returned by CDEK API
+#: src/ShippingMethod.php:204
 msgid "Error receiving token from CDEK API. Contact plugin support. Error code: %s"
 msgstr ""
 
@@ -213,16 +227,16 @@ msgstr ""
 msgid "Unknown error"
 msgstr ""
 
-#: src/Actions/OrderDeleteAction.php:101
+#: src/Actions/OrderDeleteAction.php:93
 msgid "Waybill has been deleted"
 msgstr ""
 
-#: src/Actions/IntakeDeleteAction.php:79
+#: src/Actions/IntakeDeleteAction.php:78
 msgid "Intake has been deleted"
 msgstr ""
 
 #. translators: %s: request number
-#: src/Actions/IntakeDeleteAction.php:70
+#: src/Actions/IntakeDeleteAction.php:71
 msgid "Intake %s has been deleted"
 msgstr ""
 
@@ -236,12 +250,12 @@ msgid "Intake is not found in system"
 msgstr ""
 
 #. translators: 1: number of intake 2: uuid of intake
-#: src/Actions/IntakeCreateAction.php:130
+#: src/Actions/IntakeCreateAction.php:129
 msgid "Intake has been created: Number: %1$s | Uuid: %2$s"
 msgstr ""
 
 #. translators: %s: uuid of request
-#: src/Actions/IntakeCreateAction.php:113
+#: src/Actions/IntakeCreateAction.php:114
 msgid "Intake has been created, but an error occurred while obtaining its number. Intake uuid: %s"
 msgstr ""
 
@@ -249,19 +263,11 @@ msgstr ""
 msgid "An error occurred while creating intake. Intake for this invoice already exists"
 msgstr ""
 
-#: src/Actions/CalculateDeliveryAction.php:142
-msgid "%s, (%s-%s days)"
-msgstr ""
-
-#: src/Actions/CalculateDeliveryAction.php:138
-msgid "%s, (%s day)"
-msgstr ""
-
 #: src/Actions/DispatchOrderAutomationAction.php:66
 msgid "Created order automation task"
 msgstr ""
 
-#: src/Validator/CheckoutValidator.php:63
+#: src/Validator/CheckoutValidator.php:69
 msgid "Phone number is required."
 msgstr ""
 
@@ -282,17 +288,17 @@ msgstr ""
 msgid "Tracking number: %1$s"
 msgstr ""
 
-#: src/Actions/GenerateBarcodeAction.php:43
-#: src/Actions/GenerateBarcodeAction.php:53
-#: src/Actions/GenerateBarcodeAction.php:83
-#: src/Actions/GenerateBarcodeAction.php:92
+#: src/Actions/GenerateBarcodeAction.php:45
+#: src/Actions/GenerateBarcodeAction.php:55
+#: src/Actions/GenerateBarcodeAction.php:85
+#: src/Actions/GenerateBarcodeAction.php:94
 msgid ""
 "Failed to create barcode.\n"
 "Try re-creating the order.\n"
 "You may need to cancel existing one (if that button exists)"
 msgstr ""
 
-#: templates/intake.php:73
+#: templates/intake.php:75
 msgid "Telephone call required"
 msgstr ""
 
@@ -304,11 +310,11 @@ msgstr ""
 msgid "Full name"
 msgstr ""
 
-#: src/Blocks/CheckoutMapBlock.php:123
+#: src/Blocks/CheckoutMapBlock.php:113
 msgid "Code of selected CDEK office for delivery"
 msgstr ""
 
-#: src/Blocks/CheckoutMapBlock.php:85
+#: src/Blocks/CheckoutMapBlock.php:86
 msgid "JSONifiend array of available CDEK offices"
 msgstr ""
 
@@ -347,7 +353,7 @@ msgstr ""
 msgid "There are no CDEK pick-up points available in this direction, please select another delivery method"
 msgstr ""
 
-#: src/UI/CheckoutMap.php:59 build/cdek-checkout-map.js:1
+#: src/UI/CheckoutMap.php:68 build/cdek-checkout-map.js:1
 msgid "Re-select pick-up"
 msgstr ""
 
@@ -403,7 +409,7 @@ msgstr ""
 msgid "Order price"
 msgstr ""
 
-#: src/UI/CheckoutMap.php:59 build/cdek-checkout-map-block-frontend.js:1
+#: src/UI/CheckoutMap.php:67 build/cdek-checkout-map-block-frontend.js:1
 #: build/cdek-checkout-map.js:1
 msgid "Choose pick-up"
 msgstr ""
@@ -416,7 +422,7 @@ msgstr ""
 msgid "Call the courier"
 msgstr ""
 
-#: src/UI/AdminOrderProductFields.php:81 templates/create_many.php:45
+#: src/UI/AdminOrderProductFields.php:83 templates/create_many.php:45
 msgid "Save"
 msgstr ""
 
@@ -444,7 +450,7 @@ msgstr ""
 msgid "Weight in kg"
 msgstr ""
 
-#: templates/intake.php:63
+#: templates/intake.php:65
 msgid "For warehouse tariffs, you can send several orders at once. Therefore, the dimensions may differ from those indicated when creating the order. For door tariffs, you can duplicate those that were specified when creating the order."
 msgstr ""
 
@@ -461,23 +467,23 @@ msgid "Courier waiting date"
 msgstr ""
 
 #. translators: %s: Order number
-#: src/Actions/OrderDeleteAction.php:59
+#: src/Actions/OrderDeleteAction.php:58
 msgid "An error occurred while deleting the order. Order number %s was not found"
 msgstr ""
 
 #. translators: %s: Order number
-#: src/Actions/OrderDeleteAction.php:49
+#: src/Actions/OrderDeleteAction.php:50
 msgid "An attempt to delete order number %s failed with an error. Order not found."
 msgstr ""
 
 #. translators: %s: Order number
-#: src/Actions/OrderDeleteAction.php:90
+#: src/Actions/OrderDeleteAction.php:85
 msgid "An error occurred while deleting the order. Order number %s was not deleted"
 msgstr ""
 
-#. translators: %s: Order number
-#: src/Actions/OrderDeleteAction.php:79
-msgid "An attempt to delete order number %s failed with an error. Error code: %s"
+#. translators: 1: Order number 2: Error code
+#: src/Actions/OrderDeleteAction.php:76
+msgid "An attempt to delete order number %1$s failed with an error. Error code: %2$s"
 msgstr ""
 
 #: src/Validator/IntakeValidator.php:115
@@ -549,59 +555,59 @@ msgstr ""
 msgid "Error. The courier request has not been created. (%s)"
 msgstr ""
 
-#: src/Validator/CheckoutValidator.php:40
+#: src/Validator/CheckoutValidator.php:46
 msgid "No shipping address."
 msgstr ""
 
-#: src/Validator/CheckoutValidator.php:36
+#: src/Validator/CheckoutValidator.php:42
 msgid "Order pickup point not selected."
 msgstr ""
 
 #. translators: 1: Name of a city 2: ZIP code
-#: src/Validator/CheckoutValidator.php:48
+#: src/Validator/CheckoutValidator.php:54
 msgid "Failed to determine locality in %1$s %2$s"
 msgstr ""
 
-#: templates/common.php:15 templates/order.php:18
+#: templates/common.php:18 templates/order.php:18
 msgid "Editing of waybill is not available due to a change in the order status in the CDEK system"
 msgstr ""
 
-#. translators: %s: Name of the plugin
-#: src/Blocks/AdminOrderBox.php:84
-msgid "Enter the correct client ID and secret key in <a>the settings</a> plugin named %s"
+#. translators: 1: opening link tag, 2: closing link tag, 3: plugin name
+#: src/Blocks/AdminOrderBox.php:81
+msgid "Enter the correct client ID and secret key in %1$sthe settings%2$s plugin named %3$s"
 msgstr ""
 
-#: src/Blocks/AdminOrderBox.php:77
+#: src/Blocks/AdminOrderBox.php:78
 msgid "Authorization failed"
 msgstr ""
 
 #. translators: %s: Code of selected tariff
-#: src/UI/AdminShippingFields.php:129
+#: src/UI/AdminShippingFields.php:133
 msgid "Tariff code: %s"
 msgstr ""
 
 #. translators: %s: Code of selected point
-#: src/UI/AdminShippingFields.php:119
+#: src/UI/AdminShippingFields.php:124
 msgid "Selected pickup point: %s"
 msgstr ""
 
 #. translators: %s: Amount with measurement
-#: src/UI/AdminShippingFields.php:111
+#: src/UI/AdminShippingFields.php:115
 msgid "Height: %s"
 msgstr ""
 
 #. translators: %s: Amount with measurement
-#: src/UI/AdminShippingFields.php:103
+#: src/UI/AdminShippingFields.php:106
 msgid "Width: %s"
 msgstr ""
 
 #. translators: %s: Amount with measurement
-#: src/UI/AdminShippingFields.php:95
+#: src/UI/AdminShippingFields.php:97
 msgid "Length: %s"
 msgstr ""
 
 #. translators: %s: Amount with measurement
-#: src/UI/AdminShippingFields.php:87
+#: src/UI/AdminShippingFields.php:88
 msgid "Weight: %s"
 msgstr ""
 
@@ -609,7 +615,8 @@ msgstr ""
 msgid "Not available for order"
 msgstr ""
 
-#: src/UI/AdminNotices.php:37
+#. translators: %s: Selected weight unit
+#: src/UI/AdminNotices.php:38
 msgid ""
 "The selected weight unit %s is not supported by this plugin.\n"
 "You can use the default value for product dimensions.\n"
@@ -653,135 +660,138 @@ msgstr ""
 msgid "Street address"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:450
+#: src/Traits/SettingsFields.php:453
 msgid "Barcode format"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:446
+#: src/Traits/SettingsFields.php:449
 msgid "Print settings"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:433
-msgid "Calculated from the cost of the order. Changes the total amount on the receipt.%s The surcharge will only appear on the receipt.%s Therefore, it is recommended to inform the user on the checkout page about extra charges when sending by cash on delivery."
+#. translators: 1: Opening markup 2: Closing markup
+#: src/Traits/SettingsFields.php:436
+msgid "Calculated from the cost of the order. Changes the total amount on the receipt.%1$s The surcharge will only appear on the receipt.%2$s Therefore, it is recommended to inform the user on the checkout page about extra charges when sending by cash on delivery."
 msgstr ""
 
-#: src/Traits/SettingsFields.php:430
+#: src/Traits/SettingsFields.php:432
 msgid "Extra charge on order as a percentage"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:424
+#: src/Traits/SettingsFields.php:426
 msgid "Cash on delivery settings are applied only when sending an order from the admin panels and for the user on the checkout page are not displayed"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:422
+#: src/Traits/SettingsFields.php:424
 msgid "Cash on delivery settings"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:414
+#: src/Traits/SettingsFields.php:416
 msgid "Calculated based on the amount of goods in the order"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:411
+#: src/Traits/SettingsFields.php:413
 msgid "Add insurance quote to shipping cost"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:410
+#: src/Traits/SettingsFields.php:412
 msgid "Insurance"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:405
+#: src/Traits/SettingsFields.php:407
 msgid "Delivery cost"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:399
+#: src/Traits/SettingsFields.php:401
 msgid "Partial delivery"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:393
+#: src/Traits/SettingsFields.php:395
 msgid "Trying on"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:385
+#: src/Traits/SettingsFields.php:387
 msgid "This service is not available for tariffs to the parcel locker and is only available to clients with an IM type agreement.\\n\\r Also, the prohibition on inspecting the attachment does not work when the services of fitting at home and partial delivery are included."
 msgstr ""
 
-#: src/Traits/SettingsFields.php:384
+#: src/Traits/SettingsFields.php:386
 msgid "Prohibition of inspection of attachment"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:379
+#: src/Traits/SettingsFields.php:381
 msgid "Services"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:370
+#: src/Traits/SettingsFields.php:372
 msgid "Force the use of product dimensions (length, width and height) by default for all products"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:369
+#: src/Traits/SettingsFields.php:371
 msgid "Product dimensions on/off"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:359
+#: src/Traits/SettingsFields.php:361
 msgid "Default product height in cm"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:358
+#: src/Traits/SettingsFields.php:360
 msgid "Item height"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:348
+#: src/Traits/SettingsFields.php:350
 msgid "Default product width in cm"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:347
+#: src/Traits/SettingsFields.php:349
 msgid "Item width"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:337
+#: src/Traits/SettingsFields.php:339
 msgid "Default product length in cm"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:336
+#: src/Traits/SettingsFields.php:338
 msgid "Item length"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:321
-msgid "All goods must have their weight indicated, if there are goods without %s a specified weight, then for such goods the value from this field will be substituted. %s This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings."
+#. translators: 1: Line break 2: Line break
+#: src/Traits/SettingsFields.php:323
+msgid "All goods must have their weight indicated, if there are goods without %1$s a specified weight, then for such goods the value from this field will be substituted. %2$s This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings."
 msgstr ""
 
-#: src/Traits/SettingsFields.php:315
+#: src/Traits/SettingsFields.php:316
 msgid "Default weight of one item in"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:310
+#: src/Traits/SettingsFields.php:311
 msgid "Dimensions"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:280
+#: src/Traits/SettingsFields.php:281
 msgid "If this setting is enabled, then after selecting a pick-up point on the checkout page, the card will automatically close."
 msgstr ""
 
-#: src/Traits/SettingsFields.php:277
+#: src/Traits/SettingsFields.php:278
 msgid "Close the map after selecting pick-up"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:266
+#: src/Traits/SettingsFields.php:267
 msgid "Number of days will be added to the estimated delivery time"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:263
+#: src/Traits/SettingsFields.php:264
 msgid "Add days for delivery"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:256
+#: src/Traits/SettingsFields.php:257
 msgid "When the \"Multi-seat\" mode is enabled, the detailed order page will display the ability to create several packages for one order and distribute goods among the created packages"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:253
+#: src/Traits/SettingsFields.php:254
 msgid "Multi-seater"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:245
+#. translators: %s: Example of tariff code-name mapping
+#: src/Traits/SettingsFields.php:246
 msgid "In the list of tariffs in the field \"Tariffs\" the tariff code is indicated in brackets.\\n\\r To change the name of the tariff, an entry in the code-name format is added to the field; for multiple changes,\\n\\r tariffs are separated by a semicolon, for example, an entry that will change the name of tariff 136 and 137 looks like this:%s If the value is not specified, the tariff names will be standard."
 msgstr ""
 
@@ -923,7 +933,7 @@ msgstr ""
 msgid "Authorization"
 msgstr ""
 
-#: src/Traits/SettingsFields.php:29 src/Traits/SettingsFields.php:417
+#: src/Traits/SettingsFields.php:29 src/Traits/SettingsFields.php:419
 msgid "Rules for displaying the delivery amount"
 msgstr ""
 
@@ -963,13 +973,13 @@ msgid ""
 "You may need to cancel existing one (if that button exists)"
 msgstr ""
 
-#: src/Actions/GenerateBarcodeAction.php:123
+#: src/Actions/GenerateBarcodeAction.php:125
 msgid ""
 "A request for a barcode was sent, but no response was received.\n"
 "Wait for 1 hour before trying again"
 msgstr ""
 
-#: src/Actions/GenerateBarcodeAction.php:114
+#: src/Actions/GenerateBarcodeAction.php:116
 msgid ""
 "Failed to create barcode.\n"
 "Try again"
@@ -982,12 +992,12 @@ msgid ""
 "You may need to cancel existing one (if that button exists)"
 msgstr ""
 
-#: src/Actions/OrderCreateAction.php:326
+#: src/Actions/OrderCreateAction.php:327
 msgid "inventory attached"
 msgstr ""
 
 #. translators: 1: error message
-#: src/Actions/OrderCreateAction.php:117
+#: src/Actions/OrderCreateAction.php:116
 msgid "Cdek shipping error: %1$s"
 msgstr ""
 

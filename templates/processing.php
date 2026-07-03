@@ -12,7 +12,7 @@ defined('ABSPATH') or exit;
 
 <div class="notice notice-warning">
     <p>
-        <strong><?php echo Loader::getPluginName() ?>:</strong>
+        <strong><?php echo esc_html(Loader::getPluginName()) ?>:</strong>
         <?php esc_html_e(
             'Waybill info is not available due to a processing of the order status in the CDEK system',
             'cdekdelivery',
