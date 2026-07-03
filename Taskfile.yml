@@ -11,3 +11,8 @@ tasks:
       - "{{.YARN}} build"
       - rm -rf node_modules
       - composer archive -f zip --file=CDEKDelivery
+
+  test:
+    desc: "Запуск PHPUnit тестов"
+    cmds:
+      - composer test

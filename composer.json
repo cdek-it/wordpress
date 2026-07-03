@@ -40,6 +40,11 @@
       "Cdek\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Cdek\\Tests\\": "tests/"
+    }
+  },
   "require": {
     "php": "^7.4",
     "composer/installers": "~2.0",
@@ -47,6 +52,8 @@
     "paragonie/paseto": "^2.4"
   },
   "require-dev": {
+    "brain/monkey": "^2",
+    "phpunit/phpunit": "^9.6",
     "roave/security-advisories": "dev-latest",
     "wp-cli/i18n-command": "^2.5"
   },
@@ -72,14 +79,18 @@
       "yarn.lock",
       "webpack.config.js",
       "sonar-project.properties",
-      "guide"
+      "guide",
+      "tests",
+      "phpunit.xml",
+      "Taskfile.yml"
     ]
   },
   "scripts": {
     "dumplang": [
       "vendor/bin/wp --allow-root make-mo lang lang",
       "vendor/bin/wp --allow-root make-json --no-purge lang lang"
-    ]
+    ],
+    "test": "phpunit"
   },
   "repositories": [
     {
