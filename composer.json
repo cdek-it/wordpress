@@ -106,7 +106,7 @@
     "test": "phpunit",
     "lint": "bash bin/phpcs-diff.sh",
     "lint-full": "phpcs",
-    "stan": "phpstan analyse"
+    "stan": "phpstan analyse --memory-limit=512M"
   },
   "repositories": [
     {

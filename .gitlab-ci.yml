@@ -93,7 +93,7 @@ lint:
   before_script:
     - set -eux
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
-    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer php84-xml php84-xmlwriter php84-xmlreader nodejs-current git
+    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer php84-xml php84-xmlwriter php84-xmlreader bash nodejs-current git
     - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
     - php -v
     - node --version
@@ -116,7 +116,7 @@ static-analysis:
     - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer php84-xml php84-xmlwriter php84-xmlreader
     - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
   script:
-    - vendor/bin/phpstan analyse --no-progress
+    - vendor/bin/phpstan analyse --no-progress --memory-limit=512M
 
 unit-tests:
   image: docker-proxy.cdek.ru/php:8.2-alpine
