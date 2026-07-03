@@ -190,7 +190,11 @@ build_tag:
       done
     - node .yarn/releases/yarn-4.8.1.cjs build
     - rm -rf node_modules
-    - composer remove --no-install --ignore-platform-req=ext-gmp composer/installers
+    # `--update-no-dev` не даёт composer резолвить require-dev (phpunit/wpcs и т.п.) на этом шаге.
+    # для release-сборки они не нужны и не установлены (ext-dom/tokenizer/simplexml отсутствуют).
+    # `|| true`: при --no-install composer честно переписывает composer.json/lock, но ругается,
+    # что пакет физически ещё лежит в vendor/ (ожидаемо до следующего шага с install).
+    - composer remove --no-install --update-no-dev --ignore-platform-req=ext-gmp composer/installers || true
     - composer i -a --no-dev --ignore-platform-req=ext-gmp
     - php -r '$d = json_decode(file_get_contents("composer.json"), true); unset($d["repositories"]); file_put_contents("composer.json", json_encode($d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);'
     - composer archive -f zip --file=cdek
