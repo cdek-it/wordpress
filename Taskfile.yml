@@ -24,9 +24,13 @@ tasks:
       - composer audit
 
   lint:
-    desc: "phpcs по PHP-файлам, изменённым относительно main"
+    desc: "php -l + phpcs/eslint/stylelint по файлам, изменённым относительно main (как в CI)"
     cmds:
-      - composer lint
+      - find src -name "*.php" -print0 | xargs -0 -n1 php -l
+      - bash bin/phpcs-diff.sh
+      - "{{.YARN}} install"
+      - bash bin/lint-js-diff.sh
+      - bash bin/lint-css-diff.sh
 
   lint-full:
     desc: "phpcs по всему src/ (для ручной уборки, не используется в CI)"

@@ -101,8 +101,8 @@ lint:
     - find src -name "*.php" -print0 | xargs -0 -n1 php -l
     - bash bin/phpcs-diff.sh
     - node .yarn/releases/yarn-4.8.1.cjs install --immutable
-    - node .yarn/releases/yarn-4.8.1.cjs lint:js
-    - node .yarn/releases/yarn-4.8.1.cjs lint:css
+    - bash bin/lint-js-diff.sh
+    - bash bin/lint-css-diff.sh
 
 static-analysis:
   image: docker-proxy.cdek.ru/php:8.2-alpine
