@@ -1,5 +1,6 @@
 {
   "name": "cdek/woocommerce-delivery-integration",
+  "description": "CDEK Delivery integration plugin for WooCommerce",
   "type": "wordpress-plugin",
   "license": "GPL-3.0",
   "authors": [
