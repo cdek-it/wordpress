@@ -340,13 +340,14 @@ github:
     - chmod 400 ~/.ssh/id_integrator
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
     - apk add --no-cache git netcat-openbsd openssh-client git-lfs
-    - git config checkout.defaultRemote origin
-    - git remote add -f github "${GITHUB_REPO}" || true
+    - git remote add github "${GITHUB_REPO}" 2>/dev/null || git remote set-url github "${GITHUB_REPO}"
+    - git fetch github
   script:
-    - git checkout $CI_COMMIT_REF_NAME
-    - git fetch github $CI_COMMIT_REF_NAME
-    - git branch -u github/$CI_COMMIT_REF_NAME
-    - git push
+    # `-B` принудительно переставляет локальную ветку на origin/$CI_COMMIT_REF_NAME,
+    # т.к. workspace раннера переиспользуется между запусками и просто `checkout`
+    # может оставить ветку на устаревшем коммите с предыдущего пайплайна.
+    - git checkout -B "$CI_COMMIT_REF_NAME" "origin/$CI_COMMIT_REF_NAME"
+    - git push github "HEAD:refs/heads/$CI_COMMIT_REF_NAME"
 
 migrate_tag_to_github:
   image: docker-proxy.cdek.tech/alpine
