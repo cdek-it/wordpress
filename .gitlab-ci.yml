@@ -5,11 +5,15 @@ image:
 #
 stages:
   - maintenance
-  - sync
+  - validate
+  - lint
+  - static-analysis
+  - unit-tests
+  - sonar
   - build
-  - test
   - upload
   - deploy
+  - sync
 
 variables:
   SELECT_JOB:
@@ -22,6 +26,143 @@ variables:
   MIGRATE_TAG:
     value: ""
     description: "Тег для переноса из GitLab в GitHub. Например: v4.2.5"
+
+# Общие проверки для любого push в ветку - feature-ветку ИЛИ main: validate -> lint -> static-analysis -> unit-tests.
+# Не запускается на тегах (там свой релизный флоу) и при ручном запуске migrate_tag_to_github.
+.branch_pipeline_rules: &branch_pipeline_rules
+  - if: $SELECT_JOB == "migrate_tag_to_github"
+    when: never
+  - if: $CI_COMMIT_TAG
+    when: never
+  - if: $CI_COMMIT_BRANCH
+    when: always
+
+# Шаги основного пайплайна main (push после merge request): sonar.
+# build_custom/deploy-staging/github управляются собственными rules у соответствующих job.
+.main_branch_rules: &main_branch_rules
+  - if: $SELECT_JOB == "migrate_tag_to_github"
+    when: never
+  - if: $CI_COMMIT_TAG
+    when: never
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    when: always
+  - when: never
+
+validate:
+  image: docker-proxy.cdek.ru/php:8.2-alpine
+  stage: validate
+  tags:
+    - docker
+  rules: *branch_pipeline_rules
+  variables:
+    COMPOSER_CACHE_DIR: "${CI_PROJECT_DIR}/.composer-cache"
+  cache:
+    key:
+      files:
+        - composer.lock
+    paths:
+      - .composer-cache/
+    policy: pull-push
+  before_script:
+    - set -eux
+    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
+    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer php84-xml php84-xmlwriter php84-xmlreader
+    - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
+    - composer --version
+  script:
+    - composer validate
+    - composer install --no-interaction --prefer-dist --ignore-platform-req=ext-gmp
+    - composer audit
+  artifacts:
+    paths:
+      - vendor/
+    expire_in: 1 hour
+
+lint:
+  image: docker-proxy.cdek.ru/php:8.2-alpine
+  stage: lint
+  tags:
+    - docker
+  rules: *branch_pipeline_rules
+  variables:
+    GIT_DEPTH: "0"
+    YARN_CACHE_FOLDER: .yarn/cache
+    YARN_ENABLE_GLOBAL_CACHE: "false"
+    npm_config_cache: .npm
+  cache:
+    key:
+      files:
+        - yarn.lock
+        - package.json
+    paths:
+      - .yarn/cache/
+      - .yarn/install-state.gz
+      - .npm/_prebuilds/
+    policy: pull
+  before_script:
+    - set -eux
+    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
+    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer php84-xml php84-xmlwriter php84-xmlreader bash nodejs-current git
+    - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
+    - php -v
+    - node --version
+  script:
+    - find src -name "*.php" -print0 | xargs -0 -n1 php -l
+    - bash bin/phpcs-diff.sh
+    - node .yarn/releases/yarn-4.8.1.cjs install --immutable
+    - bash bin/lint-js-diff.sh
+    - bash bin/lint-css-diff.sh
+
+static-analysis:
+  image: docker-proxy.cdek.ru/php:8.2-alpine
+  stage: static-analysis
+  tags:
+    - docker
+  rules: *branch_pipeline_rules
+  before_script:
+    - set -eux
+    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
+    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer php84-xml php84-xmlwriter php84-xmlreader
+    - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
+  script:
+    - vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+
+unit-tests:
+  image: docker-proxy.cdek.ru/php:8.2-alpine
+  stage: unit-tests
+  tags:
+    - docker
+  rules: *branch_pipeline_rules
+  before_script:
+    - set -eux
+    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
+    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer php84-xml php84-xmlwriter php84-xmlreader
+    - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
+  script:
+    - vendor/bin/phpunit --colors=never --log-junit junit-report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: junit-report.xml
+
+sonarqube-check:
+  image:
+    name: docker-proxy.cdek.ru/sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  tags:
+    - docker
+  stage: sonar
+  rules: *main_branch_rules
+  script:
+    - sonar-scanner
+  allow_failure: true
 
 build_tag:
   image: docker-proxy.cdek.ru/php:8.2-alpine
@@ -77,7 +218,11 @@ build_tag:
       done
     - node .yarn/releases/yarn-4.8.1.cjs build
     - rm -rf node_modules
-    - composer remove --no-install --ignore-platform-req=ext-gmp composer/installers
+    # `--update-no-dev` не даёт composer резолвить require-dev (phpunit/wpcs и т.п.) на этом шаге.
+    # для release-сборки они не нужны и не установлены (ext-dom/tokenizer/simplexml отсутствуют).
+    # `|| true`: при --no-install composer честно переписывает composer.json/lock, но ругается,
+    # что пакет физически ещё лежит в vendor/ (ожидаемо до следующего шага с install).
+    - composer remove --no-install --update-no-dev --ignore-platform-req=ext-gmp composer/installers || true
     - composer i -a --no-dev --ignore-platform-req=ext-gmp
     - php -r '$d = json_decode(file_get_contents("composer.json"), true); unset($d["repositories"]); file_put_contents("composer.json", json_encode($d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);'
     - composer archive -f zip --file=cdek
@@ -87,11 +232,18 @@ build_tag:
     paths:
       - cdek.zip
 
-build_custom:
+build-custom:
   image: docker-proxy.cdek.ru/php:8.2-alpine
   rules:
+    - if: $SELECT_JOB == "migrate_tag_to_github"
+      when: never
+    - if: $CI_COMMIT_TAG
+      when: manual
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: always
+    # feature-ветка: собрать zip автоматически после прохождения unit-tests
+    - if: $CI_COMMIT_BRANCH
+      when: on_success
     - when: manual
   stage: build
   tags:
@@ -138,7 +290,7 @@ release:
       release-cli create --name $CI_COMMIT_TAG --tag-name $CI_COMMIT_TAG \
         --assets-link "{\"name\":\"Архив\",\"filepath\":\"/archive\",\"url\":\"${ARTIFACTORY_REPO}$CI_COMMIT_BRANCH/$CI_PROJECT_NAME/wordpress_${ARCHIVE_VERSION}.zip\", \"link_type\":\"package\"}" \
 
-deploy_staging:
+deploy-staging:
   stage: deploy
   image: docker-proxy.cdek.ru/alpine
   script:
@@ -147,11 +299,11 @@ deploy_staging:
   tags:
     - docker
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: always
+    # Временно отключено: стенд для staging ещё не поднят. Включить обратно, вернув
+    # `- if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH` / `when: always`, когда появится DEPLOY_NODE.
     - when: never
   needs:
-    - job: build_custom
+    - job: build-custom
       artifacts: true
   environment:
     name: dev2
@@ -174,6 +326,8 @@ github:
   tags:
     - docker
   rules:
+    - if: $SELECT_JOB == "migrate_tag_to_github"
+      when: never
     - if: $CI_COMMIT_REF_PROTECTED != "true"
       when: never
     - if: $CI_COMMIT_TAG
@@ -193,26 +347,6 @@ github:
     - git fetch github $CI_COMMIT_REF_NAME
     - git branch -u github/$CI_COMMIT_REF_NAME
     - git push
-
-sonarqube-check:
-  image:
-    name: docker-proxy.cdek.ru/sonarsource/sonar-scanner-cli:latest
-    entrypoint: [""]
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
-    GIT_DEPTH: "0"
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  tags:
-    - docker
-  stage: test
-  script:
-    - sonar-scanner
-  allow_failure: true
-  only:
-    - main
 
 migrate_tag_to_github:
   image: docker-proxy.cdek.tech/alpine

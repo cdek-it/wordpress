@@ -1,0 +1,296 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Class Cdek\\Actions\\CalculateDeliveryAction does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/Actions/CalculateDeliveryAction.php
+
+		-
+			message: '#^Binary operation "/" between non\-falsy\-string and 100 results in an error\.$#'
+			identifier: binaryOp.invalid
+			count: 1
+			path: src/Actions/CheckoutItemPriceAction.php
+
+		-
+			message: '#^Call to an undefined static method Cdek\\Helpers\\ScheduleLocker\:\:instance\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: src/Actions/DispatchOrderAutomationAction.php
+
+		-
+			message: '#^Class Cdek\\Actions\\FlushTokenCacheAction does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/Actions/FlushTokenCacheAction.php
+
+		-
+			message: '#^Class Cdek\\Actions\\GenerateBarcodeAction does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/Actions/GenerateBarcodeAction.php
+
+		-
+			message: '#^Class Cdek\\Actions\\GenerateWaybillAction does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/Actions/GenerateWaybillAction.php
+
+		-
+			message: '#^Access to an undefined property Cdek\\Model\\Intake\:\:\$number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Actions/IntakeCreateAction.php
+
+		-
+			message: '#^Access to an undefined property Cdek\\Model\\Intake\:\:\$uuid\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Actions/IntakeCreateAction.php
+
+		-
+			message: '#^Access to an undefined property Cdek\\Model\\ShippingItem\:\:\$tariff\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Actions/IntakeCreateAction.php
+
+		-
+			message: '#^Access to an undefined property Cdek\\Model\\ShippingItem\:\:\$tariff\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Actions/OrderCreateAction.php
+
+		-
+			message: '#^Class Cdek\\Actions\\OrderCreateAction does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/Actions/OrderCreateAction.php
+
+		-
+			message: '#^Access to an undefined property Cdek\\Model\\ShippingItem\:\:\$tariff\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Actions/RecalculateShippingAction.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Actions/RecalculateShippingAction.php
+
+		-
+			message: '#^Class Cdek\\Actions\\SaveOfficeToSessionAction does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/Actions/SaveOfficeToSessionAction.php
+
+		-
+			message: '#^Access to an undefined property Cdek\\Model\\ShippingItem\:\:\$tariff\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Blocks/AdminOrderBox.php
+
+		-
+			message: '#^Class Cdek\\Blocks\\AdminOrderBox does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/Blocks/AdminOrderBox.php
+
+		-
+			message: '#^Access to an undefined property Cdek\\Model\\ShippingItem\:\:\$tariff\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Blocks/CheckoutMapBlock.php
+
+		-
+			message: '#^Access to constant IDENTIFIER on an unknown class Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\CartSchema\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/CheckoutMapBlock.php
+
+		-
+			message: '#^Access to constant IDENTIFIER on an unknown class Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\CheckoutSchema\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/CheckoutMapBlock.php
+
+		-
+			message: '#^Function woocommerce_store_api_register_endpoint_data not found\.$#'
+			identifier: function.notFound
+			count: 2
+			path: src/Blocks/CheckoutMapBlock.php
+
+		-
+			message: '#^PHPDoc tag @return with type array is incompatible with native type string\|null\.$#'
+			identifier: return.phpDocType
+			count: 1
+			path: src/CdekApi.php
+
+		-
+			message: '#^Class Cdek\\Commands\\TokensSyncCommand does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/Commands/TokensSyncCommand.php
+
+		-
+			message: '#^Access to an undefined property Cdek\\Model\\ShippingItem\:\:\$tariff\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Controllers/IntakeController.php
+
+		-
+			message: '#^Call to an undefined method Throwable\:\:getData\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/ExceptionHandler.php
+
+		-
+			message: '#^Call to an undefined method Throwable\:\:getKey\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/ExceptionHandler.php
+
+		-
+			message: '#^Call to an undefined method Throwable\:\:getStatusCode\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/ExceptionHandler.php
+
+		-
+			message: '#^Class Cdek\\ExceptionHandler does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/ExceptionHandler.php
+
+		-
+			message: '#^Unsafe access to private property Cdek\\Helpers\\Logger\:\:\$instance through static\:\:\.$#'
+			identifier: staticClassAccess.privateProperty
+			count: 3
+			path: src/Helpers/Logger.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Helpers/Logger.php
+
+		-
+			message: '#^Action callback returns Cdek\\Model\\ValidationResult but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Loader.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 3
+			path: src/Loader.php
+
+		-
+			message: '#^Action callback returns non\-empty\-array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Loader.php
+
+		-
+			message: '#^Action callback returns true but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Loader.php
+
+		-
+			message: '#^Class Cdek\\Loader does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/Loader.php
+
+		-
+			message: '#^PHPDoc tag @property has invalid value \(string\|null number\)\: Unexpected token "number", expected variable at offset 33 on line 2$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Model/Intake.php
+
+		-
+			message: '#^PHPDoc tag @property has invalid value \(string\|null uuid\)\: Unexpected token "uuid", expected variable at offset 69 on line 3$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Model/Intake.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 2
+			path: src/Model/Log.php
+
+		-
+			message: '#^PHPDoc tag @property has invalid value \(string tariff\)\: Unexpected token "tariff", expected variable at offset 28 on line 2$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Model/ShippingItem.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/ShippingMethod.php
+
+		-
+			message: '#^Unsafe access to private property Cdek\\ShippingMethod\:\:\$instance through static\:\:\.$#'
+			identifier: staticClassAccess.privateProperty
+			count: 2
+			path: src/ShippingMethod.php
+
+		-
+			message: '#^Cannot access property \$max_num_pages on array\|object\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: src/Tasks/CollectOrphanedOrders.php
+
+		-
+			message: '#^Cannot access property \$orders on array\|object\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: src/Tasks/CollectOrphanedOrders.php
+
+		-
+			message: '#^Access to an undefined property Cdek\\Model\\Order\:\:\$uuid\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Tasks/RestoreOrderUuids.php
+
+		-
+			message: '#^Class Cdek\\UI\\Admin does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/UI/Admin.php
+
+		-
+			message: '#^Class Cdek\\UI\\AdminNotices does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/UI/AdminNotices.php
+
+		-
+			message: '#^Class Cdek\\UI\\CdekWidget does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/UI/CdekWidget.php
+
+		-
+			message: '#^Class Cdek\\UI\\Frontend does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/UI/Frontend.php
+
+		-
+			message: '#^Class Cdek\\Uninstaller does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/Uninstaller.php
+
+		-
+			message: '#^Class Cdek\\Validator\\PhoneValidator does not have a constructor and must be instantiated without any parameters\.$#'
+			identifier: new.noConstructor
+			count: 1
+			path: src/Validator/PhoneValidator.php
+

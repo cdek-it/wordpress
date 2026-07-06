@@ -1,5 +1,6 @@
 {
   "name": "cdek/woocommerce-delivery-integration",
+  "description": "CDEK Delivery integration plugin for WooCommerce",
   "type": "wordpress-plugin",
   "license": "GPL-3.0",
   "authors": [
@@ -39,6 +40,11 @@
       "Cdek\\": "src/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Cdek\\Tests\\": "tests/"
+    }
+  },
   "require": {
     "php": "^7.4",
     "composer/installers": "~2.0",
@@ -46,14 +52,24 @@
     "paragonie/paseto": "^2.4"
   },
   "require-dev": {
+    "brain/monkey": "^2",
+    "dealerdirect/phpcodesniffer-composer-installer": "^1.2",
+    "php-stubs/woocommerce-stubs": "^10.9",
+    "phpstan/extension-installer": "^1.4",
+    "phpstan/phpstan": "^2.2",
+    "phpunit/phpunit": "^9.6",
     "roave/security-advisories": "dev-latest",
-    "wp-cli/i18n-command": "^2.5"
+    "szepeviktor/phpstan-wordpress": "^2.0",
+    "wp-cli/i18n-command": "^2.5",
+    "wp-coding-standards/wpcs": "^3.3"
   },
   "config": {
     "sort-packages": true,
     "optimize-autoloader": true,
     "allow-plugins": {
-      "composer/installers": true
+      "composer/installers": true,
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "phpstan/extension-installer": true
     },
     "platform": {
       "php": "7.4"
@@ -71,14 +87,26 @@
       "yarn.lock",
       "webpack.config.js",
       "sonar-project.properties",
-      "guide"
+      "guide",
+      "tests",
+      "phpunit.xml",
+      "Taskfile.yml",
+      "phpcs.xml",
+      "phpstan.neon",
+      "phpstan-baseline.neon",
+      ".phpstan",
+      "bin"
     ]
   },
   "scripts": {
     "dumplang": [
       "vendor/bin/wp --allow-root make-mo lang lang",
       "vendor/bin/wp --allow-root make-json --no-purge lang lang"
-    ]
+    ],
+    "test": "phpunit",
+    "lint": "bash bin/phpcs-diff.sh",
+    "lint-full": "phpcs",
+    "stan": "phpstan analyse --memory-limit=1G"
   },
   "repositories": [
     {

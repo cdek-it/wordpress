@@ -11,3 +11,33 @@ tasks:
       - "{{.YARN}} build"
       - rm -rf node_modules
       - composer archive -f zip --file=CDEKDelivery
+
+  test:
+    desc: "Запуск PHPUnit тестов"
+    cmds:
+      - composer test
+
+  validate:
+    desc: "Проверка composer.json/composer.lock и уязвимостей зависимостей"
+    cmds:
+      - composer validate
+      - composer audit
+
+  lint:
+    desc: "php -l + phpcs/eslint/stylelint по файлам, изменённым относительно main (как в CI)"
+    cmds:
+      - find src -name "*.php" -print0 | xargs -0 -n1 php -l
+      - bash bin/phpcs-diff.sh
+      - "{{.YARN}} install"
+      - bash bin/lint-js-diff.sh
+      - bash bin/lint-css-diff.sh
+
+  lint-full:
+    desc: "phpcs по всему src/ (для ручной уборки, не используется в CI)"
+    cmds:
+      - composer lint-full
+
+  stan:
+    desc: "Статический анализ PHPStan"
+    cmds:
+      - composer stan
