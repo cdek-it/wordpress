@@ -27,7 +27,7 @@ variables:
     value: ""
     description: "Тег для переноса из GitLab в GitHub. Например: v4.2.5"
 
-# Быстрая проверка feature-веток: validate -> lint -> static-analysis -> unit-tests -> build_custom.
+# Быстрая проверка feature-веток: validate -> lint -> static-analysis -> unit-tests -> build-custom.
 # Не запускается на main (там уже есть sonar/deploy) и на тегах (там свой релизный флоу).
 .feature_branch_rules: &feature_branch_rules
   - if: $SELECT_JOB == "migrate_tag_to_github"
@@ -204,7 +204,7 @@ build_tag:
     paths:
       - cdek.zip
 
-build_custom:
+build-custom:
   image: docker-proxy.cdek.ru/php:8.2-alpine
   rules:
     - if: $SELECT_JOB == "migrate_tag_to_github"
@@ -277,7 +277,7 @@ deploy_staging:
       when: always
     - when: never
   needs:
-    - job: build_custom
+    - job: build-custom
       artifacts: true
   environment:
     name: dev2
