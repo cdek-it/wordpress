@@ -5,15 +5,15 @@ image:
 #
 stages:
   - maintenance
-  - sync
   - validate
   - lint
   - static-analysis
   - unit-tests
+  - sonar
   - build
-  - test
   - upload
   - deploy
+  - sync
 
 variables:
   SELECT_JOB:
@@ -27,24 +27,33 @@ variables:
     value: ""
     description: "Тег для переноса из GitLab в GitHub. Например: v4.2.5"
 
-# Быстрая проверка feature-веток: validate -> lint -> static-analysis -> unit-tests -> build-custom.
-# Не запускается на main (там уже есть sonar/deploy) и на тегах (там свой релизный флоу).
-.feature_branch_rules: &feature_branch_rules
+# Общие проверки для любого push в ветку - feature-ветку ИЛИ main: validate -> lint -> static-analysis -> unit-tests.
+# Не запускается на тегах (там свой релизный флоу) и при ручном запуске migrate_tag_to_github.
+.branch_pipeline_rules: &branch_pipeline_rules
+  - if: $SELECT_JOB == "migrate_tag_to_github"
+    when: never
+  - if: $CI_COMMIT_TAG
+    when: never
+  - if: $CI_COMMIT_BRANCH
+    when: always
+
+# Шаги основного пайплайна main (push после merge request): sonar.
+# build_custom/deploy-staging/github управляются собственными rules у соответствующих job.
+.main_branch_rules: &main_branch_rules
   - if: $SELECT_JOB == "migrate_tag_to_github"
     when: never
   - if: $CI_COMMIT_TAG
     when: never
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-    when: never
-  - if: $CI_COMMIT_BRANCH
     when: always
+  - when: never
 
 validate:
   image: docker-proxy.cdek.ru/php:8.2-alpine
   stage: validate
   tags:
     - docker
-  rules: *feature_branch_rules
+  rules: *branch_pipeline_rules
   variables:
     COMPOSER_CACHE_DIR: "${CI_PROJECT_DIR}/.composer-cache"
   cache:
@@ -74,7 +83,7 @@ lint:
   stage: lint
   tags:
     - docker
-  rules: *feature_branch_rules
+  rules: *branch_pipeline_rules
   variables:
     GIT_DEPTH: "0"
     YARN_CACHE_FOLDER: .yarn/cache
@@ -109,7 +118,7 @@ static-analysis:
   stage: static-analysis
   tags:
     - docker
-  rules: *feature_branch_rules
+  rules: *branch_pipeline_rules
   before_script:
     - set -eux
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
@@ -123,7 +132,7 @@ unit-tests:
   stage: unit-tests
   tags:
     - docker
-  rules: *feature_branch_rules
+  rules: *branch_pipeline_rules
   before_script:
     - set -eux
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
@@ -135,6 +144,25 @@ unit-tests:
     when: always
     reports:
       junit: junit-report.xml
+
+sonarqube-check:
+  image:
+    name: docker-proxy.cdek.ru/sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  tags:
+    - docker
+  stage: sonar
+  rules: *main_branch_rules
+  script:
+    - sonar-scanner
+  allow_failure: true
 
 build_tag:
   image: docker-proxy.cdek.ru/php:8.2-alpine
@@ -262,7 +290,7 @@ release:
       release-cli create --name $CI_COMMIT_TAG --tag-name $CI_COMMIT_TAG \
         --assets-link "{\"name\":\"Архив\",\"filepath\":\"/archive\",\"url\":\"${ARTIFACTORY_REPO}$CI_COMMIT_BRANCH/$CI_PROJECT_NAME/wordpress_${ARCHIVE_VERSION}.zip\", \"link_type\":\"package\"}" \
 
-deploy_staging:
+deploy-staging:
   stage: deploy
   image: docker-proxy.cdek.ru/alpine
   script:
@@ -271,10 +299,8 @@ deploy_staging:
   tags:
     - docker
   rules:
-    - if: $SELECT_JOB == "migrate_tag_to_github"
-      when: never
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: always
+    # Временно отключено: стенд для staging ещё не поднят. Включить обратно, вернув
+    # `- if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH` / `when: always`, когда появится DEPLOY_NODE.
     - when: never
   needs:
     - job: build-custom
@@ -321,29 +347,6 @@ github:
     - git fetch github $CI_COMMIT_REF_NAME
     - git branch -u github/$CI_COMMIT_REF_NAME
     - git push
-
-sonarqube-check:
-  image:
-    name: docker-proxy.cdek.ru/sonarsource/sonar-scanner-cli:latest
-    entrypoint: [""]
-  variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
-    GIT_DEPTH: "0"
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
-  tags:
-    - docker
-  stage: test
-  script:
-    - sonar-scanner
-  allow_failure: true
-  only:
-    - main
-  except:
-    variables:
-      - $SELECT_JOB == "migrate_tag_to_github"
 
 migrate_tag_to_github:
   image: docker-proxy.cdek.tech/alpine
