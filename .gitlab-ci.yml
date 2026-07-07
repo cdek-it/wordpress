@@ -176,7 +176,7 @@ sonarqube-check:
     - job: unit-tests
       artifacts: true
   script:
-    - sonar-scanner -X
+    - sonar-scanner
   allow_failure: true
 
 build_tag:
