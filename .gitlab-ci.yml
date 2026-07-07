@@ -86,6 +86,7 @@ lint:
     GIT_DEPTH: "0"
     YARN_CACHE_FOLDER: .yarn/cache
     YARN_ENABLE_GLOBAL_CACHE: "false"
+    YARN_ENABLE_IMMUTABLE_INSTALLS: "true" # `workspaces focus` не понимает флаг --immutable, только эту переменную
     npm_config_cache: .npm
   cache:
     key:
@@ -107,7 +108,8 @@ lint:
   script:
     - find src -name "*.php" -print0 | xargs -0 -n1 php -l
     - bash bin/phpcs-diff.sh
-    - node .yarn/releases/yarn-4.8.1.cjs install --immutable
+    # workspaces focus — ставит зависимости только корневого пакета, пропуская workspace guide (Docusaurus), для сборки которого тут нет нужных инструментов
+    - node .yarn/releases/yarn-4.8.1.cjs workspaces focus
     - bash bin/lint-js-diff.sh
     - bash bin/lint-css-diff.sh
 
@@ -190,6 +192,8 @@ build_tag:
   variables:
     YARN_CACHE_FOLDER: .yarn/cache
     YARN_ENABLE_GLOBAL_CACHE: "false"
+    YARN_ENABLE_IMMUTABLE_INSTALLS: "true" # `workspaces focus` не понимает флаг --immutable, только эту переменную
+    YARN_ENABLE_INLINE_BUILDS: "true" # то же самое вместо флага --inline-builds (лог сборки нативных модулей сразу в вывод job'а)
     npm_config_cache: .npm
 
   cache:
@@ -216,10 +220,11 @@ build_tag:
     - sed -i "s/\(Stable tag:\)\( *\).*/\1\2${RELEASE_VERSION}/" README.md
     - sed -i "s/\(Project-Id-Version:\)\( *\).*/\1\2CDEKDelivery ${RELEASE_VERSION}\"/" lang/cdekdelivery.pot
     - |
+      # workspaces focus - ставит зависимости только корневого пакета, пропуская workspace guide (Docusaurus), который в архив релиза и так не попадает
       for attempt in 1 2 3; do
         echo "Yarn install attempt ${attempt}/3"
 
-        if node .yarn/releases/yarn-4.8.1.cjs install --immutable --inline-builds; then
+        if node .yarn/releases/yarn-4.8.1.cjs workspaces focus; then
           break
         fi
 
@@ -263,6 +268,9 @@ build-custom:
   stage: build
   tags:
     - docker
+  variables:
+    YARN_ENABLE_IMMUTABLE_INSTALLS: "true" # `workspaces focus` не понимает флаг --immutable, только эту переменную
+    YARN_ENABLE_INLINE_BUILDS: "true" # то же самое вместо флага --inline-builds (лог сборки нативных модулей сразу в вывод job'а)
   artifacts:
     name: cdek-integration
     paths:
