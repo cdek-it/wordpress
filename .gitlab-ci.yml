@@ -6,9 +6,7 @@ image:
 stages:
   - maintenance
   - validate
-  - lint
-  - static-analysis
-  - unit-tests
+  - checks
   - sonar
   - build
   - upload
@@ -27,7 +25,7 @@ variables:
     value: ""
     description: "Тег для переноса из GitLab в GitHub. Например: v4.2.5"
 
-# Общие проверки для любого push в ветку - feature-ветку ИЛИ main: validate -> lint -> static-analysis -> unit-tests.
+# Общие проверки для любого push в ветку - feature-ветку ИЛИ main: validate -> checks (lint/static-analysis/unit-tests параллельно).
 # Не запускается на тегах (там свой релизный флоу) и при ручном запуске migrate_tag_to_github.
 .branch_pipeline_rules: &branch_pipeline_rules
   - if: $SELECT_JOB == "migrate_tag_to_github"
@@ -80,7 +78,7 @@ validate:
 
 lint:
   image: docker-proxy.cdek.ru/php:8.2-alpine
-  stage: lint
+  stage: checks
   tags:
     - docker
   rules: *branch_pipeline_rules
@@ -115,7 +113,7 @@ lint:
 
 static-analysis:
   image: docker-proxy.cdek.ru/php:8.2-alpine
-  stage: static-analysis
+  stage: checks
   tags:
     - docker
   rules: *branch_pipeline_rules
@@ -129,18 +127,24 @@ static-analysis:
 
 unit-tests:
   image: docker-proxy.cdek.ru/php:8.2-alpine
-  stage: unit-tests
+  stage: checks
   tags:
     - docker
   rules: *branch_pipeline_rules
   before_script:
     - set -eux
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
-    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer php84-xml php84-xmlwriter php84-xmlreader php84-pecl-pcov
-    - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
+    - apk add --no-cache composer
+    # `php84-*` пакеты из apk ставятся мимо кассы: у образа `php:8.2-alpine` уже есть свой
+    # встроенный PHP в /usr/local/bin/php (со всеми нужными расширениями), поэтому
+    # `command -v php` всегда находит именно его, а не apk-шный php84. Покрытие ставим
+    # штатным для официального PHP-образа способом - через pecl + docker-php-ext-enable.
+    - apk add --no-cache --virtual .build-deps $PHPIZE_DEPS
+    - pecl install pcov-1.0.12
+    - docker-php-ext-enable pcov
+    - apk del .build-deps
     - php -v
-    - php -m | grep -i pcov || echo "pcov module NOT loaded"
-    - php --ini
+    - php -m | grep -qi pcov
   script:
     - vendor/bin/phpunit --colors=never --log-junit junit-report.xml --coverage-clover=coverage.xml
   artifacts:
