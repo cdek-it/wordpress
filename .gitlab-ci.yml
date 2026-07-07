@@ -138,6 +138,9 @@ unit-tests:
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
     - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer php84-xml php84-xmlwriter php84-xmlreader php84-pecl-pcov
     - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
+    - php -v
+    - php -m | grep -i pcov || echo "pcov module NOT loaded"
+    - php --ini
   script:
     - vendor/bin/phpunit --colors=never --log-junit junit-report.xml --coverage-clover=coverage.xml
   artifacts:
