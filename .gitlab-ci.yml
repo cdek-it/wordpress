@@ -176,6 +176,13 @@ sonarqube-check:
     - job: unit-tests
       artifacts: true
   script:
+    - echo "=== DEBUG workdir ==="
+    - pwd
+    - find . -maxdepth 2 -type d | sort
+    - git ls-files | wc -l || echo "git ls-files failed"
+    - find src -name '*.php' 2>/dev/null | wc -l
+    - ls -la vendor 2>&1 | head -5
+    - echo "=== END DEBUG ==="
     - sonar-scanner
   allow_failure: true
 
