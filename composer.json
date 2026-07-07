@@ -104,6 +104,7 @@
       "vendor/bin/wp --allow-root make-json --no-purge lang lang"
     ],
     "test": "phpunit",
+    "test-coverage": "phpunit --coverage-html=.coverage-html",
     "lint": "bash bin/phpcs-diff.sh",
     "lint-full": "phpcs",
     "stan": "phpstan analyse --memory-limit=1G"

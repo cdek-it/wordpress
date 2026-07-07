@@ -17,6 +17,11 @@ tasks:
     cmds:
       - composer test
 
+  test-coverage:
+    desc: "PHPUnit с HTML-отчётом покрытия в .coverage-html (нужен xdebug или pcov)"
+    cmds:
+      - composer test-coverage
+
   validate:
     desc: "Проверка composer.json/composer.lock и уязвимостей зависимостей"
     cmds:
