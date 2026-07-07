@@ -176,13 +176,7 @@ sonarqube-check:
     - job: unit-tests
       artifacts: true
   script:
-    - echo "=== DEBUG workdir ==="
-    - pwd
-    - ls -la
-    - ls -la src 2>&1 | head -20
-    - ls -la vendor 2>&1 | head -5
-    - echo "=== END DEBUG ==="
-    - sonar-scanner
+    - sonar-scanner -X
   allow_failure: true
 
 build_tag:
