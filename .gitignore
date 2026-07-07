@@ -33,4 +33,10 @@ lang/*.json
 /.cache.php
 /.phpunit.result.cache
 
+/coverage.xml
+/junit-report.xml
+/.coverage-html/
+/.scannerwork/
+/.sonar/
+
 .idea

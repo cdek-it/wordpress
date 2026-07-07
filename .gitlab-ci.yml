@@ -136,12 +136,15 @@ unit-tests:
   before_script:
     - set -eux
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
-    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer php84-xml php84-xmlwriter php84-xmlreader
+    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer php84-xml php84-xmlwriter php84-xmlreader php84-pecl-pcov
     - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
   script:
-    - vendor/bin/phpunit --colors=never --log-junit junit-report.xml
+    - vendor/bin/phpunit --colors=never --log-junit junit-report.xml --coverage-clover=coverage.xml
   artifacts:
     when: always
+    paths:
+      - junit-report.xml
+      - coverage.xml
     reports:
       junit: junit-report.xml
 
@@ -160,6 +163,11 @@ sonarqube-check:
     - docker
   stage: sonar
   rules: *main_branch_rules
+  needs:
+    - job: validate
+      artifacts: true
+    - job: unit-tests
+      artifacts: true
   script:
     - sonar-scanner
   allow_failure: true
