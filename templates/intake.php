@@ -1,6 +1,6 @@
 <?php
 
-defined('ABSPATH') or exit;
+defined('ABSPATH') || exit;
 
 use Cdek\Model\Tariff;
 
@@ -18,15 +18,15 @@ $dateMax = gmdate('Y-m-d', strtotime($dateMin." +31 days"));
     <div>
         <label><?php esc_html_e('Date', 'cdekdelivery') ?>:
             <input type="date" min='<?php echo esc_attr($dateMin) ?>'
-                   max='<?php echo esc_attr($dateMax) ?>' name="date" required>
+                   max='<?php echo esc_attr($dateMax) ?>' name="date" data-required>
         </label>
     </div>
     <div>
         <label><?php esc_html_e('From', 'cdekdelivery') ?>
-            <input type="time" list="avail" name="from" required>
+            <input type="time" list="avail" name="from" data-required>
         </label>
         <label><?php esc_html_e('to', 'cdekdelivery') ?>
-            <input type="time" list="avail" name="to" required>
+            <input type="time" list="avail" name="to" data-required>
         </label>
         <datalist id="avail">
             <option value="09:00">
@@ -68,7 +68,7 @@ $dateMax = gmdate('Y-m-d', strtotime($dateMin." +31 days"));
                     ),
                 ) ?>
             </div>
-            <input type="number" min="0" name="weight" style="width: 150px" required>
+            <input type="number" min="0" name="weight" style="width: 150px" data-required>
         </div>
     <?php endif ?>
     <div>

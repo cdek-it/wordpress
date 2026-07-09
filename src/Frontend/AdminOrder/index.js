@@ -212,11 +212,11 @@ $(document).ready(() => {
 
           revokeDataUrl();
 
-          metaBox.find('.intake input[required]')
+          metaBox.find('.intake input[data-required]')
             .each((i, e) => e.ariaInvalid = e.value === '' ? 'true' : 'false');
 
           if (metaBox.find(
-            '.intake input[required][aria-invalid=true]').length > 0) {
+            '.intake input[data-required][aria-invalid=true]').length > 0) {
               return;
           }
 
