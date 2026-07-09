@@ -56,7 +56,7 @@ $dateMax = gmdate('Y-m-d', strtotime($dateMin." +31 days"));
         </label>
         <div>
             <div style="display: inline-flex; margin-top: 5px; align-items: center;">
-                <label style="margin: auto">
+                <label style="margin: auto" for="cdek-weight">
                     <?php esc_html_e('Weight in kg', 'cdekdelivery') ?>
                 </label>
                 <?php
@@ -68,7 +68,7 @@ $dateMax = gmdate('Y-m-d', strtotime($dateMin." +31 days"));
                     ),
                 ) ?>
             </div>
-            <input type="number" min="0" name="weight" style="width: 150px" data-required>
+            <input type="number" min="0" name="weight" id="cdek-weight" style="width: 150px" data-required>
         </div>
     <?php endif ?>
     <div>
