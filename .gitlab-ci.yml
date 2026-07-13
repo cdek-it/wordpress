@@ -25,23 +25,24 @@ variables:
     value: ""
     description: "Тег для переноса из GitLab в GitHub. Например: v4.2.5"
 
-# Общие проверки для любого push в ветку - feature-ветку ИЛИ main: validate -> checks (lint/static-analysis/unit-tests параллельно).
-# Не запускается на тегах (там свой релизный флоу) и при ручном запуске migrate_tag_to_github.
+# Общие проверки для push в ветку (feature-ветку ИЛИ main) И для тега vX.Y.Z:
+# validate -> checks (lint/static-analysis/unit-tests параллельно).
+# Не запускается только при ручном запуске migrate_tag_to_github.
 .branch_pipeline_rules: &branch_pipeline_rules
   - if: $SELECT_JOB == "migrate_tag_to_github"
     when: never
   - if: $CI_COMMIT_TAG
-    when: never
+    when: always
   - if: $CI_COMMIT_BRANCH
     when: always
 
-# Шаги основного пайплайна main (push после merge request): sonar.
+# Шаги основного пайплайна main (push после merge request) и тег-пайплайна (release candidate): sonar.
 # build_custom/deploy-staging/github управляются собственными rules у соответствующих job.
 .main_branch_rules: &main_branch_rules
   - if: $SELECT_JOB == "migrate_tag_to_github"
     when: never
   - if: $CI_COMMIT_TAG
-    when: never
+    when: always
   - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
     when: always
   - when: never
@@ -306,8 +307,8 @@ release:
     - docker
   needs:
     - job: upload
-  only:
-    - tags
+  rules:
+    - when: never
   image: registry-gitlab.cdek.ru/gitlab-org/release-cli:latest
   before_script:
     - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
