@@ -2,6 +2,7 @@ import $ from 'jquery';
 import cdekWidget from '@cdek-it/widget';
 import './style/main.scss';
 import { __ } from '@wordpress/i18n';
+import { isEqual } from 'lodash';
 const billingCityInput = $('#billing_city');
 const shippingCityInput = $('#shipping_city');
 const buttonNormalSize = 160;
@@ -12,6 +13,8 @@ let isNormalSize;
 let widget = null;
 let el;
 let checkoutUpdateTimer = null;
+let lastCity = null;
+let lastPointsRaw = null;
 
 if ((billingCityInput.val() || '') !== '' || (shippingCityInput.val() || '') !==
   '') {
@@ -53,8 +56,9 @@ const onChoose = (_type, _tariff, address) => {
     console.debug('[CDEK-MAP] Office selected', address);
 
     if (window.cdek.saver !== undefined){
-        $.post(window.cdek.saver, { code: address.code });
-        $(document.body).trigger('update_checkout');
+        $.post(window.cdek.saver, { code: address.code }).done(() => {
+            $(document.body).trigger('update_checkout');
+        });
     }
 
     if (window.cdek.close) {
@@ -120,9 +124,27 @@ $(document.body)
       const targetNode = document.querySelector('.open-pvz-btn');
 
       if (widget !== null) {
-          console.debug('[CDEK-MAP] Clearing widget selection');
+          const currentCity = targetNode ? $(targetNode).data('city') : null;
+          let currentPointsRaw = null;
 
-          widget.clearSelection();
+          if (targetNode) {
+              try {
+                  currentPointsRaw = JSON.parse($(targetNode).find('script').text());
+              } catch (SyntaxError) {
+                  console.error('[CDEK-MAP] SyntaxError during points parse');
+
+                  currentPointsRaw = null;
+              }
+          }
+
+          if (currentCity !== lastCity || !isEqual(currentPointsRaw, lastPointsRaw)) {
+              console.debug('[CDEK-MAP] Clearing widget selection');
+
+              widget.clearSelection();
+          }
+
+          lastCity = currentCity;
+          lastPointsRaw = currentPointsRaw;
       }
 
       if (targetNode) {
@@ -167,6 +189,9 @@ $(document.body)
               widget.updateOfficesRaw(points);
               widget.updateLocation(el.data('city'));
           }
+
+          lastCity = el.data('city');
+          lastPointsRaw = points;
 
           widget.open();
       } catch (SyntaxError) {
