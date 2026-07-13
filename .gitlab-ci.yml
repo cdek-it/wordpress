@@ -186,7 +186,7 @@ sonarqube-check:
     - sonar-scanner
   allow_failure: true
 
-build_tag:
+build-tag:
   image: docker-proxy.cdek.ru/php:8.2-alpine
   stage: build
   tags:
@@ -250,7 +250,8 @@ build_tag:
     - composer remove --no-install --update-no-dev --ignore-platform-req=ext-gmp composer/installers || true
     - composer i -a --no-dev --ignore-platform-req=ext-gmp
     - php -r '$d = json_decode(file_get_contents("composer.json"), true); unset($d["repositories"]); file_put_contents("composer.json", json_encode($d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);'
-    - composer archive -f zip --file=cdek
+    # `--ignore-filters`: с флагом composer сам обходит файлы на диске и принимает exclude-паттерны.
+    - composer archive -f zip --file=cdek --ignore-filters
 
   artifacts:
     name: cdek-integration
@@ -262,8 +263,9 @@ build-custom:
   rules:
     - if: $SELECT_JOB == "migrate_tag_to_github"
       when: never
+    # На тегах не нужен - build-tag + upload уже покрывают релизный артефакт, build-custom тут дублировал бы его
     - if: $CI_COMMIT_TAG
-      when: manual
+      when: never
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: always
     # feature-ветка: собрать zip автоматически после прохождения unit-tests
@@ -281,17 +283,17 @@ build-custom:
     paths:
       - cdek.zip
   before_script:
-    - !reference [build_tag, before_script]
+    - !reference [build-tag, before_script]
     - export RELEASE_VERSION="${CI_COMMIT_REF_NAME}#${CI_COMMIT_SHORT_SHA}"
   script:
-    - !reference [build_tag, script]
+    - !reference [build-tag, script]
 
 upload:
   stage: upload
   tags:
     - docker
   needs:
-    - job: build_tag
+    - job: build-tag
       artifacts: true
   only:
     - tags
