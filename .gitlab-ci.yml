@@ -250,8 +250,7 @@ build-tag:
     - composer remove --no-install --update-no-dev --ignore-platform-req=ext-gmp composer/installers || true
     - composer i -a --no-dev --ignore-platform-req=ext-gmp
     - php -r '$d = json_decode(file_get_contents("composer.json"), true); unset($d["repositories"]); file_put_contents("composer.json", json_encode($d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);'
-    # `--ignore-filters`: с флагом composer сам обходит файлы на диске и принимает exclude-паттерны.
-    - composer archive -f zip --file=cdek --ignore-filters
+    - composer archive -f zip --file=cdek
 
   artifacts:
     name: cdek-integration
