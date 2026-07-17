@@ -79,6 +79,8 @@
     "exclude": [
       "blueprint",
       ".*",
+      "docker",
+      "docker-compose.yml",
       "src/Frontend",
       "node_modules",
       "vendor/composer/installers",
