@@ -4,6 +4,10 @@
 # Сборка плагина, для разработки
 /CDEKDelivery.zip
 
+# Локальный докер для разработки (docker-compose.yml, .env.example)
+/.env
+/docker/db/*.sql
+
 cmake-build-*/
 *.iws
 out/

@@ -46,3 +46,25 @@ tasks:
     desc: "Статический анализ PHPStan"
     cmds:
       - composer stan
+
+  wp-up:
+    desc: "Поднять WordPress + MySQL в докере (http://localhost:8080)"
+    cmds:
+      - docker compose up -d --build
+
+  wp-down:
+    desc: "Остановить и удалить контейнеры WordPress + MySQL (данные в volume сохраняются)"
+    cmds:
+      - docker compose down
+
+  wp-clean:
+    desc: "Полное удаление: контейнеры + volumes (БД и файлы WordPress стираются безвозвратно)"
+    cmds:
+      - docker compose down -v
+
+  wp-dump-db:
+    desc: "Сохранить дамп текущей БД в docker/db/dump.sql (подхватится автоматически при следующем поднятии на пустом volume)"
+    cmds:
+      - mkdir -p docker/db
+      - docker compose exec -T db sh -c 'exec mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --no-tablespaces "$MYSQL_DATABASE"' > docker/db/dump.sql
+      - echo "Дамп сохранён в docker/db/dump.sql"

@@ -1,0 +1,37 @@
+name: cdek-delivery
+
+services:
+
+  wordpress:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "${WORDPRESS_PORT:-8080}:80"
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER:-wordpress}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD:-wordpress}
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME:-cdekdelivery}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - wordpress:/var/www/html
+      - ./:/var/www/html/wp-content/plugins/cdekdelivery
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_DATABASE: ${WORDPRESS_DB_NAME:-cdekdelivery}
+      MYSQL_USER: ${WORDPRESS_DB_USER:-wordpress}
+      MYSQL_PASSWORD: ${WORDPRESS_DB_PASSWORD:-wordpress}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+    volumes:
+      - db:/var/lib/mysql
+      - ./docker/db:/docker-entrypoint-initdb.d
+
+volumes:
+  wordpress:
+  db:
