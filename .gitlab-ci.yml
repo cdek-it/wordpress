@@ -65,8 +65,8 @@ validate:
   before_script:
     - set -eux
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
-    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer php84-xml php84-xmlwriter php84-xmlreader
-    - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
+    - apk add --no-cache composer php85-ctype php85-dom php85-simplexml php85-tokenizer php85-xml php85-xmlwriter php85-xmlreader
+    - ln -sf "$(command -v php85)" /usr/bin/php
     - composer --version
   script:
     - composer validate
@@ -102,8 +102,8 @@ lint:
   before_script:
     - set -eux
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
-    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer php84-xml php84-xmlwriter php84-xmlreader bash nodejs-current git
-    - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
+    - apk add --no-cache composer php85-ctype php85-dom php85-simplexml php85-tokenizer php85-xml php85-xmlwriter php85-xmlreader bash nodejs-current git
+    - ln -sf "$(command -v php85)" /usr/bin/php
     - php -v
     - node --version
   script:
@@ -123,8 +123,8 @@ static-analysis:
   before_script:
     - set -eux
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
-    - apk add --no-cache composer php84-ctype php84-dom php84-simplexml php84-tokenizer php84-xml php84-xmlwriter php84-xmlreader
-    - command -v php >/dev/null || ln -s "$(command -v php84)" /usr/bin/php
+    - apk add --no-cache composer php85-ctype php85-dom php85-simplexml php85-tokenizer php85-xml php85-xmlwriter php85-xmlreader
+    - ln -sf "$(command -v php85)" /usr/bin/php
   script:
     - vendor/bin/phpstan analyse --no-progress --memory-limit=1G
 
