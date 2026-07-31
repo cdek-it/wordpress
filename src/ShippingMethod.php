@@ -53,6 +53,7 @@ namespace Cdek {
      * @property string $product_width_default
      * @property string $product_height_default
      * @property bool $product_package_default_toggle
+     * @property string $product_package_volume_ratio
      * @property bool $services_ban_attachment_inspection
      * @property bool $services_trying_on
      * @property bool $services_part_deliv

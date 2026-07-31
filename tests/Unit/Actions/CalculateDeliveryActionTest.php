@@ -61,12 +61,15 @@ final class CalculateDeliveryActionTest extends TestCase
      *
      * @return array{0: CalculateDeliveryAction, 1: MockInterface}
      */
-    private function buildActionForPackages(): array
+    private function buildActionForPackages(string $volumeRatio = '1'): array
     {
         $shippingMethod = Mockery::mock('alias:' . ShippingMethod::class);
         $shippingMethod->shouldReceive('factory')->andReturn($shippingMethod);
         $shippingMethod->product_package_default_toggle = false;
         $shippingMethod->product_weight_default          = '0';
+        $shippingMethod->shouldReceive('get_option')
+                        ->with('product_package_volume_ratio')
+                        ->andReturn($volumeRatio);
 
         $action = new CalculateDeliveryAction();
         $this->setPrivateProperty($action, 'method', $shippingMethod);
@@ -113,7 +116,8 @@ final class CalculateDeliveryActionTest extends TestCase
 
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
-        // мм/10 => [100, 50, 30], сортировка по возрастанию => length=30, height=50, width=100
+        // мм/10 => [100, 50, 30], сортировка по возрастанию => length=30, width=100
+        // height = ceil(объём(30*50*100=150000) / (length*width=3000) * k(1)) = 50
         self::assertSame(30, $packages['length']);
         self::assertSame(100, $packages['width']);
         self::assertSame(50, $packages['height']);
@@ -135,13 +139,14 @@ final class CalculateDeliveryActionTest extends TestCase
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
         // по возрастанию [5, 10, 20]; наименьшее (5) * qty(3) = 15 => пересортировка [10, 15, 20]
+        // height = ceil(объём(10*15*20=3000) / (length*width=200) * k(1)) = 15
         self::assertSame(10, $packages['length']);
         self::assertSame(20, $packages['width']);
         self::assertSame(15, $packages['height']);
         self::assertSame(6000, $packages['weight']);
     }
 
-    public function testGetPackagesDataPicksMaximumDimensionsAcrossProductsPerAxis(): void
+    public function testGetPackagesDataPicksMaximumLengthAndWidthAcrossProductsPerAxis(): void
     {
         [$action, $shippingMethod] = $this->buildActionForPackages();
         $this->stubDefaultDimensions($shippingMethod, 1, 1, 1);
@@ -159,13 +164,45 @@ final class CalculateDeliveryActionTest extends TestCase
 
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
-        // товар A отсортирован [2,4,6] -> length=2 height=4 width=6
-        // товар B отсортирован [1,3,10] -> length=1 height=3 width=10
-        // максимум по каждой оси отдельно: length=max(2,1)=2, height=max(4,3)=4, width=max(6,10)=10
+        // товар A отсортирован [2,4,6] -> length=2 width=6, объём=48
+        // товар B отсортирован [1,3,10] -> length=1 width=10, объём=30
+        // length/width - максимум по каждой оси отдельно: length=max(2,1)=2, width=max(6,10)=10
+        // height теперь не берётся по рангу, а считается от суммарного объёма:
+        // ceil((48+30) / (2*10) * k(1)) = ceil(3.9) = 4
         self::assertSame(2, $packages['length']);
         self::assertSame(10, $packages['width']);
         self::assertSame(4, $packages['height']);
         self::assertSame(3000, $packages['weight']);
+    }
+
+    public function testGetPackagesDataDerivesHeightFromTotalVolumeAcrossMultiplePositions(): void
+    {
+        [$action, $shippingMethod] = $this->buildActionForPackages('1.1');
+        $this->stubDefaultDimensions($shippingMethod, 1, 1, 1);
+
+        $contents = [
+            [
+                'quantity' => 1,
+                'data'     => $this->mockProduct('1', '10', '10', '10'),
+            ],
+            [
+                'quantity' => 1,
+                'data'     => $this->mockProduct('1', '10', '10', '10'),
+            ],
+            [
+                'quantity' => 1,
+                'data'     => $this->mockProduct('1', '10', '10', '10'),
+            ],
+        ];
+
+        $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
+
+        // старый алгоритм (максимум по рангу) дал бы height=10, полностью игнорируя объём
+        // 2-й и 3-й позиций - именно это занижало объёмный вес при 3+ позициях в заказе.
+        // Новый расчёт: height = ceil(суммарный объём(3*1000=3000) / (length*width=100) * k(1.1)) = 33
+        self::assertSame(10, $packages['length']);
+        self::assertSame(10, $packages['width']);
+        self::assertSame(33, $packages['height']);
     }
 
     public function testGetPackagesDataForcesDefaultDimensionsWhenToggleEnabled(): void
@@ -253,6 +290,9 @@ final class CalculateDeliveryActionTest extends TestCase
         $shippingMethod->shouldReceive('get_option')
             ->with(Mockery::pattern('/^product_.+_default$/'))
             ->andReturn('10');
+        $shippingMethod->shouldReceive('get_option')
+            ->with('product_package_volume_ratio')
+            ->andReturn('1');
 
         $cdekApi = Mockery::mock('overload:' . CdekApi::class);
         $cdekApi->shouldReceive('authGetError')->andReturn($authError);

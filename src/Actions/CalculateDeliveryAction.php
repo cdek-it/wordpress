@@ -241,9 +241,9 @@ namespace Cdek\Actions {
         private function getPackagesData(array $contents): array
         {
             $totalWeight = 0;
+            $totalVolume = 0;
             $lengthList  = [];
             $widthList   = [];
-            $heightList  = [];
 
             $dimensionsInMM = get_option('woocommerce_dimension_unit') === 'mm';
 
@@ -270,8 +270,11 @@ namespace Cdek\Actions {
                 }
 
                 $lengthList[] = $dimensions[0];
-                $heightList[] = $dimensions[1];
                 $widthList[]  = $dimensions[2];
+
+                // Произведение трёх граней после поправки на quantity уже равно
+                // quantity * объём одной штуки - отдельно домножать на quantity не нужно.
+                $totalVolume += $dimensions[0] * $dimensions[1] * $dimensions[2];
 
                 $weight      = WeightConverter::applyFallback($weight);
                 $totalWeight += $quantity * $weight;
@@ -283,16 +286,27 @@ namespace Cdek\Actions {
 
             sort($predefinedDimensions);
             $lengthList[] = $predefinedDimensions[0];
-            $heightList[] = $predefinedDimensions[1];
             $widthList[]  = $predefinedDimensions[2];
 
             rsort($lengthList);
             rsort($widthList);
-            rsort($heightList);
 
             $length = $lengthList[0];
             $width  = $widthList[0];
-            $height = $heightList[0];
+
+            // Высоту не выбираем по рангу среди позиций (это и занижало объём при 3+ разных
+            // товарах), а досчитываем от суммарного объёма всех позиций заказа, чтобы
+            // итоговый объём грузоместа не мог оказаться меньше суммы объёмов товаров.
+            // k - коэффициент запаса на свободное пространство в упаковке (admin-настройка).
+            $volumeRatio = (float)str_replace(
+                ',',
+                '.',
+                $this->method->get_option('product_package_volume_ratio'),
+            );
+
+            $height = ($length > 0 && $width > 0)
+                ? (int)ceil($totalVolume / ($length * $width) * $volumeRatio)
+                : 0;
 
             $useDefaultValue = $this->method->product_package_default_toggle;
             foreach (['length', 'width', 'height'] as $dimension) {
