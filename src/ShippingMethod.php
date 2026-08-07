@@ -220,6 +220,25 @@ namespace Cdek {
             parent::admin_options();
         }
 
+        /** @noinspection PhpUnused */
+        final public function validate_product_package_volume_ratio_field(string $key, ?string $value): string
+        {
+            $value = wc_format_decimal(str_replace(',', '.', (string)$value));
+
+            if ($value === '' || (float)$value < 1.1 || (float)$value > 1.15) {
+                $this->add_error(
+                    esc_html__(
+                        'Package volume safety ratio must be between 1.1 and 1.15.',
+                        'cdekdelivery',
+                    ),
+                );
+
+                return (string)$this->get_option($key);
+            }
+
+            return $value;
+        }
+
         final public function calculate_shipping($package = []): void
         {
             try {

@@ -380,14 +380,15 @@ namespace Cdek\Traits {
                 'product_package_volume_ratio'       => [
                     'title'             => esc_html__('Package volume safety ratio', 'cdekdelivery'),
                     'description'       => esc_html__(
-                        'Multiplier applied to the calculated package height to compensate for free space inside the box (e.g. 1.1 = +10%). Must be 1 or greater.',
+                        'Multiplier applied to the calculated package height to compensate for free space inside the box (e.g. 1.1 = +10%). Must be between 1.1 and 1.15.',
                         'cdekdelivery',
                     ),
                     'type'              => 'number',
                     'desc_tip'          => true,
                     'default'           => 1.1,
                     'custom_attributes' => [
-                        'min'  => 1,
+                        'min'  => 1.1,
+                        'max'  => 1.15,
                         'step' => 0.01,
                     ],
                 ],
