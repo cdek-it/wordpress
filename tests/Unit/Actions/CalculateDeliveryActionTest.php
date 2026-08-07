@@ -240,9 +240,34 @@ final class CalculateDeliveryActionTest extends TestCase
 
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
+        // Дефолты (15,25,35) идут через тот же расчёт, что и габариты товара:
+        // отсортированы [15,25,35] -> length=15 (min) width=35 (max), объём=13125
+        // height = ceil(13125 / (15*35) * k(1)) = 25
         self::assertSame(15, $packages['length']);
-        self::assertSame(25, $packages['width']);
-        self::assertSame(35, $packages['height']);
+        self::assertSame(35, $packages['width']);
+        self::assertSame(25, $packages['height']);
+    }
+
+    public function testGetPackagesDataAppliesQuantityAndVolumeRatioToDefaultDimensionsWhenToggleEnabled(): void
+    {
+        [$action, $shippingMethod] = $this->buildActionForPackages('1.3');
+        $shippingMethod->product_package_default_toggle = true;
+        $this->stubDefaultDimensions($shippingMethod, 10, 10, 10);
+
+        $contents = [
+            [
+                'quantity' => 2,
+                'data'     => $this->mockProduct('1', '1', '1', '1'),
+            ],
+        ];
+
+        $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
+
+        // Дефолты [10,10,10], наименьшая грань * qty(2) = 20 => пересортировка [10,10,20]
+        // length=10 width=20, объём=2000; height = ceil(2000 / (10*20) * k(1.3)) = 13
+        self::assertSame(10, $packages['length']);
+        self::assertSame(20, $packages['width']);
+        self::assertSame(13, $packages['height']);
     }
 
     public function testGetPackagesDataAppliesWeightFallbackWhenProductWeightIsEmpty(): void

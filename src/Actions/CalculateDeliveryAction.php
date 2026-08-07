@@ -245,21 +245,36 @@ namespace Cdek\Actions {
             $lengthList  = [];
             $widthList   = [];
 
-            $dimensionsInMM = get_option('woocommerce_dimension_unit') === 'mm';
+            $dimensionsInMM  = get_option('woocommerce_dimension_unit') === 'mm';
+            $useDefaultValue = $this->method->product_package_default_toggle;
+
+            if ($useDefaultValue) {
+                foreach (['length', 'width', 'height'] as $dimension) {
+                    $forcedDimensions[] = (int)$this->method->get_option("product_{$dimension}_default");
+                }
+
+                sort($forcedDimensions);
+            }
 
             foreach ($contents as $productGroup) {
                 $quantity = $productGroup['quantity'];
                 $weight   = $productGroup['data']->get_weight();
 
-                $dimensions = $dimensionsInMM ? [
-                    (int)((int)$productGroup['data']->get_length() / 10),
-                    (int)((int)$productGroup['data']->get_width() / 10),
-                    (int)((int)$productGroup['data']->get_height() / 10),
-                ] : [
-                    (int)$productGroup['data']->get_length(),
-                    (int)$productGroup['data']->get_width(),
-                    (int)$productGroup['data']->get_height(),
-                ];
+                if ($useDefaultValue) {
+                    $dimensions = $forcedDimensions;
+                } elseif ($dimensionsInMM) {
+                    $dimensions = [
+                        (int)((int)$productGroup['data']->get_length() / 10),
+                        (int)((int)$productGroup['data']->get_width() / 10),
+                        (int)((int)$productGroup['data']->get_height() / 10),
+                    ];
+                } else {
+                    $dimensions = [
+                        (int)$productGroup['data']->get_length(),
+                        (int)$productGroup['data']->get_width(),
+                        (int)$productGroup['data']->get_height(),
+                    ];
+                }
 
                 sort($dimensions);
 
@@ -283,13 +298,16 @@ namespace Cdek\Actions {
             // Дефолтные габариты из настроек не должны конкурировать с реальными размерами товаров.
             // Если пустой $contents, то не обращаться к несуществующему $lengthList[0]/$widthList[0]
             if (empty($lengthList)) {
-                foreach (['length', 'width', 'height'] as $dimension) {
-                    $predefinedDimensions[] = (int)$this->method->get_option("product_{$dimension}_default");
+                if (!$useDefaultValue) {
+                    foreach (['length', 'width', 'height'] as $dimension) {
+                        $forcedDimensions[] = (int)$this->method->get_option("product_{$dimension}_default");
+                    }
+
+                    sort($forcedDimensions);
                 }
 
-                sort($predefinedDimensions);
-                $lengthList[] = $predefinedDimensions[0];
-                $widthList[]  = $predefinedDimensions[2];
+                $lengthList[] = $forcedDimensions[0];
+                $widthList[]  = $forcedDimensions[2];
             }
 
             rsort($lengthList);
@@ -312,11 +330,16 @@ namespace Cdek\Actions {
                 ? (int)ceil($totalVolume / ($length * $width) * $volumeRatio)
                 : 0;
 
-            $useDefaultValue = $this->method->product_package_default_toggle;
-            foreach (['length', 'width', 'height'] as $dimension) {
-                if ($$dimension === 0 || $useDefaultValue) {
-                    $$dimension = (int)$this->method->get_option("product_{$dimension}_default");
-                }
+            if ($length === 0) {
+                $length = (int)$this->method->get_option('product_length_default');
+            }
+
+            if ($width === 0) {
+                $width = (int)$this->method->get_option('product_width_default');
+            }
+
+            if ($height === 0) {
+                $height = (int)$this->method->get_option('product_height_default');
             }
 
             return [
