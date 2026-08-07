@@ -240,72 +240,17 @@ namespace Cdek\Actions {
 
         private function getPackagesData(array $contents): array
         {
-            $totalWeight = 0;
-            $totalVolume = 0;
-            $lengthList  = [];
-            $widthList   = [];
+            $dimensionsInMM   = get_option('woocommerce_dimension_unit') === 'mm';
+            $useDefaultValue  = $this->method->product_package_default_toggle;
+            $forcedDimensions = $this->getForcedDimensions();
 
-            $dimensionsInMM  = get_option('woocommerce_dimension_unit') === 'mm';
-            $useDefaultValue = $this->method->product_package_default_toggle;
+            $aggregated = $this->aggregatePackageContents($contents, $useDefaultValue, $forcedDimensions, $dimensionsInMM);
+            $lengthList = $aggregated['lengths'];
+            $widthList  = $aggregated['widths'];
 
-            if ($useDefaultValue) {
-                foreach (['length', 'width', 'height'] as $dimension) {
-                    $forcedDimensions[] = (int)$this->method->get_option("product_{$dimension}_default");
-                }
-
-                sort($forcedDimensions);
-            }
-
-            foreach ($contents as $productGroup) {
-                $quantity = $productGroup['quantity'];
-                $weight   = $productGroup['data']->get_weight();
-
-                if ($useDefaultValue) {
-                    $dimensions = $forcedDimensions;
-                } elseif ($dimensionsInMM) {
-                    $dimensions = [
-                        (int)((int)$productGroup['data']->get_length() / 10),
-                        (int)((int)$productGroup['data']->get_width() / 10),
-                        (int)((int)$productGroup['data']->get_height() / 10),
-                    ];
-                } else {
-                    $dimensions = [
-                        (int)$productGroup['data']->get_length(),
-                        (int)$productGroup['data']->get_width(),
-                        (int)$productGroup['data']->get_height(),
-                    ];
-                }
-
-                sort($dimensions);
-
-                if ($quantity > 1) {
-                    $dimensions[0] = $quantity * $dimensions[0];
-
-                    sort($dimensions);
-                }
-
-                $lengthList[] = $dimensions[0];
-                $widthList[]  = $dimensions[2];
-
-                // Произведение трёх граней после поправки на quantity уже равно
-                // quantity * объём одной штуки - отдельно домножать на quantity не нужно.
-                $totalVolume += $dimensions[0] * $dimensions[1] * $dimensions[2];
-
-                $weight      = WeightConverter::applyFallback($weight);
-                $totalWeight += $quantity * $weight;
-            }
-
-            // Дефолтные габариты из настроек не должны конкурировать с реальными размерами товаров.
-            // Если пустой $contents, то не обращаться к несуществующему $lengthList[0]/$widthList[0]
+            // Настройки по умолчанию не должны конкурировать с размерами товаров
+            // При пустом $contents обращаться к существующему $lengthList[0]/$widthList[0].
             if (empty($lengthList)) {
-                if (!$useDefaultValue) {
-                    foreach (['length', 'width', 'height'] as $dimension) {
-                        $forcedDimensions[] = (int)$this->method->get_option("product_{$dimension}_default");
-                    }
-
-                    sort($forcedDimensions);
-                }
-
                 $lengthList[] = $forcedDimensions[0];
                 $widthList[]  = $forcedDimensions[2];
             }
@@ -319,35 +264,162 @@ namespace Cdek\Actions {
             // Высоту не выбираем по рангу среди позиций (это и занижало объём при 3+ разных
             // товарах), а досчитываем от суммарного объёма всех позиций заказа, чтобы
             // итоговый объём грузоместа не мог оказаться меньше суммы объёмов товаров.
-            // k - коэффициент запаса на свободное пространство в упаковке (admin-настройка).
-            $volumeRatio = (float)str_replace(
+            $height = $this->calculateHeight($length, $width, $aggregated['volume']);
+
+            return [
+                'length' => $this->fallbackToDefaultDimension($length, 'length'),
+                'width'  => $this->fallbackToDefaultDimension($width, 'width'),
+                'height' => $this->fallbackToDefaultDimension($height, 'height'),
+                'weight' => WeightConverter::getWeightInGrams($aggregated['weight']),
+            ];
+        }
+
+        /**
+         * Сортированные по возрастанию габариты (по умолчанию) товара из настроек плагина.
+         */
+        private function getForcedDimensions(): array
+        {
+            $dimensions = [];
+
+            foreach (['length', 'width', 'height'] as $dimension) {
+                $dimensions[] = (int)$this->method->get_option("product_{$dimension}_default");
+            }
+
+            sort($dimensions);
+
+            return $dimensions;
+        }
+
+        /**
+         * Проходит по позициям заказа и считает кандидатов на итоговые length/width
+         * (по одному на позицию - наименьшая и наибольшая грань после учёта quantity),
+         * суммарный объём и суммарный вес.
+         *
+         * @param  array  $contents          Позиции заказа (WooCommerce cart contents / order items)
+         * @param  bool   $useDefaultValue   Тумблер "Габариты товара вкл/выкл" - форсировать
+         *                                   $forcedDimensions вместо реальных габаритов товара
+         * @param  array  $forcedDimensions  Отсортированные дефолтные габариты из настроек,
+         *                                   используются только если $useDefaultValue === true
+         * @param  bool   $dimensionsInMM    Единица измерения габаритов в WooCommerce - мм (true) или см (false)
+         *
+         * @return array{lengths: int[], widths: int[], volume: int, weight: float}
+         */
+        private function aggregatePackageContents(
+            array $contents,
+            bool $useDefaultValue,
+            array $forcedDimensions,
+            bool $dimensionsInMM
+        ): array {
+            $totalWeight = 0;
+            $totalVolume = 0;
+            $lengthList  = [];
+            $widthList   = [];
+
+            foreach ($contents as $productGroup) {
+                $quantity = $productGroup['quantity'];
+
+                $dimensions = $useDefaultValue
+                    ? $forcedDimensions
+                    : $this->resolveProductDimensions($productGroup['data'], $dimensionsInMM);
+
+                $dimensions = $this->applyQuantityToLineDimensions($dimensions, $quantity);
+
+                $lengthList[] = $dimensions[0];
+                $widthList[]  = $dimensions[2];
+
+                // Произведение трёх граней после поправки на quantity уже равно quantity * объём одной штуки.
+                $totalVolume += $dimensions[0] * $dimensions[1] * $dimensions[2];
+
+                $weight      = WeightConverter::applyFallback($productGroup['data']->get_weight());
+                $totalWeight += $quantity * $weight;
+            }
+
+            return [
+                'lengths' => $lengthList,
+                'widths'  => $widthList,
+                'volume'  => $totalVolume,
+                'weight'  => $totalWeight,
+            ];
+        }
+
+        /**
+         * Габариты товара в см, как они заданы в карточке товара.
+         *
+         * @param  \WC_Product  $product          Товар одной позиции заказа (`$productGroup['data']`)
+         * @param  bool         $dimensionsInMM   Единица измерения габаритов в WooCommerce - мм (true) или см (false)
+         */
+        private function resolveProductDimensions($product, bool $dimensionsInMM): array
+        {
+            if ($dimensionsInMM) {
+                return [
+                    (int)((int)$product->get_length() / 10),
+                    (int)((int)$product->get_width() / 10),
+                    (int)((int)$product->get_height() / 10),
+                ];
+            }
+
+            return [
+                (int)$product->get_length(),
+                (int)$product->get_width(),
+                (int)$product->get_height(),
+            ];
+        }
+
+        /**
+         * При quantity > 1 наименьшая грань позиции домножается на quantity
+         * (упаковки складываются в стопку по этой грани), после чего габариты
+         * позиции пересортировываются заново.
+         *
+         * @param  int[]  $dimensions  Три грани одной позиции (в произвольном порядке)
+         * @param  int    $quantity    Количество товара в этой позиции заказа
+         */
+        private function applyQuantityToLineDimensions(array $dimensions, int $quantity): array
+        {
+            sort($dimensions);
+
+            if ($quantity > 1) {
+                $dimensions[0] *= $quantity;
+
+                sort($dimensions);
+            }
+
+            return $dimensions;
+        }
+
+        /**
+         * @param  int  $length       Итоговая длина упаковки (наименьшая грань), см
+         * @param  int  $width        Итоговая ширина упаковки (наибольшая грань), см
+         * @param  int  $totalVolume  Суммарный объём всех позиций заказа, см³
+         */
+        private function calculateHeight(int $length, int $width, int $totalVolume): int
+        {
+            if ($length === 0 || $width === 0) {
+                return 0;
+            }
+
+            return (int)ceil($totalVolume / ($length * $width) * $this->getVolumeRatio());
+        }
+
+        /**
+         * k - коэффициент запаса на свободное пространство в упаковке (admin-настройка).
+         */
+        private function getVolumeRatio(): float
+        {
+            return (float)str_replace(
                 ',',
                 '.',
                 $this->method->get_option('product_package_volume_ratio'),
             );
+        }
 
-            $height = ($length > 0 && $width > 0)
-                ? (int)ceil($totalVolume / ($length * $width) * $volumeRatio)
-                : 0;
-
-            if ($length === 0) {
-                $length = (int)$this->method->get_option('product_length_default');
-            }
-
-            if ($width === 0) {
-                $width = (int)$this->method->get_option('product_width_default');
-            }
-
-            if ($height === 0) {
-                $height = (int)$this->method->get_option('product_height_default');
-            }
-
-            return [
-                'length' => $length,
-                'width'  => $width,
-                'height' => $height,
-                'weight' => WeightConverter::getWeightInGrams($totalWeight),
-            ];
+        /**
+         * @param  int     $value  Рассчитанное значение по оси; 0 означает, что рассчитать не удалось
+         * @param  string  $axis   Название оси - 'length'/'width'/'height' (совпадает с суффиксом
+         *                         настройки `product_{$axis}_default`)
+         */
+        private function fallbackToDefaultDimension(int $value, string $axis): int
+        {
+            return $value !== 0 ? $value : (int)$this->method->get_option("product_{$axis}_default");
         }
     }
 }
