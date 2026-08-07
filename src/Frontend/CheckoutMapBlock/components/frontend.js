@@ -2,18 +2,19 @@
  * External dependencies
  */
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import { useDispatch, useSelect } from '@wordpress/data';
+import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { __ } from '@wordpress/i18n';
 import { debounce, isEqual } from 'lodash';
 import { getSetting } from '@woocommerce/settings';
 import cdekWidget from '@cdek-it/widget';
 
 export const Block = ({
-    checkoutExtensionData, extensions, cart, validation,
+    checkoutExtensionData, extensions, cart,
 }) => {
     const { apiKey, officeDeliveryModes, lang } = getSetting('official_cdek_data');
 
     const [showMap, setShowMap] = useState(false);
-    const [validationError, setValidationError] = useState(null);
 
     const { setExtensionData } = checkoutExtensionData;
 
@@ -23,9 +24,11 @@ export const Block = ({
     const lastOfficeCodeRef = useRef(null);
     const isOfficeModeRef = useRef(false);
 
-    const {
-        setValidationErrors, clearValidationError, getValidationError,
-    } = validation;
+    const { setValidationErrors, clearValidationError } = useDispatch(VALIDATION_STORE_KEY);
+    const validationError = useSelect(
+        (select) => select(VALIDATION_STORE_KEY).getValidationError('official_cdek_office'),
+        [],
+    );
 
     const debouncedSetExtensionData = debounce((namespace, key, value) => {
         setExtensionData(namespace, key, value);
@@ -57,7 +60,7 @@ export const Block = ({
         }
 
         if (officeDeliveryModes.indexOf(parseInt(selectedRate.meta_data.find(
-          (meta) => meta.key === '_official_cdek_tariff_mode').value)) === -1) {
+          (meta) => meta.key === '_official_cdek_tariff_mode')?.value)) === -1) {
             isOfficeModeRef.current = false;
             lastOfficeCodeRef.current = null;
             widgetRef.current?.clearSelection();
@@ -133,10 +136,6 @@ export const Block = ({
         cart.isLoadingRates,
         cart.shippingRates,
         extensions.official_cdek]);
-
-    useEffect(() => {
-        setValidationError(getValidationError('official_cdek_office'));
-    });
 
     return <div className="wp-block-shipping-cdek-map"
                 style={{ display: showMap ? 'block' : 'none' }}>
