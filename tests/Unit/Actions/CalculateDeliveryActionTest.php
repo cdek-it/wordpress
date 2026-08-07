@@ -205,6 +205,25 @@ final class CalculateDeliveryActionTest extends TestCase
         self::assertSame(33, $packages['height']);
     }
 
+    public function testGetPackagesDataDoesNotLeakDefaultDimensionsWhenToggleDisabled(): void
+    {
+        [$action, $shippingMethod] = $this->buildActionForPackages();
+        $this->stubDefaultDimensions($shippingMethod, 10, 10, 10);
+
+        $contents = [
+            [
+                'quantity' => 1,
+                'data'     => $this->mockProduct('1', '4', '7', '15'),
+            ],
+        ];
+
+        $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
+
+        self::assertSame(4, $packages['length']);
+        self::assertSame(15, $packages['width']);
+        self::assertSame(7, $packages['height']);
+    }
+
     public function testGetPackagesDataForcesDefaultDimensionsWhenToggleEnabled(): void
     {
         [$action, $shippingMethod] = $this->buildActionForPackages();

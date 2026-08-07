@@ -280,13 +280,17 @@ namespace Cdek\Actions {
                 $totalWeight += $quantity * $weight;
             }
 
-            foreach (['length', 'width', 'height'] as $dimension) {
-                $predefinedDimensions[] = (int)$this->method->get_option("product_{$dimension}_default");
-            }
+            // Дефолтные габариты из настроек не должны конкурировать с реальными размерами товаров.
+            // Если пустой $contents, то не обращаться к несуществующему $lengthList[0]/$widthList[0]
+            if (empty($lengthList)) {
+                foreach (['length', 'width', 'height'] as $dimension) {
+                    $predefinedDimensions[] = (int)$this->method->get_option("product_{$dimension}_default");
+                }
 
-            sort($predefinedDimensions);
-            $lengthList[] = $predefinedDimensions[0];
-            $widthList[]  = $predefinedDimensions[2];
+                sort($predefinedDimensions);
+                $lengthList[] = $predefinedDimensions[0];
+                $widthList[]  = $predefinedDimensions[2];
+            }
 
             rsort($lengthList);
             rsort($widthList);
