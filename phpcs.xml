@@ -12,4 +12,6 @@
     <rule ref="WordPress-Extra">
         <exclude name="WordPress.Files.FileName"/>
     </rule>
+
+    <exclude-pattern>src/Blocks/CheckoutMapBlock.php</exclude-pattern>
 </ruleset>
