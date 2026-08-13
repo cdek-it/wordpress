@@ -3,10 +3,10 @@
  */
 import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import { __ } from '@wordpress/i18n';
 import { debounce, isEqual } from 'lodash';
 import { getSetting } from '@woocommerce/settings';
+import { VALIDATION_STORE_KEY } from '@woocommerce/block-data';
 import cdekWidget from '@cdek-it/widget';
 
 export const Block = ({
@@ -34,7 +34,7 @@ export const Block = ({
         setExtensionData(namespace, key, value);
     }, 500);
 
-    const debouncedMapRender = useCallback(debounce((shippingRates, points) => {
+    const debouncedMapRender = useCallback(debounce((shippingRates, points, tariffMode) => {
         if (points === '' || !cart.cartNeedsShipping) {
             isOfficeModeRef.current = false;
             lastOfficeCodeRef.current = null;
@@ -59,8 +59,7 @@ export const Block = ({
             return;
         }
 
-        if (officeDeliveryModes.indexOf(parseInt(selectedRate.meta_data.find(
-          (meta) => meta.key === '_official_cdek_tariff_mode')?.value)) === -1) {
+        if (officeDeliveryModes.indexOf(parseInt(tariffMode)) === -1) {
             isOfficeModeRef.current = false;
             lastOfficeCodeRef.current = null;
             widgetRef.current?.clearSelection();
@@ -129,8 +128,11 @@ export const Block = ({
             return;
         }
 
-        debouncedMapRender(cart.shippingRates,
-          extensions.official_cdek.points || []);
+        debouncedMapRender(
+            cart.shippingRates,
+            extensions.official_cdek.points || [],
+            extensions.official_cdek.tariffMode
+        );
     }, [
         cart.isLoading,
         cart.isLoadingRates,

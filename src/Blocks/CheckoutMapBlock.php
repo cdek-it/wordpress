@@ -52,9 +52,10 @@ namespace Cdek\Blocks {
         {
             $cityInput     = CheckoutHelper::getCurrentValue('city');
             $postcodeInput = CheckoutHelper::getCurrentValue('postcode');
+            $tariffMode    = self::getSelectedTariffMode();
 
             if (empty($cityInput)) {
-                return ['points' => '[]'];
+                return ['points' => '[]', 'tariffMode' => $tariffMode];
             }
 
             $api = new CdekApi;
@@ -72,9 +73,23 @@ namespace Cdek\Blocks {
                     'city'     => $cityInput,
                     'postcode' => $postcodeInput,
                 ],
-                'city'   => $city,
-                'points' => $points,
+                'city'       => $city,
+                'points'     => $points,
+                'tariffMode' => $tariffMode,
             ];
+        }
+
+        private static function getSelectedTariffMode(): ?int
+        {
+            $rate = CheckoutHelper::getSelectedShippingRate();
+
+            if ($rate === null || !CheckoutHelper::isShippingRateSuitable($rate)) {
+                return null;
+            }
+
+            $meta = $rate->get_meta_data();
+
+            return isset($meta[MetaKeys::TARIFF_MODE]) ? (int)$meta[MetaKeys::TARIFF_MODE] : null;
         }
 
         /** @noinspection PhpUnused */
@@ -85,6 +100,12 @@ namespace Cdek\Blocks {
                 'points' => [
                     'description' => esc_html__('JSONifiend array of available CDEK offices', 'cdekdelivery'),
                     'type'        => 'string',
+                    'readonly'    => true,
+                    'context'     => ['view', 'edit'],
+                ],
+                'tariffMode' => [
+                    'description' => esc_html__('Delivery mode of the currently selected CDEK tariff', 'cdekdelivery'),
+                    'type'        => ['integer', 'null'],
                     'readonly'    => true,
                     'context'     => ['view', 'edit'],
                 ],
