@@ -117,7 +117,7 @@ final class CalculateDeliveryActionTest extends TestCase
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
         // мм/10 => [100, 50, 30], сортировка по возрастанию => length=30, width=100
-        // height = ceil(объём(30*50*100=150000) / (length*width=3000) * k(1)) = 50
+        // k=1 (по умолчанию) - старый алгоритм: height берётся по рангу (средняя грань) = 50
         self::assertSame(30, $packages['length']);
         self::assertSame(100, $packages['width']);
         self::assertSame(50, $packages['height']);
@@ -139,7 +139,7 @@ final class CalculateDeliveryActionTest extends TestCase
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
         // по возрастанию [5, 10, 20]; наименьшее (5) * qty(3) = 15 => пересортировка [10, 15, 20]
-        // height = ceil(объём(10*15*20=3000) / (length*width=200) * k(1)) = 15
+        // k=1 (по умолчанию) - старый алгоритм: height берётся по рангу (средняя грань) = 15
         self::assertSame(10, $packages['length']);
         self::assertSame(20, $packages['width']);
         self::assertSame(15, $packages['height']);
@@ -164,15 +164,44 @@ final class CalculateDeliveryActionTest extends TestCase
 
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
-        // товар A отсортирован [2,4,6] -> length=2 width=6, объём=48
-        // товар B отсортирован [1,3,10] -> length=1 width=10, объём=30
-        // length/width - максимум по каждой оси отдельно: length=max(2,1)=2, width=max(6,10)=10
-        // height теперь не берётся по рангу, а считается от суммарного объёма:
-        // ceil((48+30) / (2*10) * k(1)) = ceil(3.9) = 4
+        // товар A отсортирован [2,4,6] -> length=2 height=4 width=6
+        // товар B отсортирован [1,3,10] -> length=1 height=3 width=10
+        // k=1 (по умолчанию) - старый алгоритм: каждая ось берётся по рангу (максимум) отдельно:
+        // length=max(2,1)=2, width=max(6,10)=10, height=max(4,3)=4
         self::assertSame(2, $packages['length']);
         self::assertSame(10, $packages['width']);
         self::assertSame(4, $packages['height']);
         self::assertSame(3000, $packages['weight']);
+    }
+
+    public function testGetPackagesDataUsesLegacyRankedHeightByDefault(): void
+    {
+        [$action, $shippingMethod] = $this->buildActionForPackages();
+        $this->stubDefaultDimensions($shippingMethod, 1, 1, 1);
+
+        $contents = [
+            [
+                'quantity' => 1,
+                'data'     => $this->mockProduct('1', '10', '10', '10'),
+            ],
+            [
+                'quantity' => 1,
+                'data'     => $this->mockProduct('1', '10', '10', '10'),
+            ],
+            [
+                'quantity' => 1,
+                'data'     => $this->mockProduct('1', '10', '10', '10'),
+            ],
+        ];
+
+        $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
+
+        // k=1 (по умолчанию) - старый алгоритм (максимум по рангу) даёт height=10, полностью
+        // игнорируя объём 2-й и 3-й позиций - именно это занижало объёмный вес при 3+ позициях
+        // в заказе и воспроизводит пример из ТЗ (0,9 кг вместо 1,07 кг суммарных).
+        self::assertSame(10, $packages['length']);
+        self::assertSame(10, $packages['width']);
+        self::assertSame(10, $packages['height']);
     }
 
     public function testGetPackagesDataDerivesHeightFromTotalVolumeAcrossMultiplePositions(): void
@@ -197,9 +226,7 @@ final class CalculateDeliveryActionTest extends TestCase
 
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
-        // старый алгоритм (максимум по рангу) дал бы height=10, полностью игнорируя объём
-        // 2-й и 3-й позиций - именно это занижало объёмный вес при 3+ позициях в заказе.
-        // Новый расчёт: height = ceil(суммарный объём(3*1000=3000) / (length*width=100) * k(1.1)) = 33
+        // k>1 (1.1) - новый алгоритм: height = ceil(суммарный объём(3*1000=3000) / (length*width=100) * k(1.1)) = 33
         self::assertSame(10, $packages['length']);
         self::assertSame(10, $packages['width']);
         self::assertSame(33, $packages['height']);
@@ -241,8 +268,8 @@ final class CalculateDeliveryActionTest extends TestCase
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
         // Дефолты (15,25,35) идут через тот же расчёт, что и габариты товара:
-        // отсортированы [15,25,35] -> length=15 (min) width=35 (max), объём=13125
-        // height = ceil(13125 / (15*35) * k(1)) = 25
+        // отсортированы [15,25,35] -> length=15 (min) width=35 (max) height=25 (mid)
+        // k=1 (по умолчанию) - старый алгоритм: height берётся по рангу = 25
         self::assertSame(15, $packages['length']);
         self::assertSame(35, $packages['width']);
         self::assertSame(25, $packages['height']);
@@ -264,7 +291,8 @@ final class CalculateDeliveryActionTest extends TestCase
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
         // Дефолты [10,10,10], наименьшая грань * qty(2) = 20 => пересортировка [10,10,20]
-        // length=10 width=20, объём=2000; height = ceil(2000 / (10*20) * k(1.3)) = 13
+        // k>1 (1.3) - новый алгоритм: length=10 width=20, объём=2000;
+        // height = ceil(2000 / (10*20) * k(1.3)) = 13
         self::assertSame(10, $packages['length']);
         self::assertSame(20, $packages['width']);
         self::assertSame(13, $packages['height']);

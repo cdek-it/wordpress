@@ -225,10 +225,10 @@ namespace Cdek {
         {
             $value = wc_format_decimal(str_replace(',', '.', (string)$value));
 
-            if ($value === '' || (float)$value < 1.1 || (float)$value > 1.15) {
+            if ($value === '' || (float)$value < 1 || (float)$value > 1.15) {
                 $this->add_error(
                     esc_html__(
-                        'Package volume safety ratio must be between 1.1 and 1.15.',
+                        'Package volume safety ratio must be between 1 and 1.15.',
                         'cdekdelivery',
                     ),
                 );

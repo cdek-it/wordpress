@@ -247,12 +247,14 @@ namespace Cdek\Actions {
             $aggregated = $this->aggregatePackageContents($contents, $useDefaultValue, $forcedDimensions, $dimensionsInMM);
             $lengthList = $aggregated['lengths'];
             $widthList  = $aggregated['widths'];
+            $heightList = $aggregated['heights'];
 
             // Настройки по умолчанию не должны конкурировать с размерами товаров
-            // При пустом $contents обращаться к существующему $lengthList[0]/$widthList[0].
+            // При пустом $contents обращаться к существующему $lengthList[0]/$widthList[0]/$heightList[0].
             if (empty($lengthList)) {
                 $lengthList[] = $forcedDimensions[0];
                 $widthList[]  = $forcedDimensions[2];
+                $heightList[] = $forcedDimensions[1];
             }
 
             rsort($lengthList);
@@ -260,11 +262,15 @@ namespace Cdek\Actions {
 
             $length = $lengthList[0];
             $width  = $widthList[0];
+            $k      = $this->getVolumeRatio();
 
-            // Высоту не выбираем по рангу среди позиций (это и занижало объём при 3+ разных
-            // товарах), а досчитываем от суммарного объёма всех позиций заказа, чтобы
-            // итоговый объём грузоместа не мог оказаться меньше суммы объёмов товаров.
-            $height = $this->calculateHeight($length, $width, $aggregated['volume']);
+            // k = 1 (по умолчанию) - старый алгоритм: высота берётся по рангу, как и length/width.
+            if ($k > 1.0) {
+                $height = $this->calculateHeight($length, $width, $aggregated['volume']);
+            } else {
+                rsort($heightList);
+                $height = $heightList[0];
+            }
 
             return [
                 'length' => $this->fallbackToDefaultDimension($length, 'length'),
@@ -302,7 +308,7 @@ namespace Cdek\Actions {
          *                                   используются только если $useDefaultValue === true
          * @param  bool   $dimensionsInMM    Единица измерения габаритов в WooCommerce - мм (true) или см (false)
          *
-         * @return array{lengths: int[], widths: int[], volume: int, weight: float}
+         * @return array{lengths: int[], widths: int[], heights: int[], volume: int, weight: float}
          */
         private function aggregatePackageContents(
             array $contents,
@@ -314,6 +320,7 @@ namespace Cdek\Actions {
             $totalVolume = 0;
             $lengthList  = [];
             $widthList   = [];
+            $heightList  = [];
 
             foreach ($contents as $productGroup) {
                 $quantity = $productGroup['quantity'];
@@ -325,6 +332,7 @@ namespace Cdek\Actions {
                 $dimensions = $this->applyQuantityToLineDimensions($dimensions, $quantity);
 
                 $lengthList[] = $dimensions[0];
+                $heightList[] = $dimensions[1];
                 $widthList[]  = $dimensions[2];
 
                 // Произведение трёх граней после поправки на quantity уже равно quantity * объём одной штуки.
@@ -337,6 +345,7 @@ namespace Cdek\Actions {
             return [
                 'lengths' => $lengthList,
                 'widths'  => $widthList,
+                'heights' => $heightList,
                 'volume'  => $totalVolume,
                 'weight'  => $totalWeight,
             ];
@@ -401,7 +410,9 @@ namespace Cdek\Actions {
         }
 
         /**
-         * k - коэффициент запаса на свободное пространство в упаковке (admin-настройка).
+         * k - коэффициент запаса на свободное пространство в упаковке (admin-настройка), от 1 до 1.15.
+         * k = 1 (по умолчанию) включает старый алгоритм расчёта высоты (по рангу),
+         * k > 1 - новый алгоритм (от суммарного объёма) с этим значением как множителем.
          */
         private function getVolumeRatio(): float
         {
