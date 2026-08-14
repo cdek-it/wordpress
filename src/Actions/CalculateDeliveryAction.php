@@ -323,7 +323,7 @@ namespace Cdek\Actions {
             $heightList  = [];
 
             foreach ($contents as $productGroup) {
-                $quantity = $productGroup['quantity'];
+                $quantity = (int)$productGroup['quantity'];
 
                 $dimensions = $useDefaultValue
                     ? $forcedDimensions

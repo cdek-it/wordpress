@@ -146,6 +146,32 @@ final class CalculateDeliveryActionTest extends TestCase
         self::assertSame(6000, $packages['weight']);
     }
 
+    /**
+     * WooCommerce Store API (`WC_Cart::set_quantity()`) передаёт quantity как float (например 5.0),
+     * `applyQuantityToLineDimensions()` типизирован под `int $quantity`
+     * при `declare(strict_types=1)` - без явного приведения это падает с TypeError.
+     */
+    public function testGetPackagesDataAcceptsFloatQuantityFromStoreApi(): void
+    {
+        [$action, $shippingMethod] = $this->buildActionForPackages();
+        $this->stubDefaultDimensions($shippingMethod, 1, 1, 1);
+
+        $contents = [
+            [
+                'quantity' => 3.0,
+                'data'     => $this->mockProduct('2', '10', '20', '5'),
+            ],
+        ];
+
+        $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
+
+        // тот же сценарий, что и с int quantity=3: [5,10,20] * qty(3) по наименьшей грани => [10,15,20]
+        self::assertSame(10, $packages['length']);
+        self::assertSame(20, $packages['width']);
+        self::assertSame(15, $packages['height']);
+        self::assertSame(6000, $packages['weight']);
+    }
+
     public function testGetPackagesDataPicksMaximumLengthAndWidthAcrossProductsPerAxis(): void
     {
         [$action, $shippingMethod] = $this->buildActionForPackages();
