@@ -86,7 +86,15 @@ namespace Cdek\Transport {
          */
         public function error(): ?array
         {
-            return $this->json()['error'] ?? $this->legacyRequestErrors()[0] ?? null;
+            $error = $this->json()['error'] ?? $this->legacyRequestErrors()[0] ?? null;
+
+            if ($error === null || is_array($error)) {
+                return $error;
+            }
+
+            // API иногда присылает `error` строкой вместо объекта нормализуем,
+            // чтобы не ловить TypeError на объявленном ?array.
+            return ['message' => (string)$error];
         }
 
         /**

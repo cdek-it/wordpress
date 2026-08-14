@@ -207,6 +207,32 @@ final class HttpResponseTest extends TestCase
         self::assertSame(['code' => 'legacy_error'], $response->error());
     }
 
+    public function testErrorNormalizesStringErrorToArray(): void
+    {
+        $response = new HttpResponse(
+            500,
+            '{"error":"Internal Server Error"}',
+            ['content-type' => 'application/json'],
+            $this->testUrl,
+            'GET',
+        );
+
+        self::assertSame(['message' => 'Internal Server Error'], $response->error());
+    }
+
+    public function testErrorNormalizesStringLegacyRequestErrorToArray(): void
+    {
+        $response = new HttpResponse(
+            400,
+            '{"requests":[{"errors":["oops"]}]}',
+            ['content-type' => 'application/json'],
+            $this->testUrl,
+            'GET',
+        );
+
+        self::assertSame(['message' => 'oops'], $response->error());
+    }
+
     public function testErrorReturnsNullWhenNothingPresent(): void
     {
         $response = new HttpResponse(
