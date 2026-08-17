@@ -293,12 +293,11 @@ final class CalculateDeliveryActionTest extends TestCase
 
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
-        // Дефолты (15,25,35) идут через тот же расчёт, что и габариты товара:
-        // отсортированы [15,25,35] -> length=15 (min) width=35 (max) height=25 (mid)
-        // k=1 (по умолчанию) - старый алгоритм: height берётся по рангу = 25
+        // Дефолты (15,25,35) сопоставляются с осями сырым способом (без переранжирования):
+        // length=15, width=25, height=35 - как заданы в настройках, quantity=1 не меняет высоту.
         self::assertSame(15, $packages['length']);
-        self::assertSame(35, $packages['width']);
-        self::assertSame(25, $packages['height']);
+        self::assertSame(25, $packages['width']);
+        self::assertSame(35, $packages['height']);
     }
 
     public function testGetPackagesDataAppliesQuantityAndVolumeRatioToDefaultDimensionsWhenToggleEnabled(): void
@@ -316,12 +315,13 @@ final class CalculateDeliveryActionTest extends TestCase
 
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
-        // Дефолты [10,10,10], наименьшая грань * qty(2) = 20 => пересортировка [10,10,20]
-        // k>1 (1.3) - новый алгоритм: length=10 width=20, объём=2000;
-        // height = ceil(2000 / (10*20) * k(1.3)) = 13
+        // Дефолты [10,10,10] сопоставляются с осями сырым способом; quantity(2) складывает
+        // упаковки по высоте: height=10*2=20 => объём=10*10*20=2000.
+        // k>1 (1.3) - волюметрический алгоритм: length=10, width=10;
+        // height = ceil(2000 / (10*10) * k(1.3)) = 26
         self::assertSame(10, $packages['length']);
-        self::assertSame(20, $packages['width']);
-        self::assertSame(13, $packages['height']);
+        self::assertSame(10, $packages['width']);
+        self::assertSame(26, $packages['height']);
     }
 
     public function testGetPackagesDataAppliesWeightFallbackWhenProductWeightIsEmpty(): void

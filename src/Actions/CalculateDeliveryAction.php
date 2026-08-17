@@ -253,8 +253,8 @@ namespace Cdek\Actions {
             // При пустом $contents обращаться к существующему $lengthList[0]/$widthList[0]/$heightList[0].
             if (empty($lengthList)) {
                 $lengthList[] = $forcedDimensions[0];
-                $widthList[]  = $forcedDimensions[2];
-                $heightList[] = $forcedDimensions[1];
+                $widthList[]  = $forcedDimensions[1];
+                $heightList[] = $forcedDimensions[2];
             }
 
             rsort($lengthList);
@@ -280,20 +280,13 @@ namespace Cdek\Actions {
             ];
         }
 
-        /**
-         * Сортированные по возрастанию габариты (по умолчанию) товара из настроек плагина.
-         */
         private function getForcedDimensions(): array
         {
-            $dimensions = [];
-
-            foreach (['length', 'width', 'height'] as $dimension) {
-                $dimensions[] = (int)$this->method->get_option("product_{$dimension}_default");
-            }
-
-            sort($dimensions);
-
-            return $dimensions;
+            return [
+                (int)$this->method->get_option('product_length_default'),
+                (int)$this->method->get_option('product_width_default'),
+                (int)$this->method->get_option('product_height_default'),
+            ];
         }
 
         /**
@@ -304,7 +297,7 @@ namespace Cdek\Actions {
          * @param  array  $contents          Позиции заказа (WooCommerce cart contents / order items)
          * @param  bool   $useDefaultValue   Тумблер "Габариты товара вкл/выкл" - форсировать
          *                                   $forcedDimensions вместо реальных габаритов товара
-         * @param  array  $forcedDimensions  Отсортированные дефолтные габариты из настроек,
+         * @param  array  $forcedDimensions  Сырые дефолтные габариты из настроек (length/width/height),
          *                                   используются только если $useDefaultValue === true
          * @param  bool   $dimensionsInMM    Единица измерения габаритов в WooCommerce - мм (true) или см (false)
          *
@@ -325,15 +318,23 @@ namespace Cdek\Actions {
             foreach ($contents as $productGroup) {
                 $quantity = (int)$productGroup['quantity'];
 
-                $dimensions = $useDefaultValue
-                    ? $forcedDimensions
-                    : $this->resolveProductDimensions($productGroup['data'], $dimensionsInMM);
+                if ($useDefaultValue) {
+                    $dimensions    = $forcedDimensions;
+                    $dimensions[2] *= $quantity;
 
-                $dimensions = $this->applyQuantityToLineDimensions($dimensions, $quantity);
+                    $lengthList[] = $dimensions[0];
+                    $widthList[]  = $dimensions[1];
+                    $heightList[] = $dimensions[2];
+                } else {
+                    $dimensions = $this->applyQuantityToLineDimensions(
+                        $this->resolveProductDimensions($productGroup['data'], $dimensionsInMM),
+                        $quantity,
+                    );
 
-                $lengthList[] = $dimensions[0];
-                $heightList[] = $dimensions[1];
-                $widthList[]  = $dimensions[2];
+                    $lengthList[] = $dimensions[0];
+                    $heightList[] = $dimensions[1];
+                    $widthList[]  = $dimensions[2];
+                }
 
                 // Произведение трёх граней после поправки на quantity уже равно quantity * объём одной штуки.
                 $totalVolume += $dimensions[0] * $dimensions[1] * $dimensions[2];
