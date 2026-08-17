@@ -301,7 +301,7 @@ namespace Cdek\Actions {
          *                                   используются только если $useDefaultValue === true
          * @param  bool   $dimensionsInMM    Единица измерения габаритов в WooCommerce - мм (true) или см (false)
          *
-         * @return array{lengths: int[], widths: int[], heights: int[], volume: int, weight: float}
+         * @return array{lengths: int[], widths: int[], heights: int[], volume: int|float, weight: float}
          */
         private function aggregatePackageContents(
             array $contents,
@@ -397,11 +397,11 @@ namespace Cdek\Actions {
         }
 
         /**
-         * @param  int  $length       Итоговая длина упаковки (наименьшая грань), см
-         * @param  int  $width        Итоговая ширина упаковки (наибольшая грань), см
-         * @param  int  $totalVolume  Суммарный объём всех позиций заказа, см³
+         * @param  int    $length       Итоговая длина упаковки (наименьшая грань), см
+         * @param  int    $width        Итоговая ширина упаковки (наибольшая грань), см
+         * @param  float  $totalVolume  Суммарный объём всех позиций заказа, см³
          */
-        private function calculateHeight(int $length, int $width, int $totalVolume): int
+        private function calculateHeight(int $length, int $width, float $totalVolume): int
         {
             if ($length === 0 || $width === 0) {
                 return 0;
