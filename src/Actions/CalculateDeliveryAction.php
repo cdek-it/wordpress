@@ -316,7 +316,11 @@ namespace Cdek\Actions {
             $heightList  = [];
 
             foreach ($contents as $productGroup) {
-                $quantity = (int)$productGroup['quantity'];
+                // Дробная часть quantity сохраняется отдельно для веса - габаритные расчёты типизированы под int
+                // (strict_types=1), поэтому quantity приводится к int, а вес считаем по исходному (возможно
+                // дробному) значению.
+                $rawQuantity = (float)$productGroup['quantity'];
+                $quantity    = (int)$rawQuantity;
 
                 if ($useDefaultValue) {
                     $dimensions    = $forcedDimensions;
@@ -340,7 +344,7 @@ namespace Cdek\Actions {
                 $totalVolume += $dimensions[0] * $dimensions[1] * $dimensions[2];
 
                 $weight      = WeightConverter::applyFallback($productGroup['data']->get_weight());
-                $totalWeight += $quantity * $weight;
+                $totalWeight += $rawQuantity * $weight;
             }
 
             return [

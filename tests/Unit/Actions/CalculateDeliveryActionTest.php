@@ -172,6 +172,33 @@ final class CalculateDeliveryActionTest extends TestCase
         self::assertSame(6000, $packages['weight']);
     }
 
+    /**
+     * Дробное quantity (например, из импорта внешних заказов) усекается до int только для
+     * габаритных расчётов (типизированы под int при strict_types=1) - вес считается по исходному
+     * дробному значению, как и до рефакторинга.
+     */
+    public function testGetPackagesDataKeepsFractionalQuantityForWeightButTruncatesForDimensions(): void
+    {
+        [$action, $shippingMethod] = $this->buildActionForPackages();
+        $this->stubDefaultDimensions($shippingMethod, 1, 1, 1);
+
+        $contents = [
+            [
+                'quantity' => 2.5,
+                'data'     => $this->mockProduct('2', '10', '20', '5'),
+            ],
+        ];
+
+        $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
+
+        // Габариты: [5,10,20] * qty(int(2.5)=2) по наименьшей грани => [10,10,20]
+        self::assertSame(10, $packages['length']);
+        self::assertSame(20, $packages['width']);
+        self::assertSame(10, $packages['height']);
+        // Вес: 2.5 (не усечённое) * 2кг = 5кг = 5000г, а не 2 (усечённое) * 2кг = 4000г
+        self::assertSame(5000, $packages['weight']);
+    }
+
     public function testGetPackagesDataPicksMaximumLengthAndWidthAcrossProductsPerAxis(): void
     {
         [$action, $shippingMethod] = $this->buildActionForPackages();
