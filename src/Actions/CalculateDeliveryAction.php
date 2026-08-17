@@ -419,7 +419,7 @@ namespace Cdek\Actions {
             return (float)str_replace(
                 ',',
                 '.',
-                $this->method->get_option('product_package_volume_ratio'),
+                (string)$this->method->get_option('product_package_volume_ratio'),
             );
         }
 
