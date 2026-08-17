@@ -324,6 +324,26 @@ final class CalculateDeliveryActionTest extends TestCase
         self::assertSame(26, $packages['height']);
     }
 
+    /**
+     * @dataProvider invalidVolumeRatioProvider
+     */
+    public function testGetVolumeRatioFallsBackToOneOnInvalidOption(string $storedValue): void
+    {
+        [$action] = $this->buildActionForPackages($storedValue);
+
+        // Пустая/нечисловая опция даёт (float)0.0 - вне диапазона [1, 1.15], поэтому вместо
+        // случайного 0.0 должен вернуться безопасный дефолт 1.0 (старый алгоритм).
+        self::assertSame(1.0, $this->invokePrivate($action, 'getVolumeRatio'));
+    }
+
+    public static function invalidVolumeRatioProvider(): array
+    {
+        return [
+            'empty string'  => [''],
+            'non-numeric'   => ['abc'],
+        ];
+    }
+
     public function testGetPackagesDataAppliesWeightFallbackWhenProductWeightIsEmpty(): void
     {
         [$action, $shippingMethod] = $this->buildActionForPackages();

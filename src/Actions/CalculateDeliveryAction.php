@@ -417,11 +417,13 @@ namespace Cdek\Actions {
          */
         private function getVolumeRatio(): float
         {
-            return (float)str_replace(
+            $ratio = (float)str_replace(
                 ',',
                 '.',
                 (string)$this->method->get_option('product_package_volume_ratio'),
             );
+
+            return max($ratio, 1.0);
         }
 
         /**
