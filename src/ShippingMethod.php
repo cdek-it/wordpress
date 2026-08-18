@@ -11,6 +11,7 @@ namespace Cdek {
 
     use Cdek\Actions\CalculateDeliveryAction;
     use Cdek\Contracts\ExceptionContract;
+    use Cdek\Helpers\ShippingRatesCache;
     use Cdek\Migrators\MigrateCityCodeFromMap;
     use Cdek\Traits\SettingsFields;
     use Throwable;
@@ -242,11 +243,24 @@ namespace Cdek {
         final public function calculate_shipping($package = []): void
         {
             try {
+                $destination = $package['destination'] ?? [];
+                $cachedRates = ShippingRatesCache::get($this->instance_id, $destination);
+
+                if ($cachedRates !== null) {
+                    foreach ($cachedRates as $rate) {
+                        $this->add_rate($rate);
+                    }
+
+                    return;
+                }
+
                 $rates = CalculateDeliveryAction::new()($package, $this);
 
                 foreach ($rates as $rate) {
                     $this->add_rate($rate);
                 }
+
+                ShippingRatesCache::set($this->instance_id, $destination, $rates);
             } catch (ExceptionContract $e) {
                 return;
             }
