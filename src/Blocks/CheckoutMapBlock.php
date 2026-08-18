@@ -16,6 +16,7 @@ namespace Cdek\Blocks {
     use Cdek\Config;
     use Cdek\Contracts\ExceptionContract;
     use Cdek\Helpers\CheckoutHelper;
+    use Cdek\Helpers\OfficeListCache;
     use Cdek\Helpers\UI;
     use Cdek\MetaKeys;
     use Cdek\Model\Order;
@@ -57,14 +58,21 @@ namespace Cdek\Blocks {
                 return ['points' => '[]'];
             }
 
-            $api = new CdekApi;
+            $cached = OfficeListCache::get($cityInput, $postcodeInput);
 
-            try {
-                $city   = $api->cityCodeGet($cityInput, $postcodeInput);
-                $points = $city !== null ? $api->officeListRaw($city) : '[]';
-            } catch (ExceptionContract $e) {
-                $city   = null;
-                $points = '[]';
+            if ($cached === null) {
+                $api = new CdekApi;
+
+                try {
+                    $city   = $api->cityCodeGet($cityInput, $postcodeInput);
+                    $points = $city !== null ? $api->officeListRaw($city) : '[]';
+                } catch (ExceptionContract $e) {
+                    $city   = null;
+                    $points = '[]';
+                }
+
+                $cached = ['city' => $city, 'points' => $points];
+                OfficeListCache::set($cityInput, $postcodeInput, $cached);
             }
 
             return [
@@ -72,8 +80,8 @@ namespace Cdek\Blocks {
                     'city'     => $cityInput,
                     'postcode' => $postcodeInput,
                 ],
-                'city'   => $city,
-                'points' => $points,
+                'city'   => $cached['city'],
+                'points' => $cached['points'],
             ];
         }
 
