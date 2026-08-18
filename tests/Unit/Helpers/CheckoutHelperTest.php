@@ -48,6 +48,8 @@ final class CheckoutHelperTest extends TestCase
         parent::setUp();
 
         $_REQUEST = [];
+        $_GET     = [];
+        unset($_SERVER['REQUEST_URI']);
 
         Functions\when('wp_strip_all_tags')->returnArg();
         Functions\when('wp_unslash')->returnArg();
@@ -381,5 +383,47 @@ final class CheckoutHelperTest extends TestCase
             $international->getFieldDefinition('passport_series'),
             $result['billing']['passport_series'],
         );
+    }
+
+    public function testIsCheckoutRequestReturnsFalseByDefault(): void
+    {
+        self::assertFalse(CheckoutHelper::isCheckoutRequest());
+    }
+
+    public function testIsCheckoutRequestReturnsFalseForCartRoute(): void
+    {
+        $_GET['rest_route']     = '/wc/store/v1/cart/add-item';
+        $_SERVER['REQUEST_URI'] = '/index.php?rest_route=/wc/store/v1/cart/add-item';
+
+        self::assertFalse(CheckoutHelper::isCheckoutRequest());
+    }
+
+    public function testIsCheckoutRequestReturnsFalseForBatchRoute(): void
+    {
+        $_GET['rest_route']     = '/wc/store/v1/batch';
+        $_SERVER['REQUEST_URI'] = '/index.php?rest_route=/wc/store/v1/batch';
+
+        self::assertFalse(CheckoutHelper::isCheckoutRequest());
+    }
+
+    public function testIsCheckoutRequestReturnsTrueForRestRouteQueryVar(): void
+    {
+        $_GET['rest_route'] = '/wc/store/v1/checkout';
+
+        self::assertTrue(CheckoutHelper::isCheckoutRequest());
+    }
+
+    public function testIsCheckoutRequestReturnsTrueForCheckoutOrderSubRoute(): void
+    {
+        $_GET['rest_route'] = '/wc/store/v1/checkout/123';
+
+        self::assertTrue(CheckoutHelper::isCheckoutRequest());
+    }
+
+    public function testIsCheckoutRequestReturnsTrueForPrettyPermalinkRequestUri(): void
+    {
+        $_SERVER['REQUEST_URI'] = '/wp-json/wc/store/v1/checkout';
+
+        self::assertTrue(CheckoutHelper::isCheckoutRequest());
     }
 }

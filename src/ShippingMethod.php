@@ -11,6 +11,7 @@ namespace Cdek {
 
     use Cdek\Actions\CalculateDeliveryAction;
     use Cdek\Contracts\ExceptionContract;
+    use Cdek\Helpers\CheckoutHelper;
     use Cdek\Helpers\ShippingRatesCache;
     use Cdek\Migrators\MigrateCityCodeFromMap;
     use Cdek\Traits\SettingsFields;
@@ -244,7 +245,10 @@ namespace Cdek {
         {
             try {
                 $destination = $package['destination'] ?? [];
-                $cachedRates = ShippingRatesCache::get($this->instance_id, $destination);
+                // На чекауте (Store API `wc/store/v1/checkout`) кеш всегда обходится - именно тут
+                // возможная устаревшая ставка попадёт в реально создаваемый заказ, поэтому цена должна быть свежей.
+                $skipCache   = CheckoutHelper::isCheckoutRequest();
+                $cachedRates = $skipCache ? null : ShippingRatesCache::get($this->instance_id, $destination);
 
                 if ($cachedRates !== null) {
                     foreach ($cachedRates as $rate) {
@@ -260,7 +264,9 @@ namespace Cdek {
                     $this->add_rate($rate);
                 }
 
-                ShippingRatesCache::set($this->instance_id, $destination, $rates);
+                if (!$skipCache) {
+                    ShippingRatesCache::set($this->instance_id, $destination, $rates);
+                }
             } catch (ExceptionContract $e) {
                 return;
             }
