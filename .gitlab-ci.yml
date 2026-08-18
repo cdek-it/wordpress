@@ -109,8 +109,23 @@ lint:
   script:
     - find src -name "*.php" -print0 | xargs -0 -n1 php -l
     - bash bin/phpcs-diff.sh
-    # workspaces focus — ставит зависимости только корневого пакета, пропуская workspace guide (Docusaurus), для сборки которого тут нет нужных инструментов
-    - node .yarn/releases/yarn-4.8.1.cjs workspaces focus
+    - |
+      # workspaces focus — ставит зависимости только корневого пакета, пропуская workspace guide (Docusaurus), для сборки которого тут нет нужных инструментов
+      for attempt in 1 2 3; do
+        echo "Yarn install attempt ${attempt}/3"
+
+        if node .yarn/releases/yarn-4.8.1.cjs workspaces focus; then
+          break
+        fi
+
+        if [ "$attempt" -eq 3 ]; then
+          echo "Yarn install failed after 3 attempts"
+          exit 1
+        fi
+
+        echo "Yarn install failed, retrying in 20 seconds..."
+        sleep 20
+      done
     - bash bin/lint-js-diff.sh
     - bash bin/lint-css-diff.sh
 
