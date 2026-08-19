@@ -24,7 +24,8 @@ namespace Cdek\Helpers {
 
             $cache = $session->get(self::SESSION_KEY);
 
-            if (empty($cache) ||
+            if (!is_array($cache) ||
+                !isset($cache['key'], $cache['expires'], $cache['rates']) ||
                 $cache['key'] !== self::buildKey($instanceId, $destination, $cartSnapshot) ||
                 $cache['expires'] < time()) {
                 return null;

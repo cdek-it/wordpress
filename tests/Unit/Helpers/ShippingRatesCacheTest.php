@@ -39,6 +39,30 @@ class ShippingRatesCacheTest extends TestCase
         self::assertNull(ShippingRatesCache::get(1, ['city' => 'Москва'], []));
     }
 
+    public function testGetReturnsNullWhenCacheIsNotArray(): void
+    {
+        $session = Mockery::mock();
+        $session->shouldReceive('get')
+                ->once()
+                ->andReturn('corrupted');
+
+        $this->mockWcSession($session);
+
+        self::assertNull(ShippingRatesCache::get(1, ['city' => 'Москва'], []));
+    }
+
+    public function testGetReturnsNullWhenCacheIsMissingExpectedKeys(): void
+    {
+        $session = Mockery::mock();
+        $session->shouldReceive('get')
+                ->once()
+                ->andReturn(['unexpected' => 'shape']);
+
+        $this->mockWcSession($session);
+
+        self::assertNull(ShippingRatesCache::get(1, ['city' => 'Москва'], []));
+    }
+
     public function testGetReturnsNullWhenKeyDiffers(): void
     {
         $captured = $this->captureKeyFromSet(1, ['city' => 'Москва'], []);

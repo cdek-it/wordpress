@@ -29,7 +29,8 @@ namespace Cdek\Helpers {
 
             $cache = $session->get(self::SESSION_KEY);
 
-            if (empty($cache) ||
+            if (!is_array($cache) ||
+                !isset($cache['key'], $cache['expires'], $cache['data']) ||
                 $cache['key'] !== self::buildKey($city, $postcode) ||
                 $cache['expires'] < time()) {
                 return null;

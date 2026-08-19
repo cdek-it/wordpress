@@ -62,6 +62,28 @@ final class OfficeListCacheTest extends TestCase
         self::assertNull(OfficeListCache::get(self::CITY, self::POSTCODE));
     }
 
+    public function testGetReturnsNullWhenCacheIsNotArray(): void
+    {
+        $session = Mockery::mock();
+        $this->mockSession($session);
+
+        $session->shouldReceive('get')->with('official_cdek_office_list_cache')->andReturn('corrupted');
+
+        self::assertNull(OfficeListCache::get(self::CITY, self::POSTCODE));
+    }
+
+    public function testGetReturnsNullWhenCacheIsMissingExpectedKeys(): void
+    {
+        $session = Mockery::mock();
+        $this->mockSession($session);
+
+        $session->shouldReceive('get')
+                ->with('official_cdek_office_list_cache')
+                ->andReturn(['unexpected' => 'shape']);
+
+        self::assertNull(OfficeListCache::get(self::CITY, self::POSTCODE));
+    }
+
     public function testGetReturnsNullWhenStoredKeyDoesNotMatch(): void
     {
         $session = Mockery::mock();
