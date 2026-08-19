@@ -426,4 +426,18 @@ final class CheckoutHelperTest extends TestCase
 
         self::assertTrue(CheckoutHelper::isCheckoutRequest());
     }
+
+    public function testIsCheckoutRequestReturnsTrueForClassicCheckoutPage(): void
+    {
+        Functions\when('is_checkout')->justReturn(true);
+
+        self::assertTrue(CheckoutHelper::isCheckoutRequest());
+    }
+
+    public function testIsCheckoutRequestReturnsFalseWhenNotCheckoutPageAndNoRouteMatches(): void
+    {
+        Functions\when('is_checkout')->justReturn(false);
+
+        self::assertFalse(CheckoutHelper::isCheckoutRequest());
+    }
 }
