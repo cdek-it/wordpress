@@ -265,7 +265,9 @@ namespace Cdek {
                     $this->add_rate($rate);
                 }
 
-                if (!$skipCache) {
+                // Пустой результат не кэшируется - иначе временный сбой/авторизационная
+                // ошибка держит "нет вариантов доставки" все TTL, даже после восстановления.
+                if (!$skipCache && !empty($rates)) {
                     ShippingRatesCache::set($this->instance_id, $destination, $cartSnapshot, $rates);
                 }
             } catch (ExceptionContract $e) {

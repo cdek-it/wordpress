@@ -73,7 +73,12 @@ namespace Cdek\Blocks {
                 }
 
                 $cached = ['city' => $city, 'points' => $points];
-                OfficeListCache::set($cityInput, $postcodeInput, $cached);
+
+                // Ошибки не кешируем (город не резолвнулся/API упал): иначе временный
+                // сбой держит пустую карту ПВЗ все TTL (300с), даже после восстановления.
+                if ($city !== null) {
+                    OfficeListCache::set($cityInput, $postcodeInput, $cached);
+                }
             }
 
             return [
