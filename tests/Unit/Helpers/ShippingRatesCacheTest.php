@@ -24,7 +24,7 @@ class ShippingRatesCacheTest extends TestCase
     {
         $this->mockWcSession(null);
 
-        self::assertNull(ShippingRatesCache::get(1, ['city' => 'Москва']));
+        self::assertNull(ShippingRatesCache::get(1, ['city' => 'Москва'], []));
     }
 
     public function testGetReturnsNullWhenCacheIsEmpty(): void
@@ -36,12 +36,12 @@ class ShippingRatesCacheTest extends TestCase
 
         $this->mockWcSession($session);
 
-        self::assertNull(ShippingRatesCache::get(1, ['city' => 'Москва']));
+        self::assertNull(ShippingRatesCache::get(1, ['city' => 'Москва'], []));
     }
 
     public function testGetReturnsNullWhenKeyDiffers(): void
     {
-        $captured = $this->captureKeyFromSet(1, ['city' => 'Москва']);
+        $captured = $this->captureKeyFromSet(1, ['city' => 'Москва'], []);
 
         $session = Mockery::mock();
         $session->shouldReceive('get')
@@ -54,12 +54,12 @@ class ShippingRatesCacheTest extends TestCase
 
         $this->mockWcSession($session);
 
-        self::assertNull(ShippingRatesCache::get(1, ['city' => 'Москва']));
+        self::assertNull(ShippingRatesCache::get(1, ['city' => 'Москва'], []));
     }
 
     public function testGetReturnsNullWhenExpired(): void
     {
-        $key = $this->captureKeyFromSet(1, ['city' => 'Москва']);
+        $key = $this->captureKeyFromSet(1, ['city' => 'Москва'], []);
 
         $session = Mockery::mock();
         $session->shouldReceive('get')
@@ -72,12 +72,12 @@ class ShippingRatesCacheTest extends TestCase
 
         $this->mockWcSession($session);
 
-        self::assertNull(ShippingRatesCache::get(1, ['city' => 'Москва']));
+        self::assertNull(ShippingRatesCache::get(1, ['city' => 'Москва'], []));
     }
 
     public function testGetReturnsCachedRatesOnHit(): void
     {
-        $key = $this->captureKeyFromSet(1, ['city' => 'Москва']);
+        $key = $this->captureKeyFromSet(1, ['city' => 'Москва'], []);
 
         $session = Mockery::mock();
         $session->shouldReceive('get')
@@ -90,30 +90,38 @@ class ShippingRatesCacheTest extends TestCase
 
         $this->mockWcSession($session);
 
-        self::assertSame(['rate-1', 'rate-2'], ShippingRatesCache::get(1, ['city' => 'Москва']));
+        self::assertSame(['rate-1', 'rate-2'], ShippingRatesCache::get(1, ['city' => 'Москва'], []));
     }
 
     public function testKeyDiffersByDestination(): void
     {
-        $keyMoscow = $this->captureKeyFromSet(1, ['city' => 'Москва']);
-        $keySpb    = $this->captureKeyFromSet(1, ['city' => 'Санкт-Петербург']);
+        $keyMoscow = $this->captureKeyFromSet(1, ['city' => 'Москва'], []);
+        $keySpb    = $this->captureKeyFromSet(1, ['city' => 'Санкт-Петербург'], []);
 
         self::assertNotSame($keyMoscow, $keySpb);
     }
 
     public function testKeyDiffersByInstanceId(): void
     {
-        $keyOne = $this->captureKeyFromSet(1, ['city' => 'Москва']);
-        $keyTwo = $this->captureKeyFromSet(2, ['city' => 'Москва']);
+        $keyOne = $this->captureKeyFromSet(1, ['city' => 'Москва'], []);
+        $keyTwo = $this->captureKeyFromSet(2, ['city' => 'Москва'], []);
 
         self::assertNotSame($keyOne, $keyTwo);
+    }
+
+    public function testKeyDiffersByCartSnapshot(): void
+    {
+        $keyLight = $this->captureKeyFromSet(1, ['city' => 'Москва'], ['items' => [['weight' => 1]]]);
+        $keyHeavy = $this->captureKeyFromSet(1, ['city' => 'Москва'], ['items' => [['weight' => 10]]]);
+
+        self::assertNotSame($keyLight, $keyHeavy);
     }
 
     public function testSetDoesNothingWhenSessionIsNull(): void
     {
         $this->mockWcSession(null);
 
-        ShippingRatesCache::set(1, ['city' => 'Москва'], ['rate']);
+        ShippingRatesCache::set(1, ['city' => 'Москва'], [], ['rate']);
 
         $this->addToAssertionCount(1);
     }
@@ -133,13 +141,13 @@ class ShippingRatesCacheTest extends TestCase
 
         $this->mockWcSession($session);
 
-        ShippingRatesCache::set(1, ['city' => 'Москва'], ['rate']);
+        ShippingRatesCache::set(1, ['city' => 'Москва'], [], ['rate']);
 
         self::assertGreaterThan(time(), $captured['expires']);
         self::assertSame(['rate'], $captured['rates']);
     }
 
-    private function captureKeyFromSet(int $instanceId, array $destination): string
+    private function captureKeyFromSet(int $instanceId, array $destination, array $cartSnapshot): string
     {
         $captured = null;
 
@@ -154,7 +162,7 @@ class ShippingRatesCacheTest extends TestCase
 
         $this->mockWcSession($session);
 
-        ShippingRatesCache::set($instanceId, $destination, []);
+        ShippingRatesCache::set($instanceId, $destination, $cartSnapshot, []);
 
         return $captured['key'];
     }

@@ -244,11 +244,12 @@ namespace Cdek {
         final public function calculate_shipping($package = []): void
         {
             try {
-                $destination = $package['destination'] ?? [];
-                // На чекауте (Store API `wc/store/v1/checkout`) кеш всегда обходится - именно тут
-                // возможная устаревшая ставка попадёт в реально создаваемый заказ, поэтому цена должна быть свежей.
+                $destination  = $package['destination'] ?? [];
+                $cartSnapshot = $this->buildCartSnapshot($package);
+
                 $skipCache   = CheckoutHelper::isCheckoutRequest();
-                $cachedRates = $skipCache ? null : ShippingRatesCache::get($this->instance_id, $destination);
+                $cachedRates = $skipCache ?
+                    null : ShippingRatesCache::get($this->instance_id, $destination, $cartSnapshot);
 
                 if ($cachedRates !== null) {
                     foreach ($cachedRates as $rate) {
@@ -265,11 +266,35 @@ namespace Cdek {
                 }
 
                 if (!$skipCache) {
-                    ShippingRatesCache::set($this->instance_id, $destination, $rates);
+                    ShippingRatesCache::set($this->instance_id, $destination, $cartSnapshot, $rates);
                 }
             } catch (ExceptionContract $e) {
                 return;
             }
+        }
+
+        // Всё, что влияет на посчитанную CDEK ставку помимо адреса (вес/габариты позиций,
+        // стоимость корзины для INSURANCE и ценовых порогов) - идёт в ключ кэша ставок,
+        // иначе в течение TTL смена состава корзины по тому же адресу вернёт чужую цену.
+        private function buildCartSnapshot(array $package): array
+        {
+            return [
+                'contents_cost' => $package['contents_cost'] ?? 0,
+                'items'         => array_map(
+                    static function (array $item) {
+                        $product = $item['data'] ?? null;
+
+                        return [
+                            'quantity' => $item['quantity'] ?? 0,
+                            'weight'   => $product ? $product->get_weight() : '',
+                            'length'   => $product ? $product->get_length() : '',
+                            'width'    => $product ? $product->get_width() : '',
+                            'height'   => $product ? $product->get_height() : '',
+                        ];
+                    },
+                    $package['contents'] ?? [],
+                ),
+            ];
         }
     }
 }

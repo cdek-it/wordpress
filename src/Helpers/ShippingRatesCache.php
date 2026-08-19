@@ -14,7 +14,7 @@ namespace Cdek\Helpers {
         private const TTL         = 10;
         private const SESSION_KEY = 'official_cdek_rates_cache';
 
-        final public static function get(int $instanceId, array $destination): ?array
+        final public static function get(int $instanceId, array $destination, array $cartSnapshot): ?array
         {
             $session = WC()->session;
 
@@ -25,7 +25,7 @@ namespace Cdek\Helpers {
             $cache = $session->get(self::SESSION_KEY);
 
             if (empty($cache) ||
-                $cache['key'] !== self::buildKey($instanceId, $destination) ||
+                $cache['key'] !== self::buildKey($instanceId, $destination, $cartSnapshot) ||
                 $cache['expires'] < time()) {
                 return null;
             }
@@ -33,7 +33,7 @@ namespace Cdek\Helpers {
             return $cache['rates'];
         }
 
-        final public static function set(int $instanceId, array $destination, array $rates): void
+        final public static function set(int $instanceId, array $destination, array $cartSnapshot, array $rates): void
         {
             $session = WC()->session;
 
@@ -42,15 +42,15 @@ namespace Cdek\Helpers {
             }
 
             $session->set(self::SESSION_KEY, [
-                'key'     => self::buildKey($instanceId, $destination),
+                'key'     => self::buildKey($instanceId, $destination, $cartSnapshot),
                 'expires' => time() + self::TTL,
                 'rates'   => $rates,
             ]);
         }
 
-        private static function buildKey(int $instanceId, array $destination): string
+        private static function buildKey(int $instanceId, array $destination, array $cartSnapshot): string
         {
-            return $instanceId.':'.md5((string)wp_json_encode($destination));
+            return $instanceId.':'.md5((string)wp_json_encode([$destination, $cartSnapshot]));
         }
     }
 }
