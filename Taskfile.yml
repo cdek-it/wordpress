@@ -48,9 +48,30 @@ tasks:
       - composer stan
 
   wp-up:
-    desc: "Поднять WordPress + MySQL в докере (http://localhost:8080)"
+    desc: "Поднять WordPress + MySQL в докере (http://localhost:8080). Версия WooCommerce: task wp-up WC_VERSION=10.x.x (по умолчанию последняя стабильная)"
+    vars:
+      WC_VERSION: '{{.WC_VERSION | default "latest-stable"}}'
+    env:
+      WC_VERSION: "{{.WC_VERSION}}"
     cmds:
       - docker compose up -d --build
+      # На свежем volume entrypoint сам копирует WordPress + WooCommerce
+      - cmd: |
+          echo "Ждём готовности WordPress..."
+          for i in $(seq 1 60); do
+            if curl -sf -o /dev/null "http://localhost:${WORDPRESS_PORT:-8080}/wp-login.php"; then
+              break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "WordPress не ответил за 2 минуты"
+              exit 1
+            fi
+            sleep 2
+          done
+        silent: true
+      - docker compose exec wordpress sh -c 'rm -rf /var/www/html/wp-content/plugins/woocommerce && cp -r /usr/src/wordpress/wp-content/plugins/woocommerce /var/www/html/wp-content/plugins/'
+      - cmd: 'echo "Готово: WordPress + WooCommerce {{.WC_VERSION}} подняты на http://localhost:${WORDPRESS_PORT:-8080}"'
+        silent: true
 
   wp-down:
     desc: "Остановить и удалить контейнеры WordPress + MySQL (данные в volume сохраняются)"

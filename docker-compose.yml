@@ -6,6 +6,8 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
+      args:
+        WC_VERSION: ${WC_VERSION:-latest-stable}
     ports:
       - "${WORDPRESS_PORT:-8080}:80"
     environment:
