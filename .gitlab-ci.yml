@@ -18,18 +18,25 @@ variables:
     value: "none"
     options:
       - "none"
-      - "migrate_tag_to_github"
+      - "migrate-tag-to-github"
+      - "release"
     description: "Выберите запуск job"
 
   MIGRATE_TAG:
     value: ""
     description: "Тег для переноса из GitLab в GitHub. Например: v4.2.5"
 
+  RELEASE_TAG:
+    value: ""
+    description: "Тег для публикации релиза (GitLab Release + миграция в GitHub). Например: v4.2.5"
+
 # Общие проверки для push в ветку (feature-ветку ИЛИ main) И для тега vX.Y.Z:
 # validate -> checks (lint/static-analysis/unit-tests параллельно).
-# Не запускается только при ручном запуске migrate_tag_to_github.
+# Не запускается при ручном запуске migrate-tag-to-github/release.
 .branch_pipeline_rules: &branch_pipeline_rules
-  - if: $SELECT_JOB == "migrate_tag_to_github"
+  - if: $SELECT_JOB == "migrate-tag-to-github"
+    when: never
+  - if: $SELECT_JOB == "release"
     when: never
   - if: $CI_COMMIT_TAG
     when: always
@@ -39,7 +46,9 @@ variables:
 # Шаги основного пайплайна main (push после merge request) и тег-пайплайна (release candidate): sonar.
 # build_custom/deploy-staging/github управляются собственными rules у соответствующих job.
 .main_branch_rules: &main_branch_rules
-  - if: $SELECT_JOB == "migrate_tag_to_github"
+  - if: $SELECT_JOB == "migrate-tag-to-github"
+    when: never
+  - if: $SELECT_JOB == "release"
     when: never
   - if: $CI_COMMIT_TAG
     when: always
@@ -272,7 +281,9 @@ build-tag:
 build-custom:
   image: docker-proxy.cdek.ru/php:8.2-alpine
   rules:
-    - if: $SELECT_JOB == "migrate_tag_to_github"
+    - if: $SELECT_JOB == "migrate-tag-to-github"
+      when: never
+    - if: $SELECT_JOB == "release"
       when: never
     # На тегах не нужен - build-tag + upload уже покрывают релизный артефакт, build-custom тут дублировал бы его
     - if: $CI_COMMIT_TAG
@@ -315,21 +326,99 @@ upload:
     - curl -u "${NEXUS_LOGIN}":"${NEXUS_PASS}" --upload-file cdek.zip "${ARTIFACTORY_REPO}/$CI_PROJECT_NAME/wp_cdek-delivery_${ARCHIVE_VERSION}.zip"
 
 release:
-  stage: deploy
+  image: registry-gitlab.cdek.ru/gitlab-org/release-cli:latest
+  stage: maintenance
   tags:
     - docker
-  needs:
-    - job: upload
+  variables:
+    GIT_DEPTH: "0"
   rules:
+    - if: '$CI_PIPELINE_SOURCE != "web"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED != "true"'
+      when: never
+    - if: '$SELECT_JOB == "release"'
+      when: on_success
     - when: never
-  image: registry-gitlab.cdek.ru/gitlab-org/release-cli:latest
   before_script:
-    - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
-    - export ARCHIVE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/\./_/g')
+    - set -eu
+    - test -n "${RELEASE_TAG:-}"
+    - echo "${RELEASE_TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$'
+    # migrate-tag-to-github ожидает MIGRATE_TAG - переиспользуем его before_script целиком
+    # (ssh/git-lfs/apk-репо/github remote), чтобы не дублировать настройку
+    - export MIGRATE_TAG="${RELEASE_TAG}"
+    - !reference [migrate-tag-to-github, before_script]
+    - apk add --no-cache curl jq
   script:
+    - set -eu
+    - export RELEASE_VERSION=$(echo "${RELEASE_TAG}" | sed 's/v//')
+    - export ARCHIVE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/\./_/g')
+    - export ARCHIVE_URL="${ARTIFACTORY_REPO}/$CI_PROJECT_NAME/wp_cdek-delivery_${ARCHIVE_VERSION}.zip"
+
+    # Тег должен существовать в GitLab
+    - echo "Checking tag ${RELEASE_TAG} exists in GitLab..."
+    - git ls-remote --exit-code --tags origin "refs/tags/${RELEASE_TAG}" >/dev/null
+
+    # Артефакт для тега должен быть уже загружен в Nexus (job upload тег-пайплайна).
+    # Отдельная проверка нужна, т.к. curl в upload не падает на HTTP-ошибках (нет --fail) -
+    # job upload может показать "passed", даже если сама заливка не удалась.
     - |
-      release-cli create --name $CI_COMMIT_TAG --tag-name $CI_COMMIT_TAG \
-        --assets-link "{\"name\":\"Архив\",\"filepath\":\"/archive\",\"url\":\"${ARTIFACTORY_REPO}$CI_COMMIT_BRANCH/$CI_PROJECT_NAME/wordpress_${ARCHIVE_VERSION}.zip\", \"link_type\":\"package\"}" \
+      echo "Checking artifact exists in Nexus: ${ARCHIVE_URL}"
+      HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${NEXUS_LOGIN}":"${NEXUS_PASS}" -I "${ARCHIVE_URL}")
+      if [ "$HTTP_CODE" != "200" ]; then
+        echo "ERROR: artifact not found in Nexus (HTTP ${HTTP_CODE}): ${ARCHIVE_URL}"
+        exit 1
+      fi
+
+    # Текст релиза
+    - export RELEASE_DESCRIPTION="$(git for-each-ref "refs/tags/${RELEASE_TAG}" --format='%(contents)')"
+
+    - echo "Creating GitLab Release ${RELEASE_TAG}..."
+    - |
+      release-cli create --name "${RELEASE_TAG}" --tag-name "${RELEASE_TAG}" \
+        --description "${RELEASE_DESCRIPTION}" \
+        --assets-link "{\"name\":\"Архив\",\"filepath\":\"/archive\",\"url\":\"${ARCHIVE_URL}\", \"link_type\":\"package\"}"
+
+    # Migrate tag to GitHub
+    - !reference [migrate-tag-to-github, script]
+
+    # GitHub Release (черновик).
+    - |
+      GITHUB_OWNER_REPO=$(echo "${GITHUB_REPO}" | sed -E 's#^(git@|ssh://git@)?github\.com[:/]##; s#\.git$##')
+      echo "Creating GitHub Release (draft) for ${GITHUB_OWNER_REPO}@${RELEASE_TAG}..."
+
+      CREATE_RESPONSE=$(curl -s -w '\n%{http_code}' -X POST \
+        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        -H "Accept: application/vnd.github+json" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        "https://api.github.com/repos/${GITHUB_OWNER_REPO}/releases" \
+        -d "$(jq -n --arg tag "${RELEASE_TAG}" --arg name "${RELEASE_TAG}" --arg body "${RELEASE_DESCRIPTION}" \
+              '{tag_name: $tag, name: $name, body: $body, draft: true}')")
+
+      HTTP_CODE=$(echo "${CREATE_RESPONSE}" | tail -n1)
+      CREATE_BODY=$(echo "${CREATE_RESPONSE}" | sed '$d')
+
+      if [ "$HTTP_CODE" != "201" ]; then
+        echo "ERROR: failed to create GitHub Release (HTTP ${HTTP_CODE}): ${CREATE_BODY}"
+        exit 1
+      fi
+
+      RELEASE_ID=$(echo "${CREATE_BODY}" | jq -r '.id')
+      UPLOAD_URL=$(echo "${CREATE_BODY}" | jq -r '.upload_url' | sed 's/{?name,label}//')
+
+      echo "Downloading artifact from Nexus for GitHub asset upload..."
+      curl -sf -u "${NEXUS_LOGIN}":"${NEXUS_PASS}" -o cdek.zip "${ARCHIVE_URL}"
+
+      echo "Uploading asset to GitHub release ${RELEASE_ID}..."
+      curl -sf -X POST \
+        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        -H "Content-Type: application/zip" \
+        --data-binary @cdek.zip \
+        "${UPLOAD_URL}?name=wp_cdek-delivery_${ARCHIVE_VERSION}.zip"
+
+      echo "GitHub Release draft created: id=${RELEASE_ID}"
 
 deploy-staging:
   stage: deploy
@@ -367,7 +456,9 @@ github:
   tags:
     - docker
   rules:
-    - if: $SELECT_JOB == "migrate_tag_to_github"
+    - if: $SELECT_JOB == "migrate-tag-to-github"
+      when: never
+    - if: $SELECT_JOB == "release"
       when: never
     - if: $CI_COMMIT_REF_PROTECTED != "true"
       when: never
@@ -390,7 +481,7 @@ github:
     - git checkout -B "$CI_COMMIT_REF_NAME" "origin/$CI_COMMIT_REF_NAME"
     - git push github "HEAD:refs/heads/$CI_COMMIT_REF_NAME"
 
-migrate_tag_to_github:
+migrate-tag-to-github:
   image: docker-proxy.cdek.tech/alpine
   stage: maintenance
 
@@ -414,7 +505,7 @@ migrate_tag_to_github:
       when: never
 
     # Запускать только если явно выбрали эту job
-    - if: '$SELECT_JOB == "migrate_tag_to_github"'
+    - if: '$SELECT_JOB == "migrate-tag-to-github"'
       when: on_success
 
     - when: never
@@ -423,7 +514,7 @@ migrate_tag_to_github:
     - set -eu
 
     - test -n "${MIGRATE_TAG:-}"
-    - echo "${MIGRATE_TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$'
+    - echo "${MIGRATE_TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$'
 
     - mkdir -p ~/.ssh
     - echo "$SSH_CONFIG" > ~/.ssh/config
