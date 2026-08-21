@@ -158,5 +158,22 @@ namespace Cdek\Helpers {
         {
             return $rate->get_method_id() === Config::DELIVERY_NAME;
         }
+
+        /** @noinspection GlobalVariableUsageInspection */
+        public static function isCheckoutRequest(): bool
+        {
+            // Классический (shortcode) чекаут отправляется обычным POST/AJAX на страницу
+            // чекаута (wc-ajax=checkout), а не на Store API - строковые проверки ниже его
+            // не ловят, поэтому нужен отдельный WC-условный тег.
+            if (function_exists('is_checkout') && is_checkout()) {
+                return true;
+            }
+
+            $restRoute = isset($_GET['rest_route']) ? wp_unslash((string)$_GET['rest_route']) : '';
+            $uri       = isset($_SERVER['REQUEST_URI']) ? (string)$_SERVER['REQUEST_URI'] : '';
+
+            return strpos($restRoute, '/wc/store/v1/checkout') === 0
+                || strpos($uri, '/wc/store/v1/checkout') !== false;
+        }
     }
 }

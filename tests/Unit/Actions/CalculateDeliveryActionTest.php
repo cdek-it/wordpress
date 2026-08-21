@@ -61,12 +61,15 @@ final class CalculateDeliveryActionTest extends TestCase
      *
      * @return array{0: CalculateDeliveryAction, 1: MockInterface}
      */
-    private function buildActionForPackages(): array
+    private function buildActionForPackages(string $volumeRatio = '1'): array
     {
         $shippingMethod = Mockery::mock('alias:' . ShippingMethod::class);
         $shippingMethod->shouldReceive('factory')->andReturn($shippingMethod);
         $shippingMethod->product_package_default_toggle = false;
         $shippingMethod->product_weight_default          = '0';
+        $shippingMethod->shouldReceive('get_option')
+                        ->with('product_package_volume_ratio')
+                        ->andReturn($volumeRatio);
 
         $action = new CalculateDeliveryAction();
         $this->setPrivateProperty($action, 'method', $shippingMethod);
@@ -113,7 +116,8 @@ final class CalculateDeliveryActionTest extends TestCase
 
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
-        // мм/10 => [100, 50, 30], сортировка по возрастанию => length=30, height=50, width=100
+        // мм/10 => [100, 50, 30], сортировка по возрастанию => length=30, width=100
+        // k=1 (по умолчанию) - старый алгоритм: height берётся по рангу (средняя грань) = 50
         self::assertSame(30, $packages['length']);
         self::assertSame(100, $packages['width']);
         self::assertSame(50, $packages['height']);
@@ -135,13 +139,67 @@ final class CalculateDeliveryActionTest extends TestCase
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
         // по возрастанию [5, 10, 20]; наименьшее (5) * qty(3) = 15 => пересортировка [10, 15, 20]
+        // k=1 (по умолчанию) - старый алгоритм: height берётся по рангу (средняя грань) = 15
         self::assertSame(10, $packages['length']);
         self::assertSame(20, $packages['width']);
         self::assertSame(15, $packages['height']);
         self::assertSame(6000, $packages['weight']);
     }
 
-    public function testGetPackagesDataPicksMaximumDimensionsAcrossProductsPerAxis(): void
+    /**
+     * WooCommerce Store API (`WC_Cart::set_quantity()`) передаёт quantity как float (например 5.0),
+     * `applyQuantityToLineDimensions()` типизирован под `int $quantity`
+     * при `declare(strict_types=1)` - без явного приведения это падает с TypeError.
+     */
+    public function testGetPackagesDataAcceptsFloatQuantityFromStoreApi(): void
+    {
+        [$action, $shippingMethod] = $this->buildActionForPackages();
+        $this->stubDefaultDimensions($shippingMethod, 1, 1, 1);
+
+        $contents = [
+            [
+                'quantity' => 3.0,
+                'data'     => $this->mockProduct('2', '10', '20', '5'),
+            ],
+        ];
+
+        $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
+
+        // тот же сценарий, что и с int quantity=3: [5,10,20] * qty(3) по наименьшей грани => [10,15,20]
+        self::assertSame(10, $packages['length']);
+        self::assertSame(20, $packages['width']);
+        self::assertSame(15, $packages['height']);
+        self::assertSame(6000, $packages['weight']);
+    }
+
+    /**
+     * Дробное quantity (например, из импорта внешних заказов) усекается до int только для
+     * габаритных расчётов (типизированы под int при strict_types=1) - вес считается по исходному
+     * дробному значению, как и до рефакторинга.
+     */
+    public function testGetPackagesDataKeepsFractionalQuantityForWeightButTruncatesForDimensions(): void
+    {
+        [$action, $shippingMethod] = $this->buildActionForPackages();
+        $this->stubDefaultDimensions($shippingMethod, 1, 1, 1);
+
+        $contents = [
+            [
+                'quantity' => 2.5,
+                'data'     => $this->mockProduct('2', '10', '20', '5'),
+            ],
+        ];
+
+        $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
+
+        // Габариты: [5,10,20] * qty(int(2.5)=2) по наименьшей грани => [10,10,20]
+        self::assertSame(10, $packages['length']);
+        self::assertSame(20, $packages['width']);
+        self::assertSame(10, $packages['height']);
+        // Вес: 2.5 (не усечённое) * 2кг = 5кг = 5000г, а не 2 (усечённое) * 2кг = 4000г
+        self::assertSame(5000, $packages['weight']);
+    }
+
+    public function testGetPackagesDataPicksMaximumLengthAndWidthAcrossProductsPerAxis(): void
     {
         [$action, $shippingMethod] = $this->buildActionForPackages();
         $this->stubDefaultDimensions($shippingMethod, 1, 1, 1);
@@ -161,11 +219,89 @@ final class CalculateDeliveryActionTest extends TestCase
 
         // товар A отсортирован [2,4,6] -> length=2 height=4 width=6
         // товар B отсортирован [1,3,10] -> length=1 height=3 width=10
-        // максимум по каждой оси отдельно: length=max(2,1)=2, height=max(4,3)=4, width=max(6,10)=10
+        // k=1 (по умолчанию) - старый алгоритм: каждая ось берётся по рангу (максимум) отдельно:
+        // length=max(2,1)=2, width=max(6,10)=10, height=max(4,3)=4
         self::assertSame(2, $packages['length']);
         self::assertSame(10, $packages['width']);
         self::assertSame(4, $packages['height']);
         self::assertSame(3000, $packages['weight']);
+    }
+
+    public function testGetPackagesDataUsesLegacyRankedHeightByDefault(): void
+    {
+        [$action, $shippingMethod] = $this->buildActionForPackages();
+        $this->stubDefaultDimensions($shippingMethod, 1, 1, 1);
+
+        $contents = [
+            [
+                'quantity' => 1,
+                'data'     => $this->mockProduct('1', '10', '10', '10'),
+            ],
+            [
+                'quantity' => 1,
+                'data'     => $this->mockProduct('1', '10', '10', '10'),
+            ],
+            [
+                'quantity' => 1,
+                'data'     => $this->mockProduct('1', '10', '10', '10'),
+            ],
+        ];
+
+        $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
+
+        // k=1 (по умолчанию) - старый алгоритм (максимум по рангу) даёт height=10, полностью
+        // игнорируя объём 2-й и 3-й позиций - именно это занижало объёмный вес при 3+ позициях
+        // в заказе и воспроизводит пример из ТЗ (0,9 кг вместо 1,07 кг суммарных).
+        self::assertSame(10, $packages['length']);
+        self::assertSame(10, $packages['width']);
+        self::assertSame(10, $packages['height']);
+    }
+
+    public function testGetPackagesDataDerivesHeightFromTotalVolumeAcrossMultiplePositions(): void
+    {
+        [$action, $shippingMethod] = $this->buildActionForPackages('1.1');
+        $this->stubDefaultDimensions($shippingMethod, 1, 1, 1);
+
+        $contents = [
+            [
+                'quantity' => 1,
+                'data'     => $this->mockProduct('1', '10', '10', '10'),
+            ],
+            [
+                'quantity' => 1,
+                'data'     => $this->mockProduct('1', '10', '10', '10'),
+            ],
+            [
+                'quantity' => 1,
+                'data'     => $this->mockProduct('1', '10', '10', '10'),
+            ],
+        ];
+
+        $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
+
+        // k>1 (1.1) - новый алгоритм: height = ceil(суммарный объём(3*1000=3000) / (length*width=100) * k(1.1)) = 33
+        self::assertSame(10, $packages['length']);
+        self::assertSame(10, $packages['width']);
+        self::assertSame(33, $packages['height']);
+    }
+
+    public function testGetPackagesDataDoesNotLeakDefaultDimensionsWhenToggleDisabled(): void
+    {
+        [$action, $shippingMethod] = $this->buildActionForPackages();
+        $this->stubDefaultDimensions($shippingMethod, 10, 10, 10);
+
+        $contents = [
+            [
+                'quantity' => 1,
+                'data'     => $this->mockProduct('1', '4', '7', '15'),
+            ],
+        ];
+
+        $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
+
+        self::assertSame(4, $packages['length']);
+        self::assertSame(15, $packages['width']);
+        self::assertSame(7, $packages['height']);
     }
 
     public function testGetPackagesDataForcesDefaultDimensionsWhenToggleEnabled(): void
@@ -184,9 +320,55 @@ final class CalculateDeliveryActionTest extends TestCase
 
         $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
 
+        // Дефолты (15,25,35) сопоставляются с осями сырым способом (без переранжирования):
+        // length=15, width=25, height=35 - как заданы в настройках, quantity=1 не меняет высоту.
         self::assertSame(15, $packages['length']);
         self::assertSame(25, $packages['width']);
         self::assertSame(35, $packages['height']);
+    }
+
+    public function testGetPackagesDataAppliesQuantityAndVolumeRatioToDefaultDimensionsWhenToggleEnabled(): void
+    {
+        [$action, $shippingMethod] = $this->buildActionForPackages('1.3');
+        $shippingMethod->product_package_default_toggle = true;
+        $this->stubDefaultDimensions($shippingMethod, 10, 10, 10);
+
+        $contents = [
+            [
+                'quantity' => 2,
+                'data'     => $this->mockProduct('1', '1', '1', '1'),
+            ],
+        ];
+
+        $packages = $this->invokePrivate($action, 'getPackagesData', [$contents]);
+
+        // Дефолты [10,10,10] сопоставляются с осями сырым способом; quantity(2) складывает
+        // упаковки по высоте: height=10*2=20 => объём=10*10*20=2000.
+        // k>1 (1.3) - волюметрический алгоритм: length=10, width=10;
+        // height = ceil(2000 / (10*10) * k(1.3)) = 26
+        self::assertSame(10, $packages['length']);
+        self::assertSame(10, $packages['width']);
+        self::assertSame(26, $packages['height']);
+    }
+
+    /**
+     * @dataProvider invalidVolumeRatioProvider
+     */
+    public function testGetVolumeRatioFallsBackToOneOnInvalidOption(string $storedValue): void
+    {
+        [$action] = $this->buildActionForPackages($storedValue);
+
+        // Пустая/нечисловая опция даёт (float)0.0 - вне диапазона [1, 1.15], поэтому вместо
+        // случайного 0.0 должен вернуться безопасный дефолт 1.0 (старый алгоритм).
+        self::assertSame(1.0, $this->invokePrivate($action, 'getVolumeRatio'));
+    }
+
+    public static function invalidVolumeRatioProvider(): array
+    {
+        return [
+            'empty string'  => [''],
+            'non-numeric'   => ['abc'],
+        ];
     }
 
     public function testGetPackagesDataAppliesWeightFallbackWhenProductWeightIsEmpty(): void
@@ -253,6 +435,9 @@ final class CalculateDeliveryActionTest extends TestCase
         $shippingMethod->shouldReceive('get_option')
             ->with(Mockery::pattern('/^product_.+_default$/'))
             ->andReturn('10');
+        $shippingMethod->shouldReceive('get_option')
+            ->with('product_package_volume_ratio')
+            ->andReturn('1');
 
         $cdekApi = Mockery::mock('overload:' . CdekApi::class);
         $cdekApi->shouldReceive('authGetError')->andReturn($authError);

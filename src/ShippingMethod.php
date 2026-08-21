@@ -11,6 +11,8 @@ namespace Cdek {
 
     use Cdek\Actions\CalculateDeliveryAction;
     use Cdek\Contracts\ExceptionContract;
+    use Cdek\Helpers\CheckoutHelper;
+    use Cdek\Helpers\ShippingRatesCache;
     use Cdek\Migrators\MigrateCityCodeFromMap;
     use Cdek\Traits\SettingsFields;
     use Throwable;
@@ -53,6 +55,7 @@ namespace Cdek {
      * @property string $product_width_default
      * @property string $product_height_default
      * @property bool $product_package_default_toggle
+     * @property string $product_package_volume_ratio
      * @property bool $services_ban_attachment_inspection
      * @property bool $services_trying_on
      * @property bool $services_part_deliv
@@ -219,17 +222,81 @@ namespace Cdek {
             parent::admin_options();
         }
 
+        /** @noinspection PhpUnused */
+        final public function validate_product_package_volume_ratio_field(string $key, ?string $value): string
+        {
+            $value = wc_format_decimal(str_replace(',', '.', (string)$value));
+
+            if ($value === '' || (float)$value < 1 || (float)$value > 1.15) {
+                $this->add_error(
+                    esc_html__(
+                        'Package volume safety ratio must be between 1 and 1.15.',
+                        'cdekdelivery',
+                    ),
+                );
+
+                return (string)$this->get_option($key);
+            }
+
+            return $value;
+        }
+
         final public function calculate_shipping($package = []): void
         {
             try {
+                $destination  = $package['destination'] ?? [];
+                $cartSnapshot = $this->buildCartSnapshot($package);
+
+                $skipCache   = CheckoutHelper::isCheckoutRequest();
+                $cachedRates = $skipCache ?
+                    null : ShippingRatesCache::get($this->instance_id, $destination, $cartSnapshot);
+
+                if ($cachedRates !== null) {
+                    foreach ($cachedRates as $rate) {
+                        $this->add_rate($rate);
+                    }
+
+                    return;
+                }
+
                 $rates = CalculateDeliveryAction::new()($package, $this);
 
                 foreach ($rates as $rate) {
                     $this->add_rate($rate);
                 }
+
+                // Пустой результат не кэшируется - иначе временный сбой/авторизационная
+                // ошибка держит "нет вариантов доставки" все TTL, даже после восстановления.
+                if (!$skipCache && !empty($rates)) {
+                    ShippingRatesCache::set($this->instance_id, $destination, $cartSnapshot, $rates);
+                }
             } catch (ExceptionContract $e) {
                 return;
             }
+        }
+
+        // Всё, что влияет на посчитанную CDEK ставку помимо адреса (вес/габариты позиций,
+        // стоимость корзины для INSURANCE и ценовых порогов) - идёт в ключ кэша ставок,
+        // иначе в течение TTL смена состава корзины по тому же адресу вернёт чужую цену.
+        private function buildCartSnapshot(array $package): array
+        {
+            return [
+                'contents_cost' => $package['contents_cost'] ?? 0,
+                'items'         => array_map(
+                    static function (array $item) {
+                        $product = $item['data'] ?? null;
+
+                        return [
+                            'quantity' => $item['quantity'] ?? 0,
+                            'weight'   => $product ? $product->get_weight() : '',
+                            'length'   => $product ? $product->get_length() : '',
+                            'width'    => $product ? $product->get_width() : '',
+                            'height'   => $product ? $product->get_height() : '',
+                        ];
+                    },
+                    $package['contents'] ?? [],
+                ),
+            ];
         }
     }
 }

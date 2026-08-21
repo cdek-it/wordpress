@@ -240,73 +240,204 @@ namespace Cdek\Actions {
 
         private function getPackagesData(array $contents): array
         {
+            $dimensionsInMM   = get_option('woocommerce_dimension_unit') === 'mm';
+            $useDefaultValue  = $this->method->product_package_default_toggle;
+            $forcedDimensions = $this->getForcedDimensions();
+
+            $aggregated = $this->aggregatePackageContents($contents, $useDefaultValue, $forcedDimensions, $dimensionsInMM);
+            $lengthList = $aggregated['lengths'];
+            $widthList  = $aggregated['widths'];
+            $heightList = $aggregated['heights'];
+
+            // Настройки по умолчанию не должны конкурировать с размерами товаров
+            // При пустом $contents обращаться к существующему $lengthList[0]/$widthList[0]/$heightList[0].
+            if (empty($lengthList)) {
+                $lengthList[] = $forcedDimensions[0];
+                $widthList[]  = $forcedDimensions[1];
+                $heightList[] = $forcedDimensions[2];
+            }
+
+            rsort($lengthList);
+            rsort($widthList);
+
+            $length = $lengthList[0];
+            $width  = $widthList[0];
+            $k      = $this->getVolumeRatio();
+
+            // k = 1 (по умолчанию) - старый алгоритм: высота берётся по рангу, как и length/width.
+            if ($k > 1.0) {
+                $height = $this->calculateHeight($length, $width, $aggregated['volume']);
+            } else {
+                rsort($heightList);
+                $height = $heightList[0];
+            }
+
+            return [
+                'length' => $this->fallbackToDefaultDimension($length, 'length'),
+                'width'  => $this->fallbackToDefaultDimension($width, 'width'),
+                'height' => $this->fallbackToDefaultDimension($height, 'height'),
+                'weight' => WeightConverter::getWeightInGrams($aggregated['weight']),
+            ];
+        }
+
+        private function getForcedDimensions(): array
+        {
+            return [
+                (int)$this->method->get_option('product_length_default'),
+                (int)$this->method->get_option('product_width_default'),
+                (int)$this->method->get_option('product_height_default'),
+            ];
+        }
+
+        /**
+         * Проходит по позициям заказа и считает кандидатов на итоговые length/width
+         * (по одному на позицию - наименьшая и наибольшая грань после учёта quantity),
+         * суммарный объём и суммарный вес.
+         *
+         * @param  array  $contents          Позиции заказа (WooCommerce cart contents / order items)
+         * @param  bool   $useDefaultValue   Тумблер "Габариты товара вкл/выкл" - форсировать
+         *                                   $forcedDimensions вместо реальных габаритов товара
+         * @param  array  $forcedDimensions  Сырые дефолтные габариты из настроек (length/width/height),
+         *                                   используются только если $useDefaultValue === true
+         * @param  bool   $dimensionsInMM    Единица измерения габаритов в WooCommerce - мм (true) или см (false)
+         *
+         * @return array{lengths: int[], widths: int[], heights: int[], volume: int|float, weight: float}
+         */
+        private function aggregatePackageContents(
+            array $contents,
+            bool $useDefaultValue,
+            array $forcedDimensions,
+            bool $dimensionsInMM
+        ): array {
             $totalWeight = 0;
+            $totalVolume = 0;
             $lengthList  = [];
             $widthList   = [];
             $heightList  = [];
 
-            $dimensionsInMM = get_option('woocommerce_dimension_unit') === 'mm';
-
             foreach ($contents as $productGroup) {
-                $quantity = $productGroup['quantity'];
-                $weight   = $productGroup['data']->get_weight();
+                // Дробная часть quantity сохраняется отдельно для веса - габаритные расчёты типизированы под int
+                // (strict_types=1), поэтому quantity приводится к int, а вес считаем по исходному (возможно
+                // дробному) значению.
+                $rawQuantity = (float)$productGroup['quantity'];
+                $quantity    = (int)$rawQuantity;
 
-                $dimensions = $dimensionsInMM ? [
-                    (int)((int)$productGroup['data']->get_length() / 10),
-                    (int)((int)$productGroup['data']->get_width() / 10),
-                    (int)((int)$productGroup['data']->get_height() / 10),
-                ] : [
-                    (int)$productGroup['data']->get_length(),
-                    (int)$productGroup['data']->get_width(),
-                    (int)$productGroup['data']->get_height(),
-                ];
+                if ($useDefaultValue) {
+                    $dimensions    = $forcedDimensions;
+                    $dimensions[2] *= $quantity;
 
-                sort($dimensions);
+                    $lengthList[] = $dimensions[0];
+                    $widthList[]  = $dimensions[1];
+                    $heightList[] = $dimensions[2];
+                } else {
+                    $dimensions = $this->applyQuantityToLineDimensions(
+                        $this->resolveProductDimensions($productGroup['data'], $dimensionsInMM),
+                        $quantity,
+                    );
 
-                if ($quantity > 1) {
-                    $dimensions[0] = $quantity * $dimensions[0];
-
-                    sort($dimensions);
+                    $lengthList[] = $dimensions[0];
+                    $heightList[] = $dimensions[1];
+                    $widthList[]  = $dimensions[2];
                 }
 
-                $lengthList[] = $dimensions[0];
-                $heightList[] = $dimensions[1];
-                $widthList[]  = $dimensions[2];
+                // Произведение трёх граней после поправки на quantity уже равно quantity * объём одной штуки.
+                $totalVolume += $dimensions[0] * $dimensions[1] * $dimensions[2];
 
-                $weight      = WeightConverter::applyFallback($weight);
-                $totalWeight += $quantity * $weight;
-            }
-
-            foreach (['length', 'width', 'height'] as $dimension) {
-                $predefinedDimensions[] = (int)$this->method->get_option("product_{$dimension}_default");
-            }
-
-            sort($predefinedDimensions);
-            $lengthList[] = $predefinedDimensions[0];
-            $heightList[] = $predefinedDimensions[1];
-            $widthList[]  = $predefinedDimensions[2];
-
-            rsort($lengthList);
-            rsort($widthList);
-            rsort($heightList);
-
-            $length = $lengthList[0];
-            $width  = $widthList[0];
-            $height = $heightList[0];
-
-            $useDefaultValue = $this->method->product_package_default_toggle;
-            foreach (['length', 'width', 'height'] as $dimension) {
-                if ($$dimension === 0 || $useDefaultValue) {
-                    $$dimension = (int)$this->method->get_option("product_{$dimension}_default");
-                }
+                $weight      = WeightConverter::applyFallback($productGroup['data']->get_weight());
+                $totalWeight += $rawQuantity * $weight;
             }
 
             return [
-                'length' => $length,
-                'width'  => $width,
-                'height' => $height,
-                'weight' => WeightConverter::getWeightInGrams($totalWeight),
+                'lengths' => $lengthList,
+                'widths'  => $widthList,
+                'heights' => $heightList,
+                'volume'  => $totalVolume,
+                'weight'  => $totalWeight,
             ];
+        }
+
+        /**
+         * Габариты товара в см, как они заданы в карточке товара.
+         *
+         * @param  \WC_Product  $product          Товар одной позиции заказа (`$productGroup['data']`)
+         * @param  bool         $dimensionsInMM   Единица измерения габаритов в WooCommerce - мм (true) или см (false)
+         */
+        private function resolveProductDimensions($product, bool $dimensionsInMM): array
+        {
+            if ($dimensionsInMM) {
+                return [
+                    (int)((int)$product->get_length() / 10),
+                    (int)((int)$product->get_width() / 10),
+                    (int)((int)$product->get_height() / 10),
+                ];
+            }
+
+            return [
+                (int)$product->get_length(),
+                (int)$product->get_width(),
+                (int)$product->get_height(),
+            ];
+        }
+
+        /**
+         * При quantity > 1 наименьшая грань позиции домножается на quantity
+         * (упаковки складываются в стопку по этой грани), после чего габариты
+         * позиции пересортировываются заново.
+         *
+         * @param  int[]  $dimensions  Три грани одной позиции (в произвольном порядке)
+         * @param  int    $quantity    Количество товара в этой позиции заказа
+         */
+        private function applyQuantityToLineDimensions(array $dimensions, int $quantity): array
+        {
+            sort($dimensions);
+
+            if ($quantity > 1) {
+                $dimensions[0] *= $quantity;
+
+                sort($dimensions);
+            }
+
+            return $dimensions;
+        }
+
+        /**
+         * @param  int    $length       Итоговая длина упаковки (наименьшая грань), см
+         * @param  int    $width        Итоговая ширина упаковки (наибольшая грань), см
+         * @param  float  $totalVolume  Суммарный объём всех позиций заказа, см³
+         */
+        private function calculateHeight(int $length, int $width, float $totalVolume): int
+        {
+            if ($length === 0 || $width === 0) {
+                return 0;
+            }
+
+            return (int)ceil($totalVolume / ($length * $width) * $this->getVolumeRatio());
+        }
+
+        /**
+         * k - коэффициент запаса на свободное пространство в упаковке (admin-настройка), от 1 до 1.15.
+         * k = 1 (по умолчанию) включает старый алгоритм расчёта высоты (по рангу),
+         * k > 1 - новый алгоритм (от суммарного объёма) с этим значением как множителем.
+         */
+        private function getVolumeRatio(): float
+        {
+            $ratio = (float)str_replace(
+                ',',
+                '.',
+                (string)$this->method->get_option('product_package_volume_ratio'),
+            );
+
+            return max($ratio, 1.0);
+        }
+
+        /**
+         * @param  int     $value  Рассчитанное значение по оси; 0 означает, что рассчитать не удалось
+         * @param  string  $axis   Название оси - 'length'/'width'/'height' (совпадает с суффиксом
+         *                         настройки `product_{$axis}_default`)
+         */
+        private function fallbackToDefaultDimension(int $value, string $axis): int
+        {
+            return $value !== 0 ? $value : (int)$this->method->get_option("product_{$axis}_default");
         }
     }
 }

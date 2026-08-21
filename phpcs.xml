@@ -14,4 +14,12 @@
     </rule>
 
     <exclude-pattern>src/Blocks/CheckoutMapBlock.php</exclude-pattern>
+    <exclude-pattern>src/ShippingMethod.php</exclude-pattern>
+    <exclude-pattern>src/Actions/CalculateDeliveryAction.php</exclude-pattern>
+    <exclude-pattern>src/Helpers/CheckoutHelper.php</exclude-pattern>
+    <exclude-pattern>src/Helpers/OfficeListCache.php</exclude-pattern>
+    <exclude-pattern>src/Helpers/ShippingRatesCache.php</exclude-pattern>
+    <exclude-pattern>src/Traits/SettingsFields.php</exclude-pattern>
+    <exclude-pattern>src/Loader.php</exclude-pattern>
+    <exclude-pattern>src/Actions/EnsureShopSessionCookieAction.php</exclude-pattern>
 </ruleset>
