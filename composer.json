@@ -79,6 +79,7 @@
     "exclude": [
       "blueprint",
       ".*",
+      "*.zip",
       "docker",
       "docker-compose.yml",
       "src/Frontend",

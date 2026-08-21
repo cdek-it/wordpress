@@ -5,12 +5,17 @@ vars:
 
 tasks:
   build-dev:
-    desc: "Сборка плагина → CDEKDelivery.zip"
+    desc: "Сборка плагина → cdek-delivery_<дата>.zip"
+    vars:
+      BUILD_DATE:
+        sh: date +%Y-%m-%d
     cmds:
       - "{{.YARN}}"
       - "{{.YARN}} build"
       - rm -rf node_modules
-      - composer archive -f zip --file=CDEKDelivery
+      - composer install --no-dev
+      - composer archive -f zip --file=cdek-delivery_{{.BUILD_DATE}}
+      - defer: composer install
 
   test:
     desc: "Запуск PHPUnit тестов"

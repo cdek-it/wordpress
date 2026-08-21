@@ -2,7 +2,7 @@
 .idea/
 
 # Сборка плагина, для разработки
-/CDEKDelivery.zip
+/cdek-delivery_*.zip
 
 # Локальный докер для разработки (docker-compose.yml, .env.example)
 /.env
