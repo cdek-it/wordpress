@@ -158,11 +158,9 @@ unit-tests:
     # `command -v php` всегда находит именно его, а не apk-шный php84. Покрытие ставим
     # штатным для официального PHP-образа способом - через pecl + docker-php-ext-enable.
     - apk add --no-cache --virtual .build-deps $PHPIZE_DEPS
-    # Кэш pecl-канала, вшитый в образ, может отставать от реальных релизов на pecl.php.net
-    # без обновления `pecl install pcov-X` падает с "No releases available",
-    # даже если версия реально существует в реестре.
-    - pecl channel-update pecl.php.net
-    - pecl install pcov-1.0.12
+    # REST-discovery канала pecl.php.net периодически отдаёт невалидный XML.
+    # Загрузка tarball напрямую по URL - это не задействует REST-discovery вообще.
+    - pecl install https://pecl.php.net/get/pcov-1.0.12.tgz
     - docker-php-ext-enable pcov
     - apk del .build-deps
     - php -v
