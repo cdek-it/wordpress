@@ -67,6 +67,12 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 
 == Changelog ==
 
+= 5.1 =
+* WP-324 New logic for calculating dimensions
+* WP-334 Fixed an error when retrieving rates
+* WP-337 Optimized adding products to the cart
+* WP-330 Updated instructions
+
 = 5.0 =
 * CMS-1327 Add support WordPress 7.0
 * WP-301 Fixed validation fields on order update
