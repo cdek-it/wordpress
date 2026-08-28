@@ -377,9 +377,20 @@ release:
 
     - echo "Creating GitLab Release ${RELEASE_TAG}..."
     - |
-      release-cli create --name "${RELEASE_TAG}" --tag-name "${RELEASE_TAG}" \
+      set +e
+      RELEASE_OUTPUT=$(release-cli create --name "${RELEASE_TAG}" --tag-name "${RELEASE_TAG}" \
         --description "${RELEASE_DESCRIPTION}" \
-        --assets-link "{\"name\":\"Архив\",\"filepath\":\"/archive\",\"url\":\"${ARCHIVE_URL}\", \"link_type\":\"package\"}"
+        --assets-link "{\"name\":\"Архив\",\"filepath\":\"/archive\",\"url\":\"${ARCHIVE_URL}\", \"link_type\":\"package\"}" 2>&1)
+      RELEASE_EXIT=$?
+      set -e
+      echo "${RELEASE_OUTPUT}"
+      if [ "${RELEASE_EXIT}" -ne 0 ]; then
+        if echo "${RELEASE_OUTPUT}" | grep -q "Release already exists"; then
+          echo "GitLab Release ${RELEASE_TAG} already exists, skipping."
+        else
+          exit "${RELEASE_EXIT}"
+        fi
+      fi
 
     # Migrate tag to GitHub
     - !reference [migrate-tag-to-github, script]
