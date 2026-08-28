@@ -558,6 +558,7 @@ migrate-tag-to-github:
 
     # Проверяем, есть ли такой тег в GitHub
     - |
+      export MIGRATE_TAG_SKIP=""
       if git ls-remote --exit-code --tags github "refs/tags/${MIGRATE_TAG}" >/dev/null 2>&1; then
         echo "Tag ${MIGRATE_TAG} already exists in GitHub. Checking commit..."
 
@@ -573,18 +574,19 @@ migrate-tag-to-github:
         fi
 
         echo "Tag ${MIGRATE_TAG} already exists in GitHub and points to the same commit. Nothing to migrate."
-        exit 0
+        export MIGRATE_TAG_SKIP="1"
       fi
 
-    # Проверяем, что коммит тега уже есть на GitHub
-    - git fetch github main
     - |
-      if ! git merge-base --is-ancestor "${GITLAB_TAG_COMMIT}" github/main; then
-        echo "ERROR: commit ${GITLAB_TAG_COMMIT} (tag ${MIGRATE_TAG}) not found in GitHub main. Sync branches to GitHub first."
-        exit 1
+      if [ -z "${MIGRATE_TAG_SKIP}" ]; then
+        # Проверяем, что коммит тега уже есть на GitHub
+        git fetch github main
+        if ! git merge-base --is-ancestor "${GITLAB_TAG_COMMIT}" github/main; then
+          echo "ERROR: commit ${GITLAB_TAG_COMMIT} (tag ${MIGRATE_TAG}) not found in GitHub main. Sync branches to GitHub first."
+          exit 1
+        fi
+
+        git push github "refs/tags/${MIGRATE_TAG}:refs/tags/${MIGRATE_TAG}"
+
+        echo "Tag ${MIGRATE_TAG} migrated to GitHub successfully"
       fi
-
-    # Пушим в GitHub именно существующий GitLab tag ref
-    - git push github "refs/tags/${MIGRATE_TAG}:refs/tags/${MIGRATE_TAG}"
-
-    - echo "Tag ${MIGRATE_TAG} migrated to GitHub successfully"
