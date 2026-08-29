@@ -154,10 +154,11 @@ namespace Cdek\Model {
 
             return $forShipping ? array_filter($items, static fn(WC_Order_Item_Product $e)
                 => in_array(
-                $e->get_product()->get_type(),
-                self::SHIPPING_ALLOWED_PRODUCT_TYPES,
-                true,
-            )) : $items;
+                    $e->get_product()->get_type(),
+                    self::SHIPPING_ALLOWED_PRODUCT_TYPES,
+                    true,
+                ) && !$e->get_product()->is_virtual() && !$e->get_product()->is_downloadable()
+            ) : $items;
         }
 
         final public function getShipping(): ?ShippingItem
