@@ -14,6 +14,7 @@ namespace Cdek\Validator {
     use Cdek\Exceptions\CacheException;
     use Cdek\Exceptions\External\ApiException;
     use Cdek\Exceptions\External\CoreAuthException;
+    use Cdek\Fieldsets\InternationalOrderFields;
     use Cdek\Helpers\CheckoutHelper;
     use Cdek\MetaKeys;
     use Cdek\Model\Tariff;
@@ -75,6 +76,39 @@ namespace Cdek\Validator {
                 } catch (Throwable $e) {
                     wc_add_notice($e->getMessage(), 'error');
                 }
+            }
+
+            if ($this->checkOffice) {
+                $this->validateInternationalFields();
+            }
+        }
+
+        private function validateInternationalFields(): void
+        {
+            $internationalFields = new InternationalOrderFields;
+
+            if (!$internationalFields->isApplicable()) {
+                return;
+            }
+
+            foreach ($internationalFields->getFieldsNames() as $field) {
+                if (!$internationalFields->isRequiredField($field)) {
+                    continue;
+                }
+
+                if (!empty(CheckoutHelper::getCurrentValue($field))) {
+                    continue;
+                }
+
+                $label = $internationalFields->getFieldDefinition($field)['label'] ?? $field;
+
+                wc_add_notice(
+                    sprintf(
+                        esc_html__('"%s" is required for international orders.', 'cdekdelivery'),
+                        esc_html($label),
+                    ),
+                    'error',
+                );
             }
         }
     }
