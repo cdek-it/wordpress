@@ -90,7 +90,9 @@ namespace Cdek\Helpers {
 
         public static function restoreFields(array $fields): array
         {
-            if (self::getSelectedShippingRate() === null) {
+            $hasCdekRate = self::getSelectedShippingRate() !== null;
+
+            if (!$hasCdekRate && !(new InternationalOrderFields)->isApplicable()) {
                 return $fields;
             }
 
@@ -105,13 +107,27 @@ namespace Cdek\Helpers {
                     continue;
                 }
 
+                $isInternational = $fieldsetInstance instanceof InternationalOrderFields;
+
+                if (!$hasCdekRate && !$isInternational) {
+                    continue;
+                }
+
                 foreach ($fieldsetInstance->getFieldsNames() as $field) {
                     if (empty($fields['billing'][$field])) {
                         $fields['billing'][$field] = empty($originalFields[$field]) ?
                             $fieldsetInstance->getFieldDefinition($field) : $originalFields[$field];
                     }
 
-                    if ($fieldsetInstance->isRequiredField($field)) {
+                    if ($isInternational) {
+                        $fields['billing'][$field]['class'][] = 'cdek-international-field';
+
+                        if (!$hasCdekRate) {
+                            $fields['billing'][$field]['class'][] = 'cdek-international-field-hidden';
+                        }
+                    }
+
+                    if ($fieldsetInstance->isRequiredField($field) && ($hasCdekRate || !$isInternational)) {
                         $fields['billing'][$field]['required'] = true;
                     }
                 }

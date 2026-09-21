@@ -72,6 +72,39 @@ const onChoose = ( _type, _tariff, address ) => {
 	}
 };
 
+const isCdekShippingSelected = () => {
+	const methods = $(
+		'#shipping_method input[name^="shipping_method"]'
+	).toArray();
+
+	if ( ! methods.length ) {
+		return false;
+	}
+
+	const checked = methods.filter(
+		( input ) => input.type !== 'radio' || input.checked
+	);
+
+	return checked.some(
+		( input ) => ( input.value || '' ).indexOf( 'official_cdek' ) === 0
+	);
+};
+
+const toggleInternationalFields = () => {
+	const isCdekSelected = isCdekShippingSelected();
+	const fields = $( '.cdek-international-field' );
+
+	fields.toggleClass( 'cdek-international-field-hidden', ! isCdekSelected );
+	fields.toggleClass( 'validate-required', isCdekSelected );
+
+	if ( ! isCdekSelected ) {
+		fields
+			.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field' )
+			.find( '.input-text, select' )
+			.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
+	}
+};
+
 const debouncedCheckoutUpdate = () => {
 	clearTimeout( checkoutUpdateTimer );
 	checkoutUpdateTimer = setTimeout( () => {
@@ -132,6 +165,8 @@ $( document.body )
 		debouncedCheckoutUpdate
 	)
 	.on( 'updated_checkout', () => {
+		toggleInternationalFields();
+
 		const targetNode = document.querySelector( '.open-pvz-btn' );
 
 		if ( widget !== null ) {
