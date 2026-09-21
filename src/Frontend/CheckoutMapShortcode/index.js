@@ -99,9 +99,13 @@ const toggleInternationalFields = () => {
 
 	if ( ! isCdekSelected ) {
 		fields
-			.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field' )
+			.removeClass(
+				'woocommerce-invalid woocommerce-invalid-required-field'
+			)
 			.find( '.input-text, select' )
-			.removeClass( 'woocommerce-invalid woocommerce-invalid-required-field' );
+			.removeClass(
+				'woocommerce-invalid woocommerce-invalid-required-field'
+			);
 	}
 };
 
