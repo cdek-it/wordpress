@@ -104,6 +104,7 @@ namespace Cdek\Validator {
 
                 wc_add_notice(
                     sprintf(
+                        /* translators: %s: name of the required field, e.g. "Passport number" */
                         esc_html__('"%s" is required for international orders.', 'cdekdelivery'),
                         esc_html($label),
                     ),

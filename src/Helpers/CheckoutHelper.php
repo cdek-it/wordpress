@@ -129,6 +129,8 @@ namespace Cdek\Helpers {
 
                     if ($fieldsetInstance->isRequiredField($field) && ($hasCdekRate || !$isInternational)) {
                         $fields['billing'][$field]['required'] = true;
+                    } elseif ($isInternational && !$hasCdekRate) {
+                        $fields['billing'][$field]['required'] = false;
                     }
                 }
             }

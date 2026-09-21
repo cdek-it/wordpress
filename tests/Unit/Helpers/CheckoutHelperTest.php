@@ -322,6 +322,13 @@ final class CheckoutHelperTest extends TestCase
         $wc->cart = null;
         Functions\when('WC')->justReturn($wc);
 
+        $methodInstance                     = Mockery::mock();
+        $methodInstance->international_mode = false;
+
+        Mockery::mock('alias:' . ShippingMethod::class)
+               ->shouldReceive('factory')
+               ->andReturn($methodInstance);
+
         $fields = ['billing' => ['some_existing_field' => ['x' => 1]]];
 
         self::assertSame($fields, CheckoutHelper::restoreFields($fields));
@@ -378,11 +385,36 @@ final class CheckoutHelperTest extends TestCase
         $result = CheckoutHelper::restoreFields(['billing' => []]);
 
         $international = new InternationalOrderFields();
+        $expected      = $international->getFieldDefinition('passport_series');
+        $expected['class'][] = 'cdek-international-field';
 
-        self::assertSame(
-            $international->getFieldDefinition('passport_series'),
-            $result['billing']['passport_series'],
-        );
+        self::assertSame($expected, $result['billing']['passport_series']);
+    }
+
+    public function testRestoreFieldsAddsHiddenInternationalFieldsWhenNoRateSelectedYet(): void
+    {
+        $wc       = Mockery::mock();
+        $wc->cart = null;
+        Functions\when('WC')->justReturn($wc);
+
+        $methodInstance                     = Mockery::mock();
+        $methodInstance->international_mode = true;
+
+        Mockery::mock('alias:' . ShippingMethod::class)
+               ->shouldReceive('factory')
+               ->andReturn($methodInstance);
+
+        $checkout = Mockery::mock();
+        $checkout->shouldReceive('get_checkout_fields')->with('billing')->andReturn([]);
+        $wc->shouldReceive('checkout')->andReturn($checkout);
+
+        $result = CheckoutHelper::restoreFields(['billing' => []]);
+
+        $field = $result['billing']['passport_series'];
+
+        self::assertContains('cdek-international-field', $field['class']);
+        self::assertContains('cdek-international-field-hidden', $field['class']);
+        self::assertFalse($field['required']);
     }
 
     public function testIsCheckoutRequestReturnsFalseByDefault(): void
