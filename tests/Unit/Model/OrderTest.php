@@ -317,4 +317,56 @@ final class OrderTest extends TestCase
             'number <- order_number' => ['order_number', 'number', 'LEGACY-NUM-1'],
         ];
     }
+
+    public function testGetPrefersShippingAddressByDefault(): void
+    {
+        Functions\when('wc_ship_to_billing_address_only')->justReturn(false);
+
+        $order = $this->mockWcOrder();
+        $order->shouldReceive('get_shipping_city')->andReturn('Shipping City');
+        $order->shouldReceive('get_billing_city')->andReturn('Billing City');
+
+        $model = new Order($order);
+
+        self::assertSame('Shipping City', $model->city);
+    }
+
+    public function testGetFallsBackToBillingWhenShippingEmptyByDefault(): void
+    {
+        Functions\when('wc_ship_to_billing_address_only')->justReturn(false);
+
+        $order = $this->mockWcOrder();
+        $order->shouldReceive('get_shipping_city')->andReturn('');
+        $order->shouldReceive('get_billing_city')->andReturn('Billing City');
+
+        $model = new Order($order);
+
+        self::assertSame('Billing City', $model->city);
+    }
+
+    public function testGetPrefersBillingAddressWhenForcedToBillingOnly(): void
+    {
+        Functions\when('wc_ship_to_billing_address_only')->justReturn(true);
+
+        $order = $this->mockWcOrder();
+        $order->shouldReceive('get_billing_city')->andReturn('Fresh Billing City');
+        $order->shouldReceive('get_shipping_city')->andReturn('Stale Shipping City');
+
+        $model = new Order($order);
+
+        self::assertSame('Fresh Billing City', $model->city);
+    }
+
+    public function testGetFallsBackToShippingWhenForcedToBillingOnlyButBillingEmpty(): void
+    {
+        Functions\when('wc_ship_to_billing_address_only')->justReturn(true);
+
+        $order = $this->mockWcOrder();
+        $order->shouldReceive('get_billing_city')->andReturn('');
+        $order->shouldReceive('get_shipping_city')->andReturn('Fallback Shipping City');
+
+        $model = new Order($order);
+
+        self::assertSame('Fallback Shipping City', $model->city);
+    }
 }
