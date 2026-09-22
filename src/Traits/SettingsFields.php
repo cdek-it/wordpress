@@ -36,11 +36,14 @@ namespace Cdek\Traits {
             if (!self::$settingsMutex &&
                 isset($_GET['tab'], $_GET['section']) &&
                 $_GET['tab'] === 'shipping' &&
-                $_GET['section'] = $this->id) {
+                $_GET['section'] === $this->id
+            ) {
                 self::$settingsMutex = true;
 
-                $availableGateways
-                    = array_map(static fn($g) => $g->title, WC()->payment_gateways()->payment_gateways());
+                $availableGateways = array_map(
+                    static fn($g) => sprintf('%s (%s)', $g->title, $g->id),
+                    WC()->payment_gateways()->payment_gateways(),
+                );
 
                 self::$settingsMutex = false;
             } else {
