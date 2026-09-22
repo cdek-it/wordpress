@@ -57,10 +57,7 @@ namespace Cdek\Helpers {
 
             $checkout = WC()->checkout();
 
-            // При "Принудительная доставка по платёжному адресу клиента"
-            // (woocommerce_ship_to_destination = billing_only) форма не показывает
-            // отдельные shipping_*-поля - значения там могут быть устаревшими из
-            // прошлой сессии/заказа, поэтому в этом режиме billing_* приоритетнее.
+            // При "Принудительная доставка по платёжному адресу клиента" billing_* приоритетнее.
             $primaryField   = wc_ship_to_billing_address_only() ? "billing_$valueName" : "shipping_$valueName";
             $secondaryField = wc_ship_to_billing_address_only() ? "shipping_$valueName" : "billing_$valueName";
 
