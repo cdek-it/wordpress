@@ -100,6 +100,17 @@ final class CheckoutValidatorTest extends TestCase
         (new CheckoutValidator())();
     }
 
+    public function testInvokeDoesNotRequireInternationalFieldsWhenCdekRateIsNotSelected(): void
+    {
+        $this->mockInternationalMode(true);
+        $this->mockCheckoutHelper(null, ['country' => 'KZ']);
+
+        Functions\expect('wc_add_notice')->never();
+        $this->expectNotToPerformAssertions();
+
+        (new CheckoutValidator())();
+    }
+
     public function testInvokeAddsNoticeWhenOfficeModeAndOfficeNotSelected(): void
     {
         $this->mockInternationalMode(false);
