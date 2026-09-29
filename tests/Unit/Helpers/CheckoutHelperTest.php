@@ -295,13 +295,17 @@ final class CheckoutHelperTest extends TestCase
         self::assertFalse(CheckoutHelper::isShippingRateSuitable($rate));
     }
 
-    private function mockSelectedRateAvailable(array $originalFields, bool $internationalMode): void
-    {
+    private function mockSelectedRateAvailable(
+        array $originalFields,
+        bool $internationalMode,
+        string $country = 'KZ'
+    ): void {
         $rate = Mockery::mock('WC_Shipping_Rate');
         $rate->shouldReceive('get_method_id')->andReturn(Config::DELIVERY_NAME);
 
         $checkout = Mockery::mock();
         $checkout->shouldReceive('get_checkout_fields')->with('billing')->andReturn($originalFields);
+        $checkout->shouldReceive('get_value')->andReturn($country);
 
         $wc       = Mockery::mock();
         $wc->cart = new CartWithRealShippingMethodsDouble([$rate]);
@@ -391,6 +395,15 @@ final class CheckoutHelperTest extends TestCase
         self::assertSame($expected, $result['billing']['passport_series']);
     }
 
+    public function testRestoreFieldsSkipsInternationalFieldsWhenDestinationIsRussia(): void
+    {
+        $this->mockSelectedRateAvailable([], true, 'RU');
+
+        $result = CheckoutHelper::restoreFields(['billing' => []]);
+
+        self::assertArrayNotHasKey('passport_series', $result['billing']);
+    }
+
     public function testRestoreFieldsAddsHiddenInternationalFieldsWhenNoRateSelectedYet(): void
     {
         $wc       = Mockery::mock();
@@ -406,6 +419,7 @@ final class CheckoutHelperTest extends TestCase
 
         $checkout = Mockery::mock();
         $checkout->shouldReceive('get_checkout_fields')->with('billing')->andReturn([]);
+        $checkout->shouldReceive('get_value')->andReturn('KZ');
         $wc->shouldReceive('checkout')->andReturn($checkout);
 
         $result = CheckoutHelper::restoreFields(['billing' => []]);

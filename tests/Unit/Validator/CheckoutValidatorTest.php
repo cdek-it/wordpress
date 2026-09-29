@@ -432,6 +432,27 @@ final class CheckoutValidatorTest extends TestCase
         (new CheckoutValidator())();
     }
 
+    public function testInvokeDoesNotRequireInternationalFieldsWhenDestinationIsRussia(): void
+    {
+        $this->mockInternationalMode(true);
+
+        $officeMode = Tariff::listOfficeDeliveryModes()[0];
+
+        $this->mockCheckoutHelper(
+            $this->mockRate([
+                MetaKeys::TARIFF_MODE => $officeMode,
+                MetaKeys::OFFICE_CODE => 'MSK123',
+            ]),
+            ['phone' => '+79991234567', 'country' => 'RU'],
+        );
+        $this->mockValidatedPhone('+79991234567', 'RU');
+
+        Functions\expect('wc_add_notice')->never();
+        $this->expectNotToPerformAssertions();
+
+        (new CheckoutValidator())();
+    }
+
     public function testInvokeSkipsInternationalFieldsValidationWhenCheckOfficeDisabled(): void
     {
         $this->mockInternationalMode(true);
