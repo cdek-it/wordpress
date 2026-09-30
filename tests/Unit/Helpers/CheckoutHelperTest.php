@@ -54,6 +54,7 @@ final class CheckoutHelperTest extends TestCase
         Functions\when('wp_strip_all_tags')->returnArg();
         Functions\when('wp_unslash')->returnArg();
         Functions\when('esc_html__')->returnArg();
+        Functions\when('wc_ship_to_billing_address_only')->justReturn(false);
     }
 
     private function mockWc(?array $session, ?array $checkoutValues, ?array $customer): void
@@ -120,6 +121,32 @@ final class CheckoutHelperTest extends TestCase
         );
 
         self::assertSame('From Billing', CheckoutHelper::getCurrentValue('city'));
+    }
+
+    public function testGetCurrentValuePrefersBillingOverShippingWhenForcedToBillingOnly(): void
+    {
+        Functions\when('wc_ship_to_billing_address_only')->justReturn(true);
+
+        $this->mockWc(
+            ['value' => null],
+            ['shipping_city' => 'Stale Shipping', 'billing_city' => 'Fresh Billing'],
+            null,
+        );
+
+        self::assertSame('Fresh Billing', CheckoutHelper::getCurrentValue('city'));
+    }
+
+    public function testGetCurrentValueFallsBackToShippingWhenForcedToBillingOnlyButBillingEmpty(): void
+    {
+        Functions\when('wc_ship_to_billing_address_only')->justReturn(true);
+
+        $this->mockWc(
+            ['value' => null],
+            ['shipping_city' => 'From Shipping', 'billing_city' => ''],
+            null,
+        );
+
+        self::assertSame('From Shipping', CheckoutHelper::getCurrentValue('city'));
     }
 
     public function testGetCurrentValueReturnsExtensionsRequestValueWhenCheckoutFieldsEmpty(): void

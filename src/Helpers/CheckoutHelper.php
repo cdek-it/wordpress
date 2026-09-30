@@ -57,14 +57,18 @@ namespace Cdek\Helpers {
 
             $checkout = WC()->checkout();
 
-            $shippingValue = $checkout->get_value("shipping_$valueName");
-            if (!empty($shippingValue)) {
-                return $shippingValue;
+            // При "Принудительная доставка по платёжному адресу клиента" billing_* приоритетнее.
+            $primaryField   = wc_ship_to_billing_address_only() ? "billing_$valueName" : "shipping_$valueName";
+            $secondaryField = wc_ship_to_billing_address_only() ? "shipping_$valueName" : "billing_$valueName";
+
+            $primaryValue = $checkout->get_value($primaryField);
+            if (!empty($primaryValue)) {
+                return $primaryValue;
             }
 
-            $billingValue = $checkout->get_value("billing_$valueName");
-            if (!empty($billingValue)) {
-                return $billingValue;
+            $secondaryValue = $checkout->get_value($secondaryField);
+            if (!empty($secondaryValue)) {
+                return $secondaryValue;
             }
 
             if (!empty($_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName])) {
