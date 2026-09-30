@@ -10,13 +10,21 @@ namespace {
 namespace Cdek\Fieldsets {
 
     use Cdek\Contracts\FieldsetContract;
+    use Cdek\Helpers\CheckoutHelper;
     use Cdek\ShippingMethod;
 
     class InternationalOrderFields extends FieldsetContract
     {
+        private const DOMESTIC_COUNTRY_CODE = 'RU';
+
         final public function isApplicable(): bool
         {
-            return ShippingMethod::factory()->international_mode;
+            if (!ShippingMethod::factory()->international_mode) {
+                return false;
+            }
+
+            // Для доставки внутри РФ паспортные поля не нужны
+            return strtoupper((string)CheckoutHelper::getCurrentValue('country')) !== self::DOMESTIC_COUNTRY_CODE;
         }
 
         final protected function getFields(): array
