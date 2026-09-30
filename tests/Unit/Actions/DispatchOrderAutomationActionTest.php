@@ -9,8 +9,6 @@ use Cdek\Actions\DispatchOrderAutomationAction;
 use Cdek\Config;
 use Cdek\CoreApi;
 use Cdek\Helpers\ScheduleLocker;
-use Cdek\Model\Order;
-use Cdek\Model\ShippingItem;
 use Cdek\Note;
 use Cdek\ShippingMethod;
 use Cdek\Tests\TestCase;
@@ -18,11 +16,6 @@ use Exception;
 use Mockery;
 use Mockery\MockInterface;
 
-/**
- * `Order` мокается через `overload:` (как и в OrderCreateActionTest - смешивать
- * режимы для одного класса между файлами нельзя, `overload:`/`alias:` конфликтуют
- * при совместном запуске сьюта).
- */
 final class DispatchOrderAutomationActionTest extends TestCase
 {
     protected function setUp(): void
@@ -33,26 +26,39 @@ final class DispatchOrderAutomationActionTest extends TestCase
     }
 
     /**
-     * @return array{0: DispatchOrderAutomationAction, 1: MockInterface, 2: MockInterface, 3: MockInterface}
+     * @return array{0: DispatchOrderAutomationAction, 1: MockInterface, 2: MockInterface}
      */
     private function buildActionWithMocks(
         bool $isCancelled = false,
-        bool $lockAcquired = true
+        bool $lockAcquired = true,
+        array $awaitingGateways = [],
+        ?string $paymentMethod = null,
+        bool $isPaid = true,
+        bool $hasShippingItem = true
     ): array {
-        $shippingMethod                         = Mockery::mock('alias:' . ShippingMethod::class);
+        $shippingMethod = Mockery::mock('alias:' . ShippingMethod::class);
+        $shippingMethod->shouldReceive('factory')->andReturn($shippingMethod);
         $shippingMethod->automate_orders        = true;
-        $shippingMethod->automate_wait_gateways = [];
+        $shippingMethod->automate_wait_gateways = $awaitingGateways;
 
-        $shipping = Mockery::mock('alias:' . ShippingItem::class);
-        $shipping->shouldReceive('getMethod')->andReturn($shippingMethod);
+        $shippingWcItems = [];
 
-        $order = Mockery::mock('overload:' . Order::class);
-        $order->shouldReceive('getShipping')->andReturn($shipping);
-        $order->shouldReceive('isCancelled')->andReturn($isCancelled);
-        // isPaid() принципиально не влияет на исход здесь - см. класс-докблок,
-        // payment_method всегда читается как null, поэтому ветка ожидания оплаты
-        // по конкретному шлюзу никогда не блокирует выполнение в этих тестах.
-        $order->shouldReceive('isPaid')->andReturn(true);
+        if ($hasShippingItem) {
+            $wcShippingItem = Mockery::mock('WC_Order_Item_Shipping');
+            $wcShippingItem->shouldReceive('get_method_id')->andReturn(Config::DELIVERY_NAME);
+            $wcShippingItem->shouldReceive('get_data')->andReturn(['instance_id' => 5]);
+            $wcShippingItem->shouldReceive('get_meta_data')->andReturn([]);
+
+            $shippingWcItems[] = $wcShippingItem;
+        }
+
+        $wcOrder = Mockery::mock('WC_Order');
+        $wcOrder->shouldReceive('get_meta')->with('order_data')->andReturn([]);
+        $wcOrder->shouldReceive('get_shipping_methods')->andReturn($shippingWcItems);
+        $wcOrder->shouldReceive('get_payment_method')->andReturn($paymentMethod);
+        $wcOrder->shouldReceive('is_paid')->andReturn($isPaid);
+        $wcOrder->shouldReceive('has_status')->with('cancelled')->andReturn($isCancelled);
+        $wcOrder->shouldReceive('get_id')->andReturn(123);
 
         $scheduleLocker = Mockery::mock('alias:' . ScheduleLocker::class);
         $scheduleLocker->shouldReceive('instance')->andReturn($scheduleLocker);
@@ -60,80 +66,73 @@ final class DispatchOrderAutomationActionTest extends TestCase
 
         $action = new DispatchOrderAutomationAction();
 
-        return [$action, $order, $shipping, $shippingMethod];
+        return [$action, $wcOrder, $shippingMethod];
     }
 
     public function testInvokeDoesNothingWhenOrderHasNoShipping(): void
     {
-        // Ни ScheduleLocker, ни CoreApi не должны быть замоканы - если экшен всё
-        // же дойдёт до них, немокнутый вызов упадёт с BadMethodCallException.
-        $order = Mockery::mock('overload:' . Order::class);
-        $order->shouldReceive('getShipping')->andReturn(null);
+        [$action, $wcOrder] = $this->buildActionWithMocks(false, true, [], null, true, false);
 
-        @(new DispatchOrderAutomationAction())(123);
+        @$action(123, null, $wcOrder);
 
         self::assertTrue(true);
     }
 
     public function testInvokeDoesNothingWhenAutomationIsDisabledForMethod(): void
     {
-        [$action, , , $shippingMethod] = $this->buildActionWithMocks();
+        [$action, $wcOrder, $shippingMethod] = $this->buildActionWithMocks();
         $shippingMethod->automate_orders = false;
 
-        @$action(123);
+        @$action(123, null, $wcOrder);
 
         self::assertTrue(true);
     }
 
     public function testInvokeDoesNothingWhenOrderIsCancelled(): void
     {
-        [$action] = $this->buildActionWithMocks(true);
+        [$action, $wcOrder] = $this->buildActionWithMocks(true);
 
-        @$action(123);
+        @$action(123, null, $wcOrder);
 
         self::assertTrue(true);
     }
 
     public function testInvokeDoesNothingWhenScheduleLockCannotBeAcquired(): void
     {
-        [$action] = $this->buildActionWithMocks(false, false);
+        [$action, $wcOrder] = $this->buildActionWithMocks(false, false);
 
-        // CoreApi не должен быть замокан вовсе - если экшен всё же дойдёт до него,
-        // немокнутый вызов упадёт сам.
-        @$action(123);
+        @$action(123, null, $wcOrder);
 
         self::assertTrue(true);
     }
 
     public function testInvokeProceedsWhenNoGatewaysAwaitPayment(): void
     {
-        [$action] = $this->buildActionWithMocks();
+        [$action, $wcOrder] = $this->buildActionWithMocks();
 
         Mockery::mock('overload:' . CoreApi::class)
             ->shouldReceive('orderGet')->once()->andReturn(null);
 
-        @$action(123);
+        @$action(123, null, $wcOrder);
 
         self::assertTrue(true);
     }
 
     public function testInvokeSkipsSchedulingWhenOrderAlreadyExistsRemotely(): void
     {
-        [$action] = $this->buildActionWithMocks();
+        [$action, $wcOrder] = $this->buildActionWithMocks();
 
         Mockery::mock('overload:' . CoreApi::class)
             ->shouldReceive('orderGet')->once()->andReturn(null);
 
-        // Ни as_schedule_single_action, ни Note::send не должны понадобиться -
-        // если экшен всё же зайдёт в catch-блок, немокнутый вызов упадёт сам.
-        @$action(123);
+        @$action(123, null, $wcOrder);
 
         self::assertTrue(true);
     }
 
     public function testInvokeSchedulesRetryAndSendsNoteWhenOrderGetThrows(): void
     {
-        [$action] = $this->buildActionWithMocks();
+        [$action, $wcOrder] = $this->buildActionWithMocks();
 
         Mockery::mock('overload:' . CoreApi::class)
             ->shouldReceive('orderGet')->once()->andThrow(new Exception('not found'));
@@ -153,25 +152,73 @@ final class DispatchOrderAutomationActionTest extends TestCase
             ->once()
             ->with(Mockery::any(), 'Created order automation task');
 
-        @$action(123);
+        @$action(123, null, $wcOrder);
 
         self::assertTrue(true);
     }
 
     public function testInvokeSchedulesRetryButSkipsNoteWhenSchedulingFails(): void
     {
-        [$action] = $this->buildActionWithMocks();
+        [$action, $wcOrder] = $this->buildActionWithMocks();
 
         Mockery::mock('overload:' . CoreApi::class)
             ->shouldReceive('orderGet')->once()->andThrow(new Exception('not found'));
 
         Functions\expect('as_schedule_single_action')->once()->andReturn(false);
-
-        // Note::send() не должен вызываться - если всё же вызовется, немокнутый
-        // alias упадёт с BadMethodCallException.
         Mockery::mock('alias:' . Note::class);
 
-        @$action(123);
+        @$action(123, null, $wcOrder);
+
+        self::assertTrue(true);
+    }
+
+    public function testInvokeDoesNothingWhenPaymentViaAwaitedGatewayIsNotYetPaid(): void
+    {
+        [$action, $wcOrder] = $this->buildActionWithMocks(
+            false,
+            true,
+            ['bank_card'],
+            'bank_card',
+            false,
+        );
+
+        @$action(123, null, $wcOrder);
+
+        self::assertTrue(true);
+    }
+
+    public function testInvokeProceedsWhenPaymentViaAwaitedGatewayIsAlreadyPaid(): void
+    {
+        [$action, $wcOrder] = $this->buildActionWithMocks(
+            false,
+            true,
+            ['bank_card'],
+            'bank_card',
+            true,
+        );
+
+        Mockery::mock('overload:' . CoreApi::class)
+            ->shouldReceive('orderGet')->once()->andReturn(null);
+
+        @$action(123, null, $wcOrder);
+
+        self::assertTrue(true);
+    }
+
+    public function testInvokeProceedsWhenPaymentMethodIsNotAmongAwaitedGatewaysEvenIfUnpaid(): void
+    {
+        [$action, $wcOrder] = $this->buildActionWithMocks(
+            false,
+            true,
+            ['bank_card'],
+            'cod',
+            false,
+        );
+
+        Mockery::mock('overload:' . CoreApi::class)
+            ->shouldReceive('orderGet')->once()->andReturn(null);
+
+        @$action(123, null, $wcOrder);
 
         self::assertTrue(true);
     }
