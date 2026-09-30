@@ -16,6 +16,10 @@ use Exception;
 use Mockery;
 use Mockery\MockInterface;
 
+/**
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
+ */
 final class DispatchOrderAutomationActionTest extends TestCase
 {
     protected function setUp(): void
