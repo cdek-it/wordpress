@@ -227,3 +227,4 @@ final class DispatchOrderAutomationActionTest extends TestCase
         self::assertTrue(true);
     }
 }
+
