@@ -150,7 +150,7 @@ static-analysis:
     - apk add --no-cache composer php85-ctype php85-dom php85-simplexml php85-tokenizer php85-xml php85-xmlwriter php85-xmlreader
     - ln -sf "$(command -v php85)" /usr/bin/php
   script:
-    - vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+    - vendor/bin/phpstan analyse --no-progress --memory-limit=1536M
 
 unit-tests:
   image: docker-proxy.cdek.ru/php:8.2-alpine
