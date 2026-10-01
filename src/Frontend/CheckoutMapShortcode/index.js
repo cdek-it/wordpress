@@ -9,6 +9,7 @@ const billingCityInput = $( '#billing_city' );
 const shippingCityInput = $( '#shipping_city' );
 const buttonNormalSize = 160;
 const smallFontAttribute = 'aria-small';
+const domesticCountryCode = 'RU';
 
 let needChange;
 let isNormalSize;
@@ -90,14 +91,24 @@ const isCdekShippingSelected = () => {
 	);
 };
 
+const isDomesticDestination = () => {
+	const countryInput = $( '#ship-to-different-address-checkbox' ).is(
+		':checked'
+	)
+		? $( '#shipping_country' )
+		: $( '#billing_country' );
+
+	return ( countryInput.val() || '' ).toUpperCase() === domesticCountryCode;
+};
+
 const toggleInternationalFields = () => {
-	const isCdekSelected = isCdekShippingSelected();
+	const isApplicable = isCdekShippingSelected() && ! isDomesticDestination();
 	const fields = $( '.cdek-international-field' );
 
-	fields.toggleClass( 'cdek-international-field-hidden', ! isCdekSelected );
-	fields.toggleClass( 'validate-required', isCdekSelected );
+	fields.toggleClass( 'cdek-international-field-hidden', ! isApplicable );
+	fields.toggleClass( 'validate-required', isApplicable );
 
-	if ( ! isCdekSelected ) {
+	if ( ! isApplicable ) {
 		fields
 			.removeClass(
 				'woocommerce-invalid woocommerce-invalid-required-field'
@@ -167,6 +178,11 @@ $( document.body )
 		'input',
 		'#billing_city, #billing_postcode, #shipping_city, #shipping_postcode, input[name=payment_method]',
 		debouncedCheckoutUpdate
+	)
+	.on(
+		'change',
+		'#billing_country, #shipping_country, #ship-to-different-address-checkbox',
+		toggleInternationalFields
 	)
 	.on( 'updated_checkout', () => {
 		toggleInternationalFields();
