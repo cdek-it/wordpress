@@ -422,16 +422,18 @@ final class CheckoutHelperTest extends TestCase
         self::assertSame($expected, $result['billing']['passport_series']);
     }
 
-    public function testRestoreFieldsSkipsInternationalFieldsWhenDestinationIsRussia(): void
+    public function testRestoreFieldsRendersInternationalFieldsHiddenWhenDestinationIsRussia(): void
     {
         $this->mockSelectedRateAvailable([], true, 'RU');
 
         $result = CheckoutHelper::restoreFields(['billing' => []]);
 
-        self::assertArrayNotHasKey('passport_series', $result['billing']);
+        self::assertContains('cdek-international-field', $result['billing']['passport_series']['class']);
+        self::assertContains('cdek-international-field-hidden', $result['billing']['passport_series']['class']);
+        self::assertFalse($result['billing']['passport_series']['required']);
     }
 
-    public function testRestoreFieldsAddsHiddenInternationalFieldsWhenNoRateSelectedYet(): void
+    public function testRestoreFieldsAddsVisibleNonRequiredInternationalFieldsWhenNoRateSelectedYet(): void
     {
         $wc       = Mockery::mock();
         $wc->cart = null;
@@ -454,7 +456,7 @@ final class CheckoutHelperTest extends TestCase
         $field = $result['billing']['passport_series'];
 
         self::assertContains('cdek-international-field', $field['class']);
-        self::assertContains('cdek-international-field-hidden', $field['class']);
+        self::assertNotContains('cdek-international-field-hidden', $field['class']);
         self::assertFalse($field['required']);
     }
 

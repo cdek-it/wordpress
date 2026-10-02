@@ -96,7 +96,7 @@ namespace Cdek\Helpers {
         {
             $hasCdekRate = self::getSelectedShippingRate() !== null;
 
-            if (!$hasCdekRate && !(new InternationalOrderFields)->isApplicable()) {
+            if (!$hasCdekRate && !(new InternationalOrderFields)->isModeEnabled()) {
                 return $fields;
             }
 
@@ -107,11 +107,13 @@ namespace Cdek\Helpers {
 
                 assert($fieldsetInstance instanceof FieldsetContract);
 
-                if (!$fieldsetInstance->isApplicable()) {
+                $isInternational = $fieldsetInstance instanceof InternationalOrderFields;
+
+                if ($isInternational ? !$fieldsetInstance->isModeEnabled() : !$fieldsetInstance->isApplicable()) {
                     continue;
                 }
 
-                $isInternational = $fieldsetInstance instanceof InternationalOrderFields;
+                $hideInternational = $isInternational && $fieldsetInstance->isDomestic();
 
                 if (!$hasCdekRate && !$isInternational) {
                     continue;
@@ -126,14 +128,15 @@ namespace Cdek\Helpers {
                     if ($isInternational) {
                         $fields['billing'][$field]['class'][] = 'cdek-international-field';
 
-                        if (!$hasCdekRate) {
+                        if ($hideInternational) {
                             $fields['billing'][$field]['class'][] = 'cdek-international-field-hidden';
                         }
                     }
 
-                    if ($fieldsetInstance->isRequiredField($field) && ($hasCdekRate || !$isInternational)) {
+                    if ($fieldsetInstance->isRequiredField($field) && !$hideInternational
+                        && ($hasCdekRate || !$isInternational)) {
                         $fields['billing'][$field]['required'] = true;
-                    } elseif ($isInternational && !$hasCdekRate) {
+                    } elseif ($isInternational && ($hideInternational || !$hasCdekRate)) {
                         $fields['billing'][$field]['required'] = false;
                     }
                 }

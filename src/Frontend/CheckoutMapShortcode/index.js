@@ -102,13 +102,14 @@ const isDomesticDestination = () => {
 };
 
 const toggleInternationalFields = () => {
-	const isApplicable = isCdekShippingSelected() && ! isDomesticDestination();
+	const isVisible = ! isDomesticDestination();
+	const isRequired = isVisible && isCdekShippingSelected();
 	const fields = $( '.cdek-international-field' );
 
-	fields.toggleClass( 'cdek-international-field-hidden', ! isApplicable );
-	fields.toggleClass( 'validate-required', isApplicable );
+	fields.toggleClass( 'cdek-international-field-hidden', ! isVisible );
+	fields.toggleClass( 'validate-required', isRequired );
 
-	if ( ! isApplicable ) {
+	if ( ! isRequired ) {
 		fields
 			.removeClass(
 				'woocommerce-invalid woocommerce-invalid-required-field'

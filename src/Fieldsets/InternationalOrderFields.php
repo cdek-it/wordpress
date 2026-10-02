@@ -17,14 +17,20 @@ namespace Cdek\Fieldsets {
     {
         private const DOMESTIC_COUNTRY_CODE = 'RU';
 
+        final public function isModeEnabled(): bool
+        {
+            return (bool)ShippingMethod::factory()->international_mode;
+        }
+
+        final public function isDomestic(): bool
+        {
+            return strtoupper((string)CheckoutHelper::getCurrentValue('country')) === self::DOMESTIC_COUNTRY_CODE;
+        }
+
         final public function isApplicable(): bool
         {
-            if (!ShippingMethod::factory()->international_mode) {
-                return false;
-            }
-
             // Для доставки внутри РФ паспортные поля не нужны
-            return strtoupper((string)CheckoutHelper::getCurrentValue('country')) !== self::DOMESTIC_COUNTRY_CODE;
+            return $this->isModeEnabled() && !$this->isDomestic();
         }
 
         final protected function getFields(): array
