@@ -11,7 +11,7 @@ metadata:
     - cms
   links:
     - title: Gitlab Project
-      url: https://gitcode.cdek.tech/cdek-it/backend/ecom-integrations-group/cms/wordpress
+      url: https://gitcode.cdek.tech/cdek-it/backend/ecom-integrations-group/cms/plugins/wordpress
       icon: sourceCode
 spec:
   system: ecom-platform
