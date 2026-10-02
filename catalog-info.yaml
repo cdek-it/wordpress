@@ -1,0 +1,32 @@
+---
+apiVersion: backstage.io/v1beta1
+kind: Component
+metadata:
+  name: wordpress
+  description: Модуль CDEK Delivery Shipping для WordPress (WooCommerce)
+  tags:
+    - php
+    - wordpress
+    - woocommerce
+    - cms
+  links:
+    - title: Gitlab Project
+      url: https://gitcode.cdek.tech/cdek-it/backend/ecom-integrations-group/cms/wordpress
+      icon: sourceCode
+spec:
+  system: ecom-platform
+  owner: 'группа_интеграций_с_сайтами(cc33a9e8-68f5-43ce-b79a-e35e675ac2c9)'
+  type: library
+  lifecycle: production
+  responsibleDevelopers:
+    - user:g.perman
+    - user:a.ustiuzhaninov
+  responsibleDevOps:
+    - user:duty-team/DevOps_Team_Sunyaykina
+  responsibleManager:
+    - user:zyryanov.av
+  responsibleTesters:
+    - user:e.skalozubova
+  responsibleSupportEngineers:
+    - user:melnikova.vo
+    - user:d.novozhilova
