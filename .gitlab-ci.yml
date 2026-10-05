@@ -386,7 +386,7 @@ release:
         echo "ERROR: Nexus search request failed: ${SEARCH_URL}"
         exit 1
       }
-      export ARCHIVE_URL=$(echo "${SEARCH_RESULT}" | jq -r '[.items[] | select(.downloadUrl | endswith(".zip"))][0].downloadUrl // empty')
+      export ARCHIVE_URL=$(echo "${SEARCH_RESULT}" | jq -r '[.items[] | select(.contentType == "application/zip")][0].downloadUrl // empty')
       if [ -z "${ARCHIVE_URL}" ]; then
         echo "ERROR: artifact ${RELEASE_VERSION} not found in Nexus repository ${NEXUS_COMPOSER_REPO}"
         exit 1
