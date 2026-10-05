@@ -24,7 +24,21 @@ namespace Cdek\Fieldsets {
 
         final public function isDomestic(): bool
         {
-            return strtoupper((string)CheckoutHelper::getCurrentValue('country')) === self::DOMESTIC_COUNTRY_CODE;
+            return strtoupper($this->getDestinationCountry()) === self::DOMESTIC_COUNTRY_CODE;
+        }
+
+        /**
+         * @noinspection GlobalVariableUsageInspection
+         */
+        private function getDestinationCountry(): string
+        {
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- значение только сравнивается с кодом страны
+            if (empty($_POST['ship_to_different_address']) && !empty($_POST['billing_country'])) {
+                // phpcs:ignore WordPress.Security.NonceVerification.Missing
+                return wc_clean(wp_unslash($_POST['billing_country']));
+            }
+
+            return (string)CheckoutHelper::getCurrentValue('country');
         }
 
         final public function isApplicable(): bool
