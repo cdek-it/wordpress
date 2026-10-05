@@ -113,7 +113,8 @@ namespace Cdek\Helpers {
                     continue;
                 }
 
-                $hideInternational = $isInternational && $fieldsetInstance->isDomestic();
+                // Скрываем при доставке по РФ и когда нет тарифа СДЭК (нет тарифа — паспортные данные не нужны)
+                $hideInternational = $isInternational && ($fieldsetInstance->isDomestic() || !$hasCdekRate);
 
                 if (!$hasCdekRate && !$isInternational) {
                     continue;
@@ -133,10 +134,9 @@ namespace Cdek\Helpers {
                         }
                     }
 
-                    if ($fieldsetInstance->isRequiredField($field) && !$hideInternational
-                        && ($hasCdekRate || !$isInternational)) {
+                    if ($fieldsetInstance->isRequiredField($field) && !$hideInternational) {
                         $fields['billing'][$field]['required'] = true;
-                    } elseif ($isInternational && ($hideInternational || !$hasCdekRate)) {
+                    } elseif ($isInternational) {
                         $fields['billing'][$field]['required'] = false;
                     }
                 }

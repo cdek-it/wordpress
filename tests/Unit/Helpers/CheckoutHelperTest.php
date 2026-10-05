@@ -433,7 +433,7 @@ final class CheckoutHelperTest extends TestCase
         self::assertFalse($result['billing']['passport_series']['required']);
     }
 
-    public function testRestoreFieldsAddsVisibleNonRequiredInternationalFieldsWhenNoRateSelectedYet(): void
+    public function testRestoreFieldsHidesNonRequiredInternationalFieldsWhenNoCdekRate(): void
     {
         $wc       = Mockery::mock();
         $wc->cart = null;
@@ -456,7 +456,7 @@ final class CheckoutHelperTest extends TestCase
         $field = $result['billing']['passport_series'];
 
         self::assertContains('cdek-international-field', $field['class']);
-        self::assertNotContains('cdek-international-field-hidden', $field['class']);
+        self::assertContains('cdek-international-field-hidden', $field['class']);
         self::assertFalse($field['required']);
     }
 

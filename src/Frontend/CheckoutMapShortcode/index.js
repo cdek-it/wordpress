@@ -102,8 +102,8 @@ const isDomesticDestination = () => {
 };
 
 const toggleInternationalFields = () => {
-	const isVisible = ! isDomesticDestination();
-	const isRequired = isVisible && isCdekShippingSelected();
+	const isVisible = ! isDomesticDestination() && isCdekShippingSelected();
+	const isRequired = isVisible;
 	const fields = $( '.cdek-international-field' );
 
 	fields.toggleClass( 'cdek-international-field-hidden', ! isVisible );
