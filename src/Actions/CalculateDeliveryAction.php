@@ -153,7 +153,8 @@ namespace Cdek\Actions {
                             MetaKeys::LENGTH       => $deliveryParam['packages']['length'],
                             MetaKeys::WIDTH        => $deliveryParam['packages']['width'],
                             MetaKeys::HEIGHT       => $deliveryParam['packages']['height'],
-                            MetaKeys::OFFICE_CODE  => $package['destination'][MetaKeys::OFFICE_CODE] ?? null,
+                            MetaKeys::OFFICE_CODE  => Tariff::isToOffice((int)$tariff['tariff_code']) ?
+                                ($package['destination'][MetaKeys::OFFICE_CODE] ?? null) : null,
                         ],
                     ];
                 }
