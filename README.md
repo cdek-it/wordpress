@@ -72,6 +72,9 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 * WP-334 Fixed an error when retrieving rates
 * WP-337 Optimized adding products to the cart
 * WP-330 Updated instructions
+* WP-290 Displaying fields for international delivery
+* WP-292 Fixed WooCommerce delivery settings
+* WP-311 Creating a waybill creation task before order payment
 
 = 5.0 =
 * CMS-1327 Add support WordPress 7.0
