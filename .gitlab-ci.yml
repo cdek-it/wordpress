@@ -323,11 +323,24 @@ upload:
       artifacts: true
   only:
     - tags
+  variables:
+    NEXUS_URL: https://repo.cdek.tech
+    NEXUS_COMPOSER_REPO: php-private
   before_script:
     - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
-    - export ARCHIVE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/\./_/g')
   script:
-    - curl -u "${NEXUS_LOGIN}":"${NEXUS_PASS}" --upload-file cdek.zip "${ARTIFACTORY_REPO}/$CI_PROJECT_NAME/wp_cdek-delivery_${ARCHIVE_VERSION}.zip"
+    # Composer hosted репозиторий Sonatype: загрузка через REST API компонентов.
+    # version передаём явно - в composer.json внутри архива её нет (composer archive берёт его как есть).
+    # Job падает на любом ответе кроме 2xx (раньше curl без --fail молча завершался с кодом 0).
+    - |
+      HTTP_CODE=$(curl -sS -o nexus-response.txt -w "%{http_code}" -u "${NEXUS_LOGIN}":"${NEXUS_PASS}" \
+        -F "version=${RELEASE_VERSION}" -F "asset=@cdek.zip;type=application/zip" \
+        "${NEXUS_URL}/service/rest/v1/components?repository=${NEXUS_COMPOSER_REPO}")
+      cat nexus-response.txt
+      case "$HTTP_CODE" in
+        2??) echo "Uploaded cdek.zip ${RELEASE_VERSION} to ${NEXUS_COMPOSER_REPO} (HTTP ${HTTP_CODE})" ;;
+        *) echo "ERROR: Nexus upload failed (HTTP ${HTTP_CODE})"; exit 1 ;;
+      esac
 
 release:
   image: registry-gitlab.cdek.ru/gitlab-org/release-cli:latest
@@ -359,22 +372,29 @@ release:
     - set -eu
     - export RELEASE_VERSION=$(echo "${RELEASE_TAG}" | sed 's/v//')
     - export ARCHIVE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/\./_/g')
-    - export ARCHIVE_URL="${ARTIFACTORY_REPO}/$CI_PROJECT_NAME/wp_cdek-delivery_${ARCHIVE_VERSION}.zip"
+    - export NEXUS_URL="${NEXUS_URL:-https://repo.cdek.tech}"
+    - export NEXUS_COMPOSER_REPO="${NEXUS_COMPOSER_REPO:-php-private}"
 
     # Тег должен существовать в GitLab
     - echo "Checking tag ${RELEASE_TAG} exists in GitLab..."
     - git ls-remote --exit-code --tags origin "refs/tags/${RELEASE_TAG}" >/dev/null
 
     # Артефакт для тега должен быть уже загружен в Nexus (job upload тег-пайплайна).
-    # Отдельная проверка нужна, т.к. curl в upload не падает на HTTP-ошибках (нет --fail) -
-    # job upload может показать "passed", даже если сама заливка не удалась.
+    # В Composer hosted репозитории путь к файлу формирует сам Nexus, поэтому ссылку на архив берём из поиска
+    # по компоненту (репозиторий + версия), а не собираем вручную.
     - |
-      echo "Checking artifact exists in Nexus: ${ARCHIVE_URL}"
-      HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -u "${NEXUS_LOGIN}":"${NEXUS_PASS}" -I "${ARCHIVE_URL}")
-      if [ "$HTTP_CODE" != "200" ]; then
-        echo "ERROR: artifact not found in Nexus (HTTP ${HTTP_CODE}): ${ARCHIVE_URL}"
+      echo "Searching artifact ${RELEASE_VERSION} in Nexus repository ${NEXUS_COMPOSER_REPO}..."
+      SEARCH_URL="${NEXUS_URL}/service/rest/v1/search/assets?repository=${NEXUS_COMPOSER_REPO}&version=${RELEASE_VERSION}"
+      SEARCH_RESULT=$(curl -sfS -u "${NEXUS_LOGIN}":"${NEXUS_PASS}" "${SEARCH_URL}") || {
+        echo "ERROR: Nexus search request failed: ${SEARCH_URL}"
+        exit 1
+      }
+      export ARCHIVE_URL=$(echo "${SEARCH_RESULT}" | jq -r '[.items[] | select(.downloadUrl | endswith(".zip"))][0].downloadUrl // empty')
+      if [ -z "${ARCHIVE_URL}" ]; then
+        echo "ERROR: artifact ${RELEASE_VERSION} not found in Nexus repository ${NEXUS_COMPOSER_REPO}"
         exit 1
       fi
+      echo "Artifact: ${ARCHIVE_URL}"
 
     # Текст релиза
     - export RELEASE_DESCRIPTION="$(git for-each-ref "refs/tags/${RELEASE_TAG}" --format='%(contents)')"
