@@ -298,8 +298,12 @@ build-custom:
   tags:
     - docker
   variables:
+    YARN_CACHE_FOLDER: .yarn/cache
+    YARN_ENABLE_GLOBAL_CACHE: "false"
     YARN_ENABLE_IMMUTABLE_INSTALLS: "true" # `workspaces focus` не понимает флаг --immutable, только эту переменную
     YARN_ENABLE_INLINE_BUILDS: "true" # то же самое вместо флага --inline-builds (лог сборки нативных модулей сразу в вывод job'а)
+    npm_config_cache: .npm
+  cache: !reference [build-tag, cache]
   artifacts:
     name: cdek-integration
     paths:
