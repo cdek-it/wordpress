@@ -329,9 +329,6 @@ upload:
   before_script:
     - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
   script:
-    # Composer hosted репозиторий Sonatype: загрузка через REST API компонентов.
-    # version передаём явно - в composer.json внутри архива её нет (composer archive берёт его как есть).
-    # Job падает на любом ответе кроме 2xx (раньше curl без --fail молча завершался с кодом 0).
     - |
       HTTP_CODE=$(curl -sS -o nexus-response.txt -w "%{http_code}" -u "${NEXUS_LOGIN}":"${NEXUS_PASS}" \
         -F "version=${RELEASE_VERSION}" -F "asset=@cdek.zip;type=application/zip" \
