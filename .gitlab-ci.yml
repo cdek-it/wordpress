@@ -150,7 +150,7 @@ static-analysis:
     - apk add --no-cache composer php85-ctype php85-dom php85-simplexml php85-tokenizer php85-xml php85-xmlwriter php85-xmlreader
     - ln -sf "$(command -v php85)" /usr/bin/php
   script:
-    - vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+    - vendor/bin/phpstan analyse --no-progress --memory-limit=1536M
 
 unit-tests:
   image: docker-proxy.cdek.ru/php:8.2-alpine
@@ -298,8 +298,12 @@ build-custom:
   tags:
     - docker
   variables:
+    YARN_CACHE_FOLDER: .yarn/cache
+    YARN_ENABLE_GLOBAL_CACHE: "false"
     YARN_ENABLE_IMMUTABLE_INSTALLS: "true" # `workspaces focus` не понимает флаг --immutable, только эту переменную
     YARN_ENABLE_INLINE_BUILDS: "true" # то же самое вместо флага --inline-builds (лог сборки нативных модулей сразу в вывод job'а)
+    npm_config_cache: .npm
+  cache: !reference [build-tag, cache]
   artifacts:
     name: cdek-integration
     paths:

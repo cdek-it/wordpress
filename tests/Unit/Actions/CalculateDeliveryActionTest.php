@@ -589,6 +589,30 @@ final class CalculateDeliveryActionTest extends TestCase
         self::assertSame([], $rates);
     }
 
+    public function testInvokeKeepsSessionOfficeCodeOnlyForToOfficeTariffs(): void
+    {
+        [$action, $cdekApi, $shippingMethod] = $this->buildActionWithMocks();
+        // 138 = дверь-склад (до ПВЗ), 139 = дверь-дверь
+        $shippingMethod->tariff_list = ['138', '139'];
+
+        $cdekApi->shouldReceive('calculateList')->andReturnUsing(function (array $param) {
+            if ($param['type'] !== Tariff::SHOP_TYPE) {
+                return [];
+            }
+
+            return ['tariff_codes' => [$this->tariffCode(138, 1, 1, 200, 3), $this->tariffCode(139)]];
+        });
+        $cdekApi->shouldReceive('calculateGet')->andReturn(null);
+
+        $package                                           = $this->basePackage();
+        $package['destination'][MetaKeys::OFFICE_CODE] = 'NSK17';
+
+        $rates = $action($package, $shippingMethod);
+
+        self::assertSame('NSK17', $rates[138]['meta_data'][MetaKeys::OFFICE_CODE]);
+        self::assertNull($rates[139]['meta_data'][MetaKeys::OFFICE_CODE]);
+    }
+
     /**
      * @dataProvider costComputationProvider
      */

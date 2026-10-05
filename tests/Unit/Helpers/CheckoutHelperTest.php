@@ -54,6 +54,7 @@ final class CheckoutHelperTest extends TestCase
         Functions\when('wp_strip_all_tags')->returnArg();
         Functions\when('wp_unslash')->returnArg();
         Functions\when('esc_html__')->returnArg();
+        Functions\when('wc_ship_to_billing_address_only')->justReturn(false);
     }
 
     private function mockWc(?array $session, ?array $checkoutValues, ?array $customer): void
@@ -120,6 +121,32 @@ final class CheckoutHelperTest extends TestCase
         );
 
         self::assertSame('From Billing', CheckoutHelper::getCurrentValue('city'));
+    }
+
+    public function testGetCurrentValuePrefersBillingOverShippingWhenForcedToBillingOnly(): void
+    {
+        Functions\when('wc_ship_to_billing_address_only')->justReturn(true);
+
+        $this->mockWc(
+            ['value' => null],
+            ['shipping_city' => 'Stale Shipping', 'billing_city' => 'Fresh Billing'],
+            null,
+        );
+
+        self::assertSame('Fresh Billing', CheckoutHelper::getCurrentValue('city'));
+    }
+
+    public function testGetCurrentValueFallsBackToShippingWhenForcedToBillingOnlyButBillingEmpty(): void
+    {
+        Functions\when('wc_ship_to_billing_address_only')->justReturn(true);
+
+        $this->mockWc(
+            ['value' => null],
+            ['shipping_city' => 'From Shipping', 'billing_city' => ''],
+            null,
+        );
+
+        self::assertSame('From Shipping', CheckoutHelper::getCurrentValue('city'));
     }
 
     public function testGetCurrentValueReturnsExtensionsRequestValueWhenCheckoutFieldsEmpty(): void
@@ -295,13 +322,17 @@ final class CheckoutHelperTest extends TestCase
         self::assertFalse(CheckoutHelper::isShippingRateSuitable($rate));
     }
 
-    private function mockSelectedRateAvailable(array $originalFields, bool $internationalMode): void
-    {
+    private function mockSelectedRateAvailable(
+        array $originalFields,
+        bool $internationalMode,
+        string $country = 'KZ'
+    ): void {
         $rate = Mockery::mock('WC_Shipping_Rate');
         $rate->shouldReceive('get_method_id')->andReturn(Config::DELIVERY_NAME);
 
         $checkout = Mockery::mock();
         $checkout->shouldReceive('get_checkout_fields')->with('billing')->andReturn($originalFields);
+        $checkout->shouldReceive('get_value')->andReturn($country);
 
         $wc       = Mockery::mock();
         $wc->cart = new CartWithRealShippingMethodsDouble([$rate]);
@@ -321,6 +352,13 @@ final class CheckoutHelperTest extends TestCase
         $wc       = Mockery::mock();
         $wc->cart = null;
         Functions\when('WC')->justReturn($wc);
+
+        $methodInstance                     = Mockery::mock();
+        $methodInstance->international_mode = false;
+
+        Mockery::mock('alias:' . ShippingMethod::class)
+               ->shouldReceive('factory')
+               ->andReturn($methodInstance);
 
         $fields = ['billing' => ['some_existing_field' => ['x' => 1]]];
 
@@ -378,11 +416,48 @@ final class CheckoutHelperTest extends TestCase
         $result = CheckoutHelper::restoreFields(['billing' => []]);
 
         $international = new InternationalOrderFields();
+        $expected      = $international->getFieldDefinition('passport_series');
+        $expected['class'][] = 'cdek-international-field';
 
-        self::assertSame(
-            $international->getFieldDefinition('passport_series'),
-            $result['billing']['passport_series'],
-        );
+        self::assertSame($expected, $result['billing']['passport_series']);
+    }
+
+    public function testRestoreFieldsRendersInternationalFieldsHiddenWhenDestinationIsRussia(): void
+    {
+        $this->mockSelectedRateAvailable([], true, 'RU');
+
+        $result = CheckoutHelper::restoreFields(['billing' => []]);
+
+        self::assertContains('cdek-international-field', $result['billing']['passport_series']['class']);
+        self::assertContains('cdek-international-field-hidden', $result['billing']['passport_series']['class']);
+        self::assertFalse($result['billing']['passport_series']['required']);
+    }
+
+    public function testRestoreFieldsHidesNonRequiredInternationalFieldsWhenNoCdekRate(): void
+    {
+        $wc       = Mockery::mock();
+        $wc->cart = null;
+        Functions\when('WC')->justReturn($wc);
+
+        $methodInstance                     = Mockery::mock();
+        $methodInstance->international_mode = true;
+
+        Mockery::mock('alias:' . ShippingMethod::class)
+               ->shouldReceive('factory')
+               ->andReturn($methodInstance);
+
+        $checkout = Mockery::mock();
+        $checkout->shouldReceive('get_checkout_fields')->with('billing')->andReturn([]);
+        $checkout->shouldReceive('get_value')->andReturn('KZ');
+        $wc->shouldReceive('checkout')->andReturn($checkout);
+
+        $result = CheckoutHelper::restoreFields(['billing' => []]);
+
+        $field = $result['billing']['passport_series'];
+
+        self::assertContains('cdek-international-field', $field['class']);
+        self::assertContains('cdek-international-field-hidden', $field['class']);
+        self::assertFalse($field['required']);
     }
 
     public function testIsCheckoutRequestReturnsFalseByDefault(): void

@@ -10,13 +10,41 @@ namespace {
 namespace Cdek\Fieldsets {
 
     use Cdek\Contracts\FieldsetContract;
+    use Cdek\Helpers\CheckoutHelper;
     use Cdek\ShippingMethod;
 
     class InternationalOrderFields extends FieldsetContract
     {
+        private const DOMESTIC_COUNTRY_CODE = 'RU';
+
+        final public function isModeEnabled(): bool
+        {
+            return (bool)ShippingMethod::factory()->international_mode;
+        }
+
+        final public function isDomestic(): bool
+        {
+            return strtoupper($this->getDestinationCountry()) === self::DOMESTIC_COUNTRY_CODE;
+        }
+
+        /**
+         * @noinspection GlobalVariableUsageInspection
+         */
+        private function getDestinationCountry(): string
+        {
+            // phpcs:ignore WordPress.Security.NonceVerification.Missing -- значение только сравнивается с кодом страны
+            if (empty($_POST['ship_to_different_address']) && !empty($_POST['billing_country'])) {
+                // phpcs:ignore WordPress.Security.NonceVerification.Missing
+                return wc_clean(wp_unslash($_POST['billing_country']));
+            }
+
+            return (string)CheckoutHelper::getCurrentValue('country');
+        }
+
         final public function isApplicable(): bool
         {
-            return ShippingMethod::factory()->international_mode;
+            // Для доставки внутри РФ паспортные поля не нужны
+            return $this->isModeEnabled() && !$this->isDomestic();
         }
 
         final protected function getFields(): array

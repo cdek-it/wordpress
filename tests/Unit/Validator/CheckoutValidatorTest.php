@@ -15,6 +15,7 @@ use Cdek\Helpers\CheckoutHelper;
 use Cdek\Loader;
 use Cdek\MetaKeys;
 use Cdek\Model\Tariff;
+use Cdek\ShippingMethod;
 use Cdek\Tests\TestCase;
 use Cdek\Validator\CheckoutValidator;
 use Closure;
@@ -37,6 +38,16 @@ final class CheckoutValidatorTest extends TestCase
 
         Functions\when('esc_html')->returnArg();
         Functions\when('esc_html__')->returnArg();
+    }
+
+    private function mockInternationalMode(bool $enabled): void
+    {
+        $methodInstance                     = Mockery::mock();
+        $methodInstance->international_mode = $enabled;
+
+        Mockery::mock('alias:' . ShippingMethod::class)
+               ->shouldReceive('factory')
+               ->andReturn($methodInstance);
     }
 
     private function mockRate(array $meta): MockInterface
@@ -89,8 +100,21 @@ final class CheckoutValidatorTest extends TestCase
         (new CheckoutValidator())();
     }
 
+    public function testInvokeDoesNotRequireInternationalFieldsWhenCdekRateIsNotSelected(): void
+    {
+        $this->mockInternationalMode(true);
+        $this->mockCheckoutHelper(null, ['country' => 'KZ']);
+
+        Functions\expect('wc_add_notice')->never();
+        $this->expectNotToPerformAssertions();
+
+        (new CheckoutValidator())();
+    }
+
     public function testInvokeAddsNoticeWhenOfficeModeAndOfficeNotSelected(): void
     {
+        $this->mockInternationalMode(false);
+
         $officeMode = Tariff::listOfficeDeliveryModes()[0];
 
         $this->mockCheckoutHelper(
@@ -112,6 +136,8 @@ final class CheckoutValidatorTest extends TestCase
 
     public function testInvokeDoesNotAddNoticeWhenOfficeModeAndOfficeSelected(): void
     {
+        $this->mockInternationalMode(false);
+
         $officeMode = Tariff::listOfficeDeliveryModes()[0];
 
         $this->mockCheckoutHelper(
@@ -150,6 +176,8 @@ final class CheckoutValidatorTest extends TestCase
 
     public function testInvokeAddsNoticeWhenAddressIsMissing(): void
     {
+        $this->mockInternationalMode(false);
+
         $this->mockCheckoutHelper(
             $this->mockRate([MetaKeys::TARIFF_MODE => self::NON_OFFICE_MODE]),
             [
@@ -173,6 +201,8 @@ final class CheckoutValidatorTest extends TestCase
 
     public function testInvokeDoesNotAddAddressNoticeWhenAddressIsPresent(): void
     {
+        $this->mockInternationalMode(false);
+
         $this->mockCheckoutHelper(
             $this->mockRate([MetaKeys::TARIFF_MODE => self::NON_OFFICE_MODE]),
             [
@@ -194,6 +224,8 @@ final class CheckoutValidatorTest extends TestCase
 
     public function testInvokeAddsNoticeWhenCityCodeCannotBeResolved(): void
     {
+        $this->mockInternationalMode(false);
+
         $this->mockCheckoutHelper(
             $this->mockRate([MetaKeys::TARIFF_MODE => self::NON_OFFICE_MODE]),
             [
@@ -217,6 +249,8 @@ final class CheckoutValidatorTest extends TestCase
 
     public function testInvokeDoesNotAddCityNoticeWhenCityCodeIsResolved(): void
     {
+        $this->mockInternationalMode(false);
+
         $this->mockCheckoutHelper(
             $this->mockRate([MetaKeys::TARIFF_MODE => self::NON_OFFICE_MODE]),
             [
@@ -238,6 +272,8 @@ final class CheckoutValidatorTest extends TestCase
 
     public function testInvokeAddsNoticeWhenPhoneIsEmpty(): void
     {
+        $this->mockInternationalMode(false);
+
         $officeMode = Tariff::listOfficeDeliveryModes()[0];
 
         $this->mockCheckoutHelper(
@@ -258,6 +294,8 @@ final class CheckoutValidatorTest extends TestCase
 
     public function testInvokeDoesNotAddNoticeWhenPhoneIsValid(): void
     {
+        $this->mockInternationalMode(false);
+
         $officeMode = Tariff::listOfficeDeliveryModes()[0];
 
         $this->mockCheckoutHelper(
@@ -309,6 +347,8 @@ final class CheckoutValidatorTest extends TestCase
 
     public function testInvokeAddsNoticeWithExceptionMessageWhenPhoneValidationFailsWithOtherException(): void
     {
+        $this->mockInternationalMode(false);
+
         $officeMode = Tariff::listOfficeDeliveryModes()[0];
 
         $this->mockCheckoutHelper(
@@ -328,5 +368,109 @@ final class CheckoutValidatorTest extends TestCase
         $this->expectNotToPerformAssertions();
 
         (new CheckoutValidator())();
+    }
+
+    public function testInvokeAddsNoticeForMissingRequiredInternationalField(): void
+    {
+        $this->mockInternationalMode(true);
+
+        $officeMode = Tariff::listOfficeDeliveryModes()[0];
+
+        $this->mockCheckoutHelper(
+            $this->mockRate([
+                MetaKeys::TARIFF_MODE => $officeMode,
+                MetaKeys::OFFICE_CODE => 'MSK123',
+            ]),
+            [
+                'phone'                   => '+79991234567',
+                'country'                 => 'KZ',
+                'passport_series'         => '1234',
+                'passport_number'         => '567890',
+                'passport_date_of_issue'  => '2020-01-01',
+                'passport_organization'   => 'UFMS',
+                'passport_date_of_birth'  => '1990-01-01',
+                // 'tin' is intentionally left unset
+            ],
+        );
+        $this->mockValidatedPhone('+79991234567', 'KZ');
+
+        Functions\expect('wc_add_notice')
+                 ->once()
+                 ->with('"TIN" is required for international orders.', 'error');
+        $this->expectNotToPerformAssertions();
+
+        (new CheckoutValidator())();
+    }
+
+    public function testInvokeDoesNotAddNoticeWhenAllInternationalFieldsArePresent(): void
+    {
+        $this->mockInternationalMode(true);
+
+        $officeMode = Tariff::listOfficeDeliveryModes()[0];
+
+        $this->mockCheckoutHelper(
+            $this->mockRate([
+                MetaKeys::TARIFF_MODE => $officeMode,
+                MetaKeys::OFFICE_CODE => 'MSK123',
+            ]),
+            [
+                'phone'                  => '+79991234567',
+                'country'                => 'KZ',
+                'passport_series'        => '1234',
+                'passport_number'        => '567890',
+                'passport_date_of_issue' => '2020-01-01',
+                'passport_organization'  => 'UFMS',
+                'tin'                    => '123456789012',
+                'passport_date_of_birth' => '1990-01-01',
+            ],
+        );
+        $this->mockValidatedPhone('+79991234567', 'KZ');
+
+        Functions\expect('wc_add_notice')->never();
+        $this->expectNotToPerformAssertions();
+
+        (new CheckoutValidator())();
+    }
+
+    public function testInvokeDoesNotRequireInternationalFieldsWhenDestinationIsRussia(): void
+    {
+        $this->mockInternationalMode(true);
+
+        $officeMode = Tariff::listOfficeDeliveryModes()[0];
+
+        $this->mockCheckoutHelper(
+            $this->mockRate([
+                MetaKeys::TARIFF_MODE => $officeMode,
+                MetaKeys::OFFICE_CODE => 'MSK123',
+            ]),
+            ['phone' => '+79991234567', 'country' => 'RU'],
+        );
+        $this->mockValidatedPhone('+79991234567', 'RU');
+
+        Functions\expect('wc_add_notice')->never();
+        $this->expectNotToPerformAssertions();
+
+        (new CheckoutValidator())();
+    }
+
+    public function testInvokeSkipsInternationalFieldsValidationWhenCheckOfficeDisabled(): void
+    {
+        $this->mockInternationalMode(true);
+
+        $officeMode = Tariff::listOfficeDeliveryModes()[0];
+
+        $this->mockCheckoutHelper(
+            $this->mockRate([
+                MetaKeys::TARIFF_MODE => $officeMode,
+                MetaKeys::OFFICE_CODE => 'MSK123',
+            ]),
+            ['phone' => '+79991234567', 'country' => 'KZ'],
+        );
+        $this->mockValidatedPhone('+79991234567', 'KZ');
+
+        Functions\expect('wc_add_notice')->never();
+        $this->expectNotToPerformAssertions();
+
+        (new CheckoutValidator(false))();
     }
 }

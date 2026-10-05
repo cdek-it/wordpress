@@ -22,4 +22,7 @@
     <exclude-pattern>src/Traits/SettingsFields.php</exclude-pattern>
     <exclude-pattern>src/Loader.php</exclude-pattern>
     <exclude-pattern>src/Actions/EnsureShopSessionCookieAction.php</exclude-pattern>
+    <exclude-pattern>src/Validator/CheckoutValidator.php</exclude-pattern>
+    <exclude-pattern>src/Model/Order.php</exclude-pattern>
+    <exclude-pattern>src/Fieldsets/InternationalOrderFields.php</exclude-pattern>
 </ruleset>

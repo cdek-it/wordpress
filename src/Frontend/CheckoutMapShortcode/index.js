@@ -9,6 +9,7 @@ const billingCityInput = $( '#billing_city' );
 const shippingCityInput = $( '#shipping_city' );
 const buttonNormalSize = 160;
 const smallFontAttribute = 'aria-small';
+const domesticCountryCode = 'RU';
 
 let needChange;
 let isNormalSize;
@@ -72,6 +73,54 @@ const onChoose = ( _type, _tariff, address ) => {
 	}
 };
 
+const isCdekShippingSelected = () => {
+	const methods = $(
+		'#shipping_method input[name^="shipping_method"]'
+	).toArray();
+
+	if ( ! methods.length ) {
+		return false;
+	}
+
+	const checked = methods.filter(
+		( input ) => input.type !== 'radio' || input.checked
+	);
+
+	return checked.some(
+		( input ) => ( input.value || '' ).indexOf( 'official_cdek' ) === 0
+	);
+};
+
+const isDomesticDestination = () => {
+	const countryInput = $( '#ship-to-different-address-checkbox' ).is(
+		':checked'
+	)
+		? $( '#shipping_country' )
+		: $( '#billing_country' );
+
+	return ( countryInput.val() || '' ).toUpperCase() === domesticCountryCode;
+};
+
+const toggleInternationalFields = () => {
+	const isVisible = ! isDomesticDestination() && isCdekShippingSelected();
+	const isRequired = isVisible;
+	const fields = $( '.cdek-international-field' );
+
+	fields.toggleClass( 'cdek-international-field-hidden', ! isVisible );
+	fields.toggleClass( 'validate-required', isRequired );
+
+	if ( ! isRequired ) {
+		fields
+			.removeClass(
+				'woocommerce-invalid woocommerce-invalid-required-field'
+			)
+			.find( '.input-text, select' )
+			.removeClass(
+				'woocommerce-invalid woocommerce-invalid-required-field'
+			);
+	}
+};
+
 const debouncedCheckoutUpdate = () => {
 	clearTimeout( checkoutUpdateTimer );
 	checkoutUpdateTimer = setTimeout( () => {
@@ -131,7 +180,14 @@ $( document.body )
 		'#billing_city, #billing_postcode, #shipping_city, #shipping_postcode, input[name=payment_method]',
 		debouncedCheckoutUpdate
 	)
+	.on(
+		'change',
+		'#billing_country, #shipping_country, #ship-to-different-address-checkbox',
+		toggleInternationalFields
+	)
 	.on( 'updated_checkout', () => {
+		toggleInternationalFields();
+
 		const targetNode = document.querySelector( '.open-pvz-btn' );
 
 		if ( widget !== null ) {
