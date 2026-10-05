@@ -10,3 +10,16 @@ require_once dirname(__DIR__) . '/vendor/autoload.php';
 if (!defined('ABSPATH')) {
     define('ABSPATH', __DIR__ . '/');
 }
+
+// Для тестирования WooCommerce
+if (!class_exists('WC_Abstract_Order', false)) {
+    abstract class WC_Abstract_Order
+    {
+    }
+}
+
+if (!class_exists('WC_Order', false)) {
+    class WC_Order extends WC_Abstract_Order
+    {
+    }
+}
