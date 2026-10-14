@@ -355,7 +355,7 @@ final class CheckoutMapBlockTest extends TestCase
     /**
      * @return array{0: \WC_Order, 1: MockInterface} заказ и позиция доставки (для проверки сохранённой меты)
      */
-    private function orderWithShipping(?int $tariff): array
+    private function orderWithShipping(?int $tariff, ?string $office = null): array
     {
         $wcOrder = Mockery::mock('WC_Order');
         $wcOrder->shouldReceive('get_meta')->with('order_data')->andReturn([]);
@@ -372,7 +372,15 @@ final class CheckoutMapBlockTest extends TestCase
         $item = Mockery::mock('WC_Order_Item_Shipping');
         $item->shouldReceive('get_method_id')->andReturn('official_cdek');
         $item->shouldReceive('get_data')->andReturn(['instance_id' => 0]);
-        $item->shouldReceive('get_meta_data')->andReturn([$meta]);
+        $metas = [$meta];
+
+        if ($office !== null) {
+            $officeMeta = Mockery::mock('WC_Meta_Data');
+            $officeMeta->shouldReceive('get_data')->andReturn(['key' => MetaKeys::OFFICE_CODE, 'value' => $office]);
+            $metas[] = $officeMeta;
+        }
+
+        $item->shouldReceive('get_meta_data')->andReturn($metas);
 
         $wcOrder->shouldReceive('get_shipping_methods')->andReturn([$item]);
 
@@ -450,6 +458,22 @@ final class CheckoutMapBlockTest extends TestCase
         $this->expectException(\Automattic\WooCommerce\StoreApi\Exceptions\RouteException::class);
 
         CheckoutMapBlock::saveOrderData($order, $this->request(null));
+    }
+
+    public function testSaveOrderDataKeepsOfficeFromShippingMetaWhenRequestHasNone(): void
+    {
+        [$order, $item] = $this->orderWithShipping(136, 'MSK5');
+
+        $session = Mockery::mock();
+        $session->shouldReceive('set');
+        $this->mockSession($session);
+
+        $item->shouldReceive('add_meta_data')->once()->with(MetaKeys::OFFICE_CODE, 'MSK5', true);
+        $item->shouldReceive('save')->once();
+
+        CheckoutMapBlock::saveOrderData($order, $this->request(null));
+
+        $this->addToAssertionCount(1);
     }
 
     public function testSaveOrderDataStillSavesOfficeWhenSessionFails(): void

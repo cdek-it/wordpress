@@ -16,6 +16,7 @@ use Cdek\Exceptions\External\InvalidRequestException;
 use Cdek\Exceptions\External\LegacyAuthException;
 use Cdek\Exceptions\External\UnparsableAnswerException;
 use Cdek\Exceptions\InvalidPhoneException;
+use Cdek\Exceptions\OfficeNotSelectedException;
 use Cdek\Exceptions\OrderNotFoundException;
 use Cdek\Exceptions\ScheduledTaskException;
 use Cdek\Exceptions\ShippingNotFoundException;
@@ -108,6 +109,13 @@ final class ExceptionsMappingTest extends TestCase
                 'scheduled.task',
                 'Unknown error',
                 ['task' => 'sync-orders'],
+                500,
+            ],
+            'OfficeNotSelectedException' => [
+                static fn (): OfficeNotSelectedException => new OfficeNotSelectedException(),
+                'office.not_selected',
+                'Order pickup point not selected.',
+                [],
                 500,
             ],
             'ShippingNotFoundException' => [
