@@ -67,6 +67,21 @@ final class CheckoutMapBlockTest extends TestCase
                 }
             }
 
+            namespace Automattic\WooCommerce\StoreApi\Exceptions {
+                class RouteException extends \Exception
+                {
+                    public function __construct(private string $errorCode, string $message, int $status = 400)
+                    {
+                        parent::__construct($message, $status);
+                    }
+
+                    public function getErrorCode(): string
+                    {
+                        return $this->errorCode;
+                    }
+                }
+            }
+
             namespace Automattic\WooCommerce\StoreApi\Schemas\V1 {
                 class CartSchema { const IDENTIFIER = 'cart'; }
                 class CheckoutSchema { const IDENTIFIER = 'checkout'; }
@@ -422,7 +437,7 @@ final class CheckoutMapBlockTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
-    public function testSaveOrderDataStoresNullOfficeWhenRequestHasNoExtension(): void
+    public function testSaveOrderDataRejectsToOfficeTariffWithoutOffice(): void
     {
         [$order, $item] = $this->orderWithShipping(136);
 
@@ -430,12 +445,11 @@ final class CheckoutMapBlockTest extends TestCase
         $session->shouldReceive('set');
         $this->mockSession($session);
 
-        $item->shouldReceive('add_meta_data')->once()->with(MetaKeys::OFFICE_CODE, null, true);
-        $item->shouldReceive('save')->once();
+        $item->shouldReceive('save')->never();
+
+        $this->expectException(\Automattic\WooCommerce\StoreApi\Exceptions\RouteException::class);
 
         CheckoutMapBlock::saveOrderData($order, $this->request(null));
-
-        $this->addToAssertionCount(1);
     }
 
     public function testSaveOrderDataStillSavesOfficeWhenSessionFails(): void

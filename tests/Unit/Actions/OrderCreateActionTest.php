@@ -8,6 +8,7 @@ use Brain\Monkey\Functions;
 use Cdek\Actions\OrderCreateAction;
 use Cdek\CdekApi;
 use Cdek\CoreApi;
+use Cdek\Exceptions\OfficeNotSelectedException;
 use Cdek\Exceptions\ShippingNotFoundException;
 use Cdek\Model\Order;
 use Cdek\Model\ShippingItem;
@@ -269,6 +270,15 @@ final class OrderCreateActionTest extends TestCase
 
         self::assertSame('MSK123', $param['delivery_point']);
         self::assertArrayNotHasKey('to_location', $param);
+    }
+
+    public function testBuildRequestDataThrowsWhenToOfficeTariffHasNoOffice(): void
+    {
+        [$action] = $this->buildActionWithMocks(136);
+
+        $this->expectException(OfficeNotSelectedException::class);
+
+        $this->invokePrivate($action, 'buildRequestData');
     }
 
     public function testBuildRequestDataMergesInternationalFieldsWhenInternationalModeEnabled(): void
