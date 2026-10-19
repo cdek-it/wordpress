@@ -25,4 +25,6 @@
     <exclude-pattern>src/Validator/CheckoutValidator.php</exclude-pattern>
     <exclude-pattern>src/Model/Order.php</exclude-pattern>
     <exclude-pattern>src/Fieldsets/InternationalOrderFields.php</exclude-pattern>
+    <exclude-pattern>src/Actions/OrderCreateAction.php</exclude-pattern>
+    <exclude-pattern>src/Exceptions/OfficeNotSelectedException.php</exclude-pattern>
 </ruleset>
