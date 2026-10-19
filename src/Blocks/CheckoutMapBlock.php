@@ -11,6 +11,7 @@ namespace Cdek\Blocks {
 
     use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
     use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
+    use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
     use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
     use Cdek\CdekApi;
     use Cdek\Config;
@@ -168,6 +169,16 @@ namespace Cdek\Blocks {
             }
 
             if (Tariff::isToOffice((int)$shipping->tariff)) {
+                $officeCode = $officeCode ?: $shipping->office ?: null;
+
+                if (empty($officeCode)) {
+                    throw new RouteException(
+                        'official_cdek_office_not_selected',
+                        esc_html__('Order pickup point not selected.', 'cdekdelivery'),
+                        400,
+                    );
+                }
+
                 $shipping->office = $officeCode;
             } else {
                 $shipping->office = null;
