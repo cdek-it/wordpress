@@ -161,20 +161,11 @@ unit-tests:
   before_script:
     - set -eux
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
-    - apk add --no-cache composer
-    # `php84-*` пакеты из apk ставятся мимо кассы: у образа `php:8.2-alpine` уже есть свой
-    # встроенный PHP в /usr/local/bin/php (со всеми нужными расширениями), поэтому
-    # `command -v php` всегда находит именно его, а не apk-шный php84. Покрытие ставим
-    # штатным для официального PHP-образа способом - через pecl + docker-php-ext-enable.
-    - apk add --no-cache --virtual .build-deps $PHPIZE_DEPS
-    - pecl channel-update pecl.php.net
-    - pecl install pcov-1.0.12
-    - docker-php-ext-enable pcov
-    - apk del .build-deps
-    - php -v
-    - php -m | grep -qi pcov
+    - apk add --no-cache composer php85 php85-pecl-pcov php85-ctype php85-dom php85-simplexml php85-tokenizer php85-xml php85-xmlwriter php85-xmlreader php85-mbstring php85-json php85-phar php85-openssl php85-iconv
+    - php85 -v
+    - php85 -m | grep -qi pcov
   script:
-    - vendor/bin/phpunit --colors=never --log-junit junit-report.xml --coverage-clover=coverage.xml
+    - php85 vendor/bin/phpunit --colors=never --log-junit junit-report.xml --coverage-clover=coverage.xml
   artifacts:
     when: always
     paths:
