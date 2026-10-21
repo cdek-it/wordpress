@@ -75,6 +75,7 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 * WP-290 Displaying fields for international delivery
 * WP-292 Fixed WooCommerce delivery settings
 * WP-311 Creating a waybill creation task before order payment
+* WP-362 Optimize pickup point code handling in block checkout
 
 = 5.0 =
 * CMS-1327 Add support WordPress 7.0
