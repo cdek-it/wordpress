@@ -11,11 +11,13 @@ namespace Cdek\Blocks {
 
     use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
     use Automattic\WooCommerce\StoreApi\Schemas\V1\CartSchema;
+    use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
     use Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema;
     use Cdek\CdekApi;
     use Cdek\Config;
     use Cdek\Contracts\ExceptionContract;
     use Cdek\Helpers\CheckoutHelper;
+    use Cdek\Helpers\OfficeListCache;
     use Cdek\Helpers\UI;
     use Cdek\MetaKeys;
     use Cdek\Model\Order;
@@ -52,19 +54,32 @@ namespace Cdek\Blocks {
         {
             $cityInput     = CheckoutHelper::getCurrentValue('city');
             $postcodeInput = CheckoutHelper::getCurrentValue('postcode');
+            $tariffMode    = self::getSelectedTariffMode();
 
             if (empty($cityInput)) {
-                return ['points' => '[]'];
+                return ['points' => '[]', 'tariffMode' => $tariffMode];
             }
 
-            $api = new CdekApi;
+            $cached = OfficeListCache::get($cityInput, $postcodeInput);
 
-            try {
-                $city   = $api->cityCodeGet($cityInput, $postcodeInput);
-                $points = $city !== null ? $api->officeListRaw($city) : '[]';
-            } catch (ExceptionContract $e) {
-                $city   = null;
-                $points = '[]';
+            if ($cached === null) {
+                $api = new CdekApi;
+
+                try {
+                    $city   = $api->cityCodeGet($cityInput, $postcodeInput);
+                    $points = $city !== null ? $api->officeListRaw($city) : '[]';
+                } catch (ExceptionContract $e) {
+                    $city   = null;
+                    $points = '[]';
+                }
+
+                $cached = ['city' => $city, 'points' => $points];
+
+                // Ошибки не кешируем (город не резолвнулся/API упал): иначе временный
+                // сбой держит пустую карту ПВЗ все TTL (300с), даже после восстановления.
+                if ($city !== null) {
+                    OfficeListCache::set($cityInput, $postcodeInput, $cached);
+                }
             }
 
             return [
@@ -72,9 +87,23 @@ namespace Cdek\Blocks {
                     'city'     => $cityInput,
                     'postcode' => $postcodeInput,
                 ],
-                'city'   => $city,
-                'points' => $points,
+                'city'       => $cached['city'],
+                'points'     => $cached['points'],
+                'tariffMode' => $tariffMode,
             ];
+        }
+
+        private static function getSelectedTariffMode(): ?int
+        {
+            $rate = CheckoutHelper::getSelectedShippingRate();
+
+            if ($rate === null || !CheckoutHelper::isShippingRateSuitable($rate)) {
+                return null;
+            }
+
+            $meta = $rate->get_meta_data();
+
+            return isset($meta[MetaKeys::TARIFF_MODE]) ? (int)$meta[MetaKeys::TARIFF_MODE] : null;
         }
 
         /** @noinspection PhpUnused */
@@ -88,30 +117,25 @@ namespace Cdek\Blocks {
                     'readonly'    => true,
                     'context'     => ['view', 'edit'],
                 ],
+                'tariffMode' => [
+                    'description' => esc_html__('Delivery mode of the currently selected CDEK tariff', 'cdekdelivery'),
+                    'type'        => ['integer', 'null'],
+                    'readonly'    => true,
+                    'context'     => ['view', 'edit'],
+                ],
             ];
         }
 
         public static function extend_checkout_data(): array
         {
             try {
-                $request    = json_decode(file_get_contents('php://input'), true, 512, JSON_THROW_ON_ERROR);
-                $officeCode = $request['extensions'][Config::DELIVERY_NAME]['office_code'] ?? null;
-
-                if ($officeCode !== null) {
-                    try {
-                        WC()->session->set(Config::DELIVERY_NAME.'_office_code', $officeCode);
-                    } catch (Throwable $e) {
-                    }
-
-                    return [
-                        'office_code' => $officeCode,
-                    ];
-                }
-            } catch (JsonException $e) {
+                $officeCode = WC()->session->get(Config::DELIVERY_NAME.'_office_code') ?: null;
+            } catch (Throwable $e) {
+                $officeCode = null;
             }
 
             return [
-                'office_code' => null,
+                'office_code' => $officeCode,
             ];
         }
 
@@ -137,10 +161,29 @@ namespace Cdek\Blocks {
                 return;
             }
 
-            if (Tariff::isToOffice((int)$shipping->tariff)) {
-                $shipping->office = $request['extensions'][Config::DELIVERY_NAME]['office_code'];
-                $shipping->save();
+            $officeCode = $request['extensions'][Config::DELIVERY_NAME]['office_code'] ?? null;
+
+            try {
+                WC()->session->set(Config::DELIVERY_NAME.'_office_code', $officeCode);
+            } catch (Throwable $e) {
             }
+
+            if (Tariff::isToOffice((int)$shipping->tariff)) {
+                $officeCode = $officeCode ?: $shipping->office ?: null;
+
+                if (empty($officeCode)) {
+                    throw new RouteException(
+                        'official_cdek_office_not_selected',
+                        esc_html__('Order pickup point not selected.', 'cdekdelivery'),
+                        400,
+                    );
+                }
+
+                $shipping->office = $officeCode;
+            } else {
+                $shipping->office = null;
+            }
+            $shipping->save();
         }
 
         public function get_editor_script_handles(): array

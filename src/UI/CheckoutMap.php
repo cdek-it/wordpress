@@ -62,6 +62,7 @@ namespace Cdek\UI {
             printf(
                 '<div class="open-pvz-btn" data-city="%s"><script type="application/cdek-offices">%s</script><a>%s</a></div><input name="office_code" class="cdek-office-code" type="hidden" value="%s"/>',
                 esc_attr($meta[MetaKeys::CITY]),
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_esc_json() escapes internally
                 wc_esc_json($city !== null ? $api->officeListRaw($city) : '[]', true),
                 is_null($officeInfo) ? esc_html__('Choose pick-up', 'cdekdelivery') :
                     esc_html__('Re-select pick-up', 'cdekdelivery'),

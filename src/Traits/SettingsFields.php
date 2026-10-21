@@ -36,11 +36,14 @@ namespace Cdek\Traits {
             if (!self::$settingsMutex &&
                 isset($_GET['tab'], $_GET['section']) &&
                 $_GET['tab'] === 'shipping' &&
-                $_GET['section'] = $this->id) {
+                $_GET['section'] === $this->id
+            ) {
                 self::$settingsMutex = true;
 
-                $availableGateways
-                    = array_map(static fn($g) => $g->title, WC()->payment_gateways()->payment_gateways());
+                $availableGateways = array_map(
+                    static fn($g) => sprintf('%s (%s)', $g->title, $g->id),
+                    WC()->payment_gateways()->payment_gateways(),
+                );
 
                 self::$settingsMutex = false;
             } else {
@@ -242,6 +245,7 @@ namespace Cdek\Traits {
                     'title'       => esc_html__('Change tariff name', 'cdekdelivery'),
                     'type'        => 'text',
                     'description' => sprintf(
+                        /* translators: %s: Example of tariff code-name mapping */
                         esc_html__(
                             'In the list of tariffs in the field "Tariffs" the tariff code is indicated in brackets.\n\r To change the name of the tariff, an entry in the code-name format is added to the field; for multiple changes,\n\r tariffs are separated by a semicolon, for example, an entry that will change the name of tariff 136 and 137 looks like this:%s If the value is not specified, the tariff names will be standard.',
                             'cdekdelivery',
@@ -318,8 +322,9 @@ namespace Cdek\Traits {
                                            ')',
                     'desc_tip'          => true,
                     'description'       => sprintf(
+                        /* translators: 1: Line break 2: Line break */
                         esc_html__(
-                            'All goods must have their weight indicated, if there are goods without %s a specified weight, then for such goods the value from this field will be substituted. %s This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings.',
+                            'All goods must have their weight indicated, if there are goods without %1$s a specified weight, then for such goods the value from this field will be substituted. %2$s This will affect the accuracy of the delivery calculation. The default value is 1 weight unit specified in the settings.',
                             'cdekdelivery',
                         ),
                         "<br>",
@@ -374,6 +379,21 @@ namespace Cdek\Traits {
                     'type'        => 'checkbox',
                     'desc_tip'    => true,
                     'default'     => 'no',
+                ],
+                'product_package_volume_ratio'       => [
+                    'title'             => esc_html__('Package volume safety ratio', 'cdekdelivery'),
+                    'description'       => esc_html__(
+                        'Height calculation mode. 1 (default) uses the legacy per-item ranking algorithm. Values above 1 up to 1.15 switch to the volume-based algorithm and apply the value as a multiplier compensating for free space inside the box (e.g. 1.1 = +10%). Must be between 1 and 1.15.',
+                        'cdekdelivery',
+                    ),
+                    'type'              => 'number',
+                    'desc_tip'          => true,
+                    'default'           => 1,
+                    'custom_attributes' => [
+                        'min'  => 1,
+                        'max'  => 1.15,
+                        'step' => 0.01,
+                    ],
                 ],
                 'services_block_name'                => [
                     'title' => '<h3 style="text-align: center;">'.esc_html__('Services', 'cdekdelivery').'</h3>',
@@ -430,8 +450,9 @@ namespace Cdek\Traits {
                     'title'             => esc_html__('Extra charge on order as a percentage', 'cdekdelivery'),
                     'type'              => 'number',
                     'description'       => sprintf(
+                        /* translators: 1: Opening markup 2: Closing markup */
                         esc_html__(
-                            'Calculated from the cost of the order. Changes the total amount on the receipt.%s The surcharge will only appear on the receipt.%s Therefore, it is recommended to inform the user on the checkout page about extra charges when sending by cash on delivery.',
+                            'Calculated from the cost of the order. Changes the total amount on the receipt.%1$s The surcharge will only appear on the receipt.%2$s Therefore, it is recommended to inform the user on the checkout page about extra charges when sending by cash on delivery.',
                             'cdekdelivery',
                         ),
                         "<br> <b> ",

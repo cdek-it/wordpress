@@ -1,177 +1,292 @@
+/* eslint-disable no-console -- deliberate debug logging, established convention throughout this file */
+/* global ResizeObserver */
 import $ from 'jquery';
 import cdekWidget from '@cdek-it/widget';
 import './style/main.scss';
 import { __ } from '@wordpress/i18n';
-import { debounce } from 'lodash';
-
-const billingCityInput = $('#billing_city');
-const shippingCityInput = $('#shipping_city');
+import { isEqual } from 'lodash';
+const billingCityInput = $( '#billing_city' );
+const shippingCityInput = $( '#shipping_city' );
 const buttonNormalSize = 160;
 const smallFontAttribute = 'aria-small';
+const domesticCountryCode = 'RU';
 
 let needChange;
 let isNormalSize;
 let widget = null;
 let el;
+let checkoutUpdateTimer = null;
+let lastCity = null;
+let lastPointsRaw = null;
 
-if ((billingCityInput.val() || '') !== '' || (shippingCityInput.val() || '') !==
-  '') {
-    console.debug('[CDEK-MAP] City has value, initiating checkout update');
-    $(document.body).trigger('update_checkout');
+if (
+	( billingCityInput.val() || '' ) !== '' ||
+	( shippingCityInput.val() || '' ) !== ''
+) {
+	console.debug( '[CDEK-MAP] City has value, initiating checkout update' );
+	$( document.body ).trigger( 'update_checkout' );
 }
 
-const closeMap = (e, errorMessage = null) => {
-    console.debug('[CDEK-MAP] Removing selected office info');
+const closeMap = ( e, errorMessage = null ) => {
+	console.debug( '[CDEK-MAP] Removing selected office info' );
 
-    $('.cdek-office-info').remove();
-    e.find('a').html(__('Choose pick-up', 'cdekdelivery'));
-    $('.cdek-office-code').val('');
+	$( '.cdek-office-info' ).remove();
+	e.find( 'a' ).html( __( 'Choose pick-up', 'cdekdelivery' ) );
+	$( '.cdek-office-code' ).val( '' );
 
-    if (widget !== null) {
-        widget.clearSelection();
-    }
+	if ( widget !== null ) {
+		widget.clearSelection();
+	}
 
-    if (typeof errorMessage === 'string') {
-        console.debug('[CDEK-MAP] Rendering error message');
+	if ( typeof errorMessage === 'string' ) {
+		console.debug( '[CDEK-MAP] Rendering error message' );
 
-        const triggerBtn = $('.open-pvz-btn');
-        triggerBtn.prev().text(errorMessage);
-        triggerBtn.remove();
-    }
+		const triggerBtn = $( '.open-pvz-btn' );
+		triggerBtn.prev().text( errorMessage );
+		triggerBtn.remove();
+	}
 };
 
-const onChoose = (_type, _tariff, address) => {
-    $('.cdek-office-code').val(address.code);
-    el.find('a').html(__('Re-select pick-up', 'cdekdelivery'));
+const onChoose = ( _type, _tariff, address ) => {
+	$( '.cdek-office-code' ).val( address.code );
+	el.find( 'a' ).html( __( 'Re-select pick-up', 'cdekdelivery' ) );
 
-    const officeInfo = el.parent().children('.cdek-office-info');
-    if (officeInfo.length === 0) {
-        el.before($('<div class="cdek-office-info"></div>').text(address.name));
-    } else {
-        officeInfo.text(address.name);
-    }
+	const officeInfo = el.parent().children( '.cdek-office-info' );
+	if ( officeInfo.length === 0 ) {
+		el.before(
+			$( '<div class="cdek-office-info"></div>' ).text( address.name )
+		);
+	} else {
+		officeInfo.text( address.name );
+	}
 
-    console.debug('[CDEK-MAP] Office selected', address);
+	console.debug( '[CDEK-MAP] Office selected', address );
 
-    if (window.cdek.saver !== undefined){
-        $.post(window.cdek.saver, { code: address.code });
-        $(document.body).trigger('update_checkout');
-    }
+	if ( window.cdek.saver !== undefined ) {
+		$.post( window.cdek.saver, { code: address.code } ).done( () => {
+			$( document.body ).trigger( 'update_checkout' );
+		} );
+	}
 
-    if (window.cdek.close) {
-        widget.close();
-    }
+	if ( window.cdek.close ) {
+		widget.close();
+	}
 };
 
-const debouncedCheckoutUpdate = debounce(() => {
-    if (($('#ship-to-different-address-checkbox').is(':checked')
-      ? shippingCityInput.val()
-      : billingCityInput.val()) === '') {
-        return;
-    }
-    console.debug(
-      '[CDEK-MAP] Checkout values changed, initiating checkout update');
-    if (window.cdek.saver !== undefined){
-        $.post(window.cdek.saver, { code: null })
-    }
+const isCdekShippingSelected = () => {
+	const methods = $(
+		'#shipping_method input[name^="shipping_method"]'
+	).toArray();
 
-    $(document.body).trigger('update_checkout');
-}, 500);
+	if ( ! methods.length ) {
+		return false;
+	}
 
-const resizeObserver = new ResizeObserver(entries => {
-    for (const entry of entries) {
-        if(!('contentRect' in entry) || !('target' in entry) ) {
-            continue;
-        }
+	const checked = methods.filter(
+		( input ) => input.type !== 'radio' || input.checked
+	);
 
-        if (entry.contentRect.width < buttonNormalSize) {
-            if (isNormalSize) {
-                isNormalSize = false;
-                needChange = true;
-            }
-        } else if (!isNormalSize) {
-            isNormalSize = true;
-            needChange = true;
-        }
+	return checked.some(
+		( input ) => ( input.value || '' ).indexOf( 'official_cdek' ) === 0
+	);
+};
 
-        if(!needChange){
-            continue;
-        }
+const isDomesticDestination = () => {
+	const countryInput = $( '#ship-to-different-address-checkbox' ).is(
+		':checked'
+	)
+		? $( '#shipping_country' )
+		: $( '#billing_country' );
 
-        if (isNormalSize) {
-            if (entry.target.hasAttribute(smallFontAttribute)) {
-                entry.target.removeAttribute(smallFontAttribute);
-            }
-        } else if (!entry.target.hasAttribute(smallFontAttribute)) {
-            entry.target.setAttribute(smallFontAttribute, '');
-        }
+	return ( countryInput.val() || '' ).toUpperCase() === domesticCountryCode;
+};
 
-        needChange = false;
-    }
-});
+const toggleInternationalFields = () => {
+	const isVisible = ! isDomesticDestination() && isCdekShippingSelected();
+	const isRequired = isVisible;
+	const fields = $( '.cdek-international-field' );
 
-$(document.body)
-  .on('input',
-    '#billing_city, #billing_postcode, #shipping_city, #shipping_postcode, input[name=payment_method]',
-    debouncedCheckoutUpdate)
-  .on('updated_checkout', () => {
-      const targetNode = document.querySelector('.open-pvz-btn');
+	fields.toggleClass( 'cdek-international-field-hidden', ! isVisible );
+	fields.toggleClass( 'validate-required', isRequired );
 
-      if (widget !== null) {
-          console.debug('[CDEK-MAP] Clearing widget selection');
+	if ( ! isRequired ) {
+		fields
+			.removeClass(
+				'woocommerce-invalid woocommerce-invalid-required-field'
+			)
+			.find( '.input-text, select' )
+			.removeClass(
+				'woocommerce-invalid woocommerce-invalid-required-field'
+			);
+	}
+};
 
-          widget.clearSelection();
-      }
+const debouncedCheckoutUpdate = () => {
+	clearTimeout( checkoutUpdateTimer );
+	checkoutUpdateTimer = setTimeout( () => {
+		if (
+			( $( '#ship-to-different-address-checkbox' ).is( ':checked' )
+				? shippingCityInput.val()
+				: billingCityInput.val() ) === ''
+		) {
+			return;
+		}
+		console.debug(
+			'[CDEK-MAP] Checkout values changed, initiating checkout update'
+		);
+		if ( window.cdek.saver !== undefined ) {
+			$.post( window.cdek.saver, { code: null } );
+		}
 
-      if (targetNode) {
-          needChange = false;
-          isNormalSize = true;
-          resizeObserver.observe(targetNode);
-      }
-  })
-  .on('change', '.shipping_method',
-    () => $(document.body).trigger('update_checkout'))
-  .on('click', '.open-pvz-btn', null, (e) => {
-      el = e.target.tagName === 'A' ? $(e.target.parentElement) : $(e.target);
-      closeMap(el);
+		$( document.body ).trigger( 'update_checkout' );
+	}, 500 );
+};
 
-      try {
-          const points = JSON.parse(el.find('script').text());
-          console.debug('[CDEK-MAP] Got points from backend', points);
+const resizeObserver = new ResizeObserver( ( entries ) => {
+	for ( const entry of entries ) {
+		if ( ! ( 'contentRect' in entry ) || ! ( 'target' in entry ) ) {
+			continue;
+		}
 
-          if (!points.length) {
-              console.warn('[CDEK-MAP] Backend points are empty');
-              closeMap(el, __(
-                'There are no CDEK pick-up points available in this direction, please select another delivery method',
-                'cdekdelivery'));
+		if ( entry.contentRect.width < buttonNormalSize ) {
+			if ( isNormalSize ) {
+				isNormalSize = false;
+				needChange = true;
+			}
+		} else if ( ! isNormalSize ) {
+			isNormalSize = true;
+			needChange = true;
+		}
 
-              return;
-          }
+		if ( ! needChange ) {
+			continue;
+		}
 
-          if (widget === null) {
-              widget = new cdekWidget({
-                  apiKey: window.cdek.key,
-                  popup: true,
-                  debug: true,
-                  lang: window.cdek.lang,
-                  defaultLocation: el.data('city'),
-                  officesRaw: points,
-                  hideDeliveryOptions: {
-                      door: true,
-                  },
-                  onChoose,
-              });
-          } else {
-              widget.updateOfficesRaw(points);
-              widget.updateLocation(el.data('city'));
-          }
+		if ( isNormalSize ) {
+			if ( entry.target.hasAttribute( smallFontAttribute ) ) {
+				entry.target.removeAttribute( smallFontAttribute );
+			}
+		} else if ( ! entry.target.hasAttribute( smallFontAttribute ) ) {
+			entry.target.setAttribute( smallFontAttribute, '' );
+		}
 
-          widget.open();
-      } catch (SyntaxError) {
-          console.error('[CDEK-MAP] SyntaxError during points parse');
+		needChange = false;
+	}
+} );
 
-          closeMap(el, __(
-            'There are no CDEK pick-up points available in this direction, please select another delivery method',
-            'cdekdelivery'));
-      }
-  });
+$( document.body )
+	.on(
+		'input',
+		'#billing_city, #billing_postcode, #shipping_city, #shipping_postcode, input[name=payment_method]',
+		debouncedCheckoutUpdate
+	)
+	.on(
+		'change',
+		'#billing_country, #shipping_country, #ship-to-different-address-checkbox',
+		toggleInternationalFields
+	)
+	.on( 'updated_checkout', () => {
+		toggleInternationalFields();
+
+		const targetNode = document.querySelector( '.open-pvz-btn' );
+
+		if ( widget !== null ) {
+			const currentCity = targetNode
+				? $( targetNode ).data( 'city' )
+				: null;
+			let currentPointsRaw = null;
+
+			if ( targetNode ) {
+				try {
+					currentPointsRaw = JSON.parse(
+						$( targetNode ).find( 'script' ).text()
+					);
+				} catch ( SyntaxError ) {
+					console.error(
+						'[CDEK-MAP] SyntaxError during points parse'
+					);
+
+					currentPointsRaw = null;
+				}
+			}
+
+			if (
+				currentCity !== lastCity ||
+				! isEqual( currentPointsRaw, lastPointsRaw )
+			) {
+				console.debug( '[CDEK-MAP] Clearing widget selection' );
+
+				widget.clearSelection();
+			}
+
+			lastCity = currentCity;
+			lastPointsRaw = currentPointsRaw;
+		}
+
+		if ( targetNode ) {
+			needChange = false;
+			isNormalSize = true;
+			resizeObserver.observe( targetNode );
+		}
+	} )
+	.on( 'change', '.shipping_method', () =>
+		$( document.body ).trigger( 'update_checkout' )
+	)
+	.on( 'click', '.open-pvz-btn', null, ( e ) => {
+		el =
+			e.target.tagName === 'A'
+				? $( e.target.parentElement )
+				: $( e.target );
+		closeMap( el );
+
+		try {
+			const points = JSON.parse( el.find( 'script' ).text() );
+			console.debug( '[CDEK-MAP] Got points from backend', points );
+
+			if ( ! points.length ) {
+				console.warn( '[CDEK-MAP] Backend points are empty' );
+				closeMap(
+					el,
+					__(
+						'There are no CDEK pick-up points available in this direction, please select another delivery method',
+						'cdekdelivery'
+					)
+				);
+
+				return;
+			}
+
+			if ( widget === null ) {
+				widget = new cdekWidget( {
+					apiKey: window.cdek.key,
+					popup: true,
+					debug: true,
+					lang: window.cdek.lang,
+					defaultLocation: el.data( 'city' ),
+					officesRaw: points,
+					hideDeliveryOptions: {
+						door: true,
+					},
+					onChoose,
+				} );
+			} else {
+				widget.updateOfficesRaw( points );
+				widget.updateLocation( el.data( 'city' ) );
+			}
+
+			lastCity = el.data( 'city' );
+			lastPointsRaw = points;
+
+			widget.open();
+		} catch ( SyntaxError ) {
+			console.error( '[CDEK-MAP] SyntaxError during points parse' );
+
+			closeMap(
+				el,
+				__(
+					'There are no CDEK pick-up points available in this direction, please select another delivery method',
+					'cdekdelivery'
+				)
+			);
+		}
+	} );

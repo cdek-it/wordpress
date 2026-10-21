@@ -57,22 +57,26 @@ namespace Cdek\Helpers {
 
             $checkout = WC()->checkout();
 
-            $shippingValue = $checkout->get_value("shipping_$valueName");
-            if (!empty($shippingValue)) {
-                return $shippingValue;
+            // При "Принудительная доставка по платёжному адресу клиента" billing_* приоритетнее.
+            $primaryField   = wc_ship_to_billing_address_only() ? "billing_$valueName" : "shipping_$valueName";
+            $secondaryField = wc_ship_to_billing_address_only() ? "shipping_$valueName" : "billing_$valueName";
+
+            $primaryValue = $checkout->get_value($primaryField);
+            if (!empty($primaryValue)) {
+                return $primaryValue;
             }
 
-            $billingValue = $checkout->get_value("billing_$valueName");
-            if (!empty($billingValue)) {
-                return $billingValue;
+            $secondaryValue = $checkout->get_value($secondaryField);
+            if (!empty($secondaryValue)) {
+                return $secondaryValue;
             }
 
             if (!empty($_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName])) {
-                return wp_strip_all_tags($_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName]);
+                return wp_strip_all_tags(wp_unslash($_REQUEST['extensions'][Config::DELIVERY_NAME][$valueName]));
             }
 
             if (!empty($_REQUEST[$valueName])) {
-                return wp_strip_all_tags($_REQUEST[$valueName]);
+                return wp_strip_all_tags(wp_unslash($_REQUEST[$valueName]));
             }
 
             try {
@@ -90,7 +94,9 @@ namespace Cdek\Helpers {
 
         public static function restoreFields(array $fields): array
         {
-            if (self::getSelectedShippingRate() === null) {
+            $hasCdekRate = self::getSelectedShippingRate() !== null;
+
+            if (!$hasCdekRate && !(new InternationalOrderFields)->isModeEnabled()) {
                 return $fields;
             }
 
@@ -101,7 +107,16 @@ namespace Cdek\Helpers {
 
                 assert($fieldsetInstance instanceof FieldsetContract);
 
-                if (!$fieldsetInstance->isApplicable()) {
+                $isInternational = $fieldsetInstance instanceof InternationalOrderFields;
+
+                if ($isInternational ? !$fieldsetInstance->isModeEnabled() : !$fieldsetInstance->isApplicable()) {
+                    continue;
+                }
+
+                // Скрываем при доставке по РФ и когда нет тарифа СДЭК (нет тарифа — паспортные данные не нужны)
+                $hideInternational = $isInternational && ($fieldsetInstance->isDomestic() || !$hasCdekRate);
+
+                if (!$hasCdekRate && !$isInternational) {
                     continue;
                 }
 
@@ -111,8 +126,18 @@ namespace Cdek\Helpers {
                             $fieldsetInstance->getFieldDefinition($field) : $originalFields[$field];
                     }
 
-                    if ($fieldsetInstance->isRequiredField($field)) {
+                    if ($isInternational) {
+                        $fields['billing'][$field]['class'][] = 'cdek-international-field';
+
+                        if ($hideInternational) {
+                            $fields['billing'][$field]['class'][] = 'cdek-international-field-hidden';
+                        }
+                    }
+
+                    if ($fieldsetInstance->isRequiredField($field) && !$hideInternational) {
                         $fields['billing'][$field]['required'] = true;
+                    } elseif ($isInternational) {
+                        $fields['billing'][$field]['required'] = false;
                     }
                 }
             }
@@ -157,6 +182,23 @@ namespace Cdek\Helpers {
         public static function isShippingRateSuitable(WC_Shipping_Rate $rate): bool
         {
             return $rate->get_method_id() === Config::DELIVERY_NAME;
+        }
+
+        /** @noinspection GlobalVariableUsageInspection */
+        public static function isCheckoutRequest(): bool
+        {
+            // Классический (shortcode) чекаут отправляется обычным POST/AJAX на страницу
+            // чекаута (wc-ajax=checkout), а не на Store API - строковые проверки ниже его
+            // не ловят, поэтому нужен отдельный WC-условный тег.
+            if (function_exists('is_checkout') && is_checkout()) {
+                return true;
+            }
+
+            $restRoute = isset($_GET['rest_route']) ? wp_unslash((string)$_GET['rest_route']) : '';
+            $uri       = isset($_SERVER['REQUEST_URI']) ? (string)$_SERVER['REQUEST_URI'] : '';
+
+            return strpos($restRoute, '/wc/store/v1/checkout') === 0
+                || strpos($uri, '/wc/store/v1/checkout') !== false;
         }
     }
 }

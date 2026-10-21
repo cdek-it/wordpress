@@ -86,19 +86,27 @@ namespace Cdek {
 
                 if (!isset($body->json()['access_token'])) {
                     throw new LegacyAuthException(array_merge($body->json(), [
-                        'host'   => parse_url($this->apiUrl, PHP_URL_HOST),
+                        'host'   => wp_parse_url($this->apiUrl, PHP_URL_HOST),
                         'client' => $clientId,
                     ]));
                 }
 
                 return $body->json()['access_token'];
             } catch (ApiException $e) {
+                // phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- values are escaped individually via esc_html() above
                 throw new LegacyAuthException(
-                    array_merge($e->getData(), [
-                        'host'   => parse_url($this->apiUrl, PHP_URL_HOST),
-                        'client' => $clientId,
-                    ]),
+                    array_merge(
+                        array_map(
+                            static fn($value) => is_array($value) ? $value : esc_html((string) $value),
+                            $e->getData(),
+                        ),
+                        [
+                            'host'   => esc_html((string) wp_parse_url($this->apiUrl, PHP_URL_HOST)),
+                            'client' => esc_html((string) $clientId),
+                        ],
+                    ),
                 );
+                // phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
             }
         }
 

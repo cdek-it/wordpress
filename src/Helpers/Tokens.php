@@ -61,7 +61,7 @@ namespace Cdek\Helpers {
                     'command',
                     Parser::getPublic(AsymmetricPublicKey::fromEncodedString($keyring[$kid]))
                           ->addRule(new ValidAt)
-                          ->addRule(new ForAudience(parse_url(rest_url(), PHP_URL_HOST)))
+                          ->addRule(new ForAudience(wp_parse_url(rest_url(), PHP_URL_HOST)))
                           ->parse($token)
                           ->getSubject(),
                 );

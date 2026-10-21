@@ -4,93 +4,446 @@ image:
   entrypoint: ['']
 #
 stages:
-  - sync
+  - maintenance
+  - validate
+  - checks
+  - sonar
   - build
-  - test
   - upload
   - deploy
+  - sync
 
-build_tag:
+variables:
+  SELECT_JOB:
+    value: "none"
+    options:
+      - "none"
+      - "migrate-tag-to-github"
+      - "release"
+    description: "Выберите запуск job"
+
+  MIGRATE_TAG:
+    value: ""
+    description: "Тег для переноса из GitLab в GitHub. Например: v4.2.5"
+
+  RELEASE_TAG:
+    value: ""
+    description: "Тег для публикации релиза (GitLab Release + миграция в GitHub). Например: v4.2.5"
+
+# Общие проверки для push в ветку (feature-ветку ИЛИ main) И для тега vX.Y.Z:
+# validate -> checks (lint/static-analysis/unit-tests параллельно).
+# Не запускается при ручном запуске migrate-tag-to-github/release.
+.branch_pipeline_rules: &branch_pipeline_rules
+  - if: $SELECT_JOB == "migrate-tag-to-github"
+    when: never
+  - if: $SELECT_JOB == "release"
+    when: never
+  - if: $CI_COMMIT_TAG
+    when: always
+  - if: $CI_COMMIT_BRANCH
+    when: always
+
+# Шаги основного пайплайна main (push после merge request) и тег-пайплайна (release candidate): sonar.
+# build_custom/deploy-staging/github управляются собственными rules у соответствующих job.
+.main_branch_rules: &main_branch_rules
+  - if: $SELECT_JOB == "migrate-tag-to-github"
+    when: never
+  - if: $SELECT_JOB == "release"
+    when: never
+  - if: $CI_COMMIT_TAG
+    when: always
+  - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    when: always
+  - when: never
+
+validate:
+  image: docker-proxy.cdek.ru/php:8.2-alpine
+  stage: validate
+  tags:
+    - docker
+  rules: *branch_pipeline_rules
+  variables:
+    COMPOSER_CACHE_DIR: "${CI_PROJECT_DIR}/.composer-cache"
+  cache:
+    key:
+      files:
+        - composer.lock
+    paths:
+      - .composer-cache/
+    policy: pull-push
+  before_script:
+    - set -eux
+    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
+    - apk add --no-cache composer php85-ctype php85-dom php85-simplexml php85-tokenizer php85-xml php85-xmlwriter php85-xmlreader
+    - ln -sf "$(command -v php85)" /usr/bin/php
+    - composer --version
+  script:
+    - composer validate
+    - composer install --no-interaction --prefer-dist --ignore-platform-req=ext-gmp
+    - composer audit
+  artifacts:
+    paths:
+      - vendor/
+    expire_in: 1 hour
+
+lint:
+  image: docker-proxy.cdek.ru/php:8.2-alpine
+  stage: checks
+  tags:
+    - docker
+  rules: *branch_pipeline_rules
+  variables:
+    GIT_DEPTH: "0"
+    YARN_CACHE_FOLDER: .yarn/cache
+    YARN_ENABLE_GLOBAL_CACHE: "false"
+    YARN_ENABLE_IMMUTABLE_INSTALLS: "true" # `workspaces focus` не понимает флаг --immutable, только эту переменную
+    npm_config_cache: .npm
+  cache:
+    key:
+      files:
+        - yarn.lock
+        - package.json
+    paths:
+      - .yarn/cache/
+      - .yarn/install-state.gz
+      - .npm/_prebuilds/
+    policy: pull
+  before_script:
+    - set -eux
+    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
+    - apk add --no-cache composer php85-ctype php85-dom php85-simplexml php85-tokenizer php85-xml php85-xmlwriter php85-xmlreader bash nodejs-current git
+    - ln -sf "$(command -v php85)" /usr/bin/php
+    - php -v
+    - node --version
+  script:
+    - find src -name "*.php" -print0 | xargs -0 -n1 php -l
+    - bash bin/phpcs-diff.sh
+    - |
+      # workspaces focus — ставит зависимости только корневого пакета, пропуская workspace guide (Docusaurus), для сборки которого тут нет нужных инструментов
+      for attempt in 1 2 3; do
+        echo "Yarn install attempt ${attempt}/3"
+
+        if node .yarn/releases/yarn-4.8.1.cjs workspaces focus; then
+          break
+        fi
+
+        if [ "$attempt" -eq 3 ]; then
+          echo "Yarn install failed after 3 attempts"
+          exit 1
+        fi
+
+        echo "Yarn install failed, retrying in 20 seconds..."
+        sleep 20
+      done
+    - bash bin/lint-js-diff.sh
+    - bash bin/lint-css-diff.sh
+
+static-analysis:
+  image: docker-proxy.cdek.ru/php:8.2-alpine
+  stage: checks
+  tags:
+    - docker
+  rules: *branch_pipeline_rules
+  before_script:
+    - set -eux
+    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
+    - apk add --no-cache composer php85-ctype php85-dom php85-simplexml php85-tokenizer php85-xml php85-xmlwriter php85-xmlreader
+    - ln -sf "$(command -v php85)" /usr/bin/php
+  script:
+    - vendor/bin/phpstan analyse --no-progress --memory-limit=1536M
+
+unit-tests:
+  image: docker-proxy.cdek.ru/php:8.2-alpine
+  stage: checks
+  tags:
+    - docker
+  rules: *branch_pipeline_rules
+  before_script:
+    - set -eux
+    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
+    - apk add --no-cache composer php85 php85-pecl-pcov php85-ctype php85-dom php85-simplexml php85-tokenizer php85-xml php85-xmlwriter php85-xmlreader php85-mbstring php85-json php85-phar php85-openssl php85-iconv
+    - php85 -v
+    - php85 -m | grep -qi pcov
+  script:
+    - php85 vendor/bin/phpunit --colors=never --log-junit junit-report.xml --coverage-clover=coverage.xml
+  artifacts:
+    when: always
+    paths:
+      - junit-report.xml
+      - coverage.xml
+    reports:
+      junit: junit-report.xml
+
+sonarqube-check:
+  image:
+    name: docker-proxy.cdek.ru/sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  variables:
+    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
+    GIT_DEPTH: "0"
+  cache:
+    key: "${CI_JOB_NAME}"
+    paths:
+      - .sonar/cache
+  tags:
+    - docker
+  stage: sonar
+  rules: *main_branch_rules
+  needs:
+    - job: validate
+      artifacts: true
+    - job: unit-tests
+      artifacts: true
+  script:
+    - sonar-scanner
+  allow_failure: true
+
+build-tag:
   image: docker-proxy.cdek.ru/php:8.2-alpine
   stage: build
   tags:
     - docker
   only:
     - tags
+
+  variables:
+    YARN_CACHE_FOLDER: .yarn/cache
+    YARN_ENABLE_GLOBAL_CACHE: "false"
+    YARN_ENABLE_IMMUTABLE_INSTALLS: "true" # `workspaces focus` не понимает флаг --immutable, только эту переменную
+    YARN_ENABLE_INLINE_BUILDS: "true" # то же самое вместо флага --inline-builds (лог сборки нативных модулей сразу в вывод job'а)
+    npm_config_cache: .npm
+
+  cache:
+    key:
+      files:
+        - yarn.lock
+        - package.json
+    paths:
+      - .yarn/cache/
+      - .yarn/install-state.gz
+      - .npm/_prebuilds/
+    policy: pull-push
+
   before_script:
+    - set -eux
     - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
-    - apk add nodejs-current yarn
-    - curl -v -sS https://getcomposer.org/installer | php
-    - mv composer.phar /usr/local/bin/composer
-    - corepack enable
+    - apk add --no-cache nodejs-current composer
+    - composer --version
+    - node --version
+
   script:
     - sed -i "s/\(Version:\)\( *\).*/\1\2${RELEASE_VERSION}/" cdek.php
     - sed -i "s/\(Stable tag:\)\( *\).*/\1\2${RELEASE_VERSION}/" README.md
     - sed -i "s/\(Project-Id-Version:\)\( *\).*/\1\2CDEKDelivery ${RELEASE_VERSION}\"/" lang/cdekdelivery.pot
-    - yarn
-    - yarn build
+    - |
+      # workspaces focus - ставит зависимости только корневого пакета, пропуская workspace guide (Docusaurus), который в архив релиза и так не попадает
+      for attempt in 1 2 3; do
+        echo "Yarn install attempt ${attempt}/3"
+
+        if node .yarn/releases/yarn-4.8.1.cjs workspaces focus; then
+          break
+        fi
+
+        if [ "$attempt" -eq 3 ]; then
+          echo "Yarn install failed after 3 attempts"
+          exit 1
+        fi
+
+        echo "Yarn install failed, retrying in 20 seconds..."
+        sleep 20
+      done
+    - node .yarn/releases/yarn-4.8.1.cjs build
     - rm -rf node_modules
-    - composer remove --no-install --ignore-platform-req=ext-gmp composer/installers
+    # `--update-no-dev` не даёт composer резолвить require-dev (phpunit/wpcs и т.п.) на этом шаге.
+    # для release-сборки они не нужны и не установлены (ext-dom/tokenizer/simplexml отсутствуют).
+    # `|| true`: при --no-install composer честно переписывает composer.json/lock, но ругается,
+    # что пакет физически ещё лежит в vendor/ (ожидаемо до следующего шага с install).
+    - composer remove --no-install --update-no-dev --ignore-platform-req=ext-gmp composer/installers || true
     - composer i -a --no-dev --ignore-platform-req=ext-gmp
+    - php -r '$d = json_decode(file_get_contents("composer.json"), true); unset($d["repositories"]); file_put_contents("composer.json", json_encode($d, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);'
     - composer archive -f zip --file=cdek
+
   artifacts:
     name: cdek-integration
     paths:
       - cdek.zip
 
-build_custom:
+build-custom:
   image: docker-proxy.cdek.ru/php:8.2-alpine
   rules:
+    - if: $SELECT_JOB == "migrate-tag-to-github"
+      when: never
+    - if: $SELECT_JOB == "release"
+      when: never
+    # На тегах не нужен - build-tag + upload уже покрывают релизный артефакт, build-custom тут дублировал бы его
+    - if: $CI_COMMIT_TAG
+      when: never
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
       when: always
+    # feature-ветка: собрать zip автоматически после прохождения unit-tests
+    - if: $CI_COMMIT_BRANCH
+      when: on_success
     - when: manual
   stage: build
   tags:
     - docker
+  variables:
+    YARN_CACHE_FOLDER: .yarn/cache
+    YARN_ENABLE_GLOBAL_CACHE: "false"
+    YARN_ENABLE_IMMUTABLE_INSTALLS: "true" # `workspaces focus` не понимает флаг --immutable, только эту переменную
+    YARN_ENABLE_INLINE_BUILDS: "true" # то же самое вместо флага --inline-builds (лог сборки нативных модулей сразу в вывод job'а)
+    npm_config_cache: .npm
+  cache: !reference [build-tag, cache]
   artifacts:
     name: cdek-integration
     paths:
       - cdek.zip
   before_script:
-    - !reference [build_tag, before_script]
+    - !reference [build-tag, before_script]
     - export RELEASE_VERSION="${CI_COMMIT_REF_NAME}#${CI_COMMIT_SHORT_SHA}"
   script:
-    - !reference [build_tag, script]
+    - !reference [build-tag, script]
 
 upload:
   stage: upload
   tags:
     - docker
   needs:
-    - job: build_tag
+    - job: build-tag
       artifacts: true
   only:
     - tags
+  variables:
+    NEXUS_URL: https://repo.cdek.tech
+    NEXUS_COMPOSER_REPO: php-private
   before_script:
     - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
-    - export ARCHIVE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/\./_/g')
-  script:
-    - curl -u "${NEXUS_LOGIN}":"${NEXUS_PASS}" --upload-file cdek.zip "${ARTIFACTORY_REPO}/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH/wordpress_${ARCHIVE_VERSION}.zip"
-
-release:
-  stage: deploy
-  tags:
-    - docker
-  needs:
-    - job: upload
-  only:
-    - tags
-  image: registry-gitlab.cdek.ru/gitlab-org/release-cli:latest
-  before_script:
-    - export RELEASE_VERSION=$(echo "${CI_COMMIT_TAG}" | sed 's/v//')
-    - export ARCHIVE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/\./_/g')
   script:
     - |
-      release-cli create --name $CI_COMMIT_TAG --tag-name $CI_COMMIT_TAG \
-        --assets-link "{\"name\":\"Архив\",\"filepath\":\"/archive\",\"url\":\"${ARTIFACTORY_REPO}$CI_COMMIT_BRANCH/$CI_PROJECT_NAME/wordpress_${ARCHIVE_VERSION}.zip\", \"link_type\":\"package\"}" \
+      HTTP_CODE=$(curl -sS -o nexus-response.txt -w "%{http_code}" -u "${NEXUS_LOGIN}":"${NEXUS_PASS}" \
+        -F "version=${RELEASE_VERSION}" -F "asset=@cdek.zip;type=application/zip" \
+        "${NEXUS_URL}/service/rest/v1/components?repository=${NEXUS_COMPOSER_REPO}")
+      cat nexus-response.txt
+      case "$HTTP_CODE" in
+        2??) echo "Uploaded cdek.zip ${RELEASE_VERSION} to ${NEXUS_COMPOSER_REPO} (HTTP ${HTTP_CODE})" ;;
+        *) echo "ERROR: Nexus upload failed (HTTP ${HTTP_CODE})"; exit 1 ;;
+      esac
 
-deploy_staging:
+release:
+  image: registry-gitlab.cdek.ru/gitlab-org/release-cli:latest
+  stage: maintenance
+  tags:
+    - docker
+  variables:
+    GIT_DEPTH: "0"
+  rules:
+    - if: '$CI_PIPELINE_SOURCE != "web"'
+      when: never
+    - if: '$CI_COMMIT_TAG'
+      when: never
+    - if: '$CI_COMMIT_REF_PROTECTED != "true"'
+      when: never
+    - if: '$SELECT_JOB == "release"'
+      when: on_success
+    - when: never
+  before_script:
+    - set -eu
+    - test -n "${RELEASE_TAG:-}"
+    - echo "${RELEASE_TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$'
+    # migrate-tag-to-github ожидает MIGRATE_TAG - переиспользуем его before_script целиком
+    # (ssh/git-lfs/apk-репо/github remote), чтобы не дублировать настройку
+    - export MIGRATE_TAG="${RELEASE_TAG}"
+    - !reference [migrate-tag-to-github, before_script]
+    - apk add --no-cache curl jq
+  script:
+    - set -eu
+    - export RELEASE_VERSION=$(echo "${RELEASE_TAG}" | sed 's/v//')
+    - export ARCHIVE_VERSION=$(echo "${RELEASE_VERSION}" | sed 's/\./_/g')
+    - export NEXUS_URL="${NEXUS_URL:-https://repo.cdek.tech}"
+    - export NEXUS_COMPOSER_REPO="${NEXUS_COMPOSER_REPO:-php-private}"
+
+    # Тег должен существовать в GitLab
+    - echo "Checking tag ${RELEASE_TAG} exists in GitLab..."
+    - git ls-remote --exit-code --tags origin "refs/tags/${RELEASE_TAG}" >/dev/null
+
+    # Артефакт для тега должен быть уже загружен в Nexus (job upload тег-пайплайна).
+    # В Composer hosted репозитории путь к файлу формирует сам Nexus, поэтому ссылку на архив берём из поиска
+    # по компоненту (репозиторий + версия), а не собираем вручную.
+    - |
+      echo "Searching artifact ${RELEASE_VERSION} in Nexus repository ${NEXUS_COMPOSER_REPO}..."
+      SEARCH_URL="${NEXUS_URL}/service/rest/v1/search/assets?repository=${NEXUS_COMPOSER_REPO}&version=${RELEASE_VERSION}"
+      SEARCH_RESULT=$(curl -sfS -u "${NEXUS_LOGIN}":"${NEXUS_PASS}" "${SEARCH_URL}") || {
+        echo "ERROR: Nexus search request failed: ${SEARCH_URL}"
+        exit 1
+      }
+      export ARCHIVE_URL=$(echo "${SEARCH_RESULT}" | jq -r '[.items[] | select(.contentType == "application/zip")][0].downloadUrl // empty')
+      if [ -z "${ARCHIVE_URL}" ]; then
+        echo "ERROR: artifact ${RELEASE_VERSION} not found in Nexus repository ${NEXUS_COMPOSER_REPO}"
+        exit 1
+      fi
+      echo "Artifact: ${ARCHIVE_URL}"
+
+    # Текст релиза
+    - export RELEASE_DESCRIPTION="$(git for-each-ref "refs/tags/${RELEASE_TAG}" --format='%(contents)')"
+
+    - echo "Creating GitLab Release ${RELEASE_TAG}..."
+    - |
+      set +e
+      RELEASE_OUTPUT=$(release-cli create --name "${RELEASE_TAG}" --tag-name "${RELEASE_TAG}" \
+        --description "${RELEASE_DESCRIPTION}" \
+        --assets-link "{\"name\":\"Архив\",\"filepath\":\"/archive\",\"url\":\"${ARCHIVE_URL}\", \"link_type\":\"package\"}" 2>&1)
+      RELEASE_EXIT=$?
+      set -e
+      echo "${RELEASE_OUTPUT}"
+      if [ "${RELEASE_EXIT}" -ne 0 ]; then
+        if echo "${RELEASE_OUTPUT}" | grep -q "Release already exists"; then
+          echo "GitLab Release ${RELEASE_TAG} already exists, skipping."
+        else
+          exit "${RELEASE_EXIT}"
+        fi
+      fi
+
+    # Migrate tag to GitHub
+    - !reference [migrate-tag-to-github, script]
+
+    # GitHub Release (черновик).
+    - |
+      GITHUB_OWNER_REPO=$(echo "${GITHUB_REPO}" | sed -E 's#^(git@|ssh://git@)?github\.com[:/]##; s#\.git$##')
+      echo "Creating GitHub Release (draft) for ${GITHUB_OWNER_REPO}@${RELEASE_TAG}..."
+
+      CREATE_RESPONSE=$(curl -s -w '\n%{http_code}' -X POST \
+        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        -H "Accept: application/vnd.github+json" \
+        -H "X-GitHub-Api-Version: 2022-11-28" \
+        "https://api.github.com/repos/${GITHUB_OWNER_REPO}/releases" \
+        -d "$(jq -n --arg tag "${RELEASE_TAG}" --arg name "${RELEASE_TAG}" --arg body "${RELEASE_DESCRIPTION}" \
+              '{tag_name: $tag, name: $name, body: $body, draft: true}')")
+
+      HTTP_CODE=$(echo "${CREATE_RESPONSE}" | tail -n1)
+      CREATE_BODY=$(echo "${CREATE_RESPONSE}" | sed '$d')
+
+      if [ "$HTTP_CODE" != "201" ]; then
+        echo "ERROR: failed to create GitHub Release (HTTP ${HTTP_CODE}): ${CREATE_BODY}"
+        exit 1
+      fi
+
+      RELEASE_ID=$(echo "${CREATE_BODY}" | jq -r '.id')
+      UPLOAD_URL=$(echo "${CREATE_BODY}" | jq -r '.upload_url' | sed 's/{?name,label}//')
+
+      echo "Downloading artifact from Nexus for GitHub asset upload..."
+      curl -sf -u "${NEXUS_LOGIN}":"${NEXUS_PASS}" -o cdek.zip "${ARCHIVE_URL}"
+
+      echo "Uploading asset to GitHub release ${RELEASE_ID}..."
+      curl -sf -X POST \
+        -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+        -H "Content-Type: application/zip" \
+        --data-binary @cdek.zip \
+        "${UPLOAD_URL}?name=wp_cdek-delivery_${ARCHIVE_VERSION}.zip"
+
+      echo "GitHub Release draft created: id=${RELEASE_ID}"
+
+deploy-staging:
   stage: deploy
   image: docker-proxy.cdek.ru/alpine
   script:
@@ -99,11 +452,11 @@ deploy_staging:
   tags:
     - docker
   rules:
-    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
-      when: always
+    # Временно отключено: стенд для staging ещё не поднят. Включить обратно, вернув
+    # `- if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH` / `when: always`, когда появится DEPLOY_NODE.
     - when: never
   needs:
-    - job: build_custom
+    - job: build-custom
       artifacts: true
   environment:
     name: dev2
@@ -121,9 +474,15 @@ deploy_staging:
 github:
   image: docker-proxy.cdek.ru/alpine
   stage: sync
+  variables:
+    GIT_DEPTH: 0
   tags:
     - docker
   rules:
+    - if: $SELECT_JOB == "migrate-tag-to-github"
+      when: never
+    - if: $SELECT_JOB == "release"
+      when: never
     - if: $CI_COMMIT_REF_PROTECTED != "true"
       when: never
     - if: $CI_COMMIT_TAG
@@ -136,32 +495,110 @@ github:
     - chmod 400 ~/.ssh/id_integrator
     - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
     - apk add --no-cache git netcat-openbsd openssh-client git-lfs
-    - git config checkout.defaultRemote origin
-    - git remote add -f github "${GITHUB_REPO}" || true
+    - git remote add github "${GITHUB_REPO}" 2>/dev/null || git remote set-url github "${GITHUB_REPO}"
+    - git fetch github
   script:
-    - git branch -D $CI_COMMIT_REF_NAME || true
-    - git checkout --track origin/$CI_COMMIT_REF_NAME
-    - git pull -f --unshallow
-    - git fetch github $CI_COMMIT_REF_NAME
-    - git branch -u github/$CI_COMMIT_REF_NAME
-    - git push
+    # `-B` принудительно переставляет локальную ветку на origin/$CI_COMMIT_REF_NAME,
+    # т.к. workspace раннера переиспользуется между запусками и просто `checkout`
+    # может оставить ветку на устаревшем коммите с предыдущего пайплайна.
+    - git checkout -B "$CI_COMMIT_REF_NAME" "origin/$CI_COMMIT_REF_NAME"
+    - git push github "HEAD:refs/heads/$CI_COMMIT_REF_NAME"
 
-sonarqube-check:
-  image:
-    name: docker-proxy.cdek.ru/sonarsource/sonar-scanner-cli:latest
-    entrypoint: [""]
+migrate-tag-to-github:
+  image: docker-proxy.cdek.tech/alpine
+  stage: maintenance
+
   variables:
-    SONAR_USER_HOME: "${CI_PROJECT_DIR}/.sonar"
     GIT_DEPTH: "0"
-  cache:
-    key: "${CI_JOB_NAME}"
-    paths:
-      - .sonar/cache
+
   tags:
     - docker
-  stage: test
+
+  rules:
+    # Только запуск через GitLab UI: Build → Pipelines → New pipeline
+    - if: '$CI_PIPELINE_SOURCE != "web"'
+      when: never
+
+    # Не запускать из tag pipeline
+    - if: '$CI_COMMIT_TAG'
+      when: never
+
+    # Только protected branch, чтобы были доступны protected variables
+    - if: '$CI_COMMIT_REF_PROTECTED != "true"'
+      when: never
+
+    # Запускать только если явно выбрали эту job
+    - if: '$SELECT_JOB == "migrate-tag-to-github"'
+      when: on_success
+
+    - when: never
+
+  before_script:
+    - set -eu
+
+    - test -n "${MIGRATE_TAG:-}"
+    - echo "${MIGRATE_TAG}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$'
+
+    - mkdir -p ~/.ssh
+    - echo "$SSH_CONFIG" > ~/.ssh/config
+    - echo "$GITHUB_DEPLOY_KEY" > ~/.ssh/id_integrator
+    - chmod 400 ~/.ssh/id_integrator
+
+    - sed -i 's/dl-cdn.alpinelinux.org/repo.cdek.ru\/repository/g' /etc/apk/repositories
+    - apk add --no-cache git netcat-openbsd openssh-client git-lfs
+
+    - git lfs install --local
+
+    - git remote remove github 2>/dev/null || true
+    - git remote add github "${GITHUB_REPO}"
+
   script:
-    - sonar-scanner
-  allow_failure: true
-  only:
-    - main
+    - set -eu
+
+    - echo "Migrating tag ${MIGRATE_TAG} from GitLab to GitHub"
+
+    # Удаляем локальный тег, если он уже есть, чтобы точно взять его из GitLab origin
+    - git tag -d "${MIGRATE_TAG}" 2>/dev/null || true
+
+    # Забираем тег из GitLab
+    - git fetch origin "refs/tags/${MIGRATE_TAG}:refs/tags/${MIGRATE_TAG}"
+
+    # Commit, на который указывает GitLab tag
+    - |
+      export GITLAB_TAG_COMMIT="$(git rev-parse "${MIGRATE_TAG}^{commit}")"
+      echo "GitLab ${MIGRATE_TAG} commit: ${GITLAB_TAG_COMMIT}"
+
+    # Проверяем, есть ли такой тег в GitHub
+    - |
+      export MIGRATE_TAG_SKIP=""
+      if git ls-remote --exit-code --tags github "refs/tags/${MIGRATE_TAG}" >/dev/null 2>&1; then
+        echo "Tag ${MIGRATE_TAG} already exists in GitHub. Checking commit..."
+
+        git tag -d "github-${MIGRATE_TAG}" 2>/dev/null || true
+        git fetch github "+refs/tags/${MIGRATE_TAG}:refs/tags/github-${MIGRATE_TAG}"
+
+        GITHUB_TAG_COMMIT="$(git rev-parse "github-${MIGRATE_TAG}^{commit}")"
+        echo "GitHub ${MIGRATE_TAG} commit: ${GITHUB_TAG_COMMIT}"
+
+        if [ "${GITLAB_TAG_COMMIT}" != "${GITHUB_TAG_COMMIT}" ]; then
+          echo "ERROR: GitHub tag ${MIGRATE_TAG} points to different commit"
+          exit 1
+        fi
+
+        echo "Tag ${MIGRATE_TAG} already exists in GitHub and points to the same commit. Nothing to migrate."
+        export MIGRATE_TAG_SKIP="1"
+      fi
+
+    - |
+      if [ -z "${MIGRATE_TAG_SKIP}" ]; then
+        # Проверяем, что коммит тега уже есть на GitHub
+        git fetch github main
+        if ! git merge-base --is-ancestor "${GITLAB_TAG_COMMIT}" github/main; then
+          echo "ERROR: commit ${GITLAB_TAG_COMMIT} (tag ${MIGRATE_TAG}) not found in GitHub main. Sync branches to GitHub first."
+          exit 1
+        fi
+
+        git push github "refs/tags/${MIGRATE_TAG}:refs/tags/${MIGRATE_TAG}"
+
+        echo "Tag ${MIGRATE_TAG} migrated to GitHub successfully"
+      fi

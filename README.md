@@ -1,9 +1,9 @@
 === CDEKDelivery ===
-Contributors: cdekit, caelan
+Contributors: cdekit, au777
 Tags: ecommerce, shipping, delivery, woocommerce
 Requires at least: 6.0
 Requires PHP: 7.4
-Tested up to: 6.8
+Tested up to: 7.0
 Stable tag: 4.2.0
 License: GPLv3
 
@@ -67,6 +67,23 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 
 == Changelog ==
 
+= 5.1 =
+* WP-324 New logic for calculating dimensions
+* WP-334 Fixed an error when retrieving rates
+* WP-337 Optimized adding products to the cart
+* WP-330 Updated instructions
+* WP-290 Displaying fields for international delivery
+* WP-292 Fixed WooCommerce delivery settings
+* WP-311 Creating a waybill creation task before order payment
+* WP-362 Optimize pickup point code handling in block checkout
+
+= 5.0 =
+* CMS-1327 Add support WordPress 7.0
+* WP-301 Fixed validation fields on order update
+* WP-303 Update docs
+* WP-318 Fixed the pickup point selection reset (classic checkout)
+* WP-331 Added compatibility with WooCommerce 11
+
 = 4.2 =
 * WP-167 Add tool to set Uin for gold items in order
 * WP-200 Fixed errors with shipments detection
@@ -74,6 +91,10 @@ You can check out the plugin documentation at [site](https://cdek-it.github.io/w
 * WP-203 Fixed vat calculation for waybills
 * WP-211 Fixed error with shipment creation on new checkout due to missing office
 * WP-214 Fixed critical error on plugin activation and checkout
+* WP-230 Fixed error with deleted from stock items
+* WP-282 Fixed the pickup point selection reset
+* WP-289 Fixed error on barcode printing
+* WP-273 Fixed the pickup point selection button
 
 = 4.1 =
 * WP-97 Cdek delivery logger

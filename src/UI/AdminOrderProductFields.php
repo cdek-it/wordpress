@@ -14,9 +14,9 @@ namespace Cdek\UI {
 
     class AdminOrderProductFields
     {
-        public function __invoke(int $itemId, ?WC_Order_Item $item, ?WC_Product $product): void
+        public function __invoke(int $itemId, ?WC_Order_Item $item, $_product): void
         {
-            if ($item === null || $product === null) {
+            if ($item === null) {
                 return;
             }
 
@@ -46,6 +46,7 @@ namespace Cdek\UI {
             echo '<br/>';
 
             if (empty($jewel_uin_value)){
+                // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_render_action_buttons() escapes internally
                 echo wc_render_action_buttons(
                     [
                         [
@@ -59,9 +60,9 @@ namespace Cdek\UI {
 
             echo sprintf(
                 '<div class="%s-uin-input-container%s" data-id="%s">',
-                Config::DELIVERY_NAME,
+                esc_attr(Config::DELIVERY_NAME),
                 empty($jewel_uin_value) ? ' hidden' : '',
-                $itemId,
+                esc_attr($itemId),
             );
 
             woocommerce_wp_text_input(
@@ -73,6 +74,7 @@ namespace Cdek\UI {
                 ]
             );
 
+            // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_render_action_buttons() escapes internally
             echo wc_render_action_buttons(
                 [
                     [

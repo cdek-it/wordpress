@@ -54,7 +54,7 @@ namespace Cdek\Transport {
         {
             if (!isset($this->headers['content-type']) ||
                 strpos($this->headers['content-type'], 'application/json') === false) {
-                throw new UnparsableAnswerException($this->body, $this->url, $this->method);
+                throw new UnparsableAnswerException(esc_html($this->body), esc_html($this->url), esc_html($this->method));
             }
 
             if ($this->decodedBody === null) {
@@ -66,7 +66,7 @@ namespace Cdek\Transport {
                         JSON_THROW_ON_ERROR | JSON_INVALID_UTF8_SUBSTITUTE,
                     );
                 } catch (JsonException $e) {
-                    throw new UnparsableAnswerException($this->body, $this->url, $this->method);
+                    throw new UnparsableAnswerException(esc_html($this->body), esc_html($this->url), esc_html($this->method));
                 }
             }
 
@@ -86,7 +86,15 @@ namespace Cdek\Transport {
          */
         public function error(): ?array
         {
-            return $this->json()['error'] ?? $this->legacyRequestErrors()[0] ?? null;
+            $error = $this->json()['error'] ?? $this->legacyRequestErrors()[0] ?? null;
+
+            if ($error === null || is_array($error)) {
+                return $error;
+            }
+
+            // API иногда присылает `error` строкой вместо объекта нормализуем,
+            // чтобы не ловить TypeError на объявленном ?array.
+            return ['message' => (string)$error];
         }
 
         /**

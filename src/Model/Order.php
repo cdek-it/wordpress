@@ -103,8 +103,12 @@ namespace Cdek\Model {
             }
 
             if (in_array($key, self::CHECKOUT_FIELDS, true)) {
-                $val = call_user_func([$this->order, "get_shipping_$key"]) ?:
-                    call_user_func([$this->order, "get_billing_$key"]);
+                [$primaryPrefix, $secondaryPrefix] = wc_ship_to_billing_address_only()
+                    ? ['billing', 'shipping']
+                    : ['shipping', 'billing'];
+
+                $val = call_user_func([$this->order, "get_{$primaryPrefix}_$key"]) ?:
+                    call_user_func([$this->order, "get_{$secondaryPrefix}_$key"]);
 
                 return !empty($val) ? trim($val) : null;
             }

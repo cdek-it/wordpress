@@ -1,0 +1,96 @@
+version: "3"
+
+vars:
+  YARN: node .yarn/releases/yarn-4.8.1.cjs
+
+tasks:
+  build-dev:
+    desc: "Сборка плагина → cdek-delivery_<дата>.zip"
+    vars:
+      BUILD_DATE:
+        sh: date +%Y-%m-%d
+    cmds:
+      - "{{.YARN}}"
+      - "{{.YARN}} build"
+      - rm -rf node_modules
+      - composer install --no-dev
+      - composer archive -f zip --file=cdek-delivery_{{.BUILD_DATE}}
+      - defer: composer install
+
+  test:
+    desc: "Запуск PHPUnit тестов"
+    cmds:
+      - composer test
+
+  test-coverage:
+    desc: "PHPUnit с HTML-отчётом покрытия в .coverage-html (нужен xdebug или pcov)"
+    cmds:
+      - composer test-coverage
+
+  validate:
+    desc: "Проверка composer.json/composer.lock и уязвимостей зависимостей"
+    cmds:
+      - composer validate
+      - composer audit
+
+  lint:
+    desc: "php -l + phpcs/eslint/stylelint по файлам, изменённым относительно main (как в CI)"
+    cmds:
+      - find src -name "*.php" -print0 | xargs -0 -n1 php -l
+      - bash bin/phpcs-diff.sh
+      - "{{.YARN}} install"
+      - bash bin/lint-js-diff.sh
+      - bash bin/lint-css-diff.sh
+
+  lint-full:
+    desc: "phpcs по всему src/ (для ручной уборки, не используется в CI)"
+    cmds:
+      - composer lint-full
+
+  stan:
+    desc: "Статический анализ PHPStan"
+    cmds:
+      - composer stan
+
+  wp-up:
+    desc: "Поднять WordPress + MySQL в докере (http://localhost:8080). Версия WooCommerce: task wp-up WC_VERSION=10.x.x (по умолчанию последняя стабильная)"
+    vars:
+      WC_VERSION: '{{.WC_VERSION | default "latest-stable"}}'
+    env:
+      WC_VERSION: "{{.WC_VERSION}}"
+    cmds:
+      - docker compose up -d --build
+      # На свежем volume entrypoint сам копирует WordPress + WooCommerce
+      - cmd: |
+          echo "Ждём готовности WordPress..."
+          for i in $(seq 1 60); do
+            if curl -sf -o /dev/null "http://localhost:${WORDPRESS_PORT:-8080}/wp-login.php"; then
+              break
+            fi
+            if [ "$i" -eq 60 ]; then
+              echo "WordPress не ответил за 2 минуты"
+              exit 1
+            fi
+            sleep 2
+          done
+        silent: true
+      - docker compose exec wordpress sh -c 'rm -rf /var/www/html/wp-content/plugins/woocommerce && cp -r /usr/src/wordpress/wp-content/plugins/woocommerce /var/www/html/wp-content/plugins/'
+      - cmd: 'echo "Готово: WordPress + WooCommerce {{.WC_VERSION}} подняты на http://localhost:${WORDPRESS_PORT:-8080}"'
+        silent: true
+
+  wp-down:
+    desc: "Остановить и удалить контейнеры WordPress + MySQL (данные в volume сохраняются)"
+    cmds:
+      - docker compose down
+
+  wp-clean:
+    desc: "Полное удаление: контейнеры + volumes (БД и файлы WordPress стираются безвозвратно)"
+    cmds:
+      - docker compose down -v
+
+  wp-dump-db:
+    desc: "Сохранить дамп текущей БД в docker/db/dump.sql (подхватится автоматически при следующем поднятии на пустом volume)"
+    cmds:
+      - mkdir -p docker/db
+      - docker compose exec -T db sh -c 'exec mysqldump -uroot -p"$MYSQL_ROOT_PASSWORD" --no-tablespaces "$MYSQL_DATABASE"' > docker/db/dump.sql
+      - echo "Дамп сохранён в docker/db/dump.sql"

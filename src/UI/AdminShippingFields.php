@@ -84,7 +84,8 @@ namespace Cdek\UI{
         {
             $measurement = get_option('woocommerce_weight_unit');
             echo '<div>'.sprintf(
-                    esc_html__( /* translators: %s: Amount with measurement */ 'Weight: %s', 'cdekdelivery'),
+                    /* translators: %s: Amount with measurement */
+                    esc_html__('Weight: %s', 'cdekdelivery'),
                     esc_html($value.$measurement),
                 ).'</div>';
         }
@@ -92,7 +93,8 @@ namespace Cdek\UI{
         private static function renderLength(string $length): void
         {
             echo '<div>'.sprintf(
-                    esc_html__(/* translators: %s: Amount with measurement */ 'Length: %s', 'cdekdelivery'),
+                    /* translators: %s: Amount with measurement */
+                    esc_html__('Length: %s', 'cdekdelivery'),
                     esc_html($length),
                 ).'</div>';
         }
@@ -100,7 +102,8 @@ namespace Cdek\UI{
         private static function renderWidth(string $width): void
         {
             echo '<div>'.sprintf(
-                    esc_html__(/* translators: %s: Amount with measurement */ 'Width: %s', 'cdekdelivery'),
+                    /* translators: %s: Amount with measurement */
+                    esc_html__('Width: %s', 'cdekdelivery'),
                     esc_html($width),
                 ).'</div>';
         }
@@ -108,7 +111,8 @@ namespace Cdek\UI{
         private static function renderHeight(string $height): void
         {
             echo '<div>'.sprintf(
-                    esc_html__(/* translators: %s: Amount with measurement */ 'Height: %s', 'cdekdelivery'),
+                    /* translators: %s: Amount with measurement */
+                    esc_html__('Height: %s', 'cdekdelivery'),
                     esc_html($height),
                 ).'</div>';
         }
@@ -116,9 +120,8 @@ namespace Cdek\UI{
         private static function renderOffice($value): void
         {
             echo '<div>'.sprintf(
-                    esc_html__(/* translators: %s: Code of selected point */ 'Selected pickup point: %s',
-                                                                             'cdekdelivery',
-                    ),
+                    /* translators: %s: Code of selected point */
+                    esc_html__('Selected pickup point: %s', 'cdekdelivery'),
                     esc_html($value),
                 ).'</div>';
         }
@@ -126,7 +129,8 @@ namespace Cdek\UI{
         private static function renderTariff($tariffCode): void
         {
             echo '<div>'.sprintf(
-                    esc_html__(/* translators: %s: Code of selected tariff */ 'Tariff code: %s', 'cdekdelivery'),
+                    /* translators: %s: Code of selected tariff */
+                    esc_html__('Tariff code: %s', 'cdekdelivery'),
                     esc_html($tariffCode),
                 ).'</div>';
         }
