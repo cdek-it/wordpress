@@ -44,7 +44,7 @@ namespace Cdek\Helpers {
             );
         }
 
-        public static function getCurrentValue(string $valueName, string $defaultValue = null): ?string
+        public static function getCurrentValue(string $valueName, ?string $defaultValue = null): ?string
         {
             try {
                 $cdekValue = WC()->session->get(Config::DELIVERY_NAME . "_$valueName");

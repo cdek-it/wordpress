@@ -7,6 +7,7 @@ stages:
   - maintenance
   - validate
   - checks
+  - php-compat
   - sonar
   - build
   - upload
@@ -165,7 +166,14 @@ unit-tests:
     - php85 -v
     - php85 -m | grep -qi pcov
   script:
-    - php85 vendor/bin/phpunit --colors=never --log-junit junit-report.xml --coverage-clover=coverage.xml
+    # Покрытие (pcov) утраивает время прогона из-за тестов в отдельных процессах, а читает его только sonarqube-check
+    # (main и теги, см. *main_branch_rules) - в остальных ветках собираем только junit.
+    - |
+      if [ -n "${CI_COMMIT_TAG:-}" ] || [ "${CI_COMMIT_BRANCH:-}" = "$CI_DEFAULT_BRANCH" ]; then
+        php85 vendor/bin/phpunit --colors=never --log-junit junit-report.xml --coverage-clover=coverage.xml
+      else
+        php85 vendor/bin/phpunit --colors=never --log-junit junit-report.xml
+      fi
   artifacts:
     when: always
     paths:
@@ -173,6 +181,43 @@ unit-tests:
       - coverage.xml
     reports:
       junit: junit-report.xml
+
+php-compat-lint:
+  image: docker-proxy.cdek.ru/php:${PHP_VERSION}-alpine
+  stage: php-compat
+  tags:
+    - docker
+  rules: *branch_pipeline_rules
+  parallel:
+    matrix:
+      - PHP_VERSION: ["7.4", "8.2", "8.3", "8.4", "8.5"]
+  script:
+    - php -v
+    - |
+      out=$(find src cdek.php uninstall.php -name '*.php' -print0 \
+        | xargs -0 -n1 php -d display_errors=1 -d error_reporting=-1 -l 2>&1 \
+        | grep -v '^No syntax errors detected' || true)
+      if [ -n "$out" ]; then
+        echo "$out"
+        exit 1
+      fi
+
+php-compat-tests:
+  image: docker-proxy.cdek.ru/php:${PHP_VERSION}-alpine
+  stage: php-compat
+  tags:
+    - docker
+  rules: *branch_pipeline_rules
+  parallel:
+    matrix:
+      - PHP_VERSION: ["8.2", "8.3", "8.4", "8.5"]
+  before_script:
+    - set -eux
+    - php -v
+    - echo '<?php error_reporting(E_ALL & ~E_DEPRECATED);' > /tmp/mute-deprecations.php
+    - echo 'auto_prepend_file=/tmp/mute-deprecations.php' > "$PHP_INI_DIR/conf.d/zz-mute-deprecations.ini"
+  script:
+    - php vendor/bin/phpunit --colors=never
 
 sonarqube-check:
   image:
