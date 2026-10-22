@@ -174,6 +174,43 @@ unit-tests:
     reports:
       junit: junit-report.xml
 
+php-compat-lint:
+  image: docker-proxy.cdek.ru/php:${PHP_VERSION}-alpine
+  stage: checks
+  tags:
+    - docker
+  rules: *branch_pipeline_rules
+  parallel:
+    matrix:
+      - PHP_VERSION: ["7.4", "8.2", "8.3", "8.4", "8.5"]
+  script:
+    - php -v
+    - |
+      out=$(find src cdek.php uninstall.php -name '*.php' -print0 \
+        | xargs -0 -n1 php -d display_errors=1 -d error_reporting=-1 -l 2>&1 \
+        | grep -v '^No syntax errors detected' || true)
+      if [ -n "$out" ]; then
+        echo "$out"
+        exit 1
+      fi
+
+php-compat-tests:
+  image: docker-proxy.cdek.ru/php:${PHP_VERSION}-alpine
+  stage: checks
+  tags:
+    - docker
+  rules: *branch_pipeline_rules
+  parallel:
+    matrix:
+      - PHP_VERSION: ["8.2", "8.3", "8.4", "8.5"]
+  before_script:
+    - set -eux
+    - php -v
+    - echo '<?php error_reporting(E_ALL & ~E_DEPRECATED);' > /tmp/mute-deprecations.php
+    - echo 'auto_prepend_file=/tmp/mute-deprecations.php' > "$PHP_INI_DIR/conf.d/zz-mute-deprecations.ini"
+  script:
+    - php vendor/bin/phpunit --colors=never
+
 sonarqube-check:
   image:
     name: docker-proxy.cdek.ru/sonarsource/sonar-scanner-cli:latest
