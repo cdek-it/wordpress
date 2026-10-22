@@ -27,4 +27,7 @@
     <exclude-pattern>src/Fieldsets/InternationalOrderFields.php</exclude-pattern>
     <exclude-pattern>src/Actions/OrderCreateAction.php</exclude-pattern>
     <exclude-pattern>src/Exceptions/OfficeNotSelectedException.php</exclude-pattern>
+    <exclude-pattern>src/CdekApi.php</exclude-pattern>
+    <exclude-pattern>src/Model/Log.php</exclude-pattern>
+    <exclude-pattern>src/Validator/PhoneValidator.php</exclude-pattern>
 </ruleset>

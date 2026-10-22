@@ -7,6 +7,7 @@ stages:
   - maintenance
   - validate
   - checks
+  - php-compat
   - sonar
   - build
   - upload
@@ -176,7 +177,7 @@ unit-tests:
 
 php-compat-lint:
   image: docker-proxy.cdek.ru/php:${PHP_VERSION}-alpine
-  stage: checks
+  stage: php-compat
   tags:
     - docker
   rules: *branch_pipeline_rules
@@ -196,7 +197,7 @@ php-compat-lint:
 
 php-compat-tests:
   image: docker-proxy.cdek.ru/php:${PHP_VERSION}-alpine
-  stage: checks
+  stage: php-compat
   tags:
     - docker
   rules: *branch_pipeline_rules
