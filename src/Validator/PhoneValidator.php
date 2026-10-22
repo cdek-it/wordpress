@@ -24,7 +24,7 @@ namespace Cdek\Validator {
          * @throws \Cdek\Exceptions\External\CoreAuthException
          * @throws \Cdek\Exceptions\CacheException
          */
-        public function __invoke(string $phone, string $countryCode = null): string
+        public function __invoke(string $phone, ?string $countryCode = null): string
         {
             try {
                 return (new CoreApi)->validatePhone($phone, $countryCode);

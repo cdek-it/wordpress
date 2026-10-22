@@ -15,7 +15,7 @@ namespace Cdek\Model {
         private array $context;
         private ?Throwable $exception;
 
-        public function __construct(string $message, array $context = [], Throwable $exception = null)
+        public function __construct(string $message, array $context = [], ?Throwable $exception = null)
         {
             $this->message = $message;
             $this->context = $context;
