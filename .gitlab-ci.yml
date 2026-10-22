@@ -166,7 +166,14 @@ unit-tests:
     - php85 -v
     - php85 -m | grep -qi pcov
   script:
-    - php85 vendor/bin/phpunit --colors=never --log-junit junit-report.xml --coverage-clover=coverage.xml
+    # Покрытие (pcov) утраивает время прогона из-за тестов в отдельных процессах, а читает его только sonarqube-check
+    # (main и теги, см. *main_branch_rules) - в остальных ветках собираем только junit.
+    - |
+      if [ -n "${CI_COMMIT_TAG:-}" ] || [ "${CI_COMMIT_BRANCH:-}" = "$CI_DEFAULT_BRANCH" ]; then
+        php85 vendor/bin/phpunit --colors=never --log-junit junit-report.xml --coverage-clover=coverage.xml
+      else
+        php85 vendor/bin/phpunit --colors=never --log-junit junit-report.xml
+      fi
   artifacts:
     when: always
     paths:
