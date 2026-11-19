@@ -45,9 +45,15 @@ function install(): void {
         return;
     }
 
+    const targetOrigin = window.location.origin;
+
     // Подписываемся на готовность виджета: получив "ready", отправляем актуальные
     // locale/theme/entryPoint, чтобы чат открылся в нужном виде.
     window.addEventListener("message", (event) => {
+        if (event.origin !== targetOrigin || event.source !== window) {
+            return;
+        }
+
         if (event.data?.type === "chat-bot" && event.data.func === "ready") {
             window.postMessage(
                 {
@@ -57,7 +63,7 @@ function install(): void {
                     theme: getCurrentColorMode(),
                     entryPoint,
                 },
-                "*",
+                targetOrigin,
             );
         }
     });
@@ -73,7 +79,7 @@ function install(): void {
     // Синхронизация темы с переключателем light/dark в навбаре
     new MutationObserver(() => {
         currentTheme = getCurrentColorMode();
-        window.postMessage({ type: "chat-bot", action: "theme-update", theme: currentTheme }, "*");
+        window.postMessage({ type: "chat-bot", action: "theme-update", theme: currentTheme }, targetOrigin);
     }).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 }
 
