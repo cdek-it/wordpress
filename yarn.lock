@@ -1918,7 +1918,7 @@ __metadata:
     "@wordpress/data": "npm:^10.16.0"
     "@wordpress/element": "npm:^6.16.0"
     "@wordpress/env": "npm:^10.16.0"
-    "@wordpress/i18n": "npm:^5.16.0"
+    "@wordpress/i18n": "npm:^5.23.0"
     "@wordpress/icons": "npm:^10.16.0"
     "@wordpress/prettier-config": "npm:^4.16.0"
     "@wordpress/scripts": "npm:^30.9.0"
@@ -8002,6 +8002,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@wordpress/hooks@npm:^4.23.0":
+  version: 4.23.0
+  resolution: "@wordpress/hooks@npm:4.23.0"
+  dependencies:
+    "@babel/runtime": "npm:7.25.7"
+  checksum: 10c0/923186529af25d991eead1cf28bdef3d1f0a75a96114e41741dfa78bf7dc0b7a17d2cc6b0798116009602e6e42d66ff65c3d76a60beba114529b1ea23ad67844
+  languageName: node
+  linkType: hard
+
 "@wordpress/hooks@npm:wp-6.0":
   version: 3.6.1
   resolution: "@wordpress/hooks@npm:3.6.1"
@@ -8058,6 +8067,22 @@ __metadata:
   bin:
     pot-to-php: ./tools/pot-to-php.js
   checksum: 10c0/3d50e865423cb2c7c89de8aca52308fefb4088713112a0fcc2fb64a30603b281bb270febe673a9ca068b55474d996e7cb0392ca5326d5461aa55d66982112f16
+  languageName: node
+  linkType: hard
+
+"@wordpress/i18n@npm:^5.23.0":
+  version: 5.23.0
+  resolution: "@wordpress/i18n@npm:5.23.0"
+  dependencies:
+    "@babel/runtime": "npm:7.25.7"
+    "@wordpress/hooks": "npm:^4.23.0"
+    gettext-parser: "npm:^1.3.1"
+    memize: "npm:^2.1.0"
+    sprintf-js: "npm:^1.1.1"
+    tannin: "npm:^1.2.0"
+  bin:
+    pot-to-php: ./tools/pot-to-php.js
+  checksum: 10c0/13a678c8eb1cb76e03e468cd6f7ad6d4d337f1c9f211fc623798a50defaba195f0e3854e9b5718299b3c3643d8307a2b4b9285d17af32eb190c05ae63c250cf6
   languageName: node
   linkType: hard
 
